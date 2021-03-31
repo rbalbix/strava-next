@@ -1,5 +1,6 @@
 import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import Header from '../components/Header';
+import styles from '../styles/pages/Home.module.css';
 
 export default function Home() {
   return (
@@ -7,6 +8,8 @@ export default function Home() {
       <Head>
         <title>Strava Stats</title>
       </Head>
+
+      <Header />
     </div>
   );
 }
