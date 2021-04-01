@@ -1,19 +1,21 @@
 import styles from '../styles/components/Header.module.css';
 import Link from 'next/link';
 
+import { baseURL } from '../config';
+
 export default function Header() {
   return (
     <div className={styles.headerContainer}>
       <button className={styles.signInButton}>
         <Link
           href={{
-            pathname: 'https://www.strava.com/oauth/authorize',
+            pathname: `${baseURL}/authorize`,
             query: {
-              client_id: '63218',
-              response_type: 'code',
-              redirect_uri: 'http://localhost:3000/authorize',
-              approval_prompt: 'force',
-              scope: 'read,profile:read_all,activity:read,activity:read_all',
+              client_id: process.env.CLIENT_ID,
+              response_type: process.env.RESPONSE_TYPE,
+              redirect_uri: process.env.REDIRECT_URI,
+              approval_prompt: process.env.APPROVAL_PROMPT,
+              scope: process.env.STRAVA_SCOPE,
             },
           }}
         >
