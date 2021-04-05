@@ -1,7 +1,6 @@
-import styles from '../styles/components/Header.module.css';
 import Link from 'next/link';
-
 import { baseURL } from '../config';
+import styles from '../styles/components/Header.module.css';
 
 export default function Header() {
   return (

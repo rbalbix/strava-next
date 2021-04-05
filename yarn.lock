@@ -960,7 +960,7 @@ next@10.0.9:
     vm-browserify "1.1.2"
     watchpack "2.1.1"
 
-node-fetch@2.6.1:
+node-fetch@2.6.1, node-fetch@^2.6.1:
   version "2.6.1"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
@@ -1366,6 +1366,13 @@ stacktrace-parser@0.1.10:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/statuses/-/statuses-1.5.0.tgz#161c7dac177659fd9811f43771fa99381478628c"
   integrity sha1-Fhx9rBd2Wf2YEfQ3cfqZOBR4Yow=
+
+strava@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/strava/-/strava-1.3.0.tgz#fb6444428bdfc7544ae9b976acafe96e7bfc1a97"
+  integrity sha512-FlveuVs3lX8CCkNxtXxII2BDLztYwJr9CMvGJXZeI3qj7FbP5mknz2L0BeM9F0Mc26urXXJNrK04DNkGTkILgQ==
+  dependencies:
+    node-fetch "^2.6.1"
 
 stream-browserify@3.0.0:
   version "3.0.0"
