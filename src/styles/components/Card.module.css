@@ -1,0 +1,18 @@
+.cardContainer {
+  width: 100%;
+
+  border: 1px solid var(--light-gray);
+  border-radius: 4px;
+
+  padding: 1rem 2rem;
+  margin-top: 1.5rem;
+}
+
+.cardContainer header {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.cardContainer main p {
+  font-size: 1.4rem;
+}

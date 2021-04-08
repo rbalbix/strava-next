@@ -1,0 +1,11 @@
+.statsContainer {
+  height: 100vh;
+  max-width: 992px;
+  margin: 0 auto;
+  padding: 1.5rem 2rem;
+}
+
+.statsContainer main {
+  display: flex;
+  flex-direction: column;
+}
