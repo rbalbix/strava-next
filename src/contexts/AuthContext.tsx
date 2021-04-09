@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useState } from 'react';
 
-interface UserData {
-  name: string;
-  avatar: string;
-}
+// interface UserData {
+//   name: string;
+//   avatar: string;
+// }
 
 interface AuthContextData {
   codeReturned: string;
@@ -11,8 +11,11 @@ interface AuthContextData {
   client_secret: string;
   grant_type: string;
   response_type: string;
-  user: UserData;
-  setUserInfo: (user: UserData) => void;
+  redirect_uri: string;
+  approval_prompt: string;
+  scope: string;
+  athlete: any;
+  setAthleteInfo: (athele) => void;
   signOut: () => void;
 }
 
@@ -25,22 +28,33 @@ interface AuthProviderProps {
   client_secret: string;
   grant_type: string;
   response_type: string;
-  user?: UserData;
+  redirect_uri: string;
+  approval_prompt: string;
+  scope: string;
+  athlete?: any;
 }
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? '');
-  const [user, setUser] = useState<UserData>(rest.user);
+  const [athlete, setAthlete] = useState(rest.athlete);
 
-  const { client_id, client_secret, grant_type, response_type } = rest;
+  const {
+    client_id,
+    client_secret,
+    grant_type,
+    response_type,
+    redirect_uri,
+    approval_prompt,
+    scope,
+  } = rest;
 
-  function setUserInfo(user: UserData) {
-    setUser(user);
+  function setAthleteInfo(athlete) {
+    setAthlete(athlete);
   }
 
   function signOut() {
     setCodeReturned('');
-    setUser(null);
+    setAthlete(null);
   }
 
   return (
@@ -51,8 +65,11 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         client_secret,
         grant_type,
         response_type,
-        user,
-        setUserInfo,
+        redirect_uri,
+        approval_prompt,
+        scope,
+        athlete,
+        setAthleteInfo,
         signOut,
       }}
     >

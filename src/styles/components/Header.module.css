@@ -8,11 +8,11 @@
   border-bottom: 1px solid var(--light-gray);
 }
 
-.userName {
+.athleteName {
   font-size: 1rem;
 }
 
-.userAvatar {
+.athleteAvatar {
   height: 2.5rem;
   width: 2.5rem;
   border-radius: 50%;

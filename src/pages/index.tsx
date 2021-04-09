@@ -11,6 +11,9 @@ interface HomeProps {
   client_secret: string;
   grant_type: string;
   response_type: string;
+  redirect_uri: string;
+  approval_prompt: string;
+  scope: string;
 }
 
 export default function Home(props: HomeProps) {
@@ -21,6 +24,9 @@ export default function Home(props: HomeProps) {
       client_secret={props.client_secret}
       grant_type={props.grant_type}
       response_type={props.response_type}
+      redirect_uri={props.redirect_uri}
+      approval_prompt={props.approval_prompt}
+      scope={props.scope}
     >
       <div className={styles.container}>
         <Head>
@@ -43,6 +49,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const grant_type = process.env.GRANT_TYPE;
 
   const response_type = process.env.RESPONSE_TYPE;
+  const redirect_uri = process.env.REDIRECT_URI;
+  const approval_prompt = process.env.APPROVAL_PROMPT;
+  const scope = process.env.STRAVA_SCOPE;
 
   return {
     props: {
@@ -51,6 +60,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       client_secret,
       grant_type,
       response_type,
+      redirect_uri,
+      approval_prompt,
+      scope,
     },
   };
 };

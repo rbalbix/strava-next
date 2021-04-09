@@ -5,9 +5,16 @@ import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
 export default function Header() {
-  const { user, codeReturned, client_id, response_type, signOut } = useContext(
-    AuthContext
-  );
+  const {
+    athlete,
+    codeReturned,
+    client_id,
+    response_type,
+    redirect_uri,
+    approval_prompt,
+    scope,
+    signOut,
+  } = useContext(AuthContext);
   return (
     <div className={styles.headerContainer}>
       {codeReturned === '' ? (
@@ -18,9 +25,9 @@ export default function Header() {
               query: {
                 client_id,
                 response_type,
-                redirect_uri: process.env.REDIRECT_URI,
-                approval_prompt: process.env.APPROVAL_PROMPT,
-                scope: process.env.STRAVA_SCOPE,
+                redirect_uri,
+                approval_prompt,
+                scope,
               },
             }}
           >
@@ -29,8 +36,14 @@ export default function Header() {
         </button>
       ) : (
         <>
-          <span className={styles.userName}>{user?.name}</span>
-          <img className={styles.userAvatar} src={user?.avatar} alt='' />
+          <span
+            className={styles.athleteName}
+          >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+          <img
+            className={styles.athleteAvatar}
+            src={athlete?.profile}
+            alt='Athlete Profile'
+          />
 
           <button
             className={styles.signOutButton}

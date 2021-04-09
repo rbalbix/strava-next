@@ -11,7 +11,7 @@ export default function Stats() {
     client_id,
     client_secret,
     grant_type,
-    setUserInfo,
+    setAthleteInfo,
     signOut,
   } = useContext(AuthContext);
 
@@ -30,20 +30,48 @@ export default function Stats() {
         },
       });
 
-      const { firstname, lastname, profile } = response.data.athlete;
-      const userInfo = { name: `${firstname} ${lastname}`, avatar: profile };
-      setUserInfo(userInfo);
-
       const strava = new Strava({
         client_id,
         client_secret,
         refresh_token: response.data.refresh_token,
       });
 
-      // console.log(await strava.activities.getLoggedInAthleteActivities());
+      const athlete = await strava.athletes.getLoggedInAthlete();
+      setAthleteInfo(athlete);
+
+      // PEGOU TODAS AS ATIVIDADES
+      // let activities = await strava.activities.getLoggedInAthleteActivities({
+      //   per_page: 200,
+      // });
+
+      // PEGAR OS EQUIPAMENTOS
+      const gears = JSON.parse(JSON.stringify(athlete.bikes)).concat(
+        JSON.parse(JSON.stringify(athlete.shoes))
+      );
+
+      // activities = activities.sort((a, b) => {
+      //   if (a.gear_id > b.gear_id) return 1;
+      //   if (a.gear_id < b.gear_id) return -1;
+      //   return 0;
+      // });
+
+      // const actX = activities.map((activity) => {
+      //   // (({ distance }) => ({ distance }))(activity);
+      //   return { gear_id: activity.gear_id, distance: activity.distance };
+      // });
+      // const picked = (({ a, c }) => ({ a, c }))(object);
+
+      // console.log(
+      //   actX.reduce((a, b) => ({
+      //     gear_id: a.gear_id,
+      //     distance: a.distance + b.distance,
+      //   }))
+      // );
+
+      // console.log(activities);
     } catch (error) {
       console.log(error);
-      // signOut();
+      signOut();
     }
   }
 
