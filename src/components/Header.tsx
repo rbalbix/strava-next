@@ -4,6 +4,8 @@ import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
+import { PushSpinner } from 'react-spinners-kit';
+
 export default function Header() {
   const {
     athlete,
@@ -48,7 +50,7 @@ export default function Header() {
               />
             </>
           ) : (
-            <div>Loading...</div>
+            <PushSpinner size={20} loading={true} />
           )}
 
           <button

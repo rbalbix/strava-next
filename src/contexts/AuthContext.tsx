@@ -1,9 +1,5 @@
 import { createContext, ReactNode, useState } from 'react';
-
-// interface UserData {
-//   name: string;
-//   avatar: string;
-// }
+import { DetailedAthlete } from 'strava';
 
 interface AuthContextData {
   codeReturned: string;
@@ -15,7 +11,7 @@ interface AuthContextData {
   approval_prompt: string;
   scope: string;
   athlete: any;
-  setAthleteInfo: (athele) => void;
+  setAthleteInfo: (athele: DetailedAthlete) => void;
   signOut: () => void;
 }
 
@@ -31,7 +27,7 @@ interface AuthProviderProps {
   redirect_uri: string;
   approval_prompt: string;
   scope: string;
-  athlete?: any;
+  athlete?: DetailedAthlete;
 }
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
@@ -48,7 +44,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     scope,
   } = rest;
 
-  function setAthleteInfo(athlete) {
+  function setAthleteInfo(athlete: DetailedAthlete) {
     setAthlete(athlete);
   }
 

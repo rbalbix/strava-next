@@ -5,6 +5,8 @@ import api from '../services/api';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 
+import { PushSpinner } from 'react-spinners-kit';
+
 export default function Stats() {
   const {
     codeReturned,
@@ -69,25 +71,31 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
-        {gears.map((gear) => {
-          let totalMovingTime = 0;
-          activities.map((activity) => {
-            if (activity.gear_id === gear.id) {
-              totalMovingTime = totalMovingTime + activity.moving_time;
-            }
-          });
+        {gears.length === 0 || activities.length === 0 ? (
+          <div className={styles.spinnerLoading}>
+            <PushSpinner size={30} loading={true} />
+          </div>
+        ) : (
+          gears.map((gear) => {
+            let totalMovingTime = 0;
+            activities.map((activity) => {
+              if (activity.gear_id === gear.id) {
+                totalMovingTime = totalMovingTime + activity.moving_time;
+              }
+            });
 
-          return (
-            <Card
-              key={gear.id}
-              gear={{
-                name: gear.name,
-                distance: gear.distance,
-                totalMovingTime,
-              }}
-            />
-          );
-        })}
+            return (
+              <Card
+                key={gear.id}
+                gear={{
+                  name: gear.name,
+                  distance: gear.distance,
+                  totalMovingTime,
+                }}
+              />
+            );
+          })
+        )}
       </main>
     </div>
   );
