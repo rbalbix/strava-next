@@ -50,7 +50,9 @@ export default function Header() {
               />
             </>
           ) : (
-            <PushSpinner size={20} loading={true} />
+            <span className={styles.spinnerLoading}>
+              <PushSpinner size={20} loading={true} />
+            </span>
           )}
 
           <button

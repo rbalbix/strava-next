@@ -8,6 +8,10 @@
   border-bottom: 1px solid var(--light-gray);
 }
 
+.spinnerLoading {
+  margin: 0 15px;
+}
+
 .athleteName {
   font-size: 1rem;
 }
