@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Strava } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import api from '../services/api';
@@ -14,6 +14,9 @@ export default function Stats() {
     setAthleteInfo,
     signOut,
   } = useContext(AuthContext);
+
+  const [gears, setGears] = useState([]);
+  const [activities, setActivities] = useState([]);
 
   useEffect(() => {
     configStravaParams();
@@ -39,36 +42,24 @@ export default function Stats() {
       const athlete = await strava.athletes.getLoggedInAthlete();
       setAthleteInfo(athlete);
 
-      // PEGOU TODAS AS ATIVIDADES
-      // let activities = await strava.activities.getLoggedInAthleteActivities({
-      //   per_page: 200,
-      // });
-
       // PEGAR OS EQUIPAMENTOS
-      const gears = JSON.parse(JSON.stringify(athlete.bikes)).concat(
+      const gearsResult: [] = JSON.parse(JSON.stringify(athlete.bikes)).concat(
         JSON.parse(JSON.stringify(athlete.shoes))
       );
+      setGears(gearsResult);
 
-      // activities = activities.sort((a, b) => {
-      //   if (a.gear_id > b.gear_id) return 1;
-      //   if (a.gear_id < b.gear_id) return -1;
-      //   return 0;
-      // });
-
-      // const actX = activities.map((activity) => {
-      //   // (({ distance }) => ({ distance }))(activity);
-      //   return { gear_id: activity.gear_id, distance: activity.distance };
-      // });
-      // const picked = (({ a, c }) => ({ a, c }))(object);
-
-      // console.log(
-      //   actX.reduce((a, b) => ({
-      //     gear_id: a.gear_id,
-      //     distance: a.distance + b.distance,
-      //   }))
-      // );
-
-      // console.log(activities);
+      // PEGAR TODAS AS ATIVIDADES
+      let activitiesResult = await strava.activities.getLoggedInAthleteActivities(
+        {
+          per_page: 200,
+        }
+      );
+      activitiesResult = activitiesResult.sort((a, b) => {
+        if (a.gear_id > b.gear_id) return 1;
+        if (a.gear_id < b.gear_id) return -1;
+        return 0;
+      });
+      setActivities(activitiesResult);
     } catch (error) {
       console.log(error);
       signOut();
@@ -78,9 +69,25 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
-        <Card />
-        <Card />
-        <Card />
+        {gears.map((gear) => {
+          let totalMovingTime = 0;
+          activities.map((activity) => {
+            if (activity.gear_id === gear.id) {
+              totalMovingTime = totalMovingTime + activity.moving_time;
+            }
+          });
+
+          return (
+            <Card
+              key={gear.id}
+              gear={{
+                name: gear.name,
+                distance: gear.distance,
+                totalMovingTime,
+              }}
+            />
+          );
+        })}
       </main>
     </div>
   );

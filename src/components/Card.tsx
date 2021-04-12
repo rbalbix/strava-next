@@ -1,13 +1,34 @@
 import styles from '../styles/components/Card.module.css';
 
-export default function Card() {
+import * as d3 from 'd3-format';
+
+const locale = d3.formatLocale({
+  decimal: ',',
+  thousands: '.',
+  grouping: [3],
+  currency: ['R$', ''],
+});
+
+export default function Card(props) {
   return (
     <div className={styles.cardContainer}>
-      <header>Nome do Equipamento</header>
+      <header>{props.gear.name}</header>
       <main>
-        <p>1.000 km</p>
-        <p>50.1 horas</p>
+        <p>{`${locale.format(',.2f')(props.gear.distance / 1000)} km`}</p>
+        <p>{`${secondsToHms(props.gear.totalMovingTime)}`}</p>
       </main>
     </div>
   );
+}
+
+function secondsToHms(totalSeconds) {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = Math.floor((totalSeconds % 3600) % 60);
+
+  const movingTime = `${String(hours).padStart(2, '0')}:${String(
+    minutes
+  ).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  return movingTime;
 }

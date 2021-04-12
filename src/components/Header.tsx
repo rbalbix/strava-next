@@ -36,14 +36,20 @@ export default function Header() {
         </button>
       ) : (
         <>
-          <span
-            className={styles.athleteName}
-          >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
-          <img
-            className={styles.athleteAvatar}
-            src={athlete?.profile}
-            alt='Athlete Profile'
-          />
+          {athlete ? (
+            <>
+              <span
+                className={styles.athleteName}
+              >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+              <img
+                className={styles.athleteAvatar}
+                src={athlete?.profile}
+                alt='Athlete Profile'
+              />
+            </>
+          ) : (
+            <div>Loading...</div>
+          )}
 
           <button
             className={styles.signOutButton}
