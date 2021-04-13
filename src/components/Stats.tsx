@@ -51,17 +51,27 @@ export default function Stats() {
       setGears(gearsResult);
 
       // PEGAR TODAS AS ATIVIDADES
-      let activitiesResult = await strava.activities.getLoggedInAthleteActivities(
-        {
-          per_page: 200,
-        }
-      );
-      activitiesResult = activitiesResult.sort((a, b) => {
+      let page = 1;
+      let activitiesResult = [];
+      let activitiesResultTotal = [];
+
+      do {
+        activitiesResult = await strava.activities.getLoggedInAthleteActivities(
+          {
+            per_page: 200,
+            page,
+          }
+        );
+        activitiesResultTotal.push(...activitiesResult);
+        page++;
+      } while (activitiesResult.length !== 0 && page > 1);
+
+      activitiesResultTotal = activitiesResultTotal.sort((a, b) => {
         if (a.gear_id > b.gear_id) return 1;
         if (a.gear_id < b.gear_id) return -1;
         return 0;
       });
-      setActivities(activitiesResult);
+      setActivities(activitiesResultTotal);
     } catch (error) {
       console.log(error);
       signOut();
