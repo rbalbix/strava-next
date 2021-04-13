@@ -13,6 +13,8 @@
   --light-gray: #ddd;
 
   --orange-strava: #fc5200;
+  --start-gradient-color: #ff4d4d;
+  --end-gradient-color: #f9cb28;
 }
 
 @media (max-width: 1080px) {

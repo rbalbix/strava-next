@@ -40,8 +40,8 @@ export default function Home(props: HomeProps) {
             <Stats />
           ) : (
             <div className={styles.homeText}>
-              <span>Strava</span>
-              <span>Stats.</span>
+              <h1>Strava</h1>
+              <h1>Stats.</h1>
             </div>
           )}
         </section>
