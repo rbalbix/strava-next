@@ -1,5 +1,7 @@
 import styles from '../styles/components/Card.module.css';
 
+import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+
 import * as d3 from 'd3-format';
 
 const locale = d3.formatLocale({
@@ -12,7 +14,14 @@ const locale = d3.formatLocale({
 export default function Card(props) {
   return (
     <div className={styles.cardContainer}>
-      <header>{props.gear.name}</header>
+      <header>
+        {props.gear.name}
+        {props.gear.type === 'Ride' ? (
+          <MdDirectionsBike color='var(--light-blue)' />
+        ) : (
+          <MdDirectionsRun color='#fc5200' />
+        )}
+      </header>
       <main>
         <p>{`${locale.format(',.2f')(props.gear.distance / 1000)} km`}</p>
         <p>{`${secondsToHms(props.gear.totalMovingTime)}`}</p>

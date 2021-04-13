@@ -79,9 +79,11 @@ export default function Stats() {
         ) : (
           gears.map((gear) => {
             let totalMovingTime = 0;
+            let activityType = '';
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
                 totalMovingTime = totalMovingTime + activity.moving_time;
+                activityType = activity.type;
               }
             });
 
@@ -90,6 +92,7 @@ export default function Stats() {
                 key={gear.id}
                 gear={{
                   name: gear.name,
+                  type: activityType,
                   distance: gear.distance,
                   totalMovingTime,
                 }}

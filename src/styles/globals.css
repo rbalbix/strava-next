@@ -11,6 +11,8 @@
   --gray-signOut: #ccc;
   --gray-signOut-hover: #555;
   --light-gray: #ddd;
+
+  --orange-strava: #fc5200;
 }
 
 @media (max-width: 1080px) {
