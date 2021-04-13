@@ -74,6 +74,7 @@ export default function Stats() {
         {gears.length === 0 || activities.length === 0 ? (
           <div className={styles.spinnerLoading}>
             <PushSpinner size={30} loading={true} />
+            <span>Loading ...</span>
           </div>
         ) : (
           gears.map((gear) => {

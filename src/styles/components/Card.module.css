@@ -3,6 +3,7 @@
 
   border: 1px solid var(--light-gray);
   border-radius: 4px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.05);
 
   padding: 1rem 2rem;
   margin-top: 1.5rem;
