@@ -29,9 +29,15 @@
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 420px) {
   html {
     font-size: 81.25%;
+  }
+}
+
+@media (max-width: 380px) {
+  html {
+    font-size: 78%;
   }
 }
 
