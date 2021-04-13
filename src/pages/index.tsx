@@ -49,7 +49,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const grant_type = process.env.GRANT_TYPE;
 
   const response_type = process.env.RESPONSE_TYPE;
-  const redirect_uri = process.env.REDIRECT_URI;
+  const redirect_uri =
+    process.env.NODE_ENV === 'development'
+      ? process.env.REDIRECT_URI_DEV
+      : process.env.REDIRECT_URI;
   const approval_prompt = process.env.APPROVAL_PROMPT;
   const scope = process.env.STRAVA_SCOPE;
 
