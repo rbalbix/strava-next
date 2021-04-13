@@ -22,6 +22,9 @@
 }
 
 .homeText h1 {
+  line-height: 9rem;
+  letter-spacing: -0.6rem;
+
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
