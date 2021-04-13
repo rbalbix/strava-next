@@ -7,3 +7,16 @@
   display: flex;
   flex-direction: column;
 }
+
+.homeText {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  margin: 40px 0 0 0;
+
+  font: 800 10rem 'Inter', 'JetBrains Mono', sans-serif;
+}

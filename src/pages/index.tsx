@@ -35,7 +35,16 @@ export default function Home(props: HomeProps) {
 
         <Header />
 
-        <section>{props.code !== '' && <Stats />}</section>
+        <section>
+          {props.code !== '' ? (
+            <Stats />
+          ) : (
+            <div className={styles.homeText}>
+              <span>Strava</span>
+              <span>Stats.</span>
+            </div>
+          )}
+        </section>
       </div>
     </AuthProvider>
   );
