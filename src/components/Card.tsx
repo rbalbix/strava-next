@@ -23,6 +23,7 @@ export default function Card(props) {
         )}
       </header>
       <main>
+        <p>{`${props.gear.count} atividades.`}</p>
         <p>{`${locale.format(',.2f')(props.gear.distance / 1000)} km`}</p>
         <p>{`${secondsToHms(props.gear.totalMovingTime)}`}</p>
       </main>

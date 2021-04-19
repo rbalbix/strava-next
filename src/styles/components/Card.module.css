@@ -21,3 +21,7 @@
 .cardContainer main p {
   font-size: 1.4rem;
 }
+
+.cardContainer main > :first-child {
+  color: var(--light-gray);
+}
