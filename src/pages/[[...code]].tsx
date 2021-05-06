@@ -60,8 +60,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async (ctx) => {
   const { code } = ctx.params;
 
-  console.log(code);
-
   const client_id = process.env.CLIENT_ID;
   const client_secret = process.env.CLIENT_SECRET;
   const grant_type = process.env.GRANT_TYPE;
