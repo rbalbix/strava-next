@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import { useContext } from 'react';
+import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
-
-import { PushSpinner } from 'react-spinners-kit';
 
 export default function Header() {
   const {
@@ -17,9 +16,10 @@ export default function Header() {
     scope,
     signOut,
   } = useContext(AuthContext);
+
   return (
     <div className={styles.headerContainer}>
-      {codeReturned === '' ? (
+      {!codeReturned ? (
         <button className={styles.signInButton}>
           <Link
             href={{

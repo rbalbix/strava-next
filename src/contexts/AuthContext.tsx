@@ -31,7 +31,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
-  const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? '');
+  const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? null);
   const [athlete, setAthlete] = useState(rest.athlete);
 
   const {
@@ -49,7 +49,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   }
 
   function signOut() {
-    setCodeReturned('');
+    setCodeReturned(null);
     setAthlete(null);
   }
 

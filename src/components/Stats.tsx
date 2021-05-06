@@ -73,7 +73,7 @@ export default function Stats() {
       });
       setActivities(activitiesResultTotal);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       signOut();
     }
   }

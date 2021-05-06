@@ -1,8 +1,6 @@
-import styles from '../styles/components/Card.module.css';
-
-import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-
 import * as d3 from 'd3-format';
+import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+import styles from '../styles/components/Card.module.css';
 
 const locale = d3.formatLocale({
   decimal: ',',
