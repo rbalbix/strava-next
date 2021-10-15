@@ -24,6 +24,28 @@ export default function Card(props) {
         <p>{`${props.gear.count} atividades.`}</p>
         <p>{`${locale.format(',.2f')(props.gear.distance / 1000)} km`}</p>
         <p>{`${secondsToHms(props.gear.totalMovingTime)}`}</p>
+
+        {props.gear.type === 'Ride' && (
+          <div>
+            {props.gear.lubDistance != 0 && (
+              <p>{`última lubrificação: ${locale.format(',.2f')(
+                props.gear.lubDistance / 1000
+              )} km  | ${secondsToHms(props.gear.lubMovingTime)}`}</p>
+            )}
+
+            {props.gear.frontLightDistance != 0 && (
+              <p>{`última carga do front light: ${locale.format(',.2f')(
+                props.gear.frontLightDistance / 1000
+              )} km  | ${secondsToHms(props.gear.frontLightMovingTime)}`}</p>
+            )}
+
+            {props.gear.rearLightDistance != 0 && (
+              <p>{`última carga do rear light: ${locale.format(',.2f')(
+                props.gear.rearLightDistance / 1000
+              )} km  | ${secondsToHms(props.gear.rearLightMovingTime)}`}</p>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

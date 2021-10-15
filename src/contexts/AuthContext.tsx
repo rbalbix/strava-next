@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useState } from 'react';
-import { DetailedAthlete } from 'strava';
+import { DetailedAthlete, Strava } from 'strava';
+import api from '../services/api';
 
 interface AuthContextData {
   codeReturned: string;
@@ -12,6 +13,7 @@ interface AuthContextData {
   scope: string;
   athlete: any;
   setAthleteInfo: (athele: DetailedAthlete) => void;
+  signIn: () => Promise<Strava>;
   signOut: () => void;
 }
 
@@ -48,6 +50,29 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     setAthlete(athlete);
   }
 
+  async function signIn(): Promise<Strava> {
+    try {
+      const response = await api.post(`/token`, null, {
+        params: {
+          client_id,
+          client_secret,
+          code: codeReturned,
+          grant_type,
+        },
+      });
+
+      const strava = new Strava({
+        client_id,
+        client_secret,
+        refresh_token: response.data.refresh_token,
+      });
+
+      return strava;
+    } catch (error) {
+      signOut();
+    }
+  }
+
   function signOut() {
     setCodeReturned(null);
     setAthlete(null);
@@ -66,6 +91,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         scope,
         athlete,
         setAthleteInfo,
+        signIn,
         signOut,
       }}
     >

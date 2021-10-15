@@ -25,3 +25,12 @@
 .cardContainer main > :first-child {
   color: var(--light-gray);
 }
+
+.cardContainer div p {
+  font-size: 0.8rem;
+  color: var(--light-gray-notes);
+}
+
+.cardContainer div p:first-child {
+  margin-top: 0.6rem;
+}
