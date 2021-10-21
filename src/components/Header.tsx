@@ -40,14 +40,16 @@ export default function Header() {
         <>
           {athlete ? (
             <>
-              <span
-                className={styles.athleteName}
-              >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
-              <img
-                className={styles.athleteAvatar}
-                src={athlete?.profile}
-                alt='Athlete Profile'
-              />
+              <div className={styles.athleteInfo}>
+                <img
+                  className={styles.athleteAvatar}
+                  src={athlete?.profile}
+                  alt='Athlete Profile'
+                />
+                <span
+                  className={styles.athleteName}
+                >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+              </div>
             </>
           ) : (
             <span className={styles.spinnerLoading}>

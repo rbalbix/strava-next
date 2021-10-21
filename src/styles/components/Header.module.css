@@ -2,7 +2,7 @@
   display: flex;
 
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 
   padding: 0 8px 16px 0;
   border-bottom: 1px solid var(--light-gray);
@@ -10,6 +10,11 @@
 
 .spinnerLoading {
   margin: 0 15px;
+}
+
+.athleteInfo {
+  display: flex;
+  align-items: center;
 }
 
 .athleteName {
@@ -21,7 +26,8 @@
   width: 2.5rem;
   border-radius: 50%;
 
-  margin: 0 15px;
+  margin-left: 5px;
+  margin-right: 10px;
 }
 
 .headerContainer button {
