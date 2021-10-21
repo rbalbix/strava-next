@@ -30,6 +30,12 @@
   margin-right: 10px;
 }
 
+.buttonBox {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+}
+
 .headerContainer button {
   color: var(--white);
 

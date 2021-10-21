@@ -20,37 +20,37 @@ export default function Header() {
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
-        <button className={styles.signInButton}>
-          <Link
-            href={{
-              pathname: `${baseURL}/authorize`,
-              query: {
-                client_id,
-                response_type,
-                redirect_uri,
-                approval_prompt,
-                scope,
-              },
-            }}
-          >
-            Sign in
-          </Link>
-        </button>
+        <div className={styles.buttonBox}>
+          <button className={styles.signInButton}>
+            <Link
+              href={{
+                pathname: `${baseURL}/authorize`,
+                query: {
+                  client_id,
+                  response_type,
+                  redirect_uri,
+                  approval_prompt,
+                  scope,
+                },
+              }}
+            >
+              Sign in
+            </Link>
+          </button>
+        </div>
       ) : (
         <>
           {athlete ? (
-            <>
-              <div className={styles.athleteInfo}>
-                <img
-                  className={styles.athleteAvatar}
-                  src={athlete?.profile}
-                  alt='Athlete Profile'
-                />
-                <span
-                  className={styles.athleteName}
-                >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
-              </div>
-            </>
+            <div className={styles.athleteInfo}>
+              <img
+                className={styles.athleteAvatar}
+                src={athlete?.profile}
+                alt='Athlete Profile'
+              />
+              <span
+                className={styles.athleteName}
+              >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+            </div>
           ) : (
             <span className={styles.spinnerLoading}>
               <PushSpinner size={20} loading={true} />
