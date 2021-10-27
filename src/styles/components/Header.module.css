@@ -12,6 +12,10 @@
   margin: 0 15px;
 }
 
+.athleteButton {
+  background: transparent;
+}
+
 .athleteInfo {
   display: flex;
   align-items: center;
@@ -19,6 +23,8 @@
 
 .athleteName {
   font-size: 1rem;
+  color: var(--black);
+  font-weight: 600;
 }
 
 .athleteAvatar {

@@ -41,16 +41,27 @@ export default function Header() {
       ) : (
         <>
           {athlete ? (
-            <div className={styles.athleteInfo}>
-              <img
-                className={styles.athleteAvatar}
-                src={athlete?.profile}
-                alt='Athlete Profile'
-              />
-              <span
-                className={styles.athleteName}
-              >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
-            </div>
+            <button className={styles.athleteButton}>
+              <Link
+                href={{
+                  pathname: `https://strava.com/athletes/${athlete?.id}`,
+                }}
+                passHref
+              >
+                <a target='_blank' rel='noreferrer'>
+                  <div className={styles.athleteInfo}>
+                    <img
+                      className={styles.athleteAvatar}
+                      src={athlete?.profile}
+                      alt='Athlete Profile'
+                    />
+                    <span
+                      className={styles.athleteName}
+                    >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+                  </div>
+                </a>
+              </Link>
+            </button>
           ) : (
             <span className={styles.spinnerLoading}>
               <PushSpinner size={20} loading={true} />
