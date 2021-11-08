@@ -9,6 +9,10 @@
   margin-top: 1.5rem;
 }
 
+.cardContainer:last-child {
+  margin-bottom: 2rem;
+}
+
 .cardContainer header {
   font-size: 1.8rem;
   font-weight: 600;
