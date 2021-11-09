@@ -1,8 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
-import { DetailedActivity, Strava, SummaryActivity } from 'strava';
+import { DetailedActivity, SummaryActivity } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import api from '../services/api';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 
@@ -148,6 +147,7 @@ export default function Stats() {
               <Card
                 key={gear.id}
                 gear={{
+                  id: gear.id,
                   name: gear.name,
                   type: activityType,
                   distance: totalDistance,
