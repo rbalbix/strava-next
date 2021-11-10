@@ -23,14 +23,46 @@
 
 .modalInfo {
   min-width: 50%;
-  min-height: 40%;
+  min-height: 30%;
 
   margin: 0 10px;
 
-  border: 1px solid var(--light-gray);
+  border: 1px solid var(--dark-gray);
   border-radius: 4px;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
 
   padding: 1rem 2rem;
   background-color: var(--white);
+}
+
+.modalInfo main header {
+  margin-bottom: 20px;
+}
+
+.modalInfo main span {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--dark-gray);
+}
+
+.modalInfo main span:first-child {
+  margin-right: 10px;
+}
+
+.modalInfo main section {
+  margin-bottom: 10px;
+}
+
+.modalInfo main div {
+  margin-bottom: 10px;
+}
+
+.modalInfo main strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.modalInfo main p {
+  font-size: 1rem;
+  color: var(--dark-gray);
 }

@@ -101,14 +101,54 @@ export default function Stats() {
             let totalLubMovingTime = 0;
             let totalFrontLightMovingTime = 0;
             let totalRearLightMovingTime = 0;
+            let totalReviewMovingTime = 0;
+            let totalCleanMovingTime = 0;
+            let totalSuspMovingTime = 0;
+            let totalBreakMovingTime = 0;
+            let totalTapeMovingTime = 0;
+            let totalDropperMovingTime = 0;
+            let totalStemMovingTime = 0;
+            let totalSaddleMovingTime = 0;
+            let totalTireMovingTime = 0;
+            let totalTubelessMovingTime = 0;
+            let totalHandlebarMovingTime = 0;
+            let totalGripMovingTime = 0;
 
             let totalLubDistance = 0;
             let totalFrontLightDistance = 0;
             let totalRearLightDistance = 0;
+            let totalReviewDistance = 0;
+            let totalCleanDistance = 0;
+            let totalSuspDistance = 0;
+            let totalBreakDistance = 0;
+            let totalTapeDistance = 0;
+            let totalDropperDistance = 0;
+            let totalStemDistance = 0;
+            let totalSaddleDistance = 0;
+            let totalTireDistance = 0;
+            let totalTubelessDistance = 0;
+            let totalHandlebarDistance = 0;
+            let totalGripDistance = 0;
 
             let isLubRegistered = false;
             let isFrontLightRegistered = false;
             let isRearLightRegistered = false;
+            let isReviewRegistered = false;
+            let isCleanRegistered = false;
+            let isSuspRegistered = false;
+            let isBreakRegistered = false;
+            let isTapeRegistered = false;
+            let isDropperRegistered = false;
+            let isStemRegistered = false;
+            let isSaddleRegistered = false;
+            let isTireRegistered = false;
+            let isTubelessRegistered = false;
+            let isHandlebarRegistered = false;
+            let isGripRegistered = false;
+
+            let suspDate = '';
+            let breakDate = '';
+            let tapeDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -134,11 +174,104 @@ export default function Stats() {
                     totalRearLightDistance = totalDistance;
                     isRearLightRegistered = true;
                   }
+
+                  if (
+                    !isReviewRegistered &&
+                    activity.note?.includes('review')
+                  ) {
+                    totalReviewMovingTime = totalMovingTime;
+                    totalReviewDistance = totalDistance;
+                    isReviewRegistered = true;
+                  }
+
+                  if (!isCleanRegistered && activity.note?.includes('clean')) {
+                    totalCleanMovingTime = totalMovingTime;
+                    totalCleanDistance = totalDistance;
+                    isCleanRegistered = true;
+                  }
+
+                  if (!isSuspRegistered && activity.note?.includes('susp')) {
+                    suspDate = activity.start_date_local;
+
+                    totalSuspMovingTime = totalMovingTime;
+                    totalSuspDistance = totalDistance;
+                    isSuspRegistered = true;
+                  }
+
+                  if (!isBreakRegistered && activity.note?.includes('break')) {
+                    breakDate = activity.start_date_local;
+
+                    totalBreakMovingTime = totalMovingTime;
+                    totalBreakDistance = totalDistance;
+                    isBreakRegistered = true;
+                  }
+
+                  if (!isTapeRegistered && activity.note?.includes('tape')) {
+                    tapeDate = activity.start_date_local;
+                    totalTapeMovingTime = totalMovingTime;
+                    totalTapeDistance = totalDistance;
+                    isTapeRegistered = true;
+                  }
+
+                  if (
+                    !isDropperRegistered &&
+                    activity.note?.includes('dropper')
+                  ) {
+                    totalDropperMovingTime = totalMovingTime;
+                    totalDropperDistance = totalDistance;
+                    isDropperRegistered = true;
+                  }
+
+                  if (!isStemRegistered && activity.note?.includes('stem')) {
+                    totalStemMovingTime = totalMovingTime;
+                    totalStemDistance = totalDistance;
+                    isStemRegistered = true;
+                  }
+
+                  if (
+                    !isSaddleRegistered &&
+                    activity.note?.includes('saddle')
+                  ) {
+                    totalSaddleMovingTime = totalMovingTime;
+                    totalSaddleDistance = totalDistance;
+                    isSaddleRegistered = true;
+                  }
+
+                  if (!isTireRegistered && activity.note?.includes('tire')) {
+                    totalTireMovingTime = totalMovingTime;
+                    totalTireDistance = totalDistance;
+                    isTireRegistered = true;
+                  }
+
+                  if (
+                    !isTubelessRegistered &&
+                    activity.note?.includes('tubeless')
+                  ) {
+                    totalTubelessMovingTime = totalMovingTime;
+                    totalTubelessDistance = totalDistance;
+                    isTubelessRegistered = true;
+                  }
+
+                  if (
+                    !isHandlebarRegistered &&
+                    activity.note?.includes('handlebar')
+                  ) {
+                    totalHandlebarMovingTime = totalMovingTime;
+                    totalHandlebarDistance = totalDistance;
+                    isHandlebarRegistered = true;
+                  }
+
+                  if (!isGripRegistered && activity.note?.includes('grip')) {
+                    totalGripMovingTime = totalMovingTime;
+                    totalGripDistance = totalDistance;
+                    isGripRegistered = true;
+                  }
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
                 totalDistance = totalDistance + activity.distance;
                 activityType = activity.type;
+
                 count++;
               }
             });
@@ -154,10 +287,37 @@ export default function Stats() {
                   lubDistance: totalLubDistance,
                   frontLightDistance: totalFrontLightDistance,
                   rearLightDistance: totalRearLightDistance,
+                  reviewDistance: totalReviewDistance,
+                  cleanDistance: totalCleanDistance,
+                  suspDistance: totalSuspDistance,
+                  breakDistance: totalBreakDistance,
+                  tapeDistance: totalTapeDistance,
+                  dropperDistance: totalDropperDistance,
+                  stemDistance: totalStemDistance,
+                  saddleDistance: totalSaddleDistance,
+                  tireDistance: totalTireDistance,
+                  tubelessDistance: totalTubelessDistance,
+                  handlebarDistance: totalHandlebarDistance,
+                  gripDistance: totalGripDistance,
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
                   rearLightMovingTime: totalRearLightMovingTime,
+                  reviewMovingTime: totalReviewMovingTime,
+                  cleanMovingTime: totalCleanMovingTime,
+                  suspMovingTime: totalSuspMovingTime,
+                  breakMovingTime: totalBreakMovingTime,
+                  tapeMovingTime: totalTapeMovingTime,
+                  dropperMovingTime: totalDropperMovingTime,
+                  stemMovingTime: totalStemMovingTime,
+                  saddleMovingTime: totalSaddleMovingTime,
+                  tireMovingTime: totalTireMovingTime,
+                  tubelessMovingTime: totalTubelessMovingTime,
+                  handlebarMovingTime: totalHandlebarMovingTime,
+                  gripMovingTime: totalGripMovingTime,
+                  suspDate: suspDate,
+                  breakDate: breakDate,
+                  tapeDate: tapeDate,
                   count,
                 }}
               />
