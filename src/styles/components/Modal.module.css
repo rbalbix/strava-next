@@ -66,3 +66,8 @@
   font-size: 1rem;
   color: var(--dark-gray);
 }
+
+.modalInfo main p span {
+  font-size: 0.8rem;
+  color: var(--light-gray-notes);
+}

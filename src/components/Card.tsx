@@ -153,65 +153,138 @@ export default function Card(props) {
                 )}
 
                 {props.gear.breakDistance != 0 && (
-                  <p>{`-> Freios: [${format(
-                    new Date(props.gear.breakDate),
-                    'dd/MM/yyyy'
-                  )}] ${locale.format(',.2f')(
-                    props.gear.breakDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.breakMovingTime)}h`}</p>
+                  <p>
+                    {'--> Freios: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.breakDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.breakDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.breakMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.tireDistance != 0 && (
-                  <p>{`-> Pneus: ${locale.format(',.2f')(
-                    props.gear.tireDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.tireMovingTime)}h`}</p>
+                  <p>
+                    {'--> Pneus: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.tireDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.tireDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.tireMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.tubelessDistance != 0 && (
-                  <p>{`-> Tubeless: ${locale.format(',.2f')(
-                    props.gear.tubelessDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.tubelessMovingTime)}h`}</p>
+                  <p>
+                    {'--> Tubeless: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.tubelessDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.tubelessDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.tubelessMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.tapeDistance != 0 && (
-                  <p>{`-> Fita de guidão: [${format(
-                    new Date(props.gear.tapeDate),
-                    'dd/MM/yyyy'
-                  )}] ${locale.format(',.2f')(
-                    props.gear.tapeDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.tapeMovingTime)}h`}</p>
+                  <p>
+                    {'--> Fita de guidão: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.tapeDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.tapeDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.tapeMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.dropperDistance != 0 && (
-                  <p>{`-> Canote retrátil: ${locale.format(',.2f')(
-                    props.gear.dropperDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.dropperMovingTime)}h`}</p>
+                  <p>
+                    {'--> Canote retrátil: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.dropperDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.dropperDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.dropperMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.stemDistance != 0 && (
-                  <p>{`-> Mesa: ${locale.format(',.2f')(
-                    props.gear.stemDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.stemMovingTime)}h`}</p>
+                  <p>
+                    {'--> Mesa: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.stemDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.stemDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.stemMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.saddleDistance != 0 && (
-                  <p>{`-> Selim: ${locale.format(',.2f')(
-                    props.gear.saddleDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.saddleMovingTime)}h`}</p>
+                  <p>
+                    {'--> Selim: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.saddleDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.saddleDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.saddleMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.handlebarDistance != 0 && (
-                  <p>{`-> Guidão: ${locale.format(',.2f')(
-                    props.gear.handlebarDistance / 1000
-                  )} km  | ${secondsToHms(
-                    props.gear.handlebarMovingTime
-                  )}h`}</p>
+                  <p>
+                    {'--> Guidão: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.handlebarDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.handlebarDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.handlebarMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.gripDistance != 0 && (
-                  <p>{`-> Manoplas: ${locale.format(',.2f')(
-                    props.gear.gripDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.gripMovingTime)}h`}</p>
+                  <p>
+                    {'--> Manoplas: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.gripDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.gripDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.gripMovingTime)}h`}
+                  </p>
                 )}
               </div>
             </>

@@ -149,6 +149,13 @@ export default function Stats() {
             let suspDate = '';
             let breakDate = '';
             let tapeDate = '';
+            let tireDate = '';
+            let tubelessDate = '';
+            let dropperDate = '';
+            let stemDate = '';
+            let saddleDate = '';
+            let handlebarDate = '';
+            let gripDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -208,6 +215,7 @@ export default function Stats() {
 
                   if (!isTapeRegistered && activity.note?.includes('tape')) {
                     tapeDate = activity.start_date_local;
+
                     totalTapeMovingTime = totalMovingTime;
                     totalTapeDistance = totalDistance;
                     isTapeRegistered = true;
@@ -217,12 +225,16 @@ export default function Stats() {
                     !isDropperRegistered &&
                     activity.note?.includes('dropper')
                   ) {
+                    dropperDate = activity.start_date_local;
+
                     totalDropperMovingTime = totalMovingTime;
                     totalDropperDistance = totalDistance;
                     isDropperRegistered = true;
                   }
 
                   if (!isStemRegistered && activity.note?.includes('stem')) {
+                    stemDate = activity.start_date_local;
+
                     totalStemMovingTime = totalMovingTime;
                     totalStemDistance = totalDistance;
                     isStemRegistered = true;
@@ -232,12 +244,16 @@ export default function Stats() {
                     !isSaddleRegistered &&
                     activity.note?.includes('saddle')
                   ) {
+                    saddleDate = activity.start_date_local;
+
                     totalSaddleMovingTime = totalMovingTime;
                     totalSaddleDistance = totalDistance;
                     isSaddleRegistered = true;
                   }
 
                   if (!isTireRegistered && activity.note?.includes('tire')) {
+                    tireDate = activity.start_date_local;
+
                     totalTireMovingTime = totalMovingTime;
                     totalTireDistance = totalDistance;
                     isTireRegistered = true;
@@ -247,6 +263,8 @@ export default function Stats() {
                     !isTubelessRegistered &&
                     activity.note?.includes('tubeless')
                   ) {
+                    tubelessDate = activity.start_date_local;
+
                     totalTubelessMovingTime = totalMovingTime;
                     totalTubelessDistance = totalDistance;
                     isTubelessRegistered = true;
@@ -256,12 +274,16 @@ export default function Stats() {
                     !isHandlebarRegistered &&
                     activity.note?.includes('handlebar')
                   ) {
+                    handlebarDate = activity.start_date_local;
+
                     totalHandlebarMovingTime = totalMovingTime;
                     totalHandlebarDistance = totalDistance;
                     isHandlebarRegistered = true;
                   }
 
                   if (!isGripRegistered && activity.note?.includes('grip')) {
+                    gripDate = activity.start_date_local;
+
                     totalGripMovingTime = totalMovingTime;
                     totalGripDistance = totalDistance;
                     isGripRegistered = true;
@@ -318,6 +340,13 @@ export default function Stats() {
                   suspDate: suspDate,
                   breakDate: breakDate,
                   tapeDate: tapeDate,
+                  tireDate: tireDate,
+                  tubelessDate: tubelessDate,
+                  dropperDate: dropperDate,
+                  stemDate: stemDate,
+                  saddleDate: saddleDate,
+                  handlebarDate: handlebarDate,
+                  gripDate: gripDate,
                   count,
                 }}
               />
