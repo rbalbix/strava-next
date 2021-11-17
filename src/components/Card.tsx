@@ -131,12 +131,18 @@ export default function Card(props) {
                 )}
 
                 {props.gear.suspDistance != 0 && (
-                  <p>{`-> Manutenção da Suspensão: [${format(
-                    new Date(props.gear.suspDate),
-                    'dd/MM/yyyy'
-                  )}] ${locale.format(',.2f')(
-                    props.gear.suspDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.suspMovingTime)}h`}</p>
+                  <p>
+                    {'-> Manutenção da Suspensão: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.suspDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.suspDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.suspMovingTime)}h`}
+                  </p>
                 )}
               </div>
 
