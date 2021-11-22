@@ -1,4 +1,4 @@
-import { GetServerSideProps, GetStaticPaths, GetStaticProps } from 'next';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Header from '../components/Header';
 import Stats from '../components/Stats';
@@ -85,32 +85,3 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
     revalidate: 60 * 60 * 4, // 4 hours
   };
 };
-
-// export const getServerSideProps: GetServerSideProps = async (ctx) => {
-//   const { code } = ctx.query;
-
-//   const client_id = process.env.CLIENT_ID;
-//   const client_secret = process.env.CLIENT_SECRET;
-//   const grant_type = process.env.GRANT_TYPE;
-
-//   const response_type = process.env.RESPONSE_TYPE;
-//   const redirect_uri =
-//     process.env.NODE_ENV === 'development'
-//       ? process.env.REDIRECT_URI_DEV
-//       : process.env.REDIRECT_URI;
-//   const approval_prompt = process.env.APPROVAL_PROMPT;
-//   const scope = process.env.STRAVA_SCOPE;
-
-//   return {
-//     props: {
-//       code: code ?? null,
-//       client_id,
-//       client_secret,
-//       grant_type,
-//       response_type,
-//       redirect_uri,
-//       approval_prompt,
-//       scope,
-//     },
-//   };
-// };

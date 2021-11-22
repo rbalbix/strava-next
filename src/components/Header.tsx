@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
@@ -16,6 +16,13 @@ export default function Header() {
     scope,
     signOut,
   } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (performance.navigation.type === 1) {
+      console.log(performance.navigation.type);
+      signOut();
+    }
+  }, []);
 
   return (
     <div className={styles.headerContainer}>

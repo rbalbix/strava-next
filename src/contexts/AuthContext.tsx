@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
 import { DetailedAthlete, Strava } from 'strava';
 import api from '../services/api';
@@ -36,6 +37,8 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? null);
   const [athlete, setAthlete] = useState(rest.athlete);
 
+  const router = useRouter();
+
   const {
     client_id,
     client_secret,
@@ -69,11 +72,14 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
       return strava;
     } catch (error) {
+      console.log(error);
       signOut();
     }
   }
 
   function signOut() {
+    router.push('/');
+
     setCodeReturned(null);
     setAthlete(null);
   }
