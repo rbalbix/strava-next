@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
@@ -6,6 +7,8 @@ import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
 export default function Header() {
+  const route = useRouter();
+
   const {
     athlete,
     codeReturned,
@@ -19,8 +22,20 @@ export default function Header() {
 
   useEffect(() => {
     if (performance.navigation.type === 1) {
-      console.log(performance.navigation.type);
-      signOut();
+      if (codeReturned) {
+        route.replace({
+          pathname: `${baseURL}/authorize`,
+          query: {
+            client_id,
+            response_type,
+            redirect_uri,
+            approval_prompt,
+            scope,
+          },
+        });
+      } else {
+        signOut();
+      }
     }
   }, []);
 

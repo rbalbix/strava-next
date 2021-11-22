@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
+import { useEffect } from 'react';
 import Header from '../components/Header';
 import Stats from '../components/Stats';
 import { AuthProvider } from '../contexts/AuthContext';

@@ -72,7 +72,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
       return strava;
     } catch (error) {
-      console.log(error);
       signOut();
     }
   }
