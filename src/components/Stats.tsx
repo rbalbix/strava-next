@@ -113,6 +113,7 @@ export default function Stats() {
             let totalTubelessMovingTime = 0;
             let totalHandlebarMovingTime = 0;
             let totalGripMovingTime = 0;
+            let totalPedalMovingTime = 0;
 
             let totalLubDistance = 0;
             let totalFrontLightDistance = 0;
@@ -129,6 +130,7 @@ export default function Stats() {
             let totalTubelessDistance = 0;
             let totalHandlebarDistance = 0;
             let totalGripDistance = 0;
+            let totalPedalDistance = 0;
 
             let isLubRegistered = false;
             let isFrontLightRegistered = false;
@@ -145,6 +147,7 @@ export default function Stats() {
             let isTubelessRegistered = false;
             let isHandlebarRegistered = false;
             let isGripRegistered = false;
+            let isPedalRegistered = false;
 
             let suspDate = '';
             let breakDate = '';
@@ -156,6 +159,7 @@ export default function Stats() {
             let saddleDate = '';
             let handlebarDate = '';
             let gripDate = '';
+            let pedalDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -288,6 +292,14 @@ export default function Stats() {
                     totalGripDistance = totalDistance;
                     isGripRegistered = true;
                   }
+
+                  if (!isPedalRegistered && activity.note?.includes('pedal')) {
+                    pedalDate = activity.start_date_local;
+
+                    totalPedalMovingTime = totalMovingTime;
+                    totalPedalDistance = totalDistance;
+                    isPedalRegistered = true;
+                  }
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
@@ -321,6 +333,7 @@ export default function Stats() {
                   tubelessDistance: totalTubelessDistance,
                   handlebarDistance: totalHandlebarDistance,
                   gripDistance: totalGripDistance,
+                  pedalDistance: totalPedalDistance,
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -337,6 +350,7 @@ export default function Stats() {
                   tubelessMovingTime: totalTubelessMovingTime,
                   handlebarMovingTime: totalHandlebarMovingTime,
                   gripMovingTime: totalGripMovingTime,
+                  pedalMovingTime: totalPedalMovingTime,
                   suspDate: suspDate,
                   breakDate: breakDate,
                   tapeDate: tapeDate,
@@ -347,6 +361,7 @@ export default function Stats() {
                   saddleDate: saddleDate,
                   handlebarDate: handlebarDate,
                   gripDate: gripDate,
+                  pedalDate: gripDate,
                   count,
                 }}
               />

@@ -154,7 +154,9 @@ export default function Card(props) {
                   props.gear.saddleDistance != 0 ||
                   props.gear.handlebarDistance != 0 ||
                   props.gear.tireDistance != 0 ||
-                  props.gear.tubelessDistance != 0) && (
+                  props.gear.tubelessDistance != 0 ||
+                  props.gear.gripDistance != 0 ||
+                  props.gear.pedalDistance != 0) && (
                   <strong>Outras trocas:</strong>
                 )}
 
@@ -290,6 +292,21 @@ export default function Card(props) {
                     {`${locale.format(',.2f')(
                       props.gear.gripDistance / 1000
                     )} km  | ${secondsToHms(props.gear.gripMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.pedalDistance != 0 && (
+                  <p>
+                    {'--> Pedais: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.pedalDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.pedalDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.pedalMovingTime)}h`}
                   </p>
                 )}
               </div>
