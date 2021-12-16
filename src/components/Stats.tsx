@@ -68,13 +68,17 @@ export default function Stats() {
           page++;
         } while (activitiesResult.length !== 0 && page > 1);
 
-        activitiesResultTotal.sort((a, b) => {
+        const activitiesFiltered = activitiesResultTotal.filter((activity) => {
+          return activity.gear_id != null;
+        });
+
+        activitiesFiltered.sort((a, b) => {
           if (a.gear_id > b.gear_id) return 1;
           if (a.gear_id < b.gear_id) return -1;
           return 0;
         });
 
-        setActivities(activitiesResultTotal);
+        setActivities(activitiesFiltered);
       } catch (error) {
         signOut();
       }
@@ -361,7 +365,7 @@ export default function Stats() {
                   saddleDate: saddleDate,
                   handlebarDate: handlebarDate,
                   gripDate: gripDate,
-                  pedalDate: gripDate,
+                  pedalDate: pedalDate,
                   count,
                 }}
               />
