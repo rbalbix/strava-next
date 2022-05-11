@@ -162,6 +162,21 @@ export default function Card(props) {
                   <strong>Outras trocas:</strong>
                 )}
 
+                {props.gear.frontBreakDistance != 0 && (
+                  <p>
+                    {'--> Freio [dianteiro]: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.frontBreakDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.frontBreakDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
+                  </p>
+                )}
+                
                 {props.gear.rearBreakDistance != 0 && (
                   <p>
                     {'--> Freio [traseiro]: '}
@@ -177,20 +192,6 @@ export default function Card(props) {
                   </p>
                 )}
 
-                {props.gear.frontBreakDistance != 0 && (
-                  <p>
-                    {'--> Freio [dianteiro]: '}
-                    <span>
-                      {`[${format(
-                        new Date(props.gear.frontBreakDate),
-                        'dd/MM/yyyy'
-                      )}]`}
-                    </span>
-                    {`${locale.format(',.2f')(
-                      props.gear.frontBreakDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
-                  </p>
-                )}
 
                 {props.gear.breakDistance != 0 && (
                   <p>

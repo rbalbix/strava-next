@@ -108,8 +108,8 @@ export default function Stats() {
             let totalReviewMovingTime = 0;
             let totalCleanMovingTime = 0;
             let totalSuspMovingTime = 0;
-            let totalRearBreakMovingTime = 0;
             let totalFrontBreakMovingTime = 0;
+            let totalRearBreakMovingTime = 0;
             let totalBreakMovingTime = 0;
             let totalTapeMovingTime = 0;
             let totalDropperMovingTime = 0;
@@ -127,8 +127,8 @@ export default function Stats() {
             let totalReviewDistance = 0;
             let totalCleanDistance = 0;
             let totalSuspDistance = 0;
-            let totalRearBreakDistance = 0;
             let totalFrontBreakDistance = 0;
+            let totalRearBreakDistance = 0;
             let totalBreakDistance = 0;
             let totalTapeDistance = 0;
             let totalDropperDistance = 0;
@@ -146,6 +146,8 @@ export default function Stats() {
             let isReviewRegistered = false;
             let isCleanRegistered = false;
             let isSuspRegistered = false;
+            let isFrontBreakRegistered = false;
+            let isRearBreakRegistered = false;
             let isBreakRegistered = false;
             let isTapeRegistered = false;
             let isDropperRegistered = false;
@@ -158,8 +160,8 @@ export default function Stats() {
             let isPedalRegistered = false;
 
             let suspDate = '';
-            let rearBreakDate = '';
             let frontBreakDate = '';
+            let rearBreakDate = '';
             let breakDate = '';
             let tapeDate = '';
             let tireDate = '';
@@ -219,22 +221,26 @@ export default function Stats() {
                     isSuspRegistered = true;
                   }
 
-                  if (!isBreakRegistered && activity.note?.includes('rearbreak')) {
-                    rearBreakDate = activity.start_date_local;
-
-                    totalRearBreakMovingTime = totalMovingTime;
-                    totalRearBreakDistance = totalDistance;
-                    isBreakRegistered = true;
-                  }
-
-                  if (!isBreakRegistered && activity.note?.includes('frontbreak')) {
+                  if (!isFrontBreakRegistered && activity.note?.includes('frontbreak')) {
                     frontBreakDate = activity.start_date_local;
 
                     totalFrontBreakMovingTime = totalMovingTime;
                     totalFrontBreakDistance = totalDistance;
+
+                    isFrontBreakRegistered = true;
                     isBreakRegistered = true;
                   }
 
+                  if (!isRearBreakRegistered && activity.note?.includes('rearbreak')) {
+                    rearBreakDate = activity.start_date_local;
+
+                    totalRearBreakMovingTime = totalMovingTime;
+                    totalRearBreakDistance = totalDistance;
+
+                    isRearBreakRegistered = true;
+                    isBreakRegistered = true;
+                  }
+                  
                   if (!isBreakRegistered && activity.note?.includes('break')) {
                     breakDate = activity.start_date_local;
 
