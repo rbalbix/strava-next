@@ -108,6 +108,8 @@ export default function Stats() {
             let totalReviewMovingTime = 0;
             let totalCleanMovingTime = 0;
             let totalSuspMovingTime = 0;
+            let totalRearBreakMovingTime = 0;
+            let totalFrontBreakMovingTime = 0;
             let totalBreakMovingTime = 0;
             let totalTapeMovingTime = 0;
             let totalDropperMovingTime = 0;
@@ -125,6 +127,8 @@ export default function Stats() {
             let totalReviewDistance = 0;
             let totalCleanDistance = 0;
             let totalSuspDistance = 0;
+            let totalRearBreakDistance = 0;
+            let totalFrontBreakDistance = 0;
             let totalBreakDistance = 0;
             let totalTapeDistance = 0;
             let totalDropperDistance = 0;
@@ -154,6 +158,8 @@ export default function Stats() {
             let isPedalRegistered = false;
 
             let suspDate = '';
+            let rearBreakDate = '';
+            let frontBreakDate = '';
             let breakDate = '';
             let tapeDate = '';
             let tireDate = '';
@@ -211,6 +217,22 @@ export default function Stats() {
                     totalSuspMovingTime = totalMovingTime;
                     totalSuspDistance = totalDistance;
                     isSuspRegistered = true;
+                  }
+
+                  if (!isBreakRegistered && activity.note?.includes('rearbreak')) {
+                    rearBreakDate = activity.start_date_local;
+
+                    totalRearBreakMovingTime = totalMovingTime;
+                    totalRearBreakDistance = totalDistance;
+                    isBreakRegistered = true;
+                  }
+
+                  if (!isBreakRegistered && activity.note?.includes('frontbreak')) {
+                    frontBreakDate = activity.start_date_local;
+
+                    totalFrontBreakMovingTime = totalMovingTime;
+                    totalFrontBreakDistance = totalDistance;
+                    isBreakRegistered = true;
                   }
 
                   if (!isBreakRegistered && activity.note?.includes('break')) {
@@ -328,6 +350,8 @@ export default function Stats() {
                   reviewDistance: totalReviewDistance,
                   cleanDistance: totalCleanDistance,
                   suspDistance: totalSuspDistance,
+                  rearBreakDistance: totalRearBreakDistance,
+                  frontBreakDistance: totalFrontBreakDistance,
                   breakDistance: totalBreakDistance,
                   tapeDistance: totalTapeDistance,
                   dropperDistance: totalDropperDistance,
@@ -345,6 +369,8 @@ export default function Stats() {
                   reviewMovingTime: totalReviewMovingTime,
                   cleanMovingTime: totalCleanMovingTime,
                   suspMovingTime: totalSuspMovingTime,
+                  rearBreakMovingTime: totalRearBreakMovingTime,
+                  frontBreakMovingTime: totalFrontBreakMovingTime,
                   breakMovingTime: totalBreakMovingTime,
                   tapeMovingTime: totalTapeMovingTime,
                   dropperMovingTime: totalDropperMovingTime,
@@ -356,6 +382,8 @@ export default function Stats() {
                   gripMovingTime: totalGripMovingTime,
                   pedalMovingTime: totalPedalMovingTime,
                   suspDate: suspDate,
+                  rearBreakDate: rearBreakDate,
+                  frontBreakDate: frontBreakDate,
                   breakDate: breakDate,
                   tapeDate: tapeDate,
                   tireDate: tireDate,

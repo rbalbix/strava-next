@@ -147,7 +147,9 @@ export default function Card(props) {
               </div>
 
               <div>
-                {(props.gear.breakDistance != 0 ||
+                {(props.gear.rearBreakDistance != 0 ||
+                  props.gear.frontBreakDistance != 0 ||
+                  props.gear.breakDistance != 0 ||
                   props.gear.tapeDistance != 0 ||
                   props.gear.dropperDistance != 0 ||
                   props.gear.stemDistance != 0 ||
@@ -158,6 +160,36 @@ export default function Card(props) {
                   props.gear.gripDistance != 0 ||
                   props.gear.pedalDistance != 0) && (
                   <strong>Outras trocas:</strong>
+                )}
+
+                {props.gear.rearBreakDistance != 0 && (
+                  <p>
+                    {'--> Freio [traseiro]: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.rearBreakDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.rearBreakDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.rearBreakMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.frontBreakDistance != 0 && (
+                  <p>
+                    {'--> Freio [dianteiro]: '}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.frontBreakDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.frontBreakDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
+                  </p>
                 )}
 
                 {props.gear.breakDistance != 0 && (
