@@ -168,7 +168,7 @@ export default function Card(props) {
                     <span>
                        {'[dianteiro]'}
                     </span>
-                    {':'}
+                    {': '}
                     <span>
                       {`[${format(
                         new Date(props.gear.frontBreakDate),
