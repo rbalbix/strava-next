@@ -164,7 +164,11 @@ export default function Card(props) {
 
                 {props.gear.frontBreakDistance != 0 && (
                   <p>
-                    {'--> Freio [dianteiro]: '}
+                    {'--> Freio '}
+                    <span>
+                       {'[dianteiro]'}
+                    </span>
+                    {': '}
                     <span>
                       {`[${format(
                         new Date(props.gear.frontBreakDate),
@@ -179,7 +183,11 @@ export default function Card(props) {
                 
                 {props.gear.rearBreakDistance != 0 && (
                   <p>
-                    {'--> Freio [traseiro]: '}
+                    {'--> Freio '}
+                    <span>
+                       {'[traseiro]'}
+                    </span>
+                    {': '}
                     <span>
                       {`[${format(
                         new Date(props.gear.rearBreakDate),
