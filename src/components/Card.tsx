@@ -132,7 +132,7 @@ export default function Card(props) {
 
                 {props.gear.suspDistance != 0 && (
                   <p>
-                    {'-> Manutenção da Suspensão: '}
+                    {'-> Manutenção da Suspensão:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.suspDate),
@@ -165,10 +165,10 @@ export default function Card(props) {
                 {props.gear.frontBreakDistance != 0 && (
                   <p>
                     {'--> Freio'}
-                    <span>
+                    <span className={styles.breakSpan}>
                        {'[dianteiro]'}
                     </span>
-                    {': '}
+                    {':'}
                     <span>
                       {`[${format(
                         new Date(props.gear.frontBreakDate),
