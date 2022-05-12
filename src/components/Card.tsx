@@ -184,10 +184,10 @@ export default function Card(props) {
                 {props.gear.rearBreakDistance != 0 && (
                   <p>
                     {'--> Freio'}
-                    <span>
+                    <span className={styles.breakSpan}>
                        {'[traseiro]'}
                     </span>
-                    {': '}
+                    {':'}
                     <span>
                       {`[${format(
                         new Date(props.gear.rearBreakDate),
@@ -203,7 +203,7 @@ export default function Card(props) {
 
                 {props.gear.breakDistance != 0 && (
                   <p>
-                    {'--> Freios: '}
+                    {'--> Freios:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.breakDate),
@@ -218,7 +218,7 @@ export default function Card(props) {
 
                 {props.gear.tireDistance != 0 && (
                   <p>
-                    {'--> Pneus: '}
+                    {'--> Pneus:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.tireDate),
@@ -233,7 +233,7 @@ export default function Card(props) {
 
                 {props.gear.tubelessDistance != 0 && (
                   <p>
-                    {'--> Tubeless: '}
+                    {'--> Tubeless:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.tubelessDate),
@@ -248,7 +248,7 @@ export default function Card(props) {
 
                 {props.gear.tapeDistance != 0 && (
                   <p>
-                    {'--> Fita de guidão: '}
+                    {'--> Fita de guidão:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.tapeDate),
@@ -263,7 +263,7 @@ export default function Card(props) {
 
                 {props.gear.dropperDistance != 0 && (
                   <p>
-                    {'--> Canote retrátil: '}
+                    {'--> Canote retrátil:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.dropperDate),
@@ -278,7 +278,7 @@ export default function Card(props) {
 
                 {props.gear.stemDistance != 0 && (
                   <p>
-                    {'--> Mesa: '}
+                    {'--> Mesa:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.stemDate),
@@ -293,7 +293,7 @@ export default function Card(props) {
 
                 {props.gear.saddleDistance != 0 && (
                   <p>
-                    {'--> Selim: '}
+                    {'--> Selim:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.saddleDate),
@@ -308,7 +308,7 @@ export default function Card(props) {
 
                 {props.gear.handlebarDistance != 0 && (
                   <p>
-                    {'--> Guidão: '}
+                    {'--> Guidão:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.handlebarDate),
@@ -323,7 +323,7 @@ export default function Card(props) {
 
                 {props.gear.gripDistance != 0 && (
                   <p>
-                    {'--> Manoplas: '}
+                    {'--> Manoplas:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.gripDate),
@@ -338,7 +338,7 @@ export default function Card(props) {
 
                 {props.gear.pedalDistance != 0 && (
                   <p>
-                    {'--> Pedais: '}
+                    {'--> Pedais:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.pedalDate),

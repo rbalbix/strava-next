@@ -40,3 +40,7 @@
 .cardContainer div p:first-child {
   margin-top: 0.6rem;
 }
+
+.breakSpan{
+  margin-right: 0;
+}
