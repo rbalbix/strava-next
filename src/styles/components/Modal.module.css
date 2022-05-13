@@ -57,9 +57,10 @@
   margin-right: 10px;
 }
 
-.breakSpan {
+.modalInfo main span span{
   margin-right: 0;
 }
+
 
 .modalInfo main section {
   margin-bottom: 10px;
