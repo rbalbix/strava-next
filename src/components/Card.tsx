@@ -166,13 +166,7 @@ export default function Card(props) {
                   <p>
                     {'--> Freio'}
                     <span>
-                      <span>
-                       {'[dianteiro]'}
-                      </span>
-                    </span>
-                    {':'}
-                    <span>
-                      {`[${format(
+                      {`[dianteiro]:[${format(
                         new Date(props.gear.frontBreakDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -187,13 +181,7 @@ export default function Card(props) {
                   <p>
                     {'--> Freio'}
                     <span>
-                      <span>
-                       {'[traseiro]'}
-                      </span>
-                    </span>
-                    {':'}
-                    <span>
-                      {`[${format(
+                      {`[traseiro]:[${format(
                         new Date(props.gear.rearBreakDate),
                         'dd/MM/yyyy'
                       )}]`}
