@@ -165,10 +165,8 @@ export default function Card(props) {
                 {props.gear.frontBreakDistance != 0 && (
                   <p>
                     {'--> Freio'}
-                    <span>
-                      <div>
+                    <span className='breakSpan'>
                        {'[dianteiro]'}
-                      </div>
                     </span>
                     {':'}
                     <span>
@@ -186,10 +184,8 @@ export default function Card(props) {
                 {props.gear.rearBreakDistance != 0 && (
                   <p>
                     {'--> Freio'}
-                    <span >
-                      <div>
+                    <span className='breakSpan'>
                        {'[traseiro]'}
-                      </div> 
                     </span>
                     {':'}
                     <span>

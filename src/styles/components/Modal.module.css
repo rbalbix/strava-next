@@ -57,10 +57,9 @@
   margin-right: 10px;
 }
 
-.modalInfo main span div{
+.breakSpan {
   margin-right: 0;
 }
-
 
 .modalInfo main section {
   margin-bottom: 10px;
