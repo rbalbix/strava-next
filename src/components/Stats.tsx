@@ -14,15 +14,7 @@ type DetailedActivityWithNote = DetailedActivity & {
 };
 
 export default function Stats() {
-  const {
-    codeReturned,
-    client_id,
-    client_secret,
-    grant_type,
-    setAthleteInfo,
-    signIn,
-    signOut,
-  } = useContext(AuthContext);
+  const { setAthleteInfo, signIn, signOut } = useContext(AuthContext);
 
   const [gears, setGears] = useState([]);
   const [activities, setActivities] = useState<SummaryActivityWithNote[]>([]);
@@ -120,6 +112,7 @@ export default function Stats() {
             let totalHandlebarMovingTime = 0;
             let totalGripMovingTime = 0;
             let totalPedalMovingTime = 0;
+            let totalChainMovingTime = 0;
 
             let totalLubDistance = 0;
             let totalFrontLightDistance = 0;
@@ -139,6 +132,7 @@ export default function Stats() {
             let totalHandlebarDistance = 0;
             let totalGripDistance = 0;
             let totalPedalDistance = 0;
+            let totalChainDistance = 0;
 
             let isLubRegistered = false;
             let isFrontLightRegistered = false;
@@ -158,6 +152,7 @@ export default function Stats() {
             let isHandlebarRegistered = false;
             let isGripRegistered = false;
             let isPedalRegistered = false;
+            let isChainRegistered = false;
 
             let suspDate = '';
             let frontBreakDate = '';
@@ -172,6 +167,7 @@ export default function Stats() {
             let handlebarDate = '';
             let gripDate = '';
             let pedalDate = '';
+            let chainDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -221,7 +217,10 @@ export default function Stats() {
                     isSuspRegistered = true;
                   }
 
-                  if (!isFrontBreakRegistered && activity.note?.includes('frontbreak')) {
+                  if (
+                    !isFrontBreakRegistered &&
+                    activity.note?.includes('frontbreak')
+                  ) {
                     frontBreakDate = activity.start_date_local;
 
                     totalFrontBreakMovingTime = totalMovingTime;
@@ -231,7 +230,10 @@ export default function Stats() {
                     isBreakRegistered = true;
                   }
 
-                  if (!isRearBreakRegistered && activity.note?.includes('rearbreak')) {
+                  if (
+                    !isRearBreakRegistered &&
+                    activity.note?.includes('rearbreak')
+                  ) {
                     rearBreakDate = activity.start_date_local;
 
                     totalRearBreakMovingTime = totalMovingTime;
@@ -240,7 +242,7 @@ export default function Stats() {
                     isRearBreakRegistered = true;
                     isBreakRegistered = true;
                   }
-                  
+
                   if (!isBreakRegistered && activity.note?.includes('break')) {
                     breakDate = activity.start_date_local;
 
@@ -332,6 +334,14 @@ export default function Stats() {
                     totalPedalDistance = totalDistance;
                     isPedalRegistered = true;
                   }
+
+                  if (!isChainRegistered && activity.note?.includes('chain')) {
+                    chainDate = activity.start_date_local;
+
+                    totalChainMovingTime = totalMovingTime;
+                    totalChainDistance = totalDistance;
+                    isChainRegistered = true;
+                  }
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
@@ -368,6 +378,7 @@ export default function Stats() {
                   handlebarDistance: totalHandlebarDistance,
                   gripDistance: totalGripDistance,
                   pedalDistance: totalPedalDistance,
+                  chainDistance: totalChainDistance,
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -387,6 +398,7 @@ export default function Stats() {
                   handlebarMovingTime: totalHandlebarMovingTime,
                   gripMovingTime: totalGripMovingTime,
                   pedalMovingTime: totalPedalMovingTime,
+                  chainMovingTime: totalChainMovingTime,
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
                   frontBreakDate: frontBreakDate,
@@ -400,6 +412,7 @@ export default function Stats() {
                   handlebarDate: handlebarDate,
                   gripDate: gripDate,
                   pedalDate: pedalDate,
+                  chainDate: chainDate,
                   count,
                 }}
               />

@@ -176,7 +176,7 @@ export default function Card(props) {
                     )} km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
                   </p>
                 )}
-                
+
                 {props.gear.rearBreakDistance != 0 && (
                   <p>
                     {'--> Freio'}
@@ -191,7 +191,6 @@ export default function Card(props) {
                     )} km  | ${secondsToHms(props.gear.rearBreakMovingTime)}h`}
                   </p>
                 )}
-
 
                 {props.gear.breakDistance != 0 && (
                   <p>
@@ -340,6 +339,21 @@ export default function Card(props) {
                     {`${locale.format(',.2f')(
                       props.gear.pedalDistance / 1000
                     )} km  | ${secondsToHms(props.gear.pedalMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.chainDistance != 0 && (
+                  <p>
+                    {'--> Corrente:'}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.chainDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.chainDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.chainMovingTime)}h`}
                   </p>
                 )}
               </div>
