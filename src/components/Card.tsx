@@ -155,7 +155,12 @@ export default function Card(props) {
                   props.gear.stemDistance != 0 ||
                   props.gear.saddleDistance != 0 ||
                   props.gear.handlebarDistance != 0 ||
+                  props.gear.frontTireDistance != 0 ||
+                  props.gear.rearTireDistance != 0 ||
                   props.gear.tireDistance != 0 ||
+                  props.gear.frontTubeDistance != 0 ||
+                  props.gear.rearTubeDistance != 0 ||
+                  props.gear.tubeDistance != 0 ||
                   props.gear.tubelessDistance != 0 ||
                   props.gear.gripDistance != 0 ||
                   props.gear.pedalDistance != 0) && (
@@ -207,6 +212,36 @@ export default function Card(props) {
                   </p>
                 )}
 
+                {props.gear.frontTireDistance != 0 && (
+                  <p>
+                    {'--> Pneu'}
+                    <span>
+                      {`[dianteiro]:[${format(
+                        new Date(props.gear.frontTireDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.frontTireDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.frontTireMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.rearTireDistance != 0 && (
+                  <p>
+                    {'--> Pneu'}
+                    <span>
+                      {`[traseiro]:[${format(
+                        new Date(props.gear.rearTireDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.rearTireDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.rearTireMovingTime)}h`}
+                  </p>
+                )}
+
                 {props.gear.tireDistance != 0 && (
                   <p>
                     {'--> Pneus:'}
@@ -219,6 +254,51 @@ export default function Card(props) {
                     {`${locale.format(',.2f')(
                       props.gear.tireDistance / 1000
                     )} km  | ${secondsToHms(props.gear.tireMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.frontTubeDistance != 0 && (
+                  <p>
+                    {'--> Câmara'}
+                    <span>
+                      {`[dianteiro]:[${format(
+                        new Date(props.gear.frontTubeDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.frontTubeDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.frontTubeMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.rearTubeDistance != 0 && (
+                  <p>
+                    {'--> Câmara'}
+                    <span>
+                      {`[traseiro]:[${format(
+                        new Date(props.gear.rearTubeDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.rearTubeDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.rearTubeMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.tubeDistance != 0 && (
+                  <p>
+                    {'--> Câmara:'}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.tubeDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.tubeDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.tubeMovingTime)}h`}
                   </p>
                 )}
 
