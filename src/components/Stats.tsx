@@ -108,6 +108,11 @@ export default function Stats() {
             let totalStemMovingTime = 0;
             let totalSaddleMovingTime = 0;
             let totalTireMovingTime = 0;
+            let totalFrontTireMovingTime = 0;
+            let totalRearTireMovingTime = 0;
+            let totalTubeMovingTime = 0;
+            let totalFrontTubeMovingTime = 0;
+            let totalRearTubeMovingTime = 0;
             let totalTubelessMovingTime = 0;
             let totalHandlebarMovingTime = 0;
             let totalGripMovingTime = 0;
@@ -128,6 +133,11 @@ export default function Stats() {
             let totalStemDistance = 0;
             let totalSaddleDistance = 0;
             let totalTireDistance = 0;
+            let totalFrontTireDistance = 0;
+            let totalRearTireDistance = 0;
+            let totalTubeDistance = 0;
+            let totalFrontTubeDistance = 0;
+            let totalRearTubeDistance = 0;
             let totalTubelessDistance = 0;
             let totalHandlebarDistance = 0;
             let totalGripDistance = 0;
@@ -148,6 +158,11 @@ export default function Stats() {
             let isStemRegistered = false;
             let isSaddleRegistered = false;
             let isTireRegistered = false;
+            let isFrontTireRegistered = false;
+            let isRearTireRegistered = false;
+            let isTubeRegistered = false;
+            let isFrontTubeRegistered = false;
+            let isRearTubeRegistered = false;
             let isTubelessRegistered = false;
             let isHandlebarRegistered = false;
             let isGripRegistered = false;
@@ -160,6 +175,11 @@ export default function Stats() {
             let breakDate = '';
             let tapeDate = '';
             let tireDate = '';
+            let frontTireDate = '';
+            let rearTireDate = '';
+            let tubeDate = '';
+            let frontTubeDate = '';
+            let rearTubeDate = '';
             let tubelessDate = '';
             let dropperDate = '';
             let stemDate = '';
@@ -289,12 +309,68 @@ export default function Stats() {
                     isSaddleRegistered = true;
                   }
 
+                  if (
+                    !isFrontTireRegistered &&
+                    activity.note?.includes('fronttire')
+                  ) {
+                    frontTireDate = activity.start_date_local;
+
+                    totalFrontTireMovingTime = totalMovingTime;
+                    totalFrontTireDistance = totalDistance;
+                    isFrontTireRegistered = true;
+                    isTireRegistered = true;
+                  }
+
+                  if (
+                    !isRearTireRegistered &&
+                    activity.note?.includes('reartire')
+                  ) {
+                    rearTireDate = activity.start_date_local;
+
+                    totalRearTireMovingTime = totalMovingTime;
+                    totalRearTireDistance = totalDistance;
+                    isRearTireRegistered = true;
+                    isTireRegistered = true;
+                  }
+
                   if (!isTireRegistered && activity.note?.includes('tire')) {
                     tireDate = activity.start_date_local;
 
                     totalTireMovingTime = totalMovingTime;
                     totalTireDistance = totalDistance;
                     isTireRegistered = true;
+                  }
+
+                  if (
+                    !isFrontTubeRegistered &&
+                    activity.note?.includes('fronttube')
+                  ) {
+                    frontTubeDate = activity.start_date_local;
+
+                    totalFrontTubeMovingTime = totalMovingTime;
+                    totalFrontTubeDistance = totalDistance;
+                    isFrontTubeRegistered = true;
+                    isTubeRegistered = true;
+                  }
+
+                  if (
+                    !isRearTubeRegistered &&
+                    activity.note?.includes('reartube')
+                  ) {
+                    rearTubeDate = activity.start_date_local;
+
+                    totalRearTubeMovingTime = totalMovingTime;
+                    totalRearTubeDistance = totalDistance;
+                    isRearTubeRegistered = true;
+                    isTubeRegistered = true;
+                  }
+
+                  if (!isTubeRegistered && activity.note?.includes('tube')) {
+                    tireDate = activity.start_date_local;
+
+                    totalTubeMovingTime = totalMovingTime;
+                    totalTubeDistance = totalDistance;
+                    isTubeRegistered = true;
                   }
 
                   if (
