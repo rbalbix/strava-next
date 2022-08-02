@@ -13,7 +13,9 @@ interface AuthContextData {
   approval_prompt: string;
   scope: string;
   athlete: any;
+  codeError: any;
   setAthleteInfo: (athele: DetailedAthlete) => void;
+  setErrorInfo: (error: Object) => void;
   signIn: () => Promise<Strava>;
   signOut: () => void;
 }
@@ -31,11 +33,13 @@ interface AuthProviderProps {
   approval_prompt: string;
   scope: string;
   athlete?: DetailedAthlete;
+  codeError?: Object;
 }
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? null);
   const [athlete, setAthlete] = useState(rest.athlete);
+  const [codeError, setCodeError] = useState(rest.codeError);
 
   const router = useRouter();
 
@@ -51,6 +55,10 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
   function setAthleteInfo(athlete: DetailedAthlete) {
     setAthlete(athlete);
+  }
+
+  function setErrorInfo(errorObj: Object) {
+    setCodeError(errorObj);
   }
 
   async function signIn(): Promise<Strava> {
@@ -71,7 +79,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
       });
 
       return strava;
-    } catch (error) {
+    } catch {
       signOut();
     }
   }
@@ -95,7 +103,9 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         approval_prompt,
         scope,
         athlete,
+        codeError,
         setAthleteInfo,
+        setErrorInfo,
         signIn,
         signOut,
       }}

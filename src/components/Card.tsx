@@ -261,7 +261,7 @@ export default function Card(props) {
                   <p>
                     {'--> Câmara'}
                     <span>
-                      {`[dianteiro]:[${format(
+                      {`[dianteira]:[${format(
                         new Date(props.gear.frontTubeDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -276,7 +276,7 @@ export default function Card(props) {
                   <p>
                     {'--> Câmara'}
                     <span>
-                      {`[traseiro]:[${format(
+                      {`[traseira]:[${format(
                         new Date(props.gear.rearTubeDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -289,7 +289,7 @@ export default function Card(props) {
 
                 {props.gear.tubeDistance != 0 && (
                   <p>
-                    {'--> Câmara:'}
+                    {'--> Câmaras:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.tubeDate),

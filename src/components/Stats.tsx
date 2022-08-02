@@ -14,10 +14,25 @@ type DetailedActivityWithNote = DetailedActivity & {
 };
 
 export default function Stats() {
-  const { setAthleteInfo, signIn, signOut } = useContext(AuthContext);
+  const { setAthleteInfo, setErrorInfo, signIn, signOut, codeError } =
+    useContext(AuthContext);
 
   const [gears, setGears] = useState([]);
   const [activities, setActivities] = useState<SummaryActivityWithNote[]>([]);
+
+  function handleOpenModal(id: string) {
+    handleCloseModal();
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function handleCloseModal() {
+    const itens = Array.from(
+      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
+    );
+    itens.map((item) => {
+      item.style.display = 'none';
+    });
+  }
 
   useEffect(() => {
     async function configStravaParams() {
@@ -72,6 +87,7 @@ export default function Stats() {
 
         setActivities(activitiesFiltered);
       } catch (error) {
+        setErrorInfo(error);
         signOut();
       }
     }
@@ -366,7 +382,7 @@ export default function Stats() {
                   }
 
                   if (!isTubeRegistered && activity.note?.includes('tube')) {
-                    tireDate = activity.start_date_local;
+                    tubeDate = activity.start_date_local;
 
                     totalTubeMovingTime = totalMovingTime;
                     totalTubeDistance = totalDistance;
@@ -449,7 +465,12 @@ export default function Stats() {
                   dropperDistance: totalDropperDistance,
                   stemDistance: totalStemDistance,
                   saddleDistance: totalSaddleDistance,
+                  frontTireDistance: totalFrontTireDistance,
+                  rearTireDistance: totalRearTireDistance,
                   tireDistance: totalTireDistance,
+                  frontTubeDistance: totalFrontTubeDistance,
+                  rearTubeDistance: totalRearTubeDistance,
+                  tubeDistance: totalTubeDistance,
                   tubelessDistance: totalTubelessDistance,
                   handlebarDistance: totalHandlebarDistance,
                   gripDistance: totalGripDistance,
@@ -469,7 +490,12 @@ export default function Stats() {
                   dropperMovingTime: totalDropperMovingTime,
                   stemMovingTime: totalStemMovingTime,
                   saddleMovingTime: totalSaddleMovingTime,
+                  frontTireMovingTime: totalFrontTireMovingTime,
+                  rearTireMovingTime: totalRearTireMovingTime,
                   tireMovingTime: totalTireMovingTime,
+                  frontTubeMovingTime: totalFrontTubeMovingTime,
+                  rearTubeMovingTime: totalRearTubeMovingTime,
+                  tubeMovingTime: totalTubeMovingTime,
                   tubelessMovingTime: totalTubelessMovingTime,
                   handlebarMovingTime: totalHandlebarMovingTime,
                   gripMovingTime: totalGripMovingTime,
@@ -480,7 +506,12 @@ export default function Stats() {
                   frontBreakDate: frontBreakDate,
                   breakDate: breakDate,
                   tapeDate: tapeDate,
+                  frontTireDate: frontTireDate,
+                  rearTireDate: rearTireDate,
                   tireDate: tireDate,
+                  frontTubeDate: frontTubeDate,
+                  rearTubeDate: rearTubeDate,
+                  tubeDate: tubeDate,
                   tubelessDate: tubelessDate,
                   dropperDate: dropperDate,
                   stemDate: stemDate,

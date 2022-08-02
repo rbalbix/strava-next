@@ -10,6 +10,7 @@ export default function Header() {
   const route = useRouter();
 
   const {
+    codeError,
     athlete,
     codeReturned,
     client_id,
@@ -42,24 +43,26 @@ export default function Header() {
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
-        <div className={styles.buttonBox}>
-          <button className={styles.signInButton}>
-            <Link
-              href={{
-                pathname: `${baseURL}/authorize`,
-                query: {
-                  client_id,
-                  response_type,
-                  redirect_uri,
-                  approval_prompt,
-                  scope,
-                },
-              }}
-            >
-              Sign in
-            </Link>
-          </button>
-        </div>
+        <>
+          <div className={styles.buttonBox}>
+            <button className={styles.signInButton}>
+              <Link
+                href={{
+                  pathname: `${baseURL}/authorize`,
+                  query: {
+                    client_id,
+                    response_type,
+                    redirect_uri,
+                    approval_prompt,
+                    scope,
+                  },
+                }}
+              >
+                Sign in
+              </Link>
+            </button>
+          </div>
+        </>
       ) : (
         <>
           {athlete ? (

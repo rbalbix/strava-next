@@ -1,0 +1,26 @@
+.erroMsgContainer {
+  width: 80%;
+
+  border: 1px solid var(--orange-strava);
+  border-radius: 4px;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.05);
+
+  padding: 1rem 2rem;
+  margin-top: 0rem;
+}
+
+.erroMsgContainer header {
+  font-size: 1.5rem;
+  font-weight: 600;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 0.5rem;
+}
+
+.erroMsgContainer main p {
+  font-size: 1.4rem;
+  color: var(--light-gray-notes);
+}
