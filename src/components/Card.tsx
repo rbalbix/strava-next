@@ -163,7 +163,10 @@ export default function Card(props) {
                   props.gear.tubeDistance != 0 ||
                   props.gear.tubelessDistance != 0 ||
                   props.gear.gripDistance != 0 ||
-                  props.gear.pedalDistance != 0) && (
+                  props.gear.pedalDistance != 0 ||
+                  props.gear.frontDiskDistance != 0 ||
+                  props.gear.raerDiskDistance != 0 ||
+                  props.gear.disksDistance != 0) && (
                   <strong>Outras trocas:</strong>
                 )}
 
@@ -434,6 +437,51 @@ export default function Card(props) {
                     {`${locale.format(',.2f')(
                       props.gear.chainDistance / 1000
                     )} km  | ${secondsToHms(props.gear.chainMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.frontDiskDistance != 0 && (
+                  <p>
+                    {'--> Disco de Freio'}
+                    <span>
+                      {`[dianteiro]:[${format(
+                        new Date(props.gear.frontDiskDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.frontDiskDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.frontDiskMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.rearDiskDistance != 0 && (
+                  <p>
+                    {'--> Disco de Freio'}
+                    <span>
+                      {`[traseiro]:[${format(
+                        new Date(props.gear.rearDiskDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.rearDiskDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.rearDiskMovingTime)}h`}
+                  </p>
+                )}
+
+                {props.gear.disksDistance != 0 && (
+                  <p>
+                    {'--> Freios:'}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.disksDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.disksDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.disksMovingTime)}h`}
                   </p>
                 )}
               </div>

@@ -134,6 +134,9 @@ export default function Stats() {
             let totalGripMovingTime = 0;
             let totalPedalMovingTime = 0;
             let totalChainMovingTime = 0;
+            let totalFrontDiskMovingTime = 0;
+            let totalRearDiskMovingTime = 0;
+            let totalDisksMovingTime = 0;
 
             let totalLubDistance = 0;
             let totalFrontLightDistance = 0;
@@ -159,6 +162,9 @@ export default function Stats() {
             let totalGripDistance = 0;
             let totalPedalDistance = 0;
             let totalChainDistance = 0;
+            let totalFrontDiskDistance = 0;
+            let totalRearDiskDistance = 0;
+            let totalDisksDistance = 0;
 
             let isLubRegistered = false;
             let isFrontLightRegistered = false;
@@ -184,6 +190,9 @@ export default function Stats() {
             let isGripRegistered = false;
             let isPedalRegistered = false;
             let isChainRegistered = false;
+            let isFrontDiskRegistered = false;
+            let isRearDiskRegistered = false;
+            let isDisksRegistered = false;
 
             let suspDate = '';
             let frontBreakDate = '';
@@ -204,6 +213,9 @@ export default function Stats() {
             let gripDate = '';
             let pedalDate = '';
             let chainDate = '';
+            let frontDiskDate = '';
+            let rearDiskDate = '';
+            let disksDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -358,6 +370,21 @@ export default function Stats() {
                   }
 
                   if (
+                    !isTubelessRegistered &&
+                    activity.note?.includes('tubeless')
+                  ) {
+                    tubelessDate = activity.start_date_local;
+
+                    totalTubelessMovingTime = totalMovingTime;
+                    totalTubelessDistance = totalDistance;
+                    isTubelessRegistered = true;
+
+                    isFrontTubeRegistered = true;
+                    isRearTubeRegistered = true;
+                    isTubeRegistered = true;
+                  }
+
+                  if (
                     !isFrontTubeRegistered &&
                     activity.note?.includes('fronttube')
                   ) {
@@ -387,17 +414,6 @@ export default function Stats() {
                     totalTubeMovingTime = totalMovingTime;
                     totalTubeDistance = totalDistance;
                     isTubeRegistered = true;
-                  }
-
-                  if (
-                    !isTubelessRegistered &&
-                    activity.note?.includes('tubeless')
-                  ) {
-                    tubelessDate = activity.start_date_local;
-
-                    totalTubelessMovingTime = totalMovingTime;
-                    totalTubelessDistance = totalDistance;
-                    isTubelessRegistered = true;
                   }
 
                   if (
@@ -433,6 +449,40 @@ export default function Stats() {
                     totalChainMovingTime = totalMovingTime;
                     totalChainDistance = totalDistance;
                     isChainRegistered = true;
+                  }
+
+                  if (
+                    !isFrontDiskRegistered &&
+                    activity.note?.includes('frontdisk')
+                  ) {
+                    frontDiskDate = activity.start_date_local;
+
+                    totalFrontDiskMovingTime = totalMovingTime;
+                    totalFrontDiskDistance = totalDistance;
+
+                    isFrontDiskRegistered = true;
+                    isDisksRegistered = true;
+                  }
+
+                  if (
+                    !isRearDiskRegistered &&
+                    activity.note?.includes('reardisk')
+                  ) {
+                    rearDiskDate = activity.start_date_local;
+
+                    totalRearDiskMovingTime = totalMovingTime;
+                    totalRearDiskDistance = totalDistance;
+
+                    isRearDiskRegistered = true;
+                    isDisksRegistered = true;
+                  }
+
+                  if (!isDisksRegistered && activity.note?.includes('disks')) {
+                    disksDate = activity.start_date_local;
+
+                    totalDisksMovingTime = totalMovingTime;
+                    totalDisksDistance = totalDistance;
+                    isDisksRegistered = true;
                   }
                 }
 
@@ -476,6 +526,9 @@ export default function Stats() {
                   gripDistance: totalGripDistance,
                   pedalDistance: totalPedalDistance,
                   chainDistance: totalChainDistance,
+                  frontDiskDistance: totalFrontDiskDistance,
+                  rearDiskDistance: totalRearDiskDistance,
+                  disksDistance: totalDisksDistance,
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -501,6 +554,9 @@ export default function Stats() {
                   gripMovingTime: totalGripMovingTime,
                   pedalMovingTime: totalPedalMovingTime,
                   chainMovingTime: totalChainMovingTime,
+                  frontDiskMovingTime: totalFrontDiskMovingTime,
+                  rearDiskMovingTime: totalRearDiskMovingTime,
+                  disksMovingTime: totalDisksMovingTime,
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
                   frontBreakDate: frontBreakDate,
@@ -520,6 +576,9 @@ export default function Stats() {
                   gripDate: gripDate,
                   pedalDate: pedalDate,
                   chainDate: chainDate,
+                  frontDiskDate: frontDiskDate,
+                  rearDiskDate: rearDiskDate,
+                  disksDate: disksDate,
                   count,
                 }}
               />
