@@ -137,6 +137,7 @@ export default function Stats() {
             let totalFrontDiskMovingTime = 0;
             let totalRearDiskMovingTime = 0;
             let totalDisksMovingTime = 0;
+            let totalWheelsetMovingTime = 0;
 
             let totalLubDistance = 0;
             let totalFrontLightDistance = 0;
@@ -165,6 +166,7 @@ export default function Stats() {
             let totalFrontDiskDistance = 0;
             let totalRearDiskDistance = 0;
             let totalDisksDistance = 0;
+            let totalWheelsetDistance = 0;
 
             let isLubRegistered = false;
             let isFrontLightRegistered = false;
@@ -193,6 +195,7 @@ export default function Stats() {
             let isFrontDiskRegistered = false;
             let isRearDiskRegistered = false;
             let isDisksRegistered = false;
+            let isWheelsetRegistered = false;
 
             let suspDate = '';
             let frontBreakDate = '';
@@ -216,6 +219,7 @@ export default function Stats() {
             let frontDiskDate = '';
             let rearDiskDate = '';
             let disksDate = '';
+            let wheelsetDate = '';
 
             activities.map((activity) => {
               if (activity.gear_id === gear.id) {
@@ -484,6 +488,14 @@ export default function Stats() {
                     totalDisksDistance = totalDistance;
                     isDisksRegistered = true;
                   }
+                  
+                  if (!isWheelsetRegistered && activity.note?.includes('wheelset')) {
+                    wheelsetDate = activity.start_date_local;
+
+                    totalWheelsetMovingTime = totalMovingTime;
+                    totalWheelsetDistance = totalDistance;
+                    isWheelsetRegistered = true;
+                  }
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
@@ -529,6 +541,7 @@ export default function Stats() {
                   frontDiskDistance: totalFrontDiskDistance,
                   rearDiskDistance: totalRearDiskDistance,
                   disksDistance: totalDisksDistance,
+                  wheelsetDistance: totalWheelsetDistance,
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -557,6 +570,7 @@ export default function Stats() {
                   frontDiskMovingTime: totalFrontDiskMovingTime,
                   rearDiskMovingTime: totalRearDiskMovingTime,
                   disksMovingTime: totalDisksMovingTime,
+                  wheelsetMovingTime: totalWheelsetMovingTime,
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
                   frontBreakDate: frontBreakDate,
@@ -579,6 +593,7 @@ export default function Stats() {
                   frontDiskDate: frontDiskDate,
                   rearDiskDate: rearDiskDate,
                   disksDate: disksDate,
+                  wheelsetDate: wheelsetDate,
                   count,
                 }}
               />
