@@ -165,9 +165,7 @@ export default function Card(props) {
                   props.gear.gripDistance != 0 ||
                   props.gear.pedalDistance != 0 ||
                   props.gear.frontDiskDistance != 0 ||
-                  props.gear.raerDiskDistance != 0 ||
-                  props.gear.disksDistance != 0 ||
-                  props.gear.wheelsetDistance != 0) && (
+                  props.gear.rearDiskDistance != 0 ) && (
                   <strong>Outras trocas:</strong>
                 )}
 
