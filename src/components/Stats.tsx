@@ -481,23 +481,7 @@ export default function Stats() {
                     isDisksRegistered = true;
                   }
 
-                  /*
-                  if (!isDisksRegistered && activity.note?.includes('disks')) {
-                    disksDate = activity.start_date_local;
-
-                    totalDisksMovingTime = totalMovingTime;
-                    totalDisksDistance = totalDistance;
-                    isDisksRegistered = true;
-                  }
-                  
-                  if (!isWheelsetRegistered && activity.note?.includes('wheelset')) {
-                    wheelsetDate = activity.start_date_local;
-
-                    totalWheelsetMovingTime = totalMovingTime;
-                    totalWheelsetDistance = totalDistance;
-                    isWheelsetRegistered = true;
-                  }
-                  */
+            
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
