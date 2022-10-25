@@ -526,8 +526,7 @@ export default function Stats() {
                   chainDistance: totalChainDistance,
                   frontDiskDistance: totalFrontDiskDistance,
                   rearDiskDistance: totalRearDiskDistance,
-                  disksDistance: totalDisksDistance,
-                  wheelsetDistance: totalWheelsetDistance,
+                 
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -555,8 +554,7 @@ export default function Stats() {
                   chainMovingTime: totalChainMovingTime,
                   frontDiskMovingTime: totalFrontDiskMovingTime,
                   rearDiskMovingTime: totalRearDiskMovingTime,
-                  disksMovingTime: totalDisksMovingTime,
-                  wheelsetMovingTime: totalWheelsetMovingTime,
+               
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
                   frontBreakDate: frontBreakDate,
@@ -578,8 +576,7 @@ export default function Stats() {
                   chainDate: chainDate,
                   frontDiskDate: frontDiskDate,
                   rearDiskDate: rearDiskDate,
-                  disksDate: disksDate,
-                  wheelsetDate: wheelsetDate,
+             
                   count,
                 }}
               />
