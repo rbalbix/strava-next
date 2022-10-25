@@ -481,6 +481,7 @@ export default function Stats() {
                     isDisksRegistered = true;
                   }
 
+                  /*
                   if (!isDisksRegistered && activity.note?.includes('disks')) {
                     disksDate = activity.start_date_local;
 
@@ -496,6 +497,7 @@ export default function Stats() {
                     totalWheelsetDistance = totalDistance;
                     isWheelsetRegistered = true;
                   }
+                  */
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
