@@ -471,35 +471,7 @@ export default function Card(props) {
                   </p>
                 )}
 
-                {props.gear.disksDistance != 0 && (
-                  <p>
-                    {'--> Discos de freio:'}
-                    <span>
-                      {`[${format(
-                        new Date(props.gear.disksDate),
-                        'dd/MM/yyyy'
-                      )}]`}
-                    </span>
-                    {`${locale.format(',.2f')(
-                      props.gear.disksDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.disksMovingTime)}h`}
-                  </p>
-                )}
-                
-                {props.gear.wheelsetDistance != 0 && (
-                  <p>
-                    {'--> Par de rodas:'}
-                    <span>
-                      {`[${format(
-                        new Date(props.gear.wheelsetDate),
-                        'dd/MM/yyyy'
-                      )}]`}
-                    </span>
-                    {`${locale.format(',.2f')(
-                      props.gear.wheelsetDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.wheelsetMovingTime)}h`}
-                  </p>
-                )}
+              
               </div>
             </>
           )}
