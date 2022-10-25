@@ -473,7 +473,7 @@ export default function Card(props) {
 
                 {props.gear.disksDistance != 0 && (
                   <p>
-                    {'--> Freios:'}
+                    {'--> Discos de freio:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.disksDate),
