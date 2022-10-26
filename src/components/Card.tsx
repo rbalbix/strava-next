@@ -165,7 +165,8 @@ export default function Card(props) {
                   props.gear.gripDistance != 0 ||
                   props.gear.pedalDistance != 0 ||
                   props.gear.frontDiskDistance != 0 ||
-                  props.gear.rearDiskDistance != 0 ) && (
+                  props.gear.rearDiskDistance != 0 ||
+                  props.gear.wheelsetDistance != 0 ) && (
                   <strong>Outras trocas:</strong>
                 )}
 
@@ -466,6 +467,21 @@ export default function Card(props) {
                     {`${locale.format(',.2f')(
                       props.gear.rearDiskDistance / 1000
                     )} km  | ${secondsToHms(props.gear.rearDiskMovingTime)}h`}
+                  </p>
+                )}
+                
+                {props.gear.wheelsetDistance != 0 && (
+                  <p>
+                    {'--> Par de Rodas:'}
+                    <span>
+                      {`[${format(
+                        new Date(props.gear.wheelsetDate),
+                        'dd/MM/yyyy'
+                      )}]`}
+                    </span>
+                    {`${locale.format(',.2f')(
+                      props.gear.wheelsetDistance / 1000
+                    )} km  | ${secondsToHms(props.gear.wheelsetMovingTime)}h`}
                   </p>
                 )}
 
