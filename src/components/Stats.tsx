@@ -481,6 +481,17 @@ export default function Stats() {
                     isDisksRegistered = true;
                   }
 
+                  if (
+                    !isWheelsetRegistered &&
+                    activity.note?.includes('wheelset')
+                  ) {
+                    wheelsetDate = activity.start_date_local;
+
+                    totalWheelsetMovingTime = totalMovingTime;
+                    totalWheelsetDistance = totalDistance;
+
+                    isWheelsetRegistered = true;
+                  }
             
                 }
 
@@ -526,6 +537,8 @@ export default function Stats() {
                   chainDistance: totalChainDistance,
                   frontDiskDistance: totalFrontDiskDistance,
                   rearDiskDistance: totalRearDiskDistance,
+                    
+                  wheelsetDistance: totalWheelsetDistance,
                  
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
@@ -554,6 +567,8 @@ export default function Stats() {
                   chainMovingTime: totalChainMovingTime,
                   frontDiskMovingTime: totalFrontDiskMovingTime,
                   rearDiskMovingTime: totalRearDiskMovingTime,
+                    
+                  wheelsetMovingTime: totalWheelsetMovingTime,
                
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
@@ -576,6 +591,8 @@ export default function Stats() {
                   chainDate: chainDate,
                   frontDiskDate: frontDiskDate,
                   rearDiskDate: rearDiskDate,
+                    
+                  wheelsetDate: wheelsetDate,
              
                   count,
                 }}
