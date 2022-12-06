@@ -60,8 +60,12 @@ export default function Stats() {
               page,
             });
 
-          activitiesResult.map(async (activity) => {
-            if (activity.name.includes('*')) {
+            const activitiesWithGear = activitiesResult.filter((activity) => {
+              return activity.gear_id != null;
+            });
+
+            activitiesWithGear.map(async (activity) => {
+            if (activity.name.includes('*') ) {
               const detail: DetailedActivityWithNote =
                 await strava.activities.getActivityById({
                   id: activity.id,
@@ -71,21 +75,17 @@ export default function Stats() {
             }
           });
 
-          activitiesResultTotal.push(...activitiesResult);
+          activitiesResultTotal.push(...activitiesWithGear);
           page++;
         } while (activitiesResult.length !== 0 && page > 1);
 
-        const activitiesFiltered = activitiesResultTotal.filter((activity) => {
-          return activity.gear_id != null;
-        });
-
-        activitiesFiltered.sort((a, b) => {
+        activitiesResultTotal.sort((a, b) => {
           if (a.gear_id > b.gear_id) return 1;
           if (a.gear_id < b.gear_id) return -1;
           return 0;
         });
 
-        setActivities(activitiesFiltered);
+        setActivities(activitiesResultTotal);
       } catch (error) {
         setErrorInfo(error);
         signOut();
