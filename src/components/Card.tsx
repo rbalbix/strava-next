@@ -49,19 +49,19 @@ export default function Card(props) {
           {props.gear.type === 'Ride' && (
             <div>
               {props.gear.lubDistance != 0 && (
-                <p>{`última lubrificação: ${locale.format(',.2f')(
+                <p>{`. lubrificada a: ${locale.format(',.2f')(
                   props.gear.lubDistance / 1000
                 )} km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
               )}
 
               {props.gear.frontLightDistance != 0 && (
-                <p>{`última carga do front light: ${locale.format(',.2f')(
+                <p>{`. luz da frente: ${locale.format(',.2f')(
                   props.gear.frontLightDistance / 1000
                 )} km  | ${secondsToHms(props.gear.frontLightMovingTime)}h`}</p>
               )}
 
               {props.gear.rearLightDistance != 0 && (
-                <p>{`última carga do rear light: ${locale.format(',.2f')(
+                <p>{`. luz traseira: ${locale.format(',.2f')(
                   props.gear.rearLightDistance / 1000
                 )} km  | ${secondsToHms(props.gear.rearLightMovingTime)}h`}</p>
               )}
@@ -95,13 +95,13 @@ export default function Card(props) {
             <>
               <div>
                 {props.gear.lubDistance != 0 && (
-                  <p>{`última lubrificação: ${locale.format(',.2f')(
+                  <p>{`. lubrificada a: ${locale.format(',.2f')(
                     props.gear.lubDistance / 1000
                   )} km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
                 )}
 
                 {props.gear.frontLightDistance != 0 && (
-                  <p>{`última carga do front light: ${locale.format(',.2f')(
+                  <p>{`. luz da frente: ${locale.format(',.2f')(
                     props.gear.frontLightDistance / 1000
                   )} km  | ${secondsToHms(
                     props.gear.frontLightMovingTime
@@ -109,7 +109,7 @@ export default function Card(props) {
                 )}
 
                 {props.gear.rearLightDistance != 0 && (
-                  <p>{`última carga do rear light: ${locale.format(',.2f')(
+                  <p>{`. luz traseira: ${locale.format(',.2f')(
                     props.gear.rearLightDistance / 1000
                   )} km  | ${secondsToHms(
                     props.gear.rearLightMovingTime
@@ -119,20 +119,20 @@ export default function Card(props) {
 
               <div>
                 {props.gear.cleanDistance != 0 && (
-                  <p>{`-> Lavagem: ${locale.format(',.2f')(
+                  <p>{`-> Lavada a: ${locale.format(',.2f')(
                     props.gear.cleanDistance / 1000
                   )} km  | ${secondsToHms(props.gear.cleanMovingTime)}h`}</p>
                 )}
 
                 {props.gear.reviewDistance != 0 && (
-                  <p>{`-> Revisão geral: ${locale.format(',.2f')(
+                  <p>{`-> Revisada a: ${locale.format(',.2f')(
                     props.gear.reviewDistance / 1000
                   )} km  | ${secondsToHms(props.gear.reviewMovingTime)}h`}</p>
                 )}
 
                 {props.gear.suspDistance != 0 && (
                   <p>
-                    {'-> Manutenção da Suspensão:'}
+                    {'-> Suspa revisada a:'}
                     <span>
                       {`[${format(
                         new Date(props.gear.suspDate),
@@ -174,7 +174,7 @@ export default function Card(props) {
                   <p>
                     {'--> Freio'}
                     <span>
-                      {`[dianteiro]:[${format(
+                      {`[frente]:[${format(
                         new Date(props.gear.frontBreakDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -219,7 +219,7 @@ export default function Card(props) {
                   <p>
                     {'--> Pneu'}
                     <span>
-                      {`[dianteiro]:[${format(
+                      {`[frente]:[${format(
                         new Date(props.gear.frontTireDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -264,7 +264,7 @@ export default function Card(props) {
                   <p>
                     {'--> Câmara'}
                     <span>
-                      {`[dianteira]:[${format(
+                      {`[frente]:[${format(
                         new Date(props.gear.frontTubeDate),
                         'dd/MM/yyyy'
                       )}]`}
@@ -444,7 +444,7 @@ export default function Card(props) {
                   <p>
                     {'--> Disco de Freio'}
                     <span>
-                      {`[dianteiro]:[${format(
+                      {`[frente]:[${format(
                         new Date(props.gear.frontDiskDate),
                         'dd/MM/yyyy'
                       )}]`}

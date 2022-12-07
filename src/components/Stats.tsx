@@ -42,11 +42,15 @@ export default function Stats() {
         const athlete = await strava.athletes.getLoggedInAthlete();
         setAthleteInfo(athlete);
 
-        // PEGAR OS EQUIPAMENTOS
+        // PEGAR OS EQUIPAMENTOS (só traz os que estão ativos)
         const gearsResult: [] = JSON.parse(
           JSON.stringify(athlete.bikes)
         ).concat(JSON.parse(JSON.stringify(athlete.shoes)));
+
         setGears(gearsResult);
+
+        const gearIds = [];
+        gearsResult.forEach(gear => gearIds.push(gear['id']));
 
         // PEGAR TODAS AS ATIVIDADES
         let page = 1;
@@ -60,17 +64,16 @@ export default function Stats() {
               page,
             });
 
-            const activitiesWithGear = activitiesResult.filter((activity) => {
-              return activity.gear_id != null;
-            });
+          const activitiesWithGear = activitiesResult.filter((activity) => {
+            return ((activity.gear_id != null) && (gearIds.includes(activity.gear_id)));
+          });
 
-            activitiesWithGear.map(async (activity) => {
-            if (activity.name.includes('*') ) {
+          activitiesWithGear.map(async (activity) => {
+            if (activity.name.includes('*')) {
               const detail: DetailedActivityWithNote =
                 await strava.activities.getActivityById({
                   id: activity.id,
                 });
-
               activity.note = detail.private_note;
             }
           });
@@ -492,7 +495,7 @@ export default function Stats() {
 
                     isWheelsetRegistered = true;
                   }
-            
+
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
@@ -537,9 +540,9 @@ export default function Stats() {
                   chainDistance: totalChainDistance,
                   frontDiskDistance: totalFrontDiskDistance,
                   rearDiskDistance: totalRearDiskDistance,
-                    
+
                   wheelsetDistance: totalWheelsetDistance,
-                 
+
                   totalMovingTime,
                   lubMovingTime: totalLubMovingTime,
                   frontLightMovingTime: totalFrontLightMovingTime,
@@ -567,9 +570,9 @@ export default function Stats() {
                   chainMovingTime: totalChainMovingTime,
                   frontDiskMovingTime: totalFrontDiskMovingTime,
                   rearDiskMovingTime: totalRearDiskMovingTime,
-                    
+
                   wheelsetMovingTime: totalWheelsetMovingTime,
-               
+
                   suspDate: suspDate,
                   rearBreakDate: rearBreakDate,
                   frontBreakDate: frontBreakDate,
@@ -591,9 +594,9 @@ export default function Stats() {
                   chainDate: chainDate,
                   frontDiskDate: frontDiskDate,
                   rearDiskDate: rearDiskDate,
-                    
+
                   wheelsetDate: wheelsetDate,
-             
+
                   count,
                 }}
               />
