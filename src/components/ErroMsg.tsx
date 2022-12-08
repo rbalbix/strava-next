@@ -10,13 +10,17 @@ export default function ErroMsg() {
     <>
       {codeError?.status === 429 ? (
         <div className={styles.erroMsgContainer}>
-          <header>Limite de consultas excedido.</header>
-          <main>
-            <p>
-              O strava possui uma limitação de consultas por tempo. Tente
-              novamente em 15 minutos.
-            </p>
-          </main>
+          <div className={styles.headerContainer}>
+            <header>Limite de consultas excedido.</header>
+          </div>
+          <div>
+            <main>
+              <p>
+                O strava possui uma limitação de consultas por tempo. Tente
+                novamente em 15 minutos.
+              </p>
+            </main>
+          </div>
         </div>
       ) : (
         ''
