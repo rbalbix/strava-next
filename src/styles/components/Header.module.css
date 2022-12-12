@@ -13,14 +13,8 @@
 }
 
 .athleteButton {
-  /* background: transparent; */
-  border: none;
-  margin: 0;
-  padding: 0;
-  width: auto;
-  overflow: visible;
-
-  background: transparent;
+  display: flex;
+  align-items: center;
 }
 
 .athleteInfo {

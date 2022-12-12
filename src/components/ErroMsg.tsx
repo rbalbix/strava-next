@@ -11,7 +11,7 @@ export default function ErroMsg() {
       {codeError?.status === 429 ? (
         <div className={styles.erroMsgContainer}>
           <div className={styles.headerContainer}>
-            <header>Limite de consultas excedido.</header>
+            <header>Limite excedido</header>
           </div>
           <div>
             <main>

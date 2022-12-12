@@ -81,39 +81,36 @@ export default function Card(props) {
               )}
             </span>
             <span>{props.gear.name}</span>
+            <section>
+              <span>
+                {`[${props.gear.count} | 
+              ${locale.format(',.2f')(props.gear.distance / 1000)}km | 
+              ${secondsToHms(props.gear.totalMovingTime)}h]`}
+              </span>
+            </section>
           </header>
-
-          <section>
-            <p>{`${props.gear.count} atividades.`}</p>
-            <p>{`Distância: ${locale.format(',.2f')(
-              props.gear.distance / 1000
-            )} km`}</p>
-            <p>{`Tempo: ${secondsToHms(props.gear.totalMovingTime)}h`}</p>
-          </section>
 
           {props.gear.type === 'Ride' && (
             <>
               <div>
                 {props.gear.lubDistance != 0 && (
-                  <p>{`. lubrificada a: ${locale.format(',.2f')(
+                  <p>{`lubrificada a: ${locale.format(',.2f')(
                     props.gear.lubDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
+                  )}km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
                 )}
 
                 {props.gear.frontLightDistance != 0 && (
-                  <p>{`. luz da frente: ${locale.format(',.2f')(
+                  <p>{`luz da frente: ${locale.format(',.2f')(
                     props.gear.frontLightDistance / 1000
-                  )} km  | ${secondsToHms(
+                  )}km  | ${secondsToHms(
                     props.gear.frontLightMovingTime
                   )}h`}</p>
                 )}
 
                 {props.gear.rearLightDistance != 0 && (
-                  <p>{`. luz traseira: ${locale.format(',.2f')(
+                  <p>{`luz traseira: ${locale.format(',.2f')(
                     props.gear.rearLightDistance / 1000
-                  )} km  | ${secondsToHms(
-                    props.gear.rearLightMovingTime
-                  )}h`}</p>
+                  )}km  | ${secondsToHms(props.gear.rearLightMovingTime)}h`}</p>
                 )}
               </div>
 
@@ -121,13 +118,13 @@ export default function Card(props) {
                 {props.gear.cleanDistance != 0 && (
                   <p>{`-> Lavada a: ${locale.format(',.2f')(
                     props.gear.cleanDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.cleanMovingTime)}h`}</p>
+                  )}km  | ${secondsToHms(props.gear.cleanMovingTime)}h`}</p>
                 )}
 
                 {props.gear.reviewDistance != 0 && (
                   <p>{`-> Revisada a: ${locale.format(',.2f')(
                     props.gear.reviewDistance / 1000
-                  )} km  | ${secondsToHms(props.gear.reviewMovingTime)}h`}</p>
+                  )}km  | ${secondsToHms(props.gear.reviewMovingTime)}h`}</p>
                 )}
 
                 {props.gear.suspDistance != 0 && (
@@ -141,7 +138,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.suspDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.suspMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.suspMovingTime)}h`}
                   </p>
                 )}
               </div>
@@ -166,7 +163,7 @@ export default function Card(props) {
                   props.gear.pedalDistance != 0 ||
                   props.gear.frontDiskDistance != 0 ||
                   props.gear.rearDiskDistance != 0 ||
-                  props.gear.wheelsetDistance != 0 ) && (
+                  props.gear.wheelsetDistance != 0) && (
                   <strong>Outras trocas:</strong>
                 )}
 
@@ -181,7 +178,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.frontBreakDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.frontBreakMovingTime)}h`}
                   </p>
                 )}
 
@@ -196,7 +193,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.rearBreakDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.rearBreakMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.rearBreakMovingTime)}h`}
                   </p>
                 )}
 
@@ -211,7 +208,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.breakDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.breakMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.breakMovingTime)}h`}
                   </p>
                 )}
 
@@ -226,7 +223,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.frontTireDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.frontTireMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.frontTireMovingTime)}h`}
                   </p>
                 )}
 
@@ -241,7 +238,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.rearTireDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.rearTireMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.rearTireMovingTime)}h`}
                   </p>
                 )}
 
@@ -256,7 +253,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.tireDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.tireMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.tireMovingTime)}h`}
                   </p>
                 )}
 
@@ -271,7 +268,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.frontTubeDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.frontTubeMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.frontTubeMovingTime)}h`}
                   </p>
                 )}
 
@@ -286,7 +283,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.rearTubeDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.rearTubeMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.rearTubeMovingTime)}h`}
                   </p>
                 )}
 
@@ -301,7 +298,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.tubeDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.tubeMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.tubeMovingTime)}h`}
                   </p>
                 )}
 
@@ -316,7 +313,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.tubelessDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.tubelessMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.tubelessMovingTime)}h`}
                   </p>
                 )}
 
@@ -331,7 +328,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.tapeDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.tapeMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.tapeMovingTime)}h`}
                   </p>
                 )}
 
@@ -346,7 +343,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.dropperDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.dropperMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.dropperMovingTime)}h`}
                   </p>
                 )}
 
@@ -361,7 +358,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.stemDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.stemMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.stemMovingTime)}h`}
                   </p>
                 )}
 
@@ -376,7 +373,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.saddleDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.saddleMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.saddleMovingTime)}h`}
                   </p>
                 )}
 
@@ -391,7 +388,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.handlebarDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.handlebarMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.handlebarMovingTime)}h`}
                   </p>
                 )}
 
@@ -406,7 +403,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.gripDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.gripMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.gripMovingTime)}h`}
                   </p>
                 )}
 
@@ -421,7 +418,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.pedalDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.pedalMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.pedalMovingTime)}h`}
                   </p>
                 )}
 
@@ -436,7 +433,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.chainDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.chainMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.chainMovingTime)}h`}
                   </p>
                 )}
 
@@ -451,7 +448,7 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.frontDiskDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.frontDiskMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.frontDiskMovingTime)}h`}
                   </p>
                 )}
 
@@ -466,10 +463,10 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.rearDiskDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.rearDiskMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.rearDiskMovingTime)}h`}
                   </p>
                 )}
-                
+
                 {props.gear.wheelsetDistance != 0 && (
                   <p>
                     {'--> Par de Rodas:'}
@@ -481,11 +478,9 @@ export default function Card(props) {
                     </span>
                     {`${locale.format(',.2f')(
                       props.gear.wheelsetDistance / 1000
-                    )} km  | ${secondsToHms(props.gear.wheelsetMovingTime)}h`}
+                    )}km  | ${secondsToHms(props.gear.wheelsetMovingTime)}h`}
                   </p>
                 )}
-
-              
               </div>
             </>
           )}

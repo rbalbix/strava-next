@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
-import { DetailedAthlete, Strava } from 'strava';
+import { DetailedAthlete, ActivityStats, Strava } from 'strava';
 import api from '../services/api';
 
 interface AuthContextData {
@@ -13,8 +13,10 @@ interface AuthContextData {
   approval_prompt: string;
   scope: string;
   athlete: any;
+  athleteStats: ActivityStats;
   codeError: any;
   setAthleteInfo: (athele: DetailedAthlete) => void;
+  setAthleteInfoStats: (atheleStats: ActivityStats) => void;
   setErrorInfo: (error: Object) => void;
   signIn: () => Promise<Strava>;
   signOut: () => void;
@@ -33,12 +35,14 @@ interface AuthProviderProps {
   approval_prompt: string;
   scope: string;
   athlete?: DetailedAthlete;
+  athleteStats?: ActivityStats;
   codeError?: Object;
 }
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? null);
   const [athlete, setAthlete] = useState(rest.athlete);
+  const [athleteStats, setAthleteStats] = useState(rest.athleteStats);
   const [codeError, setCodeError] = useState(rest.codeError);
 
   const router = useRouter();
@@ -55,6 +59,10 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
   function setAthleteInfo(athlete: DetailedAthlete) {
     setAthlete(athlete);
+  }
+
+  function setAthleteInfoStats(athleteStats: ActivityStats) {
+    setAthleteStats(athleteStats);
   }
 
   function setErrorInfo(errorObj: Object) {
@@ -103,8 +111,10 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         approval_prompt,
         scope,
         athlete,
+        athleteStats,
         codeError,
         setAthleteInfo,
+        setAthleteInfoStats,
         setErrorInfo,
         signIn,
         signOut,

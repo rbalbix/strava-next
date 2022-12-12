@@ -12,6 +12,7 @@ export default function Header() {
   const {
     codeError,
     athlete,
+    athleteStats,
     codeReturned,
     client_id,
     response_type,
@@ -67,25 +68,28 @@ export default function Header() {
         <>
           {athlete ? (
             // <button className={styles.athleteButton}>
-            <Link
-              href={{
-                pathname: `https://strava.com/athletes/${athlete?.id}`,
-              }}
-              passHref
-            >
-              <a target='_blank' rel='noreferrer'>
-                <div className={styles.athleteInfo}>
-                  <img
-                    className={styles.athleteAvatar}
-                    src={athlete?.profile}
-                    alt='Athlete Profile'
-                  />
-                  <span
-                    className={styles.athleteName}
-                  >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
-                </div>
-              </a>
-            </Link>
+            <div className={styles.athleteButton}>
+              <Link
+                href={{
+                  pathname: `https://strava.com/dashboard`,
+                }}
+                passHref
+              >
+                <a target='_blank' rel='noreferrer'>
+                  <div className={styles.athleteInfo}>
+                    <img
+                      className={styles.athleteAvatar}
+                      src={athlete?.profile}
+                      alt='Athlete Profile'
+                    />
+                  </div>
+                </a>
+              </Link>
+              <span
+                className={styles.athleteName}
+              >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
+              {console.log(athleteStats)}
+            </div>
           ) : (
             // </button>
             <span className={styles.spinnerLoading}>

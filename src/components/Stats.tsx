@@ -14,8 +14,14 @@ type DetailedActivityWithNote = DetailedActivity & {
 };
 
 export default function Stats() {
-  const { setAthleteInfo, setErrorInfo, signIn, signOut, codeError } =
-    useContext(AuthContext);
+  const {
+    setAthleteInfo,
+    setAthleteInfoStats,
+    setErrorInfo,
+    signIn,
+    signOut,
+    codeError,
+  } = useContext(AuthContext);
 
   const [gears, setGears] = useState([]);
   const [activities, setActivities] = useState<SummaryActivityWithNote[]>([]);
@@ -42,6 +48,9 @@ export default function Stats() {
         const athlete = await strava.athletes.getLoggedInAthlete();
         setAthleteInfo(athlete);
 
+        const athleteStats = await strava.athletes.getStats({ id: athlete.id });
+        setAthleteInfoStats(athleteStats);
+
         // PEGAR OS EQUIPAMENTOS (só traz os que estão ativos)
         const gearsResult: [] = JSON.parse(
           JSON.stringify(athlete.bikes)
@@ -50,7 +59,7 @@ export default function Stats() {
         setGears(gearsResult);
 
         const gearIds = [];
-        gearsResult.forEach(gear => gearIds.push(gear['id']));
+        gearsResult.forEach((gear) => gearIds.push(gear['id']));
 
         // PEGAR TODAS AS ATIVIDADES
         let page = 1;
@@ -65,7 +74,9 @@ export default function Stats() {
             });
 
           const activitiesWithGear = activitiesResult.filter((activity) => {
-            return ((activity.gear_id != null) && (gearIds.includes(activity.gear_id)));
+            return (
+              activity.gear_id != null && gearIds.includes(activity.gear_id)
+            );
           });
 
           activitiesWithGear.map(async (activity) => {
@@ -495,7 +506,6 @@ export default function Stats() {
 
                     isWheelsetRegistered = true;
                   }
-
                 }
 
                 totalMovingTime = totalMovingTime + activity.moving_time;
