@@ -4,13 +4,7 @@ import { Modal } from '../components/Modal';
 import styles from '../styles/components/Card.module.css';
 
 import { format } from 'date-fns';
-
-const locale = d3.formatLocale({
-  decimal: ',',
-  thousands: '.',
-  grouping: [3],
-  currency: ['R$', ''],
-});
+import { locale, secondsToHms } from '../services/utils';
 
 export default function Card(props) {
   function handleOpenModal(id: string) {
@@ -488,17 +482,4 @@ export default function Card(props) {
       </Modal>
     </div>
   );
-}
-
-function secondsToHms(totalSeconds) {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor((totalSeconds % 3600) % 60);
-
-  const movingTime = `${String(hours).padStart(2, '0')}:${String(
-    minutes
-  ).padStart(2, '0')}`;
-  // :${String(seconds).padStart(2, '0')}`;
-
-  return movingTime;
 }

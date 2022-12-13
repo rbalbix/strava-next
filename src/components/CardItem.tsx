@@ -1,12 +1,6 @@
 import * as d3 from 'd3-format';
 import { format } from 'date-fns';
-
-const locale = d3.formatLocale({
-  decimal: ',',
-  thousands: '.',
-  grouping: [3],
-  currency: ['R$', ''],
-});
+import { locale } from '../services/utils';
 
 export default function CardItem(props) {
   return (
