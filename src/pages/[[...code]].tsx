@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import { useContext } from 'react';
+import DiskIcon from '../components/DiskIcon';
 import ErroMsg from '../components/ErroMsg';
 import Header from '../components/Header';
 import Stats from '../components/Stats';
@@ -53,11 +54,16 @@ export default function Home(props: HomeProps) {
           {props.code ? (
             <Stats />
           ) : (
-            <div className={styles.homeText}>
-              <ErroMsg />
-              <h1>Strava</h1>
-              <h1>Stats.</h1>
-            </div>
+            <>
+              <div className={styles.homeText}>
+                <ErroMsg />
+                <h1>Strava</h1>
+                <h1>Stats.</h1>
+                <span>
+                  <DiskIcon />
+                </span>
+              </div>
+            </>
           )}
         </section>
       </div>

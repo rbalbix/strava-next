@@ -20,9 +20,9 @@
 }
 
 .homeText h1 {
-  font-size: 9rem;
+  font-size: 8rem;
   font-weight: 700;
-  line-height: 9rem;
+  line-height: 8rem;
   letter-spacing: -0.5rem;
 
   -webkit-background-clip: text;
@@ -34,4 +34,8 @@
     var(--start-gradient-color),
     var(--end-gradient-color)
   );
+}
+
+.homeText span {
+  margin-top: 0.5rem;
 }
