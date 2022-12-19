@@ -42,23 +42,25 @@ export default function Card(props) {
 
           {props.gear.type === 'Ride' && (
             <div>
-              {props.gear.lubDistance != 0 && (
+              {props.gear.lubDistance != 0 ? (
                 <p>{`. lubrificada a: ${locale.format(',.2f')(
                   props.gear.lubDistance / 1000
                 )} km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
+              ) : (
+                <p>Bike lubrificada. &#x1F44F;</p>
               )}
 
-              {props.gear.frontLightDistance != 0 && (
+              {/*props.gear.frontLightDistance != 0 && (
                 <p>{`. luz da frente: ${locale.format(',.2f')(
                   props.gear.frontLightDistance / 1000
                 )} km  | ${secondsToHms(props.gear.frontLightMovingTime)}h`}</p>
-              )}
+                )*/}
 
-              {props.gear.rearLightDistance != 0 && (
+              {/*props.gear.rearLightDistance != 0 && (
                 <p>{`. luz traseira: ${locale.format(',.2f')(
                   props.gear.rearLightDistance / 1000
                 )} km  | ${secondsToHms(props.gear.rearLightMovingTime)}h`}</p>
-              )}
+                )*/}
             </div>
           )}
         </main>
@@ -87,25 +89,27 @@ export default function Card(props) {
           {props.gear.type === 'Ride' && (
             <>
               <div>
-                {props.gear.lubDistance != 0 && (
-                  <p>{`lubrificada a: ${locale.format(',.2f')(
+                {props.gear.lubDistance != 0 ? (
+                  <p>{`. lubrificada a: ${locale.format(',.2f')(
                     props.gear.lubDistance / 1000
-                  )}km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
+                  )} km  | ${secondsToHms(props.gear.lubMovingTime)}h`}</p>
+                ) : (
+                  <p>Bike lubrificada. &#x1F44F;</p>
                 )}
 
-                {props.gear.frontLightDistance != 0 && (
+                {/*props.gear.frontLightDistance != 0 && (
                   <p>{`luz da frente: ${locale.format(',.2f')(
                     props.gear.frontLightDistance / 1000
                   )}km  | ${secondsToHms(
                     props.gear.frontLightMovingTime
                   )}h`}</p>
-                )}
+                  )*/}
 
-                {props.gear.rearLightDistance != 0 && (
+                {/*props.gear.rearLightDistance != 0 && (
                   <p>{`luz traseira: ${locale.format(',.2f')(
                     props.gear.rearLightDistance / 1000
                   )}km  | ${secondsToHms(props.gear.rearLightMovingTime)}h`}</p>
-                )}
+                  )*/}
               </div>
 
               <div>
