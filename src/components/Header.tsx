@@ -12,6 +12,7 @@ import { FaArrowRight } from 'react-icons/fa';
 
 import { Modal } from '../components/Modal';
 import { locale, secondsToHms } from '../services/utils';
+import Image from 'next/image';
 
 export default function Header() {
   const route = useRouter();
@@ -95,16 +96,16 @@ export default function Header() {
                   pathname: `https://strava.com/dashboard`,
                 }}
                 passHref
+                target='_blank'
+                rel='noreferrer'
               >
-                <a target='_blank' rel='noreferrer'>
-                  <div className={styles.athleteInfo}>
-                    <img
-                      className={styles.athleteAvatar}
-                      src={athlete?.profile}
-                      alt='Athlete Profile'
-                    />
-                  </div>
-                </a>
+                <div className={styles.athleteInfo}>
+                  <img
+                    className={styles.athleteAvatar}
+                    src={athlete?.profile}
+                    alt='Athlete Profile'
+                  />
+                </div>
               </Link>
               <span
                 onClick={() => handleOpenModal(athlete.id)}
