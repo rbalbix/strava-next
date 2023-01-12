@@ -31,7 +31,10 @@ export default function Header() {
   } = useContext(AuthContext);
 
   useEffect(() => {
-    if (performance.navigation.type === 1) {
+    if (
+      (window.performance.getEntries()[0] as PerformanceNavigationTiming)
+        .type === 'reload'
+    ) {
       if (codeReturned) {
         route.replace({
           pathname: `${baseURL}/authorize`,
