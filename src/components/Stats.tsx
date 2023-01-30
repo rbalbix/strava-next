@@ -1,17 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
-import { DetailedActivity, SummaryActivity } from 'strava';
+import { ActivityStats, DetailedAthlete, Strava, SummaryGear } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
+import {
+  getActivitiesSortedByGear,
+  SummaryActivityWithNote,
+} from '../services/activity';
+import { getAthlete, getAthleteStats } from '../services/athlete';
+import { GearStats, getGears } from '../services/gear';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
-
-type SummaryActivityWithNote = SummaryActivity & {
-  note?: string;
-};
-
-type DetailedActivityWithNote = DetailedActivity & {
-  private_note?: string;
-};
 
 export default function Stats() {
   const {
@@ -40,73 +38,56 @@ export default function Stats() {
     });
   }
 
+  async function getAthleteInfo(strava: Strava) {
+    const athlete: DetailedAthlete = await getAthlete(strava);
+    setAthleteInfo(athlete);
+
+    const athleteStats: ActivityStats = await getAthleteStats(strava, athlete);
+    setAthleteInfoStats(athleteStats);
+
+    return { athlete, athleteStats };
+  }
+
+  function getGearInfo(athlete: DetailedAthlete) {
+    const gears = getGears(athlete);
+    setGears(gears);
+
+    return { gears };
+  }
+
+  async function getActivitiesInfo(
+    strava: Strava,
+    gears: SummaryGear[],
+    after: number
+  ) {
+    const activities = await getActivitiesSortedByGear(strava, gears, after);
+    setActivities(activities);
+
+    return activities;
+  }
+
+  function createStats(
+    gears: SummaryGear[],
+    activities: SummaryActivityWithNote[]
+  ) {
+    let stat: GearStats;
+  }
+
   useEffect(() => {
-    async function configStravaParams() {
+    async function init() {
       try {
         const strava = await signIn();
-
-        const athlete = await strava.athletes.getLoggedInAthlete();
-        setAthleteInfo(athlete);
-
-        const athleteStats = await strava.athletes.getStats({ id: athlete.id });
-        setAthleteInfoStats(athleteStats);
-
-        // PEGAR OS EQUIPAMENTOS (só traz os que estão ativos)
-        const gearsResult: [] = JSON.parse(
-          JSON.stringify(athlete.bikes)
-        ).concat(JSON.parse(JSON.stringify(athlete.shoes)));
-
-        setGears(gearsResult);
-
-        const gearIds = [];
-        gearsResult.forEach((gear) => gearIds.push(gear['id']));
-
-        // PEGAR TODAS AS ATIVIDADES
-        let page = 1;
-        let activitiesResult = [];
-        const activitiesResultTotal: SummaryActivityWithNote[] = [];
-
-        do {
-          activitiesResult =
-            await strava.activities.getLoggedInAthleteActivities({
-              per_page: 200,
-              page,
-            });
-
-          const activitiesWithGear = activitiesResult.filter((activity) => {
-            return (
-              activity.gear_id != null && gearIds.includes(activity.gear_id)
-            );
-          });
-
-          activitiesWithGear.map(async (activity) => {
-            if (activity.name.includes('*')) {
-              const detail: DetailedActivityWithNote =
-                await strava.activities.getActivityById({
-                  id: activity.id,
-                });
-              activity.note = detail.private_note;
-            }
-          });
-
-          activitiesResultTotal.push(...activitiesWithGear);
-          page++;
-        } while (activitiesResult.length !== 0 && page > 1);
-
-        activitiesResultTotal.sort((a, b) => {
-          if (a.gear_id > b.gear_id) return 1;
-          if (a.gear_id < b.gear_id) return -1;
-          return 0;
-        });
-
-        setActivities(activitiesResultTotal);
+        const { athlete } = await getAthleteInfo(strava);
+        const { gears } = getGearInfo(athlete);
+        const activities = await getActivitiesInfo(strava, gears, null);
+        createStats(gears, activities);
       } catch (error) {
         setErrorInfo(error);
         signOut();
       }
     }
 
-    configStravaParams();
+    init();
   }, []);
 
   return (
