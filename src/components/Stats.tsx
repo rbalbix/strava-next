@@ -1,42 +1,29 @@
 import { useContext, useEffect, useState } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
-import { ActivityStats, DetailedAthlete, Strava, SummaryGear } from 'strava';
+import {
+  ActivityStats,
+  ActivityType,
+  DetailedAthlete,
+  Strava,
+  SummaryGear,
+} from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import {
   getActivitiesSortedByGear,
   SummaryActivityWithNote,
 } from '../services/activity';
 import { getAthlete, getAthleteStats } from '../services/athlete';
-import { GearStats, getGears } from '../services/gear';
+import { Equipments } from '../services/equipment';
+import { Equipment, GearStats, getGears } from '../services/gear';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 
 export default function Stats() {
-  const {
-    setAthleteInfo,
-    setAthleteInfoStats,
-    setErrorInfo,
-    signIn,
-    signOut,
-    codeError,
-  } = useContext(AuthContext);
+  const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
+    useContext(AuthContext);
 
   const [gears, setGears] = useState([]);
   const [activities, setActivities] = useState<SummaryActivityWithNote[]>([]);
-
-  function handleOpenModal(id: string) {
-    handleCloseModal();
-    document.getElementById(id).style.display = 'block';
-  }
-
-  function handleCloseModal() {
-    const itens = Array.from(
-      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
-    );
-    itens.map((item) => {
-      item.style.display = 'none';
-    });
-  }
 
   async function getAthleteInfo(strava: Strava) {
     const athlete: DetailedAthlete = await getAthlete(strava);
@@ -66,11 +53,72 @@ export default function Stats() {
     return activities;
   }
 
-  function createStats(
+  function createGearStats(
     gears: SummaryGear[],
     activities: SummaryActivityWithNote[]
   ) {
-    let stat: GearStats;
+    const gearStats: GearStats[] = [];
+
+    gears.map((gear) => {
+      let count = 0;
+      let distance = 0;
+      let movingTime = 0;
+      let activityType: ActivityType = null;
+
+      const equipmentsStatModel: Equipment[] = [];
+      const equipmentsStat: Equipment[] = [];
+
+      const equipments = Object.values(Equipments);
+      equipments.forEach((equipment) => {
+        equipmentsStatModel.push({
+          name: equipment,
+          distance: 0,
+          movingTime: 0,
+          isRegistered: false,
+        });
+      });
+
+      activities.map((activity) => {
+        if (activity.gear_id === gear.id) {
+          if (activity.name.includes('*') && activity.note) {
+            equipments.forEach((equipment) => {
+              if (activity.note?.includes(equipment)) {
+                let equipmentStat = equipmentsStatModel.find(
+                  ({ name }) => name === equipment
+                );
+
+                if (equipmentStat && !equipmentStat.isRegistered) {
+                  equipmentStat.isRegistered = true;
+                  equipmentStat.distance = distance;
+                  equipmentStat.movingTime = movingTime;
+                  equipmentsStat.push(equipmentStat);
+                }
+              }
+            });
+          }
+
+          movingTime += activity.moving_time;
+          distance += activity.distance;
+          activityType = activity.type;
+          count++;
+        }
+      });
+
+      const gearStat: GearStats = {
+        id: gear.id,
+        name: gear.name,
+        activityType,
+        count,
+        distance,
+        movingTime,
+        equipments: equipmentsStat,
+      };
+
+      gearStats.push(gearStat);
+    });
+
+    console.log(gearStats);
+    return gearStats;
   }
 
   useEffect(() => {
@@ -80,7 +128,7 @@ export default function Stats() {
         const { athlete } = await getAthleteInfo(strava);
         const { gears } = getGearInfo(athlete);
         const activities = await getActivitiesInfo(strava, gears, null);
-        createStats(gears, activities);
+        const gearStats = createGearStats(gears, activities);
       } catch (error) {
         setErrorInfo(error);
         signOut();

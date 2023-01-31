@@ -5,21 +5,24 @@ import styles from '../styles/components/Card.module.css';
 
 import { format } from 'date-fns';
 import { locale, secondsToHms } from '../services/utils';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function Card(props) {
-  function handleOpenModal(id: string) {
-    handleCloseModal();
-    document.getElementById(id).style.display = 'block';
-  }
+  const { handleOpenModal, handleCloseModal } = useContext(AuthContext);
+  // function handleOpenModal(id: string) {
+  //   handleCloseModal();
+  //   document.getElementById(id).style.display = 'block';
+  // }
 
-  function handleCloseModal() {
-    const itens = Array.from(
-      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
-    );
-    itens.map((item) => {
-      item.style.display = 'none';
-    });
-  }
+  // function handleCloseModal() {
+  //   const itens = Array.from(
+  //     document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
+  //   );
+  //   itens.map((item) => {
+  //     item.style.display = 'none';
+  //   });
+  // }
 
   return (
     <div>

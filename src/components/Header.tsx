@@ -28,6 +28,8 @@ export default function Header() {
     approval_prompt,
     scope,
     signOut,
+    handleOpenModal,
+    handleCloseModal,
   } = useContext(AuthContext);
 
   useEffect(() => {
@@ -52,19 +54,19 @@ export default function Header() {
     }
   }, []);
 
-  function handleOpenModal(id: string) {
-    handleCloseModal();
-    document.getElementById(id).style.display = 'block';
-  }
+  // function handleOpenModal(id: string) {
+  //   handleCloseModal();
+  //   document.getElementById(id).style.display = 'block';
+  // }
 
-  function handleCloseModal() {
-    const itens = Array.from(
-      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
-    );
-    itens.map((item) => {
-      item.style.display = 'none';
-    });
-  }
+  // function handleCloseModal() {
+  //   const itens = Array.from(
+  //     document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
+  //   );
+  //   itens.map((item) => {
+  //     item.style.display = 'none';
+  //   });
+  // }
 
   return (
     <div className={styles.headerContainer}>

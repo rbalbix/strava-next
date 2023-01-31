@@ -20,6 +20,8 @@ interface AuthContextData {
   setErrorInfo: (error: Object) => void;
   signIn: () => Promise<Strava>;
   signOut: () => void;
+  handleOpenModal: (id: string) => void;
+  handleCloseModal: () => void;
 }
 
 export const AuthContext = createContext({} as AuthContextData);
@@ -99,6 +101,20 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     setAthlete(null);
   }
 
+  function handleOpenModal(id: string) {
+    handleCloseModal();
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function handleCloseModal() {
+    const itens = Array.from(
+      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
+    );
+    itens.map((item) => {
+      item.style.display = 'none';
+    });
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -118,6 +134,8 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         setErrorInfo,
         signIn,
         signOut,
+        handleOpenModal,
+        handleCloseModal,
       }}
     >
       {children}
