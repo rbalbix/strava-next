@@ -1,7 +1,8 @@
 import { ActivityType, DetailedAthlete, SummaryGear } from 'strava';
 
 export type Equipment = {
-  name: string;
+  id: string;
+  caption: string;
   distance: number;
   movingTime: number;
   date?: string;

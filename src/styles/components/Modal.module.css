@@ -27,13 +27,13 @@
   min-width: 50%;
   min-height: 30%;
 
-  margin: 0 10px;
+  margin: 0 5px;
 
   border: 1px solid var(--dark-gray);
   border-radius: 4px;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
 
-  padding: 1rem 2rem;
+  padding: 1rem 0.5rem;
   background-color: var(--white);
 
   overflow-y: auto;
@@ -54,18 +54,7 @@
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--dark-gray);
-}
-
-/* .modalInfo main span:first-child {
   margin-right: 10px;
-} */
-
-.modalInfo main span {
-  margin-right: 10px;
-}
-
-.modalInfo main span span {
-  margin-right: 0;
 }
 
 .modalInfo main section {
@@ -73,20 +62,32 @@
 }
 
 .modalInfo main div {
-  margin-bottom: 10px;
+  font: 400 0.6rem 'JetBrains Mono', sans-serif;
+
+  display: flex;
+  align-items: center;
 }
 
-.modalInfo main strong {
-  font-size: 1.1rem;
-  font-weight: 600;
+.modalInfo main div:nth-child(even) {
+  background-color: var(--light-gray);
 }
 
-.modalInfo main p {
-  font-size: 1rem;
-  color: var(--dark-gray);
-}
-
-.modalInfo main p span {
-  font-size: 0.8rem;
+.modalInfo div span:first-child {
+  font: 400 0.7rem 'JetBrains Mono', sans-serif;
   color: var(--light-gray-notes);
+  margin-left: 0.05rem;
+  margin-right: 0.1rem;
+}
+
+.modalInfo div span:nth-child(2) {
+  font: 700 0.9rem 'JetBrains Mono', sans-serif;
+  margin-right: 0.2rem;
+}
+
+.modalInfo div span:nth-child(3) {
+  font: 400 0.9rem 'JetBrains Mono', sans-serif;
+}
+
+.modalInfo div span:nth-child(4) {
+  font: 400 0.9rem 'JetBrains Mono', sans-serif;
 }

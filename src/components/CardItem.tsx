@@ -1,32 +1,34 @@
-import * as d3 from 'd3-format';
 import { format } from 'date-fns';
-import { locale } from '../services/utils';
+import { Equipment } from '../services/gear';
+import { locale, secondsToHms } from '../services/utils';
 
-export default function CardItem(props) {
-  return (
-    <div>
-      <div>{props.gear.distance}</div>
-      {props.gear.distance != 0 && (
-        <p>
-          {'--> Freio'}
+type Props = { equipment: Equipment };
 
-          {`${locale.format(',.2f')(
-            props.gear.distance / 1000
-          )} km  | ${secondsToHms(props.gear.time)}h`}
-        </p>
-      )}
-    </div>
-  );
-}
+export default function CardItem(props: Props) {
+  const { equipment: e } = props;
 
-function secondsToHms(totalSeconds) {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor((totalSeconds % 3600) % 60);
-
-  const movingTime = `${String(hours).padStart(2, '0')}:${String(
-    minutes
-  ).padStart(2, '0')}`;
-
-  return movingTime;
+  if (e.id === 'lub' && e.distance === 0) {
+    return (
+      <div>
+        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
+        <span>Bike lubrificada. &#x1F44F;</span>
+      </div>
+    );
+  } else if (e.id === 'clean' && e.distance === 0) {
+    return (
+      <div>
+        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
+        <span>Bike limpinha. &#x1F44F;</span>
+      </div>
+    );
+  } else {
+    return (
+      <div key={e.id}>
+        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
+        <span>{`${e.caption}`}</span>
+        <span>{`${locale.format(',.2f')(e.distance / 1000)}km`}</span>
+        <span>{` | ${secondsToHms(e.movingTime)}h`}</span>
+      </div>
+    );
+  }
 }
