@@ -1,24 +1,23 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
+import { FaArrowRight } from 'react-icons/fa';
+import { IoMdStats } from 'react-icons/io';
+import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
-import styles from '../styles/components/Header.module.css';
 import cardStyles from '../styles/components/Card.module.css';
-import { IoMdStats } from 'react-icons/io';
-import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-import { FaArrowRight } from 'react-icons/fa';
+import modalStyles from '../styles/components/Modal.module.css';
+import styles from '../styles/components/Header.module.css';
 
 import { Modal } from '../components/Modal';
 import { locale, secondsToHms } from '../services/utils';
-import Image from 'next/image';
 
 export default function Header() {
   const route = useRouter();
 
   const {
-    codeError,
     athlete,
     athleteStats,
     codeReturned,
@@ -54,20 +53,6 @@ export default function Header() {
     }
   }, []);
 
-  // function handleOpenModal(id: string) {
-  //   handleCloseModal();
-  //   document.getElementById(id).style.display = 'block';
-  // }
-
-  // function handleCloseModal() {
-  //   const itens = Array.from(
-  //     document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
-  //   );
-  //   itens.map((item) => {
-  //     item.style.display = 'none';
-  //   });
-  // }
-
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
@@ -94,7 +79,6 @@ export default function Header() {
       ) : (
         <>
           {athlete ? (
-            // <button className={styles.athleteButton}>
             <div className={styles.athleteButton}>
               <Link
                 href={{
@@ -118,7 +102,7 @@ export default function Header() {
               >{`${athlete?.firstname} ${athlete?.lastname}`}</span>
               {athleteStats && (
                 <Modal id={athlete.id} closeModal={handleCloseModal}>
-                  <main>
+                  <main className={modalStyles.athleteStatInfoContent}>
                     <header>
                       <span>
                         <IoMdStats color='var(--light-blue)' />
@@ -129,7 +113,7 @@ export default function Header() {
                       <header>
                         <MdDirectionsBike color='var(--light-blue)' />
                       </header>
-                      <div>
+                      <div className={modalStyles.info}>
                         <p>{`Maior distância: ${locale.format(',.2f')(
                           athleteStats.biggest_ride_distance / 1000
                         )}km`}</p>
@@ -268,7 +252,6 @@ export default function Header() {
               )}
             </div>
           ) : (
-            // </button>
             <span className={styles.spinnerLoading}>
               <PushSpinner size={20} loading={true} />
             </span>

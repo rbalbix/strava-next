@@ -3,8 +3,8 @@ export default function DiskIcon() {
     <svg
       xmlns='http://www.w3.org/2000/svg'
       viewBox='0 0 500 500'
-      height='90%'
-      width='90%'
+      height='88%'
+      width='88%'
     >
       <g transform='translate(250.2,280.2) translate(-250.2,-280.2)'>
         <path
