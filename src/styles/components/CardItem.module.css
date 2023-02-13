@@ -25,8 +25,16 @@
 
 .cardItemContainer span:nth-child(3) {
   font: 400 0.9rem 'JetBrains Mono', sans-serif;
+
+  margin-right: 0.15rem;
 }
 
 .cardItemContainer span:nth-child(4) {
+  font: 700 0.9rem 'JetBrains Mono', sans-serif;
+
+  margin-right: 0.15rem;
+}
+
+.cardItemContainer span:nth-child(5) {
   font: 400 0.9rem 'JetBrains Mono', sans-serif;
 }

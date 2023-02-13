@@ -28,7 +28,8 @@ export default function CardItem(props: Props) {
         <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
         <span>{`${e.caption}`}</span>
         <span>{`${locale.format(',.2f')(e.distance / 1000)}km`}</span>
-        <span>{` | ${secondsToHms(e.movingTime)}h`}</span>
+        <span>|</span>
+        <span>{`${secondsToHms(e.movingTime)}h`}</span>
       </div>
     );
   }

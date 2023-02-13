@@ -25,13 +25,13 @@
 
 .modalInfo {
   min-width: 60%;
-  min-height: 30%;
+  min-height: 20%;
 
   border: 1px solid var(--dark-gray);
   border-radius: 4px;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
 
-  padding: 1rem 0.5rem;
+  padding: 1rem 1rem;
   background-color: var(--white);
 
   overflow-y: auto;
