@@ -8,6 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/material": "^5.11.8",
     "axios": "^0.21.1",
     "d3-format": "^2.0.0",
     "date-fns": "^2.25.0",

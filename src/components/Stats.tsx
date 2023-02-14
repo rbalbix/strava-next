@@ -1,3 +1,4 @@
+import { Divider } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
 import {
@@ -154,16 +155,19 @@ export default function Stats() {
         ) : (
           gearStats.map((gearStat) => {
             return (
-              <Card
-                key={gearStat.id}
-                id={gearStat.id}
-                name={gearStat.name}
-                activityType={gearStat.activityType}
-                count={gearStat.count}
-                distance={gearStat.distance}
-                movingTime={gearStat.movingTime}
-                equipments={gearStat.equipments}
-              />
+              <>
+                <Card
+                  key={gearStat.id}
+                  id={gearStat.id}
+                  name={gearStat.name}
+                  activityType={gearStat.activityType}
+                  count={gearStat.count}
+                  distance={gearStat.distance}
+                  movingTime={gearStat.movingTime}
+                  equipments={gearStat.equipments}
+                />
+                <Divider />
+              </>
             );
           })
         )}

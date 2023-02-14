@@ -13,6 +13,7 @@ import styles from '../styles/components/Header.module.css';
 
 import { Modal } from '../components/Modal';
 import { locale, secondsToHms } from '../services/utils';
+import Divider from '@mui/material/Divider';
 
 export default function Header() {
   const route = useRouter();
@@ -181,6 +182,9 @@ export default function Header() {
                         )}m]`}</p>
                       </div>
                     </div>
+
+                    <Divider />
+
                     <div className={cardStyles.cardContainer}>
                       <header>
                         <MdDirectionsRun color='#fc5200' />
