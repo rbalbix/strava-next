@@ -27,6 +27,7 @@ export const Equipments = {
 
   Pedal: { id: 'pedal', caption: 'pedal:' },
   Chain: { id: 'chain', caption: 'corrente:' },
+  BottomBracket: { id: 'bb', caption: 'central:' },
 
   Disks: { id: 'disks', caption: 'par de discos:' },
   FrontDisk: { id: 'frontDisk', caption: 'disco[frente]:' },

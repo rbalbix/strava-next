@@ -1,4 +1,14 @@
 import { Divider } from '@mui/material';
+import { width } from '@mui/system';
+import {
+  addDays,
+  addMonths,
+  fromUnixTime,
+  getUnixTime,
+  startOfDay,
+} from 'date-fns';
+import { stringify } from 'querystring';
+import React from 'react';
 import { useContext, useEffect, useState } from 'react';
 import { PushSpinner } from 'react-spinners-kit';
 import {
@@ -109,20 +119,61 @@ export default function Stats() {
         }
       });
 
-      const gearStat: GearStats = {
-        id: gear.id,
-        name: gear.name,
-        activityType,
-        count,
-        distance,
-        movingTime,
-        equipments: equipmentsStat,
-      };
+      if (distance !== 0) {
+        const gearStat: GearStats = {
+          id: gear.id,
+          name: gear.name,
+          activityType,
+          count,
+          distance,
+          movingTime,
+          equipments: equipmentsStat,
+        };
 
-      gearStats.push(gearStat);
+        gearStats.push(gearStat);
+      }
     });
 
+    return gearStats;
+  }
+
+  async function executeCompleteStats(strava: Strava, gears: SummaryGear[]) {
+    const activities = await getActivitiesInfo(strava, gears, null);
+    // const activities = await getActivitiesInfo(
+    //   strava,
+    //   gears,
+    //   getUnixTime(addMonths(Date.now(), -2))
+    // );
+    const gearStats = createGearStats(gears, activities);
+
     setGearStats(gearStats);
+
+    return gearStats;
+  }
+
+  async function updateStats(strava: Strava, gears: SummaryGear[]) {
+    if (window.localStorage) {
+      console.log('supports');
+      if (localStorage.getItem('gear-stats')) {
+        console.log('Tem gear-stats');
+        // Pega data atualização
+        // Soma dois meses e faz consulta
+        //Se soma dois meses = hoje não precisa consulta
+        // Guarda data atualização - hoje - 2 meses (start of day)
+        // Como guarda estatistica atualizada ?
+        // after + before
+        // Soma as estatisticas e apresenta
+      } else {
+        const gearStats = await executeCompleteStats(strava, gears);
+        const stats = {
+          lastUpdated: getUnixTime(addMonths(startOfDay(Date.now()), -2)),
+          gearStats,
+        };
+        localStorage.setItem('gear-stats', JSON.stringify(stats));
+      }
+    } else {
+      await executeCompleteStats(strava, gears);
+    }
   }
 
   useEffect(() => {
@@ -131,8 +182,7 @@ export default function Stats() {
         const strava = await signIn();
         const { athlete } = await getAthleteInfo(strava);
         const { gears } = getGearInfo(athlete);
-        const activities = await getActivitiesInfo(strava, gears, null);
-        createGearStats(gears, activities);
+        updateStats(strava, gears);
       } catch (error) {
         setErrorInfo(error);
         signOut();
@@ -153,9 +203,9 @@ export default function Stats() {
             <span>Loading ...</span>
           </div>
         ) : (
-          gearStats.map((gearStat) => {
+          gearStats.map((gearStat, index) => {
             return (
-              <>
+              <div key={index}>
                 <Card
                   key={gearStat.id}
                   id={gearStat.id}
@@ -166,8 +216,8 @@ export default function Stats() {
                   movingTime={gearStat.movingTime}
                   equipments={gearStat.equipments}
                 />
-                <Divider />
-              </>
+                <Divider style={{ width: '60%', margin: 'auto' }} />
+              </div>
             );
           })
         )}

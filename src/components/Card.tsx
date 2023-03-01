@@ -10,7 +10,7 @@ import { GearStats } from '../services/gear';
 import { locale, secondsToHms } from '../services/utils';
 import CardItem from './CardItem';
 
-export default function Card2(props: GearStats) {
+export default function Card(props: GearStats) {
   const { handleOpenModal, handleCloseModal } = useContext(AuthContext);
 
   const { id, name, activityType, count, distance, movingTime, equipments } =
@@ -69,8 +69,8 @@ export default function Card2(props: GearStats) {
           </header>
 
           {activityType === ActivityType.Ride &&
-            equipments.map((e) => {
-              return <CardItem equipment={e} />;
+            equipments.map((e, index) => {
+              return <CardItem equipment={e} key={index} />;
             })}
         </main>
       </Modal>
