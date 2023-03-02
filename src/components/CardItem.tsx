@@ -23,14 +23,16 @@ export default function CardItem(props: Props) {
       </div>
     );
   } else {
-    return (
-      <div key={e.id} className={styles.cardItemContainer}>
-        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
-        <span>{`${e.caption}`}</span>
-        <span>{`${locale.format(',.2f')(e.distance / 1000)}km`}</span>
-        <span>|</span>
-        <span>{`${secondsToHms(e.movingTime)}h`}</span>
-      </div>
-    );
+    if (e.distance !== 0) {
+      return (
+        <div key={e.id} className={styles.cardItemContainer}>
+          <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
+          <span>{`${e.caption}`}</span>
+          <span>{`${locale.format(',.2f')(e.distance / 1000)}km`}</span>
+          <span>|</span>
+          <span>{`${secondsToHms(e.movingTime)}h`}</span>
+        </div>
+      );
+    }
   }
 }
