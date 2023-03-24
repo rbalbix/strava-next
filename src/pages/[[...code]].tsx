@@ -50,8 +50,6 @@ export default function Home(props: HomeProps) {
 
         <Header />
 
-        <ErroMsg />
-
         <section>
           {props.code ? (
             <>
@@ -60,6 +58,7 @@ export default function Home(props: HomeProps) {
           ) : (
             <>
               <div className={styles.homeText}>
+                <ErroMsg />
                 <h1>Strava</h1>
                 <h1>Stats.</h1>
                 <span>

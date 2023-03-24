@@ -33,8 +33,6 @@ export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
     useContext(AuthContext);
 
-  const [gears, setGears] = useState([]);
-  const [activities, setActivities] = useState<SummaryActivityWithNote[]>([]);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
 
   async function getAthleteInfo(strava: Strava) {
@@ -45,24 +43,6 @@ export default function Stats() {
     setAthleteInfoStats(athleteStats);
 
     return { athlete, athleteStats };
-  }
-
-  function getGearInfo(athlete: DetailedAthlete) {
-    const gears = getGears(athlete);
-    setGears(gears);
-
-    return { gears };
-  }
-
-  async function getActivitiesInfo(
-    strava: Strava,
-    gears: SummaryGear[],
-    after: number
-  ) {
-    const activities = await getActivitiesSortedByGear(strava, gears, after);
-    setActivities(activities);
-
-    return activities;
   }
 
   function createGearStats(
@@ -138,7 +118,7 @@ export default function Stats() {
   }
 
   async function executeCompleteStats(strava: Strava, gears: SummaryGear[]) {
-    const activities = await getActivitiesInfo(strava, gears, null);
+    const activities = await getActivitiesSortedByGear(strava, gears, null);
     const gearStats = createGearStats(gears, activities);
 
     setGearStats(gearStats);
@@ -155,7 +135,7 @@ export default function Stats() {
       try {
         const strava = await signIn();
         const { athlete } = await getAthleteInfo(strava);
-        const { gears } = getGearInfo(athlete);
+        const gears = getGears(athlete);
         updateStats(strava, gears);
       } catch (error) {
         setErrorInfo(error);
@@ -169,9 +149,7 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
-        {gears.length === 0 ||
-        activities.length === 0 ||
-        gearStats.length === 0 ? (
+        {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
             <PushSpinner size={30} loading={true} />
             <span>Loading ...</span>
