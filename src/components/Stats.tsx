@@ -152,28 +152,7 @@ export default function Stats() {
   }
 
   async function updateStats(strava: Strava, gears: SummaryGear[]) {
-    // if (window.localStorage) {
-    //   console.log('supports');
-    //   if (localStorage.getItem('gear-stats')) {
-    //     console.log('Tem gear-stats');
-    //     // Pega data atualização
-    //     // Soma dois meses e faz consulta
-    //     //Se soma dois meses = hoje não precisa consulta
-    //     // Guarda data atualização - hoje - 2 meses (start of day)
-    //     // Como guarda estatistica atualizada ?
-    //     // after + before
-    //     // Soma as estatisticas e apresenta
-    //   } else {
-    //     const gearStats = await executeCompleteStats(strava, gears);
-    //     const stats = {
-    //       lastUpdated: getUnixTime(addMonths(startOfDay(Date.now()), -2)),
-    //       gearStats,
-    //     };
-    //     localStorage.setItem('gear-stats', JSON.stringify(stats));
-    //   }
-    // } else {
     await executeCompleteStats(strava, gears);
-    // }
   }
 
   useEffect(() => {

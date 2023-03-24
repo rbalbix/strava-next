@@ -23,7 +23,7 @@ export default function Card(props: GearStats) {
       <div className={styles.cardContainer} onClick={() => handleOpenModal(id)}>
         <header>
           {name}
-          {activityType === ActivityType.Ride ? (
+          {activityType === 'Ride' ? (
             <MdDirectionsBike color='var(--light-blue)' />
           ) : (
             <MdDirectionsRun color='#fc5200' />
@@ -34,7 +34,7 @@ export default function Card(props: GearStats) {
           <p>{`${locale.format(',.2f')(distance / 1000)} km`}</p>
           <p>{`${secondsToHms(movingTime)}h`}</p>
 
-          {activityType === ActivityType.Ride && lub && (
+          {activityType === 'Ride' && lub && (
             <div>
               {lub.distance != 0 ? (
                 <p>{`. lubrificada a: ${locale.format(',.2f')(
@@ -52,7 +52,7 @@ export default function Card(props: GearStats) {
         <main>
           <header>
             <span>
-              {activityType === ActivityType.Ride ? (
+              {activityType === 'Ride' ? (
                 <MdDirectionsBike color='var(--light-blue)' />
               ) : (
                 <MdDirectionsRun color='#fc5200' />
@@ -68,7 +68,7 @@ export default function Card(props: GearStats) {
             </section>
           </header>
 
-          {activityType === ActivityType.Ride &&
+          {activityType === 'Ride' &&
             equipments.map((e, index) => {
               return <CardItem equipment={e} key={index} />;
             })}
