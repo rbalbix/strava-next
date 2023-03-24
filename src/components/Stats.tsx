@@ -139,11 +139,6 @@ export default function Stats() {
 
   async function executeCompleteStats(strava: Strava, gears: SummaryGear[]) {
     const activities = await getActivitiesInfo(strava, gears, null);
-    // const activities = await getActivitiesInfo(
-    //   strava,
-    //   gears,
-    //   getUnixTime(addMonths(Date.now(), -2))
-    // );
     const gearStats = createGearStats(gears, activities);
 
     setGearStats(gearStats);
