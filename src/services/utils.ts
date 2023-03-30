@@ -1,4 +1,10 @@
 import * as d3 from 'd3-format';
+import { ActivityBase } from './activity';
+
+export type LocalActivity = {
+  lastUpdated: number;
+  activities: ActivityBase[];
+};
 
 const locale = d3.formatLocale({
   decimal: ',',
@@ -17,6 +23,10 @@ function secondsToHms(totalSeconds: number) {
   ).padStart(2, '0')}`;
 
   return movingTime;
+}
+
+function saveLocalStat(value: LocalActivity) {
+  localStorage.setItem('local-stat', JSON.stringify(value));
 }
 
 function fallbackCopyTextToClipboard(text: string) {
@@ -46,4 +56,4 @@ function copyTextToClipboard(text: string) {
   });
 }
 
-export { locale, secondsToHms, copyTextToClipboard };
+export { locale, secondsToHms, saveLocalStat, copyTextToClipboard };

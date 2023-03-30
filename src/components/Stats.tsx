@@ -1,16 +1,6 @@
 import { Divider } from '@mui/material';
-import { width } from '@mui/system';
-import {
-  addDays,
-  addMonths,
-  fromUnixTime,
-  getUnixTime,
-  startOfDay,
-} from 'date-fns';
-import { stringify } from 'querystring';
-import React from 'react';
+import { addDays, differenceInDays, fromUnixTime, getUnixTime } from 'date-fns';
 import { useContext, useEffect, useState } from 'react';
-import { PushSpinner } from 'react-spinners-kit';
 import {
   ActivityStats,
   ActivityType,
@@ -19,15 +9,14 @@ import {
   SummaryGear,
 } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import {
-  getActivitiesSortedByGear,
-  SummaryActivityWithNote,
-} from '../services/activity';
+import { ActivityBase, getActivities } from '../services/activity';
 import { getAthlete, getAthleteStats } from '../services/athlete';
 import { Equipments } from '../services/equipment';
 import { Equipment, GearStats, getGears } from '../services/gear';
+import { LocalActivity, saveLocalStat } from '../services/utils';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
+import DiskIcon from './DiskIcon';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
@@ -45,11 +34,20 @@ export default function Stats() {
     return { athlete, athleteStats };
   }
 
-  function createGearStats(
-    gears: SummaryGear[],
-    activities: SummaryActivityWithNote[]
-  ) {
+  function createGearStats(gears: SummaryGear[], activities: ActivityBase[]) {
     const gearStats: GearStats[] = [];
+
+    activities.sort((a, b) => {
+      if (a.start_date_local < b.start_date_local) return 1;
+      if (a.start_date_local > b.start_date_local) return -1;
+      return 0;
+    });
+
+    activities.sort((a, b) => {
+      if (a.gear_id > b.gear_id) return 1;
+      if (a.gear_id < b.gear_id) return -1;
+      return 0;
+    });
 
     gears.map((gear) => {
       let count = 0;
@@ -74,9 +72,9 @@ export default function Stats() {
 
       activities.map((activity) => {
         if (activity.gear_id === gear.id) {
-          if (activity.name.includes('*') && activity.note) {
+          if (activity.name.includes('*')) {
             equipments.forEach((equipment) => {
-              if (activity.note?.includes(equipment.id)) {
+              if (activity.private_note.includes(equipment.id)) {
                 let equipmentStat = equipmentsStatTemplate.find(
                   ({ id }) => id === equipment.id
                 );
@@ -114,20 +112,80 @@ export default function Stats() {
       }
     });
 
+    setGearStats(gearStats);
     return gearStats;
   }
 
   async function executeCompleteStats(strava: Strava, gears: SummaryGear[]) {
-    const activities = await getActivitiesSortedByGear(strava, gears, null);
-    const gearStats = createGearStats(gears, activities);
-
-    setGearStats(gearStats);
-
-    return gearStats;
+    const activities = await getActivities(strava, gears, null, null);
+    createGearStats(gears, activities);
+    return { activities };
   }
 
   async function updateStats(strava: Strava, gears: SummaryGear[]) {
-    await executeCompleteStats(strava, gears);
+    const daysToSearch = 10;
+    try {
+      if (window.localStorage) {
+        if (localStorage.getItem('local-stat') !== null) {
+          const localActivities: LocalActivity = JSON.parse(
+            localStorage.getItem('local-stat')
+          );
+
+          const activitiesFromStravaAPI = await getActivities(
+            strava,
+            gears,
+            null,
+            localActivities.lastUpdated
+          );
+
+          createGearStats(gears, [
+            ...activitiesFromStravaAPI,
+            ...localActivities.activities,
+          ]);
+
+          // store the activities difference, if exists
+          if (
+            differenceInDays(
+              addDays(new Date(), -daysToSearch),
+              fromUnixTime(localActivities.lastUpdated)
+            ) !== 0
+          ) {
+            const activitiesToStore = activitiesFromStravaAPI.filter(
+              (activity) => {
+                return (
+                  new Date(activity.start_date_local) <
+                  addDays(new Date(), -daysToSearch)
+                );
+              }
+            );
+
+            saveLocalStat({
+              lastUpdated: getUnixTime(addDays(new Date(), -daysToSearch)),
+              activities: [...activitiesToStore, ...localActivities.activities],
+            });
+          }
+        } else {
+          const { activities } = await executeCompleteStats(strava, gears);
+
+          const activitiesToStore = activities.filter((activity) => {
+            return (
+              new Date(activity.start_date_local) <
+              addDays(new Date(), -daysToSearch)
+            );
+          });
+
+          saveLocalStat({
+            lastUpdated: getUnixTime(addDays(new Date(), -daysToSearch)),
+            activities: activitiesToStore,
+          });
+        }
+      } else {
+        await executeCompleteStats(strava, gears);
+      }
+    } catch (error) {
+      setErrorInfo(error);
+      signOut();
+    }
   }
 
   useEffect(() => {
@@ -136,7 +194,7 @@ export default function Stats() {
         const strava = await signIn();
         const { athlete } = await getAthleteInfo(strava);
         const gears = getGears(athlete);
-        updateStats(strava, gears);
+        await updateStats(strava, gears);
       } catch (error) {
         setErrorInfo(error);
         signOut();
@@ -151,8 +209,11 @@ export default function Stats() {
       <main>
         {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <PushSpinner size={30} loading={true} />
-            <span>Loading ...</span>
+            {/* <PushSpinner size={30} loading={true} /> */}
+            {/* <span>Loading ...</span> */}
+            <span>
+              <DiskIcon />
+            </span>
           </div>
         ) : (
           gearStats.map((gearStat, index) => {

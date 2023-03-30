@@ -1,56 +1,93 @@
-import { DetailedActivity, Strava, SummaryActivity, SummaryGear } from 'strava';
+import {
+  ActivityType,
+  DetailedActivity,
+  Strava,
+  SummaryActivity,
+  SummaryGear,
+} from 'strava';
 
-export type SummaryActivityWithNote = SummaryActivity & {
-  note?: string;
+export type ActivityBase = {
+  id: number;
+  name: string;
+  distance: number;
+  moving_time: number;
+  type: ActivityType;
+  start_date_local: string;
+  gear_id: string;
+  private_note: string;
 };
 
-export type DetailedActivityWithNote = DetailedActivity & {
-  private_note?: string;
-};
-
-async function getActivitiesSortedByGear(
+async function getActivities(
   strava: Strava,
   gears: SummaryGear[],
+  before: number,
   after: number
 ) {
-  const gearIds = [];
   let page = 1;
-  let activitiesResult = [];
-  const activitiesResultTotal: SummaryActivityWithNote[] = [];
+  const gearIds = [];
+  let private_note = '';
+  const activities: SummaryActivity[] = [];
+  let data: SummaryActivity[] = [];
+  const activitiesPreparedToStore: ActivityBase[] = [];
 
   gears.forEach((gear) => gearIds.push(gear['id']));
 
   do {
-    activitiesResult = await strava.activities.getLoggedInAthleteActivities({
-      per_page: 200,
-      page,
-    });
+    after & before
+      ? (data = await strava.activities.getLoggedInAthleteActivities({
+          before,
+          after,
+          per_page: 200,
+          page,
+        }))
+      : before
+      ? (data = await strava.activities.getLoggedInAthleteActivities({
+          before,
+          per_page: 200,
+          page,
+        }))
+      : after
+      ? (data = await strava.activities.getLoggedInAthleteActivities({
+          after,
+          per_page: 200,
+          page,
+        }))
+      : (data = await strava.activities.getLoggedInAthleteActivities({
+          per_page: 200,
+          page,
+        }));
 
-    const activitiesWithGear = activitiesResult.filter((activity) => {
-      return activity.gear_id != null && gearIds.includes(activity.gear_id);
-    });
+    activities.push(...data);
+    page++;
+  } while (data.length !== 0 && page > 1);
 
-    activitiesWithGear.map(async (activity) => {
+  const activitiesFilteredByActiveGear = activities.filter((activity) => {
+    return activity.gear_id != null && gearIds.includes(activity.gear_id);
+  });
+
+  await Promise.all(
+    activitiesFilteredByActiveGear.map(async (activity) => {
       if (activity.name.includes('*')) {
-        const detail: DetailedActivityWithNote =
+        const detail: DetailedActivity =
           await strava.activities.getActivityById({
             id: activity.id,
           });
-        activity.note = detail.private_note;
+        private_note = detail.private_note;
       }
-    });
+      activitiesPreparedToStore.push({
+        id: activity.id,
+        name: activity.name,
+        distance: activity.distance,
+        moving_time: activity.moving_time,
+        type: activity.type,
+        start_date_local: activity.start_date_local,
+        gear_id: activity.gear_id,
+        private_note,
+      });
+    })
+  );
 
-    activitiesResultTotal.push(...activitiesWithGear);
-    page++;
-  } while (activitiesResult.length !== 0 && page > 1);
-
-  activitiesResultTotal.sort((a, b) => {
-    if (a.gear_id > b.gear_id) return 1;
-    if (a.gear_id < b.gear_id) return -1;
-    return 0;
-  });
-
-  return activitiesResultTotal;
+  return activitiesPreparedToStore;
 }
 
-export { getActivitiesSortedByGear };
+export { getActivities };
