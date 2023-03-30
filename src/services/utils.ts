@@ -7,7 +7,7 @@ const locale = d3.formatLocale({
   currency: ['R$', ''],
 });
 
-function secondsToHms(totalSeconds) {
+function secondsToHms(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = Math.floor((totalSeconds % 3600) % 60);
@@ -15,9 +15,35 @@ function secondsToHms(totalSeconds) {
   const movingTime = `${String(hours).padStart(2, '0')}:${String(
     minutes
   ).padStart(2, '0')}`;
-  // :${String(seconds).padStart(2, '0')}`;
 
   return movingTime;
 }
 
-export { locale, secondsToHms };
+function fallbackCopyTextToClipboard(text: string) {
+  var textArea = document.createElement('textarea');
+  textArea.value = text;
+
+  // Avoid scrolling to bottom
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  document.execCommand('copy');
+
+  document.body.removeChild(textArea);
+}
+function copyTextToClipboard(text: string) {
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    return;
+  });
+}
+
+export { locale, secondsToHms, copyTextToClipboard };

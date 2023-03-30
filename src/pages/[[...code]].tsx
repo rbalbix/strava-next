@@ -61,9 +61,6 @@ export default function Home(props: HomeProps) {
                 <ErroMsg />
                 <h1>Strava</h1>
                 <h1>Stats.</h1>
-                <span>
-                  <DiskIcon />
-                </span>
               </div>
             </>
           )}
