@@ -3,7 +3,6 @@ import styles from '../styles/components/Card.module.css';
 import { Modal } from './Modal';
 
 import { useContext } from 'react';
-import { ActivityType } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import { Equipments } from '../services/equipment';
 import { GearStats } from '../services/gear';
@@ -70,7 +69,14 @@ export default function Card(props: GearStats) {
 
           {activityType === 'Ride' &&
             equipments.map((e, index) => {
-              return <CardItem equipment={e} key={index} />;
+              return (
+                <CardItem
+                  equipment={e}
+                  distance={distance}
+                  movingTime={movingTime}
+                  key={index}
+                />
+              );
             })}
         </main>
       </Modal>
