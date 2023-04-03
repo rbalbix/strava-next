@@ -1,6 +1,7 @@
 .cardItemContainer {
   display: flex;
   align-items: center;
+  cursor: copy;
 }
 
 .cardItemContainer:nth-child(odd) {

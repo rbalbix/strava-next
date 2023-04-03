@@ -30,11 +30,11 @@ export default function CardItem(props: Props) {
           className={styles.cardItemContainer}
           onClick={() =>
             copyTextToClipboard(
-              `. ${format(new Date(e.date), 'dd/MM/yyyy')} - ${locale.format(
-                ',.2f'
-              )(distance / 1000)}km - ${secondsToHms(
-                movingTime
-              )}h [${locale.format(',.2f')(e.distance / 1000)}km]`
+              `. ${format(new Date(), 'dd/MM/yyyy')} - ${locale.format(',.2f')(
+                distance / 1000
+              )}km - ${secondsToHms(movingTime)}h [${locale.format(',.2f')(
+                e.distance / 1000
+              )}km]`
             )
           }
         >
