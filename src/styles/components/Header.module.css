@@ -24,7 +24,7 @@
 
 .athleteName {
   font-size: 1rem;
-  color: var(--black);
+  color: var(--athlete-name);
   font-weight: 600;
 
   cursor: pointer;
@@ -45,7 +45,7 @@
 }
 
 .headerContainer button {
-  color: var(--white);
+  color: var(--text-button);
 
   border: none;
   border-radius: 4px;

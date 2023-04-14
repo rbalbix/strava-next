@@ -5,20 +5,41 @@
 }
 
 :root {
-  --white: #fff;
-  --black: #000;
+  --background: #fff;
+  --background-card: #fff;
   --light-blue: #1eb1fc;
   --light-blue-hover: #1b9fe2;
   --gray-signOut: #ccc;
   --gray-signOut-hover: #555;
   --light-gray: #ddd;
+  --light-gray-lines: #ccc;
   --light-gray-notes: #999;
   --gray-notes: #444;
   --dark-gray: #333;
 
+  --border-card: var(--light-gray);
+
+  --athlete-name: #fff;
+  --text-button: #fff;
+
   --orange-strava: #fc5200;
   --start-gradient-color: #ff4d4d;
   --end-gradient-color: #f9cb28;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+
+  :root {
+    --background: #121212;
+    --border-card: #30363d;
+    --background-card: #0d1117;
+    --dark-gray: var(--light-gray);
+    --gray-notes: #bbb;
+    --light-gray-lines: #ddd;
+  }
 }
 
 @media (max-width: 1080px) {

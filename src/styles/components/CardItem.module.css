@@ -2,10 +2,12 @@
   display: flex;
   align-items: center;
   cursor: copy;
+
+  border-radius: 4px;
 }
 
 .cardItemContainer:nth-child(odd) {
-  background-color: var(--light-gray);
+  background-color: var(--light-gray-lines);
 }
 
 .cardItemContainer main div {
@@ -38,4 +40,10 @@
 
 .cardItemContainer span:nth-child(5) {
   font: 400 0.9rem 'JetBrains Mono', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .cardItemContainer:nth-child(odd) span {
+    color: var(--background-card);
+  }
 }

@@ -1,7 +1,8 @@
 .cardContainer {
   width: 100%;
 
-  border: 1px solid var(--light-gray);
+  background-color: var(--background-card);
+  border: 1px solid var(--border-card);
   border-radius: 4px;
   box-shadow: 0 0 60px rgba(0, 0, 0, 0.05);
 
