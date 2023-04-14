@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" id="Ebene_1" viewBox="0 0 500 500" fit="" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" focusable="false">
+<svg xmlns="http://www.w3.org/2000/svg" id="spinner" style="background-color:inherit;" viewBox="0 0 500 500" fit="" height="100%" width="100%" preserveAspectRatio="xMidYMid meet" focusable="false">
 <style>@keyframes a0_t { 0% { transform: translate(250.2px,280.2px) rotate(0deg) translate(-250.2px,-280.2px); } 18.182% { transform: translate(250.2px,280.2px) rotate(0deg) translate(-250.2px,-280.2px); animation-timing-function: cubic-bezier(.4,0,.6,1); } 81.818% { transform: translate(250.2px,280.2px) rotate(-720deg) translate(-250.2px,-280.2px); } 100% { transform: translate(250.2px,280.2px) rotate(-720deg) translate(-250.2px,-280.2px); } }
 </style>
 <path class="st0" d="M427 435h-354c-4.4 0-8-3.6-8-8v-354c0-4.4 3.6-8 8-8h354c4.4 0 8 3.6 8 8v354c0 4.4-3.6 8-8 8Z" fill="#fff"></path>

@@ -1,3 +1,7 @@
+import styles from '../styles/components/DiskIcon.module.css';
+
 export default function DiskIcon() {
-  return <object data='disk.svg' width='200' height='200' />;
+  return (
+    <img className={styles.container} src='disk.svg' width='200' height='200' />
+  );
 }
