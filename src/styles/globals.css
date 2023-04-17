@@ -19,7 +19,7 @@
 
   --border-card: var(--light-gray);
 
-  --athlete-name: #fff;
+  --athlete-name: var(--gray-notes);
   --text-button: #fff;
 
   --orange-strava: #fc5200;
@@ -42,6 +42,8 @@
 
     --gray-signOut: #333;
     --gray-signOut-hover: #222;
+
+    --athlete-name: #fff;
   }
 }
 

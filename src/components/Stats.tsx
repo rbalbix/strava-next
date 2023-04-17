@@ -229,7 +229,10 @@ export default function Stats() {
                   movingTime={gearStat.movingTime}
                   equipments={gearStat.equipments}
                 />
-                <Divider style={{ width: '60%', margin: 'auto' }} />
+                <Divider
+                  className={styles.divider}
+                  style={{ margin: 'auto' }}
+                />
               </div>
             );
           })
