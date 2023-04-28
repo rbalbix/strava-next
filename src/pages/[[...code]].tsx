@@ -1,11 +1,9 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
-import { useContext } from 'react';
-import DiskIcon from '../components/DiskIcon';
 import ErroMsg from '../components/ErroMsg';
 import Header from '../components/Header';
 import Stats from '../components/Stats';
-import { AuthContext, AuthProvider } from '../contexts/AuthContext';
+import { AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
 
 interface HomeProps {
@@ -20,18 +18,6 @@ interface HomeProps {
 }
 
 export default function Home(props: HomeProps) {
-  const {
-    codeError,
-    athlete,
-    codeReturned,
-    client_id,
-    response_type,
-    redirect_uri,
-    approval_prompt,
-    scope,
-    signOut,
-  } = useContext(AuthContext);
-
   return (
     <AuthProvider
       codeReturned={props.code}
@@ -52,17 +38,13 @@ export default function Home(props: HomeProps) {
 
         <section>
           {props.code ? (
-            <>
-              <Stats />
-            </>
+            <Stats />
           ) : (
-            <>
-              <div className={styles.homeText}>
-                <ErroMsg />
-                <h1>Strava</h1>
-                <h1>Stats.</h1>
-              </div>
-            </>
+            <div className={styles.homeText}>
+              <ErroMsg />
+              <h1>Strava</h1>
+              <h1>Stats.</h1>
+            </div>
           )}
         </section>
       </div>

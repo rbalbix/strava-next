@@ -8,6 +8,17 @@
   border-bottom: 1px solid var(--light-gray);
 }
 
+.headerContainer a {
+  color: var(--text-button);
+
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font: 400 1rem 'JetBrains Mono', sans-serif;
+
+  transition: background ease-in 0.2s;
+}
+
 .spinnerLoading {
   margin: 0 15px;
 }
@@ -15,6 +26,10 @@
 .athleteButton {
   display: flex;
   align-items: center;
+}
+
+.athleteButtonPadding {
+  padding: 0;
 }
 
 .athleteInfo {
@@ -26,6 +41,8 @@
   font-size: 1rem;
   color: var(--athlete-name);
   font-weight: 600;
+
+  padding: 0;
 
   cursor: pointer;
 }
@@ -44,20 +61,9 @@
   justify-content: flex-end;
 }
 
-.headerContainer button {
-  color: var(--text-button);
-
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font: 400 1rem 'JetBrains Mono', sans-serif;
-  padding: 0.5rem 1rem;
-
-  transition: background ease-in 0.2s;
-}
-
 .signInButton {
   background: var(--light-blue);
+  padding: 0.5rem 1rem;
 }
 
 .signInButton:hover {
@@ -66,6 +72,7 @@
 
 .signOutButton {
   background: var(--gray-signOut);
+  padding: 0.5rem 1rem;
 }
 
 .signOutButton:hover {

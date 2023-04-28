@@ -8,7 +8,7 @@
 
   display: none;
 
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--card-box-shadow);
 }
 
 .modalContent {
@@ -29,7 +29,7 @@
 
   border: 1px solid var(--dark-gray);
   border-radius: 4px;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 60px var(--card-box-shadow);
 
   padding: 1rem 1rem;
   background-color: var(--background);

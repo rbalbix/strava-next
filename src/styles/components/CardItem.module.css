@@ -10,13 +10,16 @@
   background-color: var(--light-gray-lines);
 }
 
+.cardItemContainer:nth-child(odd) span {
+  background-color: var(--light-gray-lines);
+}
+
 .cardItemContainer main div {
   margin-bottom: 0;
 }
 
 .cardItemContainer span:first-child {
   font: 400 0.8rem 'JetBrains Mono', sans-serif;
-  color: var(--gray-notes);
   margin-left: 0.05rem;
   margin-right: 0.1rem;
 }

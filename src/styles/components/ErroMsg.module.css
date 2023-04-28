@@ -3,7 +3,7 @@
 
   border: 1px solid var(--orange-strava);
   border-radius: 16px;
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 60px var(--card-box-shadow);
 
   margin-top: 1rem;
   margin-bottom: 0.5rem;
@@ -26,7 +26,7 @@
 .erroMsgContainer header {
   font-size: 1.5rem;
   font-weight: 600;
-  color: whitesmoke;
+  color: var(--errorContainer);
 
   display: flex;
   justify-content: space-between;

@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+html {
+  background-color: var(--background);
+}
+
 :root {
   --background: #fff;
   --background-card: #fff;
@@ -25,6 +29,9 @@
   --orange-strava: #fc5200;
   --start-gradient-color: #ff4d4d;
   --end-gradient-color: #f9cb28;
+
+  --card-box-shadow: rgba(0, 0, 0, 0.4);
+  --errorContainer: whitesmoke;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +51,9 @@
     --gray-signOut-hover: #222;
 
     --athlete-name: #fff;
+
+    --card-box-shadow: rgba(29, 28, 29, 0.4);
+    --errorContainer: var(--background-card);
   }
 }
 

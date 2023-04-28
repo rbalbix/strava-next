@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
-import { DetailedAthlete, ActivityStats, Strava } from 'strava';
+import { ActivityStats, DetailedAthlete, Strava } from 'strava';
 import api from '../services/api';
 
 interface AuthContextData {

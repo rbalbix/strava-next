@@ -209,8 +209,6 @@ export default function Stats() {
       <main>
         {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            {/* <PushSpinner size={30} loading={true} /> */}
-            {/* <span>Loading ...</span> */}
             <span>
               <DiskIcon />
             </span>

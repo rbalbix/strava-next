@@ -8,12 +8,12 @@ import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import cardStyles from '../styles/components/Card.module.css';
-import modalStyles from '../styles/components/Modal.module.css';
 import styles from '../styles/components/Header.module.css';
+import modalStyles from '../styles/components/Modal.module.css';
 
+import Divider from '@mui/material/Divider';
 import { Modal } from '../components/Modal';
 import { locale, secondsToHms } from '../services/utils';
-import Divider from '@mui/material/Divider';
 
 export default function Header() {
   const route = useRouter();
@@ -57,26 +57,23 @@ export default function Header() {
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
-        <>
-          <div className={styles.buttonBox}>
-            <button className={styles.signInButton}>
-              <Link
-                href={{
-                  pathname: `${baseURL}/authorize`,
-                  query: {
-                    client_id,
-                    response_type,
-                    redirect_uri,
-                    approval_prompt,
-                    scope,
-                  },
-                }}
-              >
-                Sign in
-              </Link>
-            </button>
-          </div>
-        </>
+        <div className={styles.buttonBox}>
+          <Link
+            className={styles.signInButton}
+            href={{
+              pathname: `${baseURL}/authorize`,
+              query: {
+                client_id,
+                response_type,
+                redirect_uri,
+                approval_prompt,
+                scope,
+              },
+            }}
+          >
+            Sign in
+          </Link>
+        </div>
       ) : (
         <>
           {athlete ? (
@@ -257,19 +254,24 @@ export default function Header() {
             </div>
           ) : (
             <span className={styles.spinnerLoading}>
-              <PushSpinner size={20} loading={true} />
+              <PushSpinner
+                size={20}
+                loading={true}
+                color='var(--athlete-name)'
+              />
             </span>
           )}
 
-          <button
+          <Link
             className={styles.signOutButton}
             onClick={(e) => {
               e.preventDefault();
               signOut();
             }}
+            href='/'
           >
-            <Link href='/'>Sign out</Link>
-          </button>
+            Sign out
+          </Link>
         </>
       )}
     </div>

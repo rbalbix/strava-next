@@ -23,9 +23,9 @@ export default function Card(props: GearStats) {
         <header>
           {name}
           {activityType === 'Ride' ? (
-            <MdDirectionsBike color='var(--light-blue)' />
+            <MdDirectionsBike className={styles.iconBike} />
           ) : (
-            <MdDirectionsRun color='#fc5200' />
+            <MdDirectionsRun className={styles.iconRun} />
           )}
         </header>
         <main>
@@ -54,7 +54,7 @@ export default function Card(props: GearStats) {
               {activityType === 'Ride' ? (
                 <MdDirectionsBike color='var(--light-blue)' />
               ) : (
-                <MdDirectionsRun color='#fc5200' />
+                <MdDirectionsRun color='var(--orange-strava)' />
               )}
             </span>
             <span>{name}</span>
