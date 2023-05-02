@@ -41,6 +41,12 @@
   margin-bottom: 10px;
 }
 
+.modalInfo main header div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .modalInfo main header section span {
   font-size: 1rem;
 
@@ -52,9 +58,7 @@
   font-size: 1.4rem;
   font-weight: 600;
   color: var(--dark-gray);
-}
 
-.modalInfo main span {
   margin-right: 10px;
 }
 

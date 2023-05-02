@@ -1,4 +1,4 @@
-import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import styles from '../styles/components/Card.module.css';
 import { Modal } from './Modal';
 
@@ -50,14 +50,21 @@ export default function Card(props: GearStats) {
       <Modal id={id} closeModal={handleCloseModal}>
         <main>
           <header>
-            <span>
-              {activityType === 'Ride' ? (
-                <MdDirectionsBike color='var(--light-blue)' />
-              ) : (
-                <MdDirectionsRun color='var(--orange-strava)' />
-              )}
-            </span>
-            <span>{name}</span>
+            <div>
+              <div>
+                <span>
+                  {activityType === 'Ride' ? (
+                    <MdDirectionsBike color='var(--light-blue)' />
+                  ) : (
+                    <MdDirectionsRun color='var(--orange-strava)' />
+                  )}
+                </span>
+                <span>{name}</span>
+              </div>
+              <div>
+                <MdClose />
+              </div>
+            </div>
             <section>
               <span>
                 {`[${count} | 

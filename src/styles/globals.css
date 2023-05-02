@@ -32,6 +32,8 @@ html {
 
   --card-box-shadow: rgba(0, 0, 0, 0.4);
   --errorContainer: whitesmoke;
+
+  --stat-icon: #8257e5;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
-import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
@@ -102,10 +102,17 @@ export default function Header() {
                 <Modal id={athlete.id} closeModal={handleCloseModal}>
                   <main className={modalStyles.athleteStatInfoContent}>
                     <header>
-                      <span>
-                        <IoMdStats color='var(--light-blue)' />
-                      </span>
-                      <span>Estatísticas:</span>
+                      <div>
+                        <div>
+                          <span>
+                            <IoMdStats color='var(--stat-icon)' />
+                          </span>
+                          <span>Estatísticas:</span>
+                        </div>
+                        <div>
+                          <MdClose color='var(--stat-icon)' />
+                        </div>
+                      </div>
                     </header>
                     <div className={cardStyles.cardContainer}>
                       <header>
