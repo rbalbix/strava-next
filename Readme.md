@@ -78,3 +78,9 @@
 ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=rbalbix&show_icons=true&theme=dracula)
 
 </div>
+
+## Contribuidores
+
+<a href="https://github.com/rbalbix/strava-stats/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=rbalbix/strava-stats" alt="Lista de contribuidores"/>
+</a>
