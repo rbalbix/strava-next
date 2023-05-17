@@ -1,4 +1,6 @@
-![Strava Stat Logo](public/strava-stat.svg)
+<p align="center">
+  <img src="public/strava-stat.svg" alt= “Strava-stats-logo” width="400" title="Strava Stats Logo"/>
+</p>
 
 ## Screens
 
@@ -17,6 +19,12 @@
 ### Equipment statistics
 
 ![Detail](public/screen/Captura%20de%20tela%20de%202023-05-15%2011-59-09.png) ![Detail](public/screen/Captura%20de%20tela%20de%202023-05-15%2011-59-01.png)
+
+<br/>
+
+### Strava Configuration
+
+![Detail](public/screen/config-strava.png)
 
 ## List os equipments:
 
