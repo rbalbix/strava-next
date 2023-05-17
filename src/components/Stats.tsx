@@ -79,6 +79,19 @@ export default function Stats() {
                   ({ id }) => id === equipment.id
                 );
 
+                // When tubeless, tubes does not matter.
+                if (equipment.id === Equipments.Tubeless.id) {
+                  equipmentsStatTemplate.map((e) => {
+                    if (
+                      e.id === Equipments.Tube.id ||
+                      e.id === Equipments.FrontTube.id ||
+                      e.id === Equipments.RearTube.id
+                    ) {
+                      e.isRegistered = true;
+                    }
+                  });
+                }
+
                 if (equipmentStat && !equipmentStat.isRegistered) {
                   equipmentStat.isRegistered = true;
                   equipmentStat.distance = distance;
