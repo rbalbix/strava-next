@@ -42,7 +42,7 @@ export default function Home(props: HomeProps) {
           ) : (
             <div className={styles.homeText}>
               <ErroMsg />
-              <h1>Strava</h1>
+              <h1>Stuff</h1>
               <h1>Stats.</h1>
             </div>
           )}
