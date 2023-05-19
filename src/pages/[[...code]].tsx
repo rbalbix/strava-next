@@ -31,7 +31,7 @@ export default function Home(props: HomeProps) {
     >
       <div className={styles.container}>
         <Head>
-          <title>Strava Stats</title>
+          <title>Stuff Stats</title>
         </Head>
 
         <Header />
