@@ -1,7 +1,12 @@
-import '../styles/globals.css'
+import { AppProps, NextWebVitalsMetric } from 'next/app';
+import '../styles/globals.css';
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+export function reportWebVitals(metric: NextWebVitalsMetric) {
+  // console.log(metric);
 }
 
-export default MyApp
+function MyApp({ Component, pageProps }: AppProps) {
+  return <Component {...pageProps} />;
+}
+
+export default MyApp;

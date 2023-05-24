@@ -9,8 +9,6 @@
 }
 
 .headerContainer a {
-  color: var(--text-button);
-
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -64,6 +62,8 @@
 .signInButton {
   background: var(--light-blue);
   padding: 0.5rem 1rem;
+
+  color: var(--signin-text-button);
 }
 
 .signInButton:hover {
@@ -73,6 +73,8 @@
 .signOutButton {
   background: var(--gray-signOut);
   padding: 0.5rem 1rem;
+
+  color: var(--signout-text-button);
 }
 
 .signOutButton:hover {
