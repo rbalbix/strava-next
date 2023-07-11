@@ -30,6 +30,6 @@ export const Equipments = {
   BottomBracket: { id: 'bb', caption: 'central:' },
 
   Disks: { id: 'disks', caption: 'par de discos:' },
-  FrontDisk: { id: 'frontDisk', caption: 'disco[frente]:' },
-  RearDisk: { id: 'rearDisk', caption: 'disco[traseiro]:' },
+  FrontDisk: { id: 'frontdisk', caption: 'disco[frente]:' },
+  RearDisk: { id: 'reardisk', caption: 'disco[traseiro]:' },
 };
