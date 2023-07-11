@@ -16,9 +16,9 @@ export const Equipments = {
   Handlebar: { id: 'handlebar', caption: 'guidão:' },
   Wheelset: { id: 'wheelset', caption: 'par de rodas:' },
 
-  Break: { id: 'Break', caption: 'par de freios:' },
-  FrontBreak: { id: 'FrontBreak', caption: 'freio[frente]:' },
-  RearBreak: { id: 'RearBreak', caption: 'freio[traseiro]:' },
+  Break: { id: 'breaks', caption: 'par de freios:' },
+  FrontBreak: { id: 'frontbreak', caption: 'freio[frente]:' },
+  RearBreak: { id: 'rearbreak', caption: 'freio[traseiro]:' },
 
   Tape: { id: 'tape', caption: 'fita:' },
   Grip: { id: 'grip', caption: 'manopla:' },
