@@ -32,4 +32,9 @@ export const Equipments = {
   Disks: { id: 'disks', caption: 'par de discos:' },
   FrontDisk: { id: 'frontdisk', caption: 'disco[frente]:' },
   RearDisk: { id: 'reardisk', caption: 'disco[traseiro]:' },
+
+  Cassette: { id: 'cassette', caption: 'cassete:' },
+  Crankset: { id: 'crankset', caption: 'pedivela:' },
+  RearDerailleur: { id: 'rearderailleur', caption: 'câmbio[traseiro]:' },
+  Shifter: { id: 'shifter', caption: 'shifter:' },
 };
