@@ -2,20 +2,21 @@ import { format } from 'date-fns';
 import { Equipment } from '../services/gear';
 import { copyTextToClipboard, locale, secondsToHms } from '../services/utils';
 import styles from '../styles/components/CardItem.module.css';
+import { Equipments } from '../services/equipment';
 
 type Props = { equipment: Equipment; distance: number; movingTime: number };
 
 export default function CardItem(props: Props) {
   const { equipment: e, distance, movingTime } = props;
 
-  if (e.id === 'lub' && e.distance === 0) {
+  if (e.id === Equipments.Lubrification.id && e.distance === 0) {
     return (
       <div className={styles.cardItemContainer}>
         <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
         <span>Bike lubrificada. &#x1F44F;</span>
       </div>
     );
-  } else if (e.id === 'clean' && e.distance === 0) {
+  } else if (e.id === Equipments.Clean.id && e.distance === 0) {
     return (
       <div className={styles.cardItemContainer}>
         <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
