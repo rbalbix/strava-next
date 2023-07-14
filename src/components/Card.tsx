@@ -73,18 +73,19 @@ export default function Card(props: GearStats) {
               </span>
             </section>
           </header>
-
-          {activityType === 'Ride' &&
-            equipments.map((e, index) => {
-              return (
-                <CardItem
-                  equipment={e}
-                  distance={distance}
-                  movingTime={movingTime}
-                  key={index}
-                />
-              );
-            })}
+          <ul className={styles.timeline}>
+            {activityType === 'Ride' &&
+              equipments.map((e, index) => {
+                return (
+                  <CardItem
+                    equipment={e}
+                    distance={distance}
+                    movingTime={movingTime}
+                    key={index}
+                  />
+                );
+              })}
+          </ul>
         </main>
       </Modal>
     </div>

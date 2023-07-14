@@ -1,48 +1,46 @@
-.cardItemContainer {
-  display: flex;
-  align-items: center;
-  cursor: copy;
-
-  border-radius: 4px;
-}
-
-.cardItemContainer:nth-child(odd) {
-  background-color: var(--light-gray-lines);
-}
-
-.cardItemContainer:nth-child(odd) span {
-  background-color: var(--light-gray-lines);
-}
-
-.cardItemContainer main div {
+li.event {
+  border-left: 1px solid var(--event-border);
+  margin-left: 16px;
+  padding-top: 1px;
+  padding-left: 20px;
   margin-bottom: 0;
+  padding-bottom: 5px;
 }
 
-.cardItemContainer span:first-child {
-  font: 400 0.8rem 'JetBrains Mono', sans-serif;
-  margin-left: 0.05rem;
-  margin-right: 0.1rem;
+li div.bol {
+  border-radius: 10%;
+  border: 1px solid var(--date-badge-border);
+  padding: 0.8px 3px;
+
+  margin-left: -48px;
+  margin-right: 0.5rem;
+
+  background: var(--light-blue);
+  float: left;
+  text-align: center;
+  line-height: 1rem;
+  letter-spacing: -0.5px;
+  font: 700 0.8rem 'JetBrains Mono', sans-serif;
+  color: var(--background);
 }
 
-.cardItemContainer span:nth-child(2) {
-  font: 700 1rem 'JetBrains Mono', sans-serif;
-  margin-right: 0.2rem;
+li div.txt {
+  border-bottom: 1px solid var(--text-border-bottom);
+  padding-top: 0px;
+  padding-bottom: 10px;
+  font-size: 1.1rem;
 }
 
-.cardItemContainer span:nth-child(3) {
-  font: 400 0.9rem 'JetBrains Mono', sans-serif;
-
-  margin-right: 0.15rem;
+.timeago {
+  float: right;
+  display: block;
+  font-size: 0.7rem !important;
+  color: var(--timeago) !important;
+  margin-left: 5px;
 }
 
-.cardItemContainer span:nth-child(4) {
-  font: 700 0.9rem 'JetBrains Mono', sans-serif;
-
-  margin-right: 0.15rem;
-}
-
-.cardItemContainer span:nth-child(5) {
-  font: 400 0.9rem 'JetBrains Mono', sans-serif;
+.clear {
+  clear: both;
 }
 
 @media (prefers-color-scheme: dark) {

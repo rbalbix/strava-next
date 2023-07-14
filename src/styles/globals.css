@@ -21,6 +21,11 @@ html {
   --gray-notes: #444;
   --dark-gray: #333;
 
+  --event-border: #555;
+  --date-badge-border: #666;
+  --text-border-bottom: #ccc;
+  --timeago: rgb(40, 170, 14);
+
   --border-card: var(--light-gray);
 
   --athlete-name: var(--gray-notes);
@@ -60,6 +65,8 @@ html {
 
     --signin-text-button: #000;
     --signout-text-button: #fff;
+
+    --timeago: rgb(156, 223, 24);
   }
 }
 

@@ -1,8 +1,9 @@
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Equipments } from '../services/equipment';
 import { Equipment } from '../services/gear';
 import { copyTextToClipboard, locale, secondsToHms } from '../services/utils';
 import styles from '../styles/components/CardItem.module.css';
-import { Equipments } from '../services/equipment';
 
 type Props = { equipment: Equipment; distance: number; movingTime: number };
 
@@ -26,9 +27,9 @@ export default function CardItem(props: Props) {
   } else {
     if (e.distance !== 0) {
       return (
-        <div
+        <li
           key={e.id}
-          className={styles.cardItemContainer}
+          className={styles.event}
           onClick={() =>
             copyTextToClipboard(
               `. ${format(new Date(), 'dd/MM/yyyy')} - ${locale.format(',.2f')(
@@ -39,12 +40,24 @@ export default function CardItem(props: Props) {
             )
           }
         >
-          <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
-          <span>{`${e.caption}`}</span>
-          <span>{`${locale.format(',.2f')(e.distance / 1000)}km`}</span>
-          <span>|</span>
-          <span>{`${secondsToHms(e.movingTime)}h`}</span>
-        </div>
+          <div className={styles.bol}>{`${format(
+            new Date(e.date),
+            'dd/MM/yyyy'
+          )}`}</div>
+          <div className={styles.txt}>
+            <span className={styles.timeago}>
+              {formatDistanceToNow(new Date(e.date), {
+                locale: ptBR,
+              })}
+            </span>
+            <div className={styles.textCont}>
+              {`${e.caption} ${locale.format(',.2f')(
+                e.distance / 1000
+              )}km [${secondsToHms(e.movingTime)}h]`}
+            </div>
+            <div className={styles.clear}></div>
+          </div>
+        </li>
       );
     }
   }
