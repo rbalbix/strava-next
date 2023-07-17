@@ -12,17 +12,39 @@ export default function CardItem(props: Props) {
 
   if (e.id === Equipments.Lubrification.id && e.distance === 0) {
     return (
-      <div className={styles.cardItemContainer}>
-        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
-        <span>Bike lubrificada. &#x1F44F;</span>
-      </div>
+      <li key={e.id} className={styles.event}>
+        <div className={styles.bol}>{`${format(
+          new Date(e.date),
+          'dd/MM/yyyy'
+        )}`}</div>
+        <div className={styles.txt}>
+          <span className={styles.timeago}>
+            {formatDistanceToNow(new Date(e.date), {
+              locale: ptBR,
+            })}
+          </span>
+          <div className={styles.textCont}>Bike lubrificada. &#x1F44F;</div>
+          <div className={styles.clear}></div>
+        </div>
+      </li>
     );
   } else if (e.id === Equipments.Clean.id && e.distance === 0) {
     return (
-      <div className={styles.cardItemContainer}>
-        <span>{`[${format(new Date(e.date), 'dd/MM/yyyy')}]`}</span>
-        <span>Bike limpinha. &#x1F44F;</span>
-      </div>
+      <li key={e.id} className={styles.event}>
+        <div className={styles.bol}>{`${format(
+          new Date(e.date),
+          'dd/MM/yyyy'
+        )}`}</div>
+        <div className={styles.txt}>
+          <span className={styles.timeago}>
+            {formatDistanceToNow(new Date(e.date), {
+              locale: ptBR,
+            })}
+          </span>
+          <div className={styles.textCont}>Bike limpinha. &#x1F44F;</div>
+          <div className={styles.clear}></div>
+        </div>
+      </li>
     );
   } else {
     if (e.distance !== 0) {
