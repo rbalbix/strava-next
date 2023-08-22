@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Stats from '../components/Stats';
 import { AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
+import Footer from '../components/Footer';
 
 interface HomeProps {
   code: string;
@@ -47,6 +48,8 @@ export default function Home(props: HomeProps) {
             </div>
           )}
         </section>
+
+        <Footer />
       </div>
     </AuthProvider>
   );

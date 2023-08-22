@@ -28,36 +28,51 @@
 
 ## List os equipments:
 
-|    Code    | Equipment                               |
-| :--------: | --------------------------------------- |
-|    lub     | `Lubrification`                         |
-| frontlight | `Front light`                           |
-| rearlight  | `Rear light`                            |
-|   review   | `Complete Review`                       |
-|   clean    | `Clean`                                 |
-|    susp    | `Suspension review`                     |
-|   break    | `Both breaks pads`                      |
-| frontbreak | ` Front brak pad`                       |
-| rearbreak  | `Rear break pad`                        |
-|    grip    | `Handlebar Grip`                        |
-|    tape    | `Handlebar Tape`                        |
-|  dropper   | `Dropper post`                          |
-|    stem    | `Stem`                                  |
-|   saddle   | `Saddle`                                |
-|    tire    | `Both tires`                            |
-| fronttire  | `Front tire`                            |
-|  reartire  | `Rear tire`                             |
-|    tube    | `Both tubes`                            |
-| fronttube  | `Front tube`                            |
-|  reartube  | `Rear tube`                             |
-|  tubeless  | `Tubeless installation or replacement ` |
-| habdlebar  | `Handlebar`                             |
-|   pedal    | `Pedals`                                |
-|   chain    | `Chain`                                 |
-|   disks    | `Both disks`                            |
-| frontDisk  | `Front disk`                            |
-|  rearDisk  | `Rear disk`                             |
-|  wheelset  | `Wheel Set`                             |
+|      Code      | Equipment                               |
+| :------------: | --------------------------------------- |
+|      lub       | `Lubrification`                         |
+|     review     | `Complete Review`                       |
+|     clean      | `Clean`                                 |
+|      susp      | `Suspension review`                     |
+|                |                                         |
+|     tires      | `Both tires`                            |
+|   fronttire    | `Front tire`                            |
+|    reartire    | `Rear tire`                             |
+|     tubes      | `Both tubes`                            |
+|    tubeless    | `Tubeless installation or replacement ` |
+|   fronttube    | `Front tube`                            |
+|    reartube    | `Rear tube`                             |
+|                |                                         |
+|      stem      | `Stem`                                  |
+|   habdlebar    | `Handlebar`                             |
+|    wheelset    | `Wheel Set`                             |
+|   frontwheel   | `Front Wheel`                           |
+|   rearwheel    | `Rear Wheel`                            |
+|                |                                         |
+|     breaks     | `Both breaks pads`                      |
+|   frontbreak   | `Front brak pad`                        |
+|   rearbreak    | `Rear break pad`                        |
+|                |                                         |
+|     disks      | `Both disks`                            |
+|   frontDisk    | `Front disk`                            |
+|    rearDisk    | `Rear disk`                             |
+|                |                                         |
+|      tape      | `Handlebar Tape`                        |
+|      grip      | `Handlebar Grip`                        |
+|    dropper     | `Dropper post`                          |
+|     saddle     | `Saddle`                                |
+|                |                                         |
+|     pedal      | `Pedals`                                |
+|     chain      | `Chain`                                 |
+|       bb       | `Bottom Bracket`                        |
+|                |                                         |
+|    cassette    | `Cassette`                              |
+|    crankset    | `Crankset`                              |
+| rearderailleur | `Rear Derailleur`                       |
+|  rearshifter   | `Rear Shifter`                          |
+|                |                                         |
+|   frontlight   | `Front light`                           |
+|   rearlight    | `Rear light`                            |
 
 </br>
 <div align="center">
