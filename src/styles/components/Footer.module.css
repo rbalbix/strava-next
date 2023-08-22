@@ -27,6 +27,14 @@
 }
 
 .footerEquipmentTable td {
+  font-size: 0.9rem;
   border: 1px solid var(--event-border);
   padding: 4px;
+}
+
+@media (max-width: 420px) {
+  .footerEquipmentTable {
+    width: 100%;
+    table-layout: fixed;
+  }
 }
