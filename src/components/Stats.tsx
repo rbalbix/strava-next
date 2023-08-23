@@ -121,7 +121,7 @@ export default function Stats() {
       if (distance !== 0) {
         const gearStat: GearStats = {
           id: gear.id,
-          name: gear.nickname,
+          name: gear.nickname === '' ? gear.name : gear.nickname,
           activityType,
           count,
           distance,
