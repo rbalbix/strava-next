@@ -1,4 +1,18 @@
-import { ActivityType, DetailedAthlete, SummaryGear } from 'strava';
+import {
+  ActivityType,
+  DetailedAthlete,
+  ResourceState,
+  SummaryGear,
+} from 'strava';
+
+export interface SummaryGearWithNickName {
+  id: string;
+  primary: boolean;
+  name: string;
+  nickname: string;
+  resource_state: ResourceState;
+  distance: number;
+}
 
 export type Equipment = {
   id: string;
@@ -22,9 +36,9 @@ export type GearStats = {
 function getGears(athlete: DetailedAthlete) {
   // Só traz os equipamentos ativos
   const { bikes, shoes } = athlete;
-  const gears: SummaryGear[] = JSON.parse(JSON.stringify(bikes)).concat(
-    JSON.parse(JSON.stringify(shoes))
-  );
+  const gears: SummaryGearWithNickName[] = JSON.parse(
+    JSON.stringify(bikes)
+  ).concat(JSON.parse(JSON.stringify(shoes)));
 
   return gears;
 }
