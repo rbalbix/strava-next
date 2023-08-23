@@ -12,7 +12,12 @@ import { AuthContext } from '../contexts/AuthContext';
 import { ActivityBase, getActivities } from '../services/activity';
 import { getAthlete, getAthleteStats } from '../services/athlete';
 import { Equipments } from '../services/equipment';
-import { Equipment, GearStats, getGears } from '../services/gear';
+import {
+  Equipment,
+  GearStats,
+  SummaryGearWithNickName,
+  getGears,
+} from '../services/gear';
 import { LocalActivity, saveLocalStat } from '../services/utils';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
@@ -34,7 +39,10 @@ export default function Stats() {
     return { athlete, athleteStats };
   }
 
-  function createGearStats(gears: SummaryGear[], activities: ActivityBase[]) {
+  function createGearStats(
+    gears: SummaryGearWithNickName[],
+    activities: ActivityBase[]
+  ) {
     const gearStats: GearStats[] = [];
 
     activities.sort((a, b) => {
@@ -129,13 +137,16 @@ export default function Stats() {
     return gearStats;
   }
 
-  async function executeCompleteStats(strava: Strava, gears: SummaryGear[]) {
+  async function executeCompleteStats(
+    strava: Strava,
+    gears: SummaryGearWithNickName[]
+  ) {
     const activities = await getActivities(strava, gears, null, null);
     createGearStats(gears, activities);
     return { activities };
   }
 
-  async function updateStats(strava: Strava, gears: SummaryGear[]) {
+  async function updateStats(strava: Strava, gears: SummaryGearWithNickName[]) {
     const daysToSearch = 10;
     try {
       if (window.localStorage) {
