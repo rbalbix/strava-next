@@ -42,6 +42,8 @@ html {
   --stat-icon: #8257e5;
 
   --table-head-text: whitesmoke;
+  --equipment-row-background: var(--light-gray-lines);
+  --footer-icon-hover: var(--orange-strava);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -71,6 +73,8 @@ html {
     --timeago: rgb(156, 223, 24);
 
     --table-head-text: var(--background-card);
+    --equipment-row-background: var(--border-card);
+    --footer-icon-hover: var(--end-gradient-color);
   }
 }
 

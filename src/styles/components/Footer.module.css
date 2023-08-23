@@ -32,6 +32,14 @@
   padding: 4px;
 }
 
+.footerEquipmentTable tr:nth-child(even) {
+  background-color: var(--equipment-row-background);
+}
+
+.footerIcon:hover {
+  color: var(--footer-icon-hover);
+}
+
 @media (max-width: 420px) {
   .footerEquipmentTable {
     width: 100%;

@@ -27,7 +27,10 @@ export default function Footer() {
     <div className={styles.footerContainer}>
       {athlete && (
         <div>
-          <FaMedapps onClick={() => handleOpenModal('equipments')} />
+          <FaMedapps
+            onClick={() => handleOpenModal('equipments')}
+            className={styles.footerIcon}
+          />
         </div>
       )}
 
