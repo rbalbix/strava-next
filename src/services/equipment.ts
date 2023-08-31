@@ -95,4 +95,14 @@ export const Equipments = {
     caption: 'shifter[traseiro]:',
     show: 'Trocador traseiro',
   },
+  Helmet: {
+    id: 'helmet',
+    caption: 'capacete:',
+    show: 'Capacete',
+  },
+  Shoes: {
+    id: 'shoes',
+    caption: 'sapatilha:',
+    show: 'Sapatilha',
+  },
 };

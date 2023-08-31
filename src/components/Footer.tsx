@@ -69,6 +69,10 @@ export default function Footer() {
               </tbody>
             </table>
           </section>
+          <footer>
+            Para controlar um equipamento deve-se escrever seu código no campo
+            'OBSERVAÇÕES PRIVADAS' e incluir um * no título da Atividade.
+          </footer>
         </main>
       </Modal>
     </div>
