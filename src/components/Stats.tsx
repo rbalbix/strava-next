@@ -100,6 +100,18 @@ export default function Stats() {
                   });
                 }
 
+                // When pair of breaks, only rear or front does not matter.
+                if (equipment.id === Equipments.Break.id) {
+                  equipmentsStatTemplate.map((e) => {
+                    if (
+                      e.id === Equipments.FrontBreak.id ||
+                      e.id === Equipments.RearBreak.id
+                    ) {
+                      e.isRegistered = true;
+                    }
+                  });
+                }
+
                 if (equipmentStat && !equipmentStat.isRegistered) {
                   equipmentStat.isRegistered = true;
                   equipmentStat.distance = distance;
