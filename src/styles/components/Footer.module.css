@@ -21,6 +21,16 @@
   color: var(--table-head-text);
 }
 
+.orientationRow {
+  font-size: 0.9rem;
+  text-align: center;
+
+  width: 35vw;
+  margin: auto;
+
+  margin-bottom: 8px;
+}
+
 .footerEquipmentTable th {
   border: 1px solid var(--event-border);
   padding: 8px;

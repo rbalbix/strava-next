@@ -2,10 +2,26 @@ export const Equipments = {
   Lubrification: { id: 'lub', caption: 'lubrificada a:', show: 'Lubrificação' },
   Review: { id: 'review', caption: 'revisada a:', show: 'Revisão' },
   Clean: { id: 'clean', caption: 'lavada a:', show: 'Lavagem' },
+  
   SuspensionReview: {
-    id: 'susp',
+    id: 'suspareview',
     caption: 'suspa revisada a:',
     show: 'Revisão da suspa',
+  },
+  ShockReview: {
+    id: 'shockreview',
+    caption: 'shock revisado a:',
+    show: 'Revisão do shock',
+  },
+  Suspension: {
+    id: 'suspension',
+    caption: 'suspensão:',
+    show: 'Suspensão (nova)',
+  },
+  Shock: {
+    id: 'shock',
+    caption: 'shock:',
+    show: 'Shock (novo)',
   },
 
   Tires: { id: 'tires', caption: 'par de pneus:', show: 'Par de pneus' },
@@ -105,4 +121,5 @@ export const Equipments = {
     caption: 'sapatilha:',
     show: 'Sapatilha',
   },
+
 };
