@@ -1,10 +1,10 @@
-import { AppProps, NextWebVitalsMetric } from 'next/app';
-import '../styles/globals.css';
+import { AppProps } from 'next/app';
 import { Analytics } from '@vercel/analytics/next';
+import '../styles/globals.css';
 
-export function reportWebVitals(metric: NextWebVitalsMetric) {
-  // console.log(metric);
-}
+// export function reportWebVitals(metric: NextWebVitalsMetric) {
+//   // console.log(metric);
+// }
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
