@@ -1,5 +1,5 @@
 import { AppProps } from 'next/app';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 import '../styles/globals.css';
 
 // export function reportWebVitals(metric: NextWebVitalsMetric) {
