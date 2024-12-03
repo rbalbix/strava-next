@@ -112,6 +112,24 @@ export default function Stats() {
                   });
                 }
 
+                // When new suspension, suspencion review does not matter.
+                if (equipment.id === Equipments.Suspension.id) {
+                  equipmentsStatTemplate.map((e) => {
+                    if (e.id === Equipments.SuspensionReview.id) {
+                      e.isRegistered = true;
+                    }
+                  });
+                }
+
+                // When new shock, shock review does not matter.
+                if (equipment.id === Equipments.Shock.id) {
+                  equipmentsStatTemplate.map((e) => {
+                    if (e.id === Equipments.ShockReview.id) {
+                      e.isRegistered = true;
+                    }
+                  });
+                }
+
                 if (equipmentStat && !equipmentStat.isRegistered) {
                   equipmentStat.isRegistered = true;
                   equipmentStat.distance = distance;
