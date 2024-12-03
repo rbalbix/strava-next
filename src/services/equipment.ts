@@ -2,7 +2,7 @@ export const Equipments = {
   Lubrification: { id: 'lub', caption: 'lubrificada a:', show: 'Lubrificação' },
   Review: { id: 'review', caption: 'revisada a:', show: 'Revisão' },
   Clean: { id: 'clean', caption: 'lavada a:', show: 'Lavagem' },
-  
+
   SuspensionReview: {
     id: 'suspareview',
     caption: 'suspa revisada a:',
@@ -86,6 +86,54 @@ export const Equipments = {
     show: 'Disco traseiro',
   },
 
+  Calipers: {
+    id: 'calipers',
+    caption: 'par de caliper:',
+    show: 'Par de calipers',
+  },
+  FrontCaliper: {
+    id: 'frontcaliper',
+    caption: 'caliper[frente]:',
+    show: 'Caliper dianteiro',
+  },
+  RearCaliper: {
+    id: 'rearcaliper',
+    caption: 'caliper[traseiro]:',
+    show: 'Caliper traseiro',
+  },
+
+  Levers: {
+    id: 'levers',
+    caption: 'par de manetes:',
+    show: 'Par de manetes',
+  },
+  LeftLever: {
+    id: 'leftlever',
+    caption: 'manete[esquerda]:',
+    show: 'Manete esquerda',
+  },
+  RightLever: {
+    id: 'rightlever',
+    caption: 'Manete[direita]:',
+    show: 'Manete direita',
+  },
+
+  STIs: {
+    id: 'stis',
+    caption: 'par de STI:',
+    show: 'Par de STI',
+  },
+  LeftSTI: {
+    id: 'leftsti',
+    caption: 'STI[esquerda]:',
+    show: 'STI esquerda',
+  },
+  RightSTI: {
+    id: 'rightsti',
+    caption: 'STI[direita]:',
+    show: 'STI direita',
+  },
+
   Tape: { id: 'tape', caption: 'fita:', show: 'Fita do guidão' },
   Grip: { id: 'grip', caption: 'manopla:', show: 'Manopla' },
   Dropper: {
@@ -121,5 +169,4 @@ export const Equipments = {
     caption: 'sapatilha:',
     show: 'Sapatilha',
   },
-
 };
