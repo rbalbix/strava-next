@@ -80,3 +80,12 @@
 .signOutButton:hover {
   background: var(--gray-signOut-hover);
 }
+
+.headerInfoIcon:hover {
+  color: var(--light-blue);
+}
+
+.divider {
+  width: 60%;
+  background-color: var(--light-gray);
+}

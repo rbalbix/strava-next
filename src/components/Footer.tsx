@@ -8,6 +8,7 @@ import { Modal } from './Modal';
 
 import styles from '../styles/components/Footer.module.css';
 import { copyTextToClipboard } from '../services/utils';
+import { Divider } from '@mui/material';
 
 type Equipment = {
   id: string;
@@ -42,7 +43,7 @@ export default function Footer() {
                 <span>
                   <FaMedapps color='var(--stat-icon)' />
                 </span>
-                <span>Equipamentos:</span>
+                <span>Componentes:</span>
               </div>
               <div>
                 <MdClose color='var(--stat-icon)' />
@@ -51,13 +52,14 @@ export default function Footer() {
           </header>
           <section>
             <div className={styles.orientationRow}>
-              Para controlar um equipamento deve-se escrever seu código no campo
-              'OBSERVAÇÕES PRIVADAS' e incluir um * no título da Atividade.
+              Para controlar um componente do equipamento deve-se escrever seu
+              código no campo 'OBSERVAÇÕES PRIVADAS' e incluir um * no título da
+              Atividade.
             </div>
             <table className={styles.footerEquipmentTable}>
               <thead>
                 <tr>
-                  <th>Equipamento</th>
+                  <th>Componente</th>
                   <th>Código</th>
                 </tr>
               </thead>
@@ -74,8 +76,7 @@ export default function Footer() {
             </table>
           </section>
           <footer>
-            Para controlar um equipamento deve-se escrever seu código no campo
-            'OBSERVAÇÕES PRIVADAS' e incluir um * no título da Atividade.
+            <Divider className={styles.divider} style={{ margin: 'auto' }} />
           </footer>
         </main>
       </Modal>

@@ -58,9 +58,22 @@
   margin: auto;
 }
 
-@media (max-width: 420px) {
+.divider {
+  width: 35vw;
+  background-color: var(--light-gray);
+}
+
+@media (max-width: 430px) {
   .footerEquipmentTable {
     width: 100%;
     table-layout: fixed;
+  }
+
+  .orientationRow {
+    width: 75vw;
+  }
+
+  .divider {
+    width: 50vw;
   }
 }

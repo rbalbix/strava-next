@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
-import { FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import { PushSpinner } from 'react-spinners-kit';
@@ -14,6 +14,7 @@ import modalStyles from '../styles/components/Modal.module.css';
 import Divider from '@mui/material/Divider';
 import { Modal } from '../components/Modal';
 import { locale, secondsToHms } from '../services/utils';
+import InitialInfo from './InitialInfo';
 
 export default function Header() {
   const route = useRouter();
@@ -57,23 +58,58 @@ export default function Header() {
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
-        <div className={styles.buttonBox}>
-          <Link
-            className={styles.signInButton}
-            href={{
-              pathname: `${baseURL}/authorize`,
-              query: {
-                client_id,
-                response_type,
-                redirect_uri,
-                approval_prompt,
-                scope,
-              },
-            }}
-          >
-            Sign in
-          </Link>
-        </div>
+        <>
+          <div>
+            {' '}
+            <FaInfoCircle
+              onClick={() => handleOpenModal('info')}
+              className={styles.headerInfoIcon}
+            />
+          </div>
+          <div className={styles.buttonBox}>
+            <Link
+              className={styles.signInButton}
+              href={{
+                pathname: `${baseURL}/authorize`,
+                query: {
+                  client_id,
+                  response_type,
+                  redirect_uri,
+                  approval_prompt,
+                  scope,
+                },
+              }}
+            >
+              Sign in
+            </Link>
+          </div>
+
+          <Modal id={'info'} closeModal={handleCloseModal}>
+            <main>
+              <header>
+                <div>
+                  <div>
+                    <span>
+                      <FaInfoCircle color='var(--stat-icon)' />
+                    </span>
+                  </div>
+                  <div>
+                    <MdClose color='var(--stat-icon)' />
+                  </div>
+                </div>
+              </header>
+              <section>
+                <InitialInfo />
+              </section>
+              <footer>
+                <Divider
+                  className={styles.divider}
+                  style={{ margin: 'auto' }}
+                />
+              </footer>
+            </main>
+          </Modal>
+        </>
       ) : (
         <>
           {athlete ? (
