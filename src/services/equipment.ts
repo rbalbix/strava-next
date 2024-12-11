@@ -23,6 +23,16 @@ export const Equipments = {
     caption: 'shock:',
     show: 'Shock (novo)',
   },
+  SuspensionKit: {
+    id: 'suspensionkit',
+    caption: 'kit de suspensão:',
+    show: 'Kit de Suspensão',
+  },
+  ShockKit: {
+    id: 'shockkit',
+    caption: 'kit de shock:',
+    show: 'Kit de Shock',
+  },
 
   Tires: { id: 'tires', caption: 'par de pneus:', show: 'Par de pneus' },
   Fronttire: {
@@ -154,11 +164,17 @@ export const Equipments = {
     caption: 'câmbio[traseiro]:',
     show: 'Câmbio traseiro',
   },
+  Pulley: {
+    id: 'pulley',
+    caption: 'roldanas do câmbio',
+    show: 'Roldanas do câmbio'
+  },
   Shifter: {
     id: 'rearshifter',
     caption: 'shifter[traseiro]:',
     show: 'Trocador traseiro',
   },
+  
   Helmet: {
     id: 'helmet',
     caption: 'capacete:',

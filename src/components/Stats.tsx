@@ -112,19 +112,24 @@ export default function Stats() {
                   });
                 }
 
-                // When new suspension, suspencion review does not matter.
+                // When new suspension, suspencion review/kit does not matter.
                 if (equipment.id === Equipments.Suspension.id) {
                   equipmentsStatTemplate.map((e) => {
-                    if (e.id === Equipments.SuspensionReview.id) {
+                    if (e.id === Equipments.SuspensionReview.id ||
+                      e.id === Equipments.SuspensionKit.id
+                    ) {
                       e.isRegistered = true;
                     }
                   });
                 }
 
-                // When new shock, shock review does not matter.
+                // When new shock, shock review/kit does not matter.
                 if (equipment.id === Equipments.Shock.id) {
                   equipmentsStatTemplate.map((e) => {
-                    if (e.id === Equipments.ShockReview.id) {
+                    if (e.id === Equipments.ShockReview.id ||
+                      e.id === Equipments.ShockKit.id
+
+                    ) {
                       e.isRegistered = true;
                     }
                   });
