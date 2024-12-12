@@ -117,6 +117,24 @@ export default function InitialInfo() {
         <div className={styles.screen}>
           <img src='/infoScreens/component-list.png' alt='Lista de Códigos' />
         </div>
+
+        <Divider className={styles.divider} style={{ margin: 'auto' }} />
+
+        <div>Observações:</div>
+        <ul>
+          <li>
+            O tema claro ou escuro é definido pela configuração do ambiente /
+            navegador.
+          </li>
+          <li>
+            Caso a atualização feita na atividade do Strava não apareça na lista
+            de componentes do equipamento, você vai precisar limpar o cache do
+            navegador.{' '}
+            <a href='http://bit.ly/4fdUkw1' target='_blank'>
+              Como limpar o cache do navegador?
+            </a>
+          </li>
+        </ul>
       </main>
     </div>
   );
