@@ -120,7 +120,7 @@ export default function InitialInfo() {
 
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
-        <div>Observações:</div>
+        <h3>Observações:</h3>
         <ul>
           <li>
             O tema claro ou escuro é definido pela configuração do ambiente /
