@@ -55,6 +55,8 @@
 
 .initialInfoContainer h3 {
   font-size: 1.05rem;
+
+  margin-top: 0.5rem;
 }
 
 .initialInfoContainer div > span {
