@@ -22,6 +22,7 @@ import { LocalActivity, saveLocalStat } from '../services/utils';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
+import TireIcon from './TireIcon';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
@@ -115,7 +116,8 @@ export default function Stats() {
                 // When new suspension, suspencion review/kit does not matter.
                 if (equipment.id === Equipments.Suspension.id) {
                   equipmentsStatTemplate.map((e) => {
-                    if (e.id === Equipments.SuspensionReview.id ||
+                    if (
+                      e.id === Equipments.SuspensionReview.id ||
                       e.id === Equipments.SuspensionKit.id
                     ) {
                       e.isRegistered = true;
@@ -126,9 +128,9 @@ export default function Stats() {
                 // When new shock, shock review/kit does not matter.
                 if (equipment.id === Equipments.Shock.id) {
                   equipmentsStatTemplate.map((e) => {
-                    if (e.id === Equipments.ShockReview.id ||
+                    if (
+                      e.id === Equipments.ShockReview.id ||
                       e.id === Equipments.ShockKit.id
-
                     ) {
                       e.isRegistered = true;
                     }
@@ -268,9 +270,7 @@ export default function Stats() {
       <main>
         {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <span>
-              <DiskIcon />
-            </span>
+            <span>{Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />}</span>
           </div>
         ) : (
           gearStats.map((gearStat, index) => {
