@@ -53,32 +53,26 @@
   margin-right: 6px;
 }
 
-.buttonBox {
-  display: flex;
-  flex: 1;
-  justify-content: flex-end;
+.headerLoginIcon {
+  color: var(--light-blue);
+  margin-right: 0.2rem;
+  height: 2rem;
+  width: 2rem;
 }
 
-.signInButton {
-  background: var(--light-blue);
-  padding: 0.5rem 1rem;
-
-  color: var(--signin-text-button);
+.headerLoginIcon:hover {
+  color: var(--light-blue-hover);
 }
 
-.signInButton:hover {
-  background: var(--light-blue-hover);
+.headerLogoutIcon {
+  color: var(--gray-signOut);
+  margin-right: 0.2rem;
+  height: 2rem;
+  width: 2rem;
 }
 
-.signOutButton {
-  background: var(--gray-signOut);
-  padding: 0.5rem 1rem;
-
-  color: var(--signout-text-button);
-}
-
-.signOutButton:hover {
-  background: var(--gray-signOut-hover);
+.headerLogoutIcon:hover {
+  color: var(--gray-signOut-hover);
 }
 
 .headerInfoIcon:hover {

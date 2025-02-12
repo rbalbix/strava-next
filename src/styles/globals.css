@@ -12,8 +12,8 @@ html {
   --background: #fff;
   --background-card: #fff;
   --light-blue: #1eb1fc;
-  --light-blue-hover: #1b9fe2;
-  --gray-signOut: #ccc;
+  --light-blue-hover: #0476af;
+  --gray-signOut: #999;
   --gray-signOut-hover: #555;
   --light-gray: #ddd;
   --light-gray-lines: #ccc;
@@ -29,8 +29,6 @@ html {
   --border-card: var(--light-gray);
 
   --athlete-name: var(--gray-notes);
-  --signin-text-button: #fff;
-  --signout-text-button: #fff;
 
   --orange-strava: #fc4c02;
   --start-gradient-color: #ff4d4d;
@@ -59,16 +57,13 @@ html {
     --gray-notes: #bbb;
     --light-gray-lines: #ddd;
 
-    --gray-signOut: #333;
-    --gray-signOut-hover: #222;
+    --gray-signOut: #aaa;
+    --gray-signOut-hover: #eee;
 
     --athlete-name: #fff;
 
     --card-box-shadow: rgba(29, 28, 29, 0.4);
     --errorContainer: var(--background-card);
-
-    --signin-text-button: #000;
-    --signout-text-button: #fff;
 
     --timeago: rgb(156, 223, 24);
 

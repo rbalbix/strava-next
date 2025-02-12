@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
 import { FaArrowRight, FaInfoCircle } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
+import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
@@ -66,9 +67,8 @@ export default function Header() {
               className={styles.headerInfoIcon}
             />
           </div>
-          <div className={styles.buttonBox}>
+          <div>
             <Link
-              className={styles.signInButton}
               href={{
                 pathname: `${baseURL}/authorize`,
                 query: {
@@ -80,7 +80,7 @@ export default function Header() {
                 },
               }}
             >
-              Sign in
+              <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>
 
@@ -306,14 +306,13 @@ export default function Header() {
           )}
 
           <Link
-            className={styles.signOutButton}
             onClick={(e) => {
               e.preventDefault();
               signOut();
             }}
             href='/'
           >
-            Sign out
+            <IoLogOutOutline className={styles.headerLogoutIcon} />
           </Link>
         </>
       )}
