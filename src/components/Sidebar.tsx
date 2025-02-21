@@ -33,7 +33,7 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaHome />
+          <FaHome className={styles.sidebarItemIcon} />
           <Link
             href={{
               pathname: `https://strava.com/dashboard`,
@@ -50,7 +50,7 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaChartBar />
+          <FaChartBar className={styles.sidebarItemIcon} />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal(athlete.id)}
@@ -63,7 +63,7 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaMedapps />
+          <FaMedapps className={styles.sidebarItemIcon} />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal('equipments')}
@@ -76,7 +76,7 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaInfoCircle />
+          <FaInfoCircle className={styles.sidebarItemIcon} />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal('info')}
@@ -87,15 +87,6 @@ export default function Sidebar({ active }) {
         </div>
 
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
-        {/* 
-        <SidebarItem Icon={FaChartBar} Text='Statistics' />
-        <SidebarItem Icon={FaUserAlt} Text='Users' />
-        <SidebarItem Icon={FaEnvelope} Text='Mail' />
-        <SidebarItem Icon={FaRegCalendarAlt} Text='Calendar' />
-        <SidebarItem Icon={FaIdCardAlt} Text='Employees' />
-        <SidebarItem Icon={FaRegFileAlt} Text='Reports' />
-        <SidebarItem Icon={FaRegSun} Text='Settings' /> */}
       </div>
     </div>
   );

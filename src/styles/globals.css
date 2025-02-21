@@ -11,7 +11,9 @@ html {
 :root {
   --background: #fff;
   --background-card: #fff;
-  --background-sidebar: #171923;
+  --background-sidebar: #eee;
+  --background-sidebar-item: #ddd;
+  --background-sidebar-item-hover: #ccc;
   --light-blue: #1eb1fc;
   --light-blue-hover: #0476af;
   --gray-signOut: #999;
@@ -30,7 +32,7 @@ html {
   --border-card: var(--light-gray);
 
   --athlete-name: var(--gray-notes);
-  --sidebar-icon: var(--gray-notes);
+  --sidebar-icon: var(--light-gray-notes);
 
   --orange-strava: #fc4c02;
   --start-gradient-color: #ff4d4d;
@@ -55,6 +57,9 @@ html {
     --background: #000;
     --border-card: #30363d;
     --background-card: #0d1117;
+    --background-sidebar: #171923;
+    --background-sidebar-item: #1a202c;
+    --background-sidebar-item-hover: #000;
     --dark-gray: var(--light-gray);
     --gray-notes: #bbb;
     --light-gray-lines: #ddd;

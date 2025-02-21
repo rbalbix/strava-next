@@ -6,6 +6,8 @@
   left: 0;
   width: 300px;
 
+  border-radius: 0 20px 20px 0;
+
   animation: showSidebar 0.4s;
 }
 
@@ -15,7 +17,7 @@
   width: 2rem;
   height: 2rem;
   margin-top: 2.5rem;
-  margin-left: 2rem;
+  margin-left: 20px;
   cursor: pointer;
 }
 
@@ -38,18 +40,18 @@
   display: flex;
   flex: 1;
   align-items: center;
-  background-color: #1a202c;
+  background-color: var(--background-sidebar-item);
   font-size: 1.2rem !important;
-  color: white;
+  color: var(--gray-notes);
   padding: 20px 0 20px 10px;
   cursor: pointer;
 
   &:hover {
-    background-color: black;
+    background-color: var(--background-sidebar-item-hover);
   }
 }
 
-.sidebarContainer svg {
+.sidebarItemIcon {
   margin: 0 20px;
   width: 1.8rem;
   height: 1.8rem;
