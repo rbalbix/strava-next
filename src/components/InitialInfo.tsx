@@ -1,6 +1,7 @@
 import styles from '../styles/components/InitialInfo.module.css';
 import Divider from '@mui/material/Divider';
 import { FaMedapps } from 'react-icons/fa';
+import Image from 'next/image';
 
 export default function InitialInfo() {
   return (
@@ -19,7 +20,13 @@ export default function InitialInfo() {
         <div>Ao abrir o aplicativo, você verá a seguinte tela inicial:</div>
 
         <div className={styles.screen}>
-          <img src='infoScreens/login.png' alt='Tela de Login do aplicativo' />
+          <Image
+            src='/images/login.png'
+            alt='Tela de Login do aplicativo'
+            width={203}
+            height={387}
+            priority
+          />
         </div>
 
         <ol>
@@ -49,7 +56,13 @@ export default function InitialInfo() {
         </div>
 
         <div className={styles.screen}>
-          <img src='infoScreens/equipments.png' alt='Lista de Equipamentos' />
+          <Image
+            src='/images/equipments.png'
+            alt='Lista de Equipamentos'
+            width={203}
+            height={387}
+            priority
+          />
         </div>
 
         <div>
@@ -77,7 +90,13 @@ export default function InitialInfo() {
         </div>
 
         <div className={styles.screen}>
-          <img src='infoScreens/components.png' alt='Lista de Componentes' />
+          <Image
+            src='/images/components.png'
+            alt='Lista de Componentes'
+            width={203}
+            height={387}
+            priority
+          />
         </div>
 
         <div>Nesta tela, você verá:</div>
@@ -102,9 +121,12 @@ export default function InitialInfo() {
         </div>
 
         <div className={styles.screen}>
-          <img
-            src='/infoScreens/strava-config.png'
+          <Image
+            src='/images/strava-config.png'
             alt='Configuração na atividade'
+            width={203}
+            height={387}
+            priority
           />
         </div>
 
@@ -115,7 +137,13 @@ export default function InitialInfo() {
         </div>
 
         <div className={styles.screen}>
-          <img src='/infoScreens/component-list.png' alt='Lista de Códigos' />
+          <Image
+            src='/images/component-list.png'
+            alt='Lista de Códigos'
+            width={203}
+            height={387}
+            priority
+          />
         </div>
 
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
