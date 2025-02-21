@@ -1,0 +1,22 @@
+.athleteInfoContainer {
+  display: flex;
+  align-items: center;
+
+  padding: 0 0 20px 20px;
+}
+
+.athleteAvatar {
+  height: 3.2rem;
+  width: 3.2rem;
+  border-radius: 50%;
+
+  margin-right: 10px;
+}
+
+.athleteName {
+  font-size: 1.3rem;
+  color: var(--athlete-name);
+  font-weight: normal;
+
+  padding: 0;
+}

@@ -21,36 +21,23 @@
   margin: 0 15px;
 }
 
-.athleteButton {
-  display: flex;
-  align-items: center;
-}
-
-.athleteButtonPadding {
-  padding: 0;
-}
-
-.athleteInfo {
-  display: flex;
-  align-items: center;
-}
-
-.athleteName {
-  font-size: 1rem;
-  color: var(--athlete-name);
-  font-weight: 600;
-
-  padding: 0;
-
+.sidebarIcon {
+  color: var(--sidebar-icon);
+  width: 2rem;
+  height: 2rem;
   cursor: pointer;
 }
 
-.athleteAvatar {
-  height: 2.5rem;
-  width: 2.5rem;
-  border-radius: 50%;
+.headerButtons {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  margin-right: 6px;
+.sidebarButton {
+  display: flex;
+  align-items: center;
 }
 
 .headerLoginIcon {
@@ -88,5 +75,10 @@
   .headerLoginIcon {
     height: 2.8rem;
     width: 2.8rem;
+  }
+
+  .sidebarIcon {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
