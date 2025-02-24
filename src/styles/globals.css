@@ -9,41 +9,43 @@ html {
 }
 
 :root {
-  --background: #fff;
+  --background: #f8f9fa;
   --background-card: #fff;
-  --background-sidebar: #eee;
-  --background-sidebar-item: #ddd;
-  --background-sidebar-item-hover: #ccc;
-  --light-blue: #1eb1fc;
-  --light-blue-hover: #0476af;
-  --gray-signOut: #999;
-  --gray-signOut-hover: #555;
-  --light-gray: #ddd;
-  --light-gray-lines: #ccc;
-  --light-gray-notes: #999;
-  --gray-notes: #444;
-  --dark-gray: #333;
+  --background-sidebar: #f0f2f5;
+  --background-sidebar-item: #e5e7eb;
+  --background-sidebar-item-hover: #d6d9de;
 
-  --event-border: #555;
-  --date-badge-border: #666;
-  --text-border-bottom: #ccc;
-  --timeago: rgb(40, 170, 14);
+  --light-blue: #007aff;
+  --light-blue-hover: #005bb5;
+
+  --gray-signOut: #666;
+  --gray-signOut-hover: #444;
+  --light-gray: #d1d5db;
+  --light-gray-lines: #c4c8cc;
+  --light-gray-notes: #888;
+  --gray-notes: #555;
+  --dark-gray: #222;
+
+  --event-border: #666;
+  --date-badge-border: #777;
+  --text-border-bottom: #bbb;
+  --timeago: rgb(20, 140, 10);
 
   --border-card: var(--light-gray);
 
   --athlete-name: var(--gray-notes);
   --sidebar-icon: var(--light-gray-notes);
 
-  --orange-strava: #fc4c02;
-  --start-gradient-color: #ff4d4d;
-  --end-gradient-color: #f9cb28;
+  --orange-strava: #fc5200;
+  --start-gradient-color: #ff5733;
+  --end-gradient-color: #fdb927;
 
   --card-box-shadow: rgba(0, 0, 0, 0.4);
   --errorContainer: whitesmoke;
 
   --stat-icon: #8257e5;
 
-  --table-head-text: whitesmoke;
+  --table-head-text: #fff;
   --equipment-row-background: var(--light-gray-lines);
   --footer-icon-hover: var(--orange-strava);
 }
@@ -54,26 +56,27 @@ html {
   }
 
   :root {
-    --background: #000;
-    --border-card: #30363d;
-    --background-card: #0d1117;
-    --background-sidebar: #171923;
-    --background-sidebar-item: #1a202c;
-    --background-sidebar-item-hover: #000;
+    --background: #121212; /* Preto menos agressivo */
+    --border-card: #252b33;
+    --background-card: #1e1e1e;
+    --background-sidebar: #20232a; /* Um pouco mais claro para separar do fundo */
+    --background-sidebar-item: #282c34; /* Um tom acima para separação melhor */
+    --background-sidebar-item-hover: #343a40; /* Hover com mais destaque */
+
     --dark-gray: var(--light-gray);
-    --gray-notes: #bbb;
-    --light-gray-lines: #ddd;
+    --gray-notes: #c0c0c0;
+    --light-gray-lines: #bbb;
 
-    --gray-signOut: #aaa;
-    --gray-signOut-hover: #eee;
+    --gray-signOut: #bbb;
+    --gray-signOut-hover: #ddd;
 
-    --athlete-name: #fff;
-    --sidebar-icon: #fff;
+    --athlete-name: #ffffff;
+    --sidebar-icon: #ffffff;
 
-    --card-box-shadow: rgba(29, 28, 29, 0.4);
+    --card-box-shadow: rgba(0, 0, 0, 0.2);
     --errorContainer: var(--background-card);
 
-    --timeago: rgb(156, 223, 24);
+    --timeago: rgb(120, 200, 60);
 
     --table-head-text: var(--background-card);
     --equipment-row-background: var(--border-card);
