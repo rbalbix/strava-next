@@ -137,6 +137,19 @@ export default function Stats() {
                   });
                 }
 
+                // When suspension review or shock review, the word
+                // review seems to be a new review.
+                // Checks if the word "review" is isolated in private_note
+                const hasStandaloneReview = /\breview\b/.test(
+                  activity.private_note.toLowerCase()
+                );
+                if (
+                  equipment.id === Equipments.Review.id &&
+                  !hasStandaloneReview
+                ) {
+                  return; // Next iteration
+                }
+
                 if (equipmentStat && !equipmentStat.isRegistered) {
                   equipmentStat.isRegistered = true;
                   equipmentStat.distance = distance;
@@ -298,3 +311,4 @@ export default function Stats() {
     </div>
   );
 }
+1;
