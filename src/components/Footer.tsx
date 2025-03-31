@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
@@ -18,11 +18,8 @@ type Equipment = {
 export default function Footer() {
   const { athlete, handleOpenModal, handleCloseModal } =
     useContext(AuthContext);
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
 
-  useEffect(() => {
-    setEquipment(Object.values(Equipments));
-  }, []);
+  const equipment: Equipment[] = Object.values(Equipments);
 
   return (
     <div className={styles.footerContainer}>

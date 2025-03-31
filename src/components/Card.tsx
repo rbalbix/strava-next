@@ -9,12 +9,17 @@ import { GearStats } from '../services/gear';
 import { locale, secondsToHms } from '../services/utils';
 import CardItem from './CardItem';
 
-export default function Card(props: GearStats) {
+export default function Card({
+  id,
+  name,
+  activityType,
+  count,
+  distance,
+  movingTime,
+  equipments,
+}: GearStats) {
   const { handleOpenModal, handleCloseModal } = useContext(AuthContext);
-
-  const { id, name, activityType, count, distance, movingTime, equipments } =
-    props;
-
+  const isRide = activityType === 'Ride';
   const lub = equipments.find(({ id }) => id === Equipments.Lubrification.id);
 
   return (
@@ -22,7 +27,7 @@ export default function Card(props: GearStats) {
       <div className={styles.cardContainer} onClick={() => handleOpenModal(id)}>
         <header>
           {name}
-          {activityType === 'Ride' ? (
+          {isRide ? (
             <MdDirectionsBike className={styles.iconBike} />
           ) : (
             <MdDirectionsRun className={styles.iconRun} />
@@ -33,7 +38,7 @@ export default function Card(props: GearStats) {
           <p>{`${locale.format(',.2f')(distance / 1000)} km`}</p>
           <p>{`${secondsToHms(movingTime)}h`}</p>
 
-          {activityType === 'Ride' && lub && (
+          {isRide && lub && (
             <div>
               {lub.distance != 0 ? (
                 <p>{`. lubrificada a: ${locale.format(',.2f')(
@@ -53,7 +58,7 @@ export default function Card(props: GearStats) {
             <div>
               <div>
                 <span>
-                  {activityType === 'Ride' ? (
+                  {isRide ? (
                     <MdDirectionsBike color='var(--light-blue)' />
                   ) : (
                     <MdDirectionsRun color='var(--orange-strava)' />
@@ -74,17 +79,15 @@ export default function Card(props: GearStats) {
             </section>
           </header>
           <ul className={styles.timeline}>
-            {activityType === 'Ride' &&
-              equipments.map((e, index) => {
-                return (
-                  <CardItem
-                    equipment={e}
-                    distance={distance}
-                    movingTime={movingTime}
-                    key={index}
-                  />
-                );
-              })}
+            {isRide &&
+              equipments.map((e) => (
+                <CardItem
+                  key={e.id}
+                  equipment={e}
+                  distance={distance}
+                  movingTime={movingTime}
+                />
+              ))}
           </ul>
         </main>
       </Modal>

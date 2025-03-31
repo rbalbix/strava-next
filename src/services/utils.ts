@@ -1,5 +1,7 @@
 import * as d3 from 'd3-format';
 import { ActivityBase } from './activity';
+import { format } from 'date-fns';
+import { Equipment } from './gear';
 
 export type LocalActivity = {
   lastUpdated: number;
@@ -46,14 +48,41 @@ function fallbackCopyTextToClipboard(text: string) {
 
   document.body.removeChild(textArea);
 }
+
 function copyTextToClipboard(text: string) {
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text);
     return;
   }
-  navigator.clipboard.writeText(text).then(() => {
-    return;
-  });
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+      return;
+    })
+    .catch((err) => console.error('Erro ao copiar:', err));
 }
 
-export { locale, secondsToHms, saveLocalStat, copyTextToClipboard };
+function copyEventDetailsToClipboard(
+  equipment: Equipment,
+  distance: number,
+  movingTime: number
+) {
+  const formattedDate = format(new Date(), 'dd/MM/yyyy');
+  const formattedDistance = locale.format(',.2f')(distance / 1000);
+  const formattedEquipmentDistance = locale.format(',.2f')(
+    equipment.distance / 1000
+  );
+  const formattedTime = secondsToHms(movingTime);
+
+  const text = `. ${formattedDate} - ${formattedDistance} km - ${formattedTime} h [${formattedEquipmentDistance} km]`;
+
+  copyTextToClipboard(text);
+}
+
+export {
+  locale,
+  secondsToHms,
+  saveLocalStat,
+  copyTextToClipboard,
+  copyEventDetailsToClipboard,
+};

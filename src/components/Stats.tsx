@@ -47,18 +47,13 @@ export default function Stats() {
     const gearStats: GearStats[] = [];
 
     activities.sort((a, b) => {
-      if (a.start_date_local < b.start_date_local) return 1;
-      if (a.start_date_local > b.start_date_local) return -1;
-      return 0;
+      if (a.gear_id !== b.gear_id) {
+        return a.gear_id.localeCompare(b.gear_id);
+      }
+      return b.start_date_local.localeCompare(a.start_date_local);
     });
 
-    activities.sort((a, b) => {
-      if (a.gear_id > b.gear_id) return 1;
-      if (a.gear_id < b.gear_id) return -1;
-      return 0;
-    });
-
-    gears.map((gear) => {
+    gears.forEach((gear) => {
       let count = 0;
       let distance = 0;
       let movingTime = 0;
@@ -88,53 +83,55 @@ export default function Stats() {
                   ({ id }) => id === equipment.id
                 );
 
-                // When tubeless, tubes does not matter.
-                if (equipment.id === Equipments.Tubeless.id) {
-                  equipmentsStatTemplate.map((e) => {
-                    if (
-                      e.id === Equipments.Tube.id ||
-                      e.id === Equipments.FrontTube.id ||
-                      e.id === Equipments.RearTube.id
-                    ) {
-                      e.isRegistered = true;
-                    }
-                  });
-                }
+                switch (equipment.id) {
+                  // When tubeless, tubes does not matter.
+                  case Equipments.Tubeless.id:
+                    equipmentsStatTemplate.forEach((e) => {
+                      if (
+                        e.id === Equipments.Tube.id ||
+                        e.id === Equipments.FrontTube.id ||
+                        e.id === Equipments.RearTube.id
+                      ) {
+                        e.isRegistered = true;
+                      }
+                    });
+                    break;
 
-                // When pair of breaks, only rear or front does not matter.
-                if (equipment.id === Equipments.Break.id) {
-                  equipmentsStatTemplate.map((e) => {
-                    if (
-                      e.id === Equipments.FrontBreak.id ||
-                      e.id === Equipments.RearBreak.id
-                    ) {
-                      e.isRegistered = true;
-                    }
-                  });
-                }
+                  // When pair of breaks, only rear or front does not matter.
+                  case Equipments.Break.id:
+                    equipmentsStatTemplate.forEach((e) => {
+                      if (
+                        e.id === Equipments.FrontBreak.id ||
+                        e.id === Equipments.RearBreak.id
+                      ) {
+                        e.isRegistered = true;
+                      }
+                    });
+                    break;
 
-                // When new suspension, suspencion review/kit does not matter.
-                if (equipment.id === Equipments.Suspension.id) {
-                  equipmentsStatTemplate.map((e) => {
-                    if (
-                      e.id === Equipments.SuspensionReview.id ||
-                      e.id === Equipments.SuspensionKit.id
-                    ) {
-                      e.isRegistered = true;
-                    }
-                  });
-                }
+                  // When new suspension, suspencion review/kit does not matter.
+                  case Equipments.Suspension.id:
+                    equipmentsStatTemplate.forEach((e) => {
+                      if (
+                        e.id === Equipments.SuspensionReview.id ||
+                        e.id === Equipments.SuspensionKit.id
+                      ) {
+                        e.isRegistered = true;
+                      }
+                    });
+                    break;
 
-                // When new shock, shock review/kit does not matter.
-                if (equipment.id === Equipments.Shock.id) {
-                  equipmentsStatTemplate.map((e) => {
-                    if (
-                      e.id === Equipments.ShockReview.id ||
-                      e.id === Equipments.ShockKit.id
-                    ) {
-                      e.isRegistered = true;
-                    }
-                  });
+                  // When new shock, shock review/kit does not matter.
+                  case Equipments.Shock.id:
+                    equipmentsStatTemplate.forEach((e) => {
+                      if (
+                        e.id === Equipments.ShockReview.id ||
+                        e.id === Equipments.ShockKit.id
+                      ) {
+                        e.isRegistered = true;
+                      }
+                    });
+                    break;
                 }
 
                 // When suspension review or shock review, the word
@@ -198,58 +195,63 @@ export default function Stats() {
 
   async function updateStats(strava: Strava, gears: SummaryGearWithNickName[]) {
     const daysToSearch = 10;
+    const cutoffDate = addDays(new Date(), -daysToSearch);
     try {
       if (window.localStorage) {
         if (localStorage.getItem('local-stat') !== null) {
-          const localActivities: LocalActivity = JSON.parse(
-            localStorage.getItem('local-stat')
-          );
+          const localStatData = localStorage.getItem('local-stat');
+          if (localStatData) {
+            try {
+              const localActivities: LocalActivity = JSON.parse(localStatData);
 
-          const activitiesFromStravaAPI = await getActivities(
-            strava,
-            gears,
-            null,
-            localActivities.lastUpdated
-          );
+              const activitiesFromStravaAPI = await getActivities(
+                strava,
+                gears,
+                null,
+                localActivities.lastUpdated
+              );
 
-          createGearStats(gears, [
-            ...activitiesFromStravaAPI,
-            ...localActivities.activities,
-          ]);
+              createGearStats(gears, [
+                ...activitiesFromStravaAPI,
+                ...localActivities.activities,
+              ]);
 
-          // store the activities difference, if exists
-          if (
-            differenceInDays(
-              addDays(new Date(), -daysToSearch),
-              fromUnixTime(localActivities.lastUpdated)
-            ) !== 0
-          ) {
-            const activitiesToStore = activitiesFromStravaAPI.filter(
-              (activity) => {
-                return (
-                  new Date(activity.start_date_local) <
-                  addDays(new Date(), -daysToSearch)
+              // store the activities difference, if exists
+              if (
+                differenceInDays(
+                  cutoffDate,
+                  fromUnixTime(localActivities.lastUpdated)
+                ) !== 0
+              ) {
+                const activitiesToStore = activitiesFromStravaAPI.filter(
+                  (activity) => {
+                    return new Date(activity.start_date_local) < cutoffDate;
+                  }
                 );
-              }
-            );
 
-            saveLocalStat({
-              lastUpdated: getUnixTime(addDays(new Date(), -daysToSearch)),
-              activities: [...activitiesToStore, ...localActivities.activities],
-            });
+                saveLocalStat({
+                  lastUpdated: getUnixTime(cutoffDate),
+                  activities: [
+                    ...activitiesToStore,
+                    ...localActivities.activities,
+                  ],
+                });
+              }
+            } catch (error) {
+              console.warn('Erro ao carregar estatísticas locais:', error);
+              setErrorInfo(error);
+              signOut();
+            }
           }
         } else {
           const { activities } = await executeCompleteStats(strava, gears);
 
           const activitiesToStore = activities.filter((activity) => {
-            return (
-              new Date(activity.start_date_local) <
-              addDays(new Date(), -daysToSearch)
-            );
+            return new Date(activity.start_date_local) < cutoffDate;
           });
 
           saveLocalStat({
-            lastUpdated: getUnixTime(addDays(new Date(), -daysToSearch)),
+            lastUpdated: getUnixTime(cutoffDate),
             activities: activitiesToStore,
           });
         }
@@ -286,9 +288,9 @@ export default function Stats() {
             <span>{Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />}</span>
           </div>
         ) : (
-          gearStats.map((gearStat, index) => {
+          gearStats.map((gearStat) => {
             return (
-              <div key={index}>
+              <div key={gearStat.id}>
                 <Card
                   key={gearStat.id}
                   id={gearStat.id}

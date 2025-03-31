@@ -29,56 +29,48 @@ export default function Header() {
   const [sidebar, setSidebar] = useState(false);
   const showSidebar = () => setSidebar(!sidebar);
 
+  const authQuery = {
+    client_id,
+    response_type,
+    redirect_uri,
+    approval_prompt,
+    scope,
+  };
+
   useEffect(() => {
+    const performanceEntries = window.performance.getEntries();
+    const firstEntry = performanceEntries.length ? performanceEntries[0] : null;
+
     if (
-      (window.performance.getEntries()[0] as PerformanceNavigationTiming)
-        .type === 'reload'
+      firstEntry &&
+      (firstEntry as PerformanceNavigationTiming).type === 'reload'
     ) {
       if (codeReturned) {
         route.replace({
           pathname: `${baseURL}/authorize`,
-          query: {
-            client_id,
-            response_type,
-            redirect_uri,
-            approval_prompt,
-            scope,
-          },
+          query: authQuery,
         });
       } else {
         signOut();
       }
     }
-  }, []);
+  }, [codeReturned]);
 
   return (
     <div className={styles.headerContainer}>
       {!codeReturned ? (
         <>
           <div>
-            {' '}
             <FaInfoCircle
               onClick={() => handleOpenModal('info')}
               className={styles.headerInfoIcon}
             />
           </div>
           <div>
-            <Link
-              href={{
-                pathname: `${baseURL}/authorize`,
-                query: {
-                  client_id,
-                  response_type,
-                  redirect_uri,
-                  approval_prompt,
-                  scope,
-                },
-              }}
-            >
+            <Link href={{ pathname: `${baseURL}/authorize`, query: authQuery }}>
               <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>
-
           <InitialInfoModal />
         </>
       ) : (
@@ -86,7 +78,7 @@ export default function Header() {
           {athlete ? (
             <div className={styles.sidebarButton}>
               <FaBars onClick={showSidebar} className={styles.sidebarIcon} />
-              {sidebar && <Sidebar active={setSidebar} />}
+              {sidebar && <Sidebar active={() => setSidebar(false)} />}
             </div>
           ) : (
             <span className={styles.spinnerLoading}>

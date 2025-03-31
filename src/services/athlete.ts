@@ -1,13 +1,23 @@
 import { DetailedAthlete, Strava } from 'strava';
 
 async function getAthlete(strava: Strava) {
-  return await strava.athletes.getLoggedInAthlete();
+  try {
+    return strava.athletes.getLoggedInAthlete();
+  } catch (error) {
+    console.error('Erro ao buscar atleta:', error);
+    throw error;
+  }
 }
 
 async function getAthleteStats(strava: Strava, athlete: DetailedAthlete) {
-  return await strava.athletes.getStats({
-    id: athlete.id,
-  });
+  try {
+    return strava.athletes.getStats({
+      id: athlete.id,
+    });
+  } catch (error) {
+    console.error('Erro ao buscar estatísticas do atleta:', error);
+    throw error;
+  }
 }
 
 export { getAthlete, getAthleteStats };

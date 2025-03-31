@@ -24,42 +24,31 @@ async function getActivities(
   after: number
 ) {
   let page = 1;
-  const gearIds = [];
   let private_note = '';
   const activities: SummaryActivity[] = [];
   let data: SummaryActivity[] = [];
   const activitiesPreparedToStore: ActivityBase[] = [];
+  const gearIds = gears.map((gear) => gear.id);
 
-  gears.forEach((gear) => gearIds.push(gear['id']));
+  const queryParams: {
+    before?: number;
+    after?: number;
+    per_page: number;
+    page: number;
+  } = {
+    per_page: 200,
+    page,
+  };
+
+  if (before) queryParams.before = before;
+  if (after) queryParams.after = after;
 
   do {
-    after & before
-      ? (data = await strava.activities.getLoggedInAthleteActivities({
-          before,
-          after,
-          per_page: 200,
-          page,
-        }))
-      : before
-      ? (data = await strava.activities.getLoggedInAthleteActivities({
-          before,
-          per_page: 200,
-          page,
-        }))
-      : after
-      ? (data = await strava.activities.getLoggedInAthleteActivities({
-          after,
-          per_page: 200,
-          page,
-        }))
-      : (data = await strava.activities.getLoggedInAthleteActivities({
-          per_page: 200,
-          page,
-        }));
-
+    data = await strava.activities.getLoggedInAthleteActivities(queryParams);
     activities.push(...data);
     page++;
-  } while (data.length !== 0 && page > 1);
+    queryParams.page = page;
+  } while (data.length !== 0);
 
   const activitiesFilteredByActiveGear = activities.filter((activity) => {
     return activity.gear_id != null && gearIds.includes(activity.gear_id);
@@ -67,13 +56,23 @@ async function getActivities(
 
   await Promise.all(
     activitiesFilteredByActiveGear.map(async (activity) => {
+      let private_note = '';
+
       if (activity.name.includes('*')) {
-        const detail: DetailedActivity =
-          await strava.activities.getActivityById({
-            id: activity.id,
-          });
-        private_note = detail.private_note;
+        try {
+          const detail: DetailedActivity =
+            await strava.activities.getActivityById({
+              id: activity.id,
+            });
+          private_note = detail.private_note || '';
+        } catch (error) {
+          console.error(
+            `Erro ao obter detalhes da atividade ${activity.id}:`,
+            error
+          );
+        }
       }
+
       activitiesPreparedToStore.push({
         id: activity.id,
         name: activity.name,
