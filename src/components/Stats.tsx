@@ -30,6 +30,10 @@ export default function Stats() {
 
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
 
+  const [randomIcon] = useState(
+    Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />
+  );
+
   async function getAthleteInfo(strava: Strava) {
     const athlete: DetailedAthlete = await getAthlete(strava);
     setAthleteInfo(athlete);
@@ -74,7 +78,7 @@ export default function Stats() {
         });
       });
 
-      activities.map((activity) => {
+      activities.forEach((activity) => {
         if (activity.gear_id === gear.id) {
           if (activity.name.includes('*')) {
             equipments.forEach((equipment) => {
@@ -265,19 +269,29 @@ export default function Stats() {
   }
 
   useEffect(() => {
+    let isMounted = true;
+
     async function init() {
       try {
         const strava = await signIn();
+        if (!isMounted) return;
+
         const { athlete } = await getAthleteInfo(strava);
         const gears = getGears(athlete);
         await updateStats(strava, gears);
       } catch (error) {
-        setErrorInfo(error);
-        signOut();
+        if (isMounted) {
+          setErrorInfo(error);
+          signOut();
+        }
       }
     }
 
     init();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -285,7 +299,7 @@ export default function Stats() {
       <main>
         {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <span>{Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />}</span>
+            <span>{randomIcon}</span>
           </div>
         ) : (
           gearStats.map((gearStat) => {

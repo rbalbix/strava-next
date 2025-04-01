@@ -16,8 +16,11 @@ import Link from 'next/link';
 import ComponentInfo from './ComponentInfo';
 import InitialInfoModal from './InitialInfoModal';
 import { Divider } from '@mui/material';
+interface SidebarProps {
+  active: (state: boolean) => void;
+}
 
-export default function Sidebar({ active }) {
+export default function Sidebar({ active }: SidebarProps) {
   const { athlete, handleOpenModal } = useContext(AuthContext);
 
   const closeSidebar = () => {
@@ -26,21 +29,28 @@ export default function Sidebar({ active }) {
 
   return (
     <div className={styles.sidebarContainer}>
-      <FaTimes onClick={closeSidebar} className={styles.closeIcon} />
+      <FaTimes
+        onClick={closeSidebar}
+        className={styles.closeIcon}
+        aria-label='Fechar menu lateral'
+      />
       <div className={styles.sidebarContent}>
         <AthleteAvatar />
 
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaHome className={styles.sidebarItemIcon} />
+          <FaHome
+            className={styles.sidebarItemIcon}
+            aria-label='Ir para Meu Strava'
+          />
           <Link
             href={{
               pathname: `https://strava.com/dashboard`,
             }}
             passHref
             target='_blank'
-            rel='noreferrer'
+            rel='noopener noreferrer'
             prefetch
           >
             <span className={styles.linkText}>Meu Strava</span>
@@ -50,10 +60,15 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaChartBar className={styles.sidebarItemIcon} />
+          <FaChartBar
+            className={styles.sidebarItemIcon}
+            aria-label='Estatísticas'
+          />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal(athlete.id)}
+            role='button'
+            tabIndex={0}
           >
             Estatísticas
           </span>
@@ -63,10 +78,15 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaMedapps className={styles.sidebarItemIcon} />
+          <FaMedapps
+            className={styles.sidebarItemIcon}
+            aria-label='Componentes'
+          />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal('equipments')}
+            role='button'
+            tabIndex={1}
           >
             Componentes
           </span>
@@ -76,10 +96,12 @@ export default function Sidebar({ active }) {
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
 
         <div className={styles.sidebarItemContainer}>
-          <FaInfoCircle className={styles.sidebarItemIcon} />
+          <FaInfoCircle className={styles.sidebarItemIcon} aria-label='Ajuda' />
           <span
             className={styles.linkText}
             onClick={() => handleOpenModal('info')}
+            role='button'
+            tabIndex={2}
           >
             Ajuda
           </span>

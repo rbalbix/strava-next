@@ -3,24 +3,19 @@ import { FaMedapps } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
 
-import { Equipments } from '../services/equipment';
+import { Equipment, Equipments } from '../services/equipment';
 import { Modal } from './Modal';
 
 import styles from '../styles/components/Footer.module.css';
 import { copyTextToClipboard } from '../services/utils';
 import { Divider } from '@mui/material';
 
-type Equipment = {
-  id: string;
-  show: string;
-};
-
 export default function ComponentInfo() {
   const { handleCloseModal } = useContext(AuthContext);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
 
   useEffect(() => {
-    setEquipment(Object.values(Equipments));
+    if (Equipments) setEquipment(Object.values(Equipments));
   }, []);
 
   return (
@@ -36,7 +31,7 @@ export default function ComponentInfo() {
                 <span>Componentes:</span>
               </div>
               <div>
-                <MdClose color='var(--stat-icon)' />
+                <MdClose color='var(--stat-icon)' onClick={handleCloseModal} />
               </div>
             </div>
           </header>

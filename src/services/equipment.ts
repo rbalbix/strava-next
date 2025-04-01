@@ -167,14 +167,14 @@ export const Equipments = {
   Pulley: {
     id: 'pulley',
     caption: 'roldanas do câmbio',
-    show: 'Roldanas do câmbio'
+    show: 'Roldanas do câmbio',
   },
   Shifter: {
     id: 'rearshifter',
     caption: 'shifter[traseiro]:',
     show: 'Trocador traseiro',
   },
-  
+
   Helmet: {
     id: 'helmet',
     caption: 'capacete:',
@@ -185,4 +185,9 @@ export const Equipments = {
     caption: 'sapatilha:',
     show: 'Sapatilha',
   },
+};
+
+export type Equipment = {
+  id: string;
+  show: string;
 };

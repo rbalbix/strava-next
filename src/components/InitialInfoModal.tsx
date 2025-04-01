@@ -16,11 +16,18 @@ export default function InitialInfoModal() {
           <div>
             <div>
               <span>
-                <FaInfoCircle color='var(--stat-icon)' />
+                <FaInfoCircle
+                  aria-label='Ícone de informações'
+                  color='var(--stat-icon)'
+                />
               </span>
             </div>
             <div>
-              <MdClose color='var(--stat-icon)' />
+              <MdClose
+                aria-label='Fechar janela modal'
+                color='var(--stat-icon)'
+                onClick={handleCloseModal}
+              />
             </div>
           </div>
         </header>

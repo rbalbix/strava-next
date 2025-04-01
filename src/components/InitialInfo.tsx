@@ -22,7 +22,7 @@ export default function InitialInfo() {
         <div className={styles.screen}>
           <Image
             src='/images/login.png'
-            alt='Tela de Login do aplicativo'
+            alt='Tela inicial do aplicativo com botão de login via Strava'
             width={203}
             height={387}
             priority
@@ -113,11 +113,11 @@ export default function InitialInfo() {
 
         <h2>Passo 4: Lista de Códigos dos Componentes</h2>
         <div>
-          Para monitorar diferentes tipos de <span>componentes</span>do
-          equipamento, você precisa adicionar o <span>código</span>
-          correspondente no campo de <span>Observações Privadas</span>na
-          atividade do Strava e incluir um <span>&quot;*&quot;</span>no título
-          da atividade.
+          Para monitorar diferentes tipos de <span>componentes</span> do
+          equipamento, você precisa adicionar o <span>código</span>{' '}
+          correspondente no campo de
+          <span>Observações Privadas</span> na atividade do Strava e incluir um
+          <span>&quot;*&quot;</span> no título da atividade.
         </div>
 
         <div className={styles.screen}>
@@ -132,8 +132,9 @@ export default function InitialInfo() {
 
         <h3>Lista dos códigos dos componentes:</h3>
         <div>
-          Esta lista pode ser aberta clicando no ícone <FaMedapps /> que fica no
-          final da lista de equipamentos.
+          Esta lista pode ser aberta clicando no ícone{' '}
+          <FaMedapps aria-label='Ícone de lista de componentes' />
+          que fica no final da lista de equipamentos.
         </div>
 
         <div className={styles.screen}>
@@ -158,7 +159,11 @@ export default function InitialInfo() {
             Caso a atualização feita na atividade do Strava não apareça na lista
             de componentes do equipamento, você vai precisar limpar o cache do
             navegador.{' '}
-            <a href='http://bit.ly/4fdUkw1' target='_blank'>
+            <a
+              href='http://bit.ly/4fdUkw1'
+              target='_blank'
+              rel='noopener noreferrer'
+            >
               Como limpar o cache do navegador?
             </a>
           </li>
