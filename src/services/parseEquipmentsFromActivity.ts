@@ -23,6 +23,7 @@ export function parseEquipmentsFromActivity(
       const copy: Equipment = {
         id: base.id,
         caption: base.caption,
+        show: base.show,
         distance,
         movingTime,
         date: activityDate,
