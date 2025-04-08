@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import styles from '../styles/components/DiskIcon.module.css';
 
-export default function DiskIcon() {
+function DiskIcon() {
   return (
     <img
       className={styles.container}
@@ -11,3 +12,5 @@ export default function DiskIcon() {
     />
   );
 }
+
+export default memo(DiskIcon);

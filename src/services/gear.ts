@@ -1,9 +1,5 @@
-import {
-  ActivityType,
-  DetailedAthlete,
-  ResourceState,
-  SummaryGear,
-} from 'strava';
+import { ActivityType, DetailedAthlete, ResourceState } from 'strava';
+import { Equipment } from './equipment';
 
 export interface SummaryGearWithNickName {
   id: string;
@@ -13,15 +9,6 @@ export interface SummaryGearWithNickName {
   resource_state: ResourceState;
   distance: number;
 }
-
-export type Equipment = {
-  id: string;
-  caption: string;
-  distance: number;
-  movingTime: number;
-  date?: string;
-  isRegistered: boolean;
-};
 
 export type GearStats = {
   id: string;

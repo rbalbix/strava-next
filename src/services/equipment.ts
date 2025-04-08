@@ -187,7 +187,23 @@ export const Equipments = {
   },
 };
 
+// export type Equipment = {
+//   id: string;
+//   show: string;
+// };
+
+// export type EquipmentWithStats = Equipment & {
+//   distance: number;
+//   movingTime: number;
+//   date: string;
+//   isRegistered: boolean;
+// };
+
 export type Equipment = {
   id: string;
-  show: string;
+  caption: string;
+  distance: number;
+  movingTime: number;
+  date?: string;
+  isRegistered: boolean;
 };

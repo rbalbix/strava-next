@@ -1,28 +1,18 @@
 import { Divider } from '@mui/material';
 import { addDays, differenceInDays, fromUnixTime, getUnixTime } from 'date-fns';
 import { useContext, useEffect, useState } from 'react';
-import {
-  ActivityStats,
-  ActivityType,
-  DetailedAthlete,
-  Strava,
-  SummaryGear,
-} from 'strava';
+import { ActivityType, DetailedAthlete, Strava } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import { ActivityBase, getActivities } from '../services/activity';
 import { getAthlete, getAthleteStats } from '../services/athlete';
-import { Equipments } from '../services/equipment';
-import {
-  Equipment,
-  GearStats,
-  SummaryGearWithNickName,
-  getGears,
-} from '../services/gear';
+import { Equipment, Equipments } from '../services/equipment';
+import { GearStats, SummaryGearWithNickName, getGears } from '../services/gear';
 import { LocalActivity, saveLocalStat } from '../services/utils';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
+import { mergeGearStats } from '../services/mergeGearStats';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
@@ -34,19 +24,10 @@ export default function Stats() {
     Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />
   );
 
-  async function getAthleteInfo(strava: Strava) {
-    const athlete: DetailedAthlete = await getAthlete(strava);
-    setAthleteInfo(athlete);
-
-    const athleteStats: ActivityStats = await getAthleteStats(strava, athlete);
-    setAthleteInfoStats(athleteStats);
-
-    return { athlete, athleteStats };
-  }
-
   function createGearStats(
     gears: SummaryGearWithNickName[],
-    activities: ActivityBase[]
+    activities: ActivityBase[],
+    previousGearStats?: GearStats[]
   ) {
     const gearStats: GearStats[] = [];
 
@@ -184,6 +165,12 @@ export default function Stats() {
       }
     });
 
+    if (previousGearStats) {
+      const merged = mergeGearStats(previousGearStats, gearStats);
+      setGearStats(merged);
+      return merged;
+    }
+
     setGearStats(gearStats);
     return gearStats;
   }
@@ -215,10 +202,11 @@ export default function Stats() {
                 localActivities.lastUpdated
               );
 
-              createGearStats(gears, [
-                ...activitiesFromStravaAPI,
-                ...localActivities.activities,
-              ]);
+              createGearStats(
+                gears,
+                [...activitiesFromStravaAPI, ...localActivities.activities],
+                gearStats
+              );
 
               // store the activities difference, if exists
               if (
@@ -276,7 +264,32 @@ export default function Stats() {
         const strava = await signIn();
         if (!isMounted) return;
 
-        const { athlete } = await getAthleteInfo(strava);
+        let athlete: DetailedAthlete;
+
+        const cachedAthlete = sessionStorage.getItem('athlete');
+        const cachedStats = sessionStorage.getItem('athleteStats');
+
+        const MAX_AGE = 3 * 60 * 60 * 1000; // 3 horas
+
+        const cachedTime = Number(sessionStorage.getItem('athleteCacheTime'));
+        const isFresh = Date.now() - cachedTime < MAX_AGE;
+
+        if (cachedAthlete && cachedStats && isFresh) {
+          athlete = JSON.parse(cachedAthlete);
+          setAthleteInfo(athlete);
+          setAthleteInfoStats(JSON.parse(cachedStats));
+        } else {
+          athlete = await getAthlete(strava);
+          const stats = await getAthleteStats(strava, athlete);
+
+          sessionStorage.setItem('athlete', JSON.stringify(athlete));
+          sessionStorage.setItem('athleteStats', JSON.stringify(stats));
+          sessionStorage.setItem('athleteCacheTime', Date.now().toString());
+
+          setAthleteInfo(athlete);
+          setAthleteInfoStats(stats);
+        }
+
         const gears = getGears(athlete);
         await updateStats(strava, gears);
       } catch (error) {

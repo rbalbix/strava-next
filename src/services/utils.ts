@@ -1,7 +1,7 @@
 import * as d3 from 'd3-format';
 import { ActivityBase } from './activity';
 import { format } from 'date-fns';
-import { Equipment } from './gear';
+import { Equipment } from './equipment';
 
 export type LocalActivity = {
   lastUpdated: number;

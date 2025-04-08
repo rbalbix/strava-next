@@ -1,7 +1,7 @@
 import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Equipments } from '../services/equipment';
-import { Equipment } from '../services/gear';
+import { Equipment } from '../services/equipment';
 import {
   copyEventDetailsToClipboard,
   locale,
