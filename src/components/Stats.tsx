@@ -52,6 +52,7 @@ export default function Stats() {
         equipmentsStatTemplate.push({
           id: equipment.id,
           caption: equipment.caption,
+          show: equipment.show,
           distance: 0,
           movingTime: 0,
           date: '',
