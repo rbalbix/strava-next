@@ -3,13 +3,13 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import { FaBars, FaInfoCircle } from 'react-icons/fa';
 import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
-import { PushSpinner } from 'react-spinners-kit';
 import { baseURL } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
 import Sidebar from './Sidebar';
 import InitialInfoModal from './InitialInfoModal';
+import { PulseLoader } from 'react-spinners';
 
 export default function Header() {
   const route = useRouter();
@@ -82,10 +82,10 @@ export default function Header() {
             </div>
           ) : (
             <span className={styles.spinnerLoading}>
-              <PushSpinner
-                size={20}
-                loading={true}
+              <PulseLoader
                 color='var(--athlete-name)'
+                loading={true}
+                size={20}
               />
             </span>
           )}

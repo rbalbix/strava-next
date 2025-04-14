@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Equipments } from '../services/equipment';
 import { Equipment } from '../services/equipment';
@@ -18,8 +18,9 @@ export default function CardItem({
 }: Props) {
   if (!e.date) return null;
 
-  const formattedDate = format(new Date(e.date), 'dd/MM/yyyy');
-  const timeAgo = formatDistanceToNow(new Date(e.date), { locale: ptBR });
+  const localDate = parseISO(e.date.replace(/Z$/, ''));
+  const formattedDate = format(localDate, 'dd/MM/yyyy');
+  const timeAgo = formatDistanceToNow(localDate, { locale: ptBR });
 
   const renderEvent = (message: string) => (
     <li className={styles.event}>

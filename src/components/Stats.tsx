@@ -19,10 +19,11 @@ export default function Stats() {
     useContext(AuthContext);
 
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
+  const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
 
-  const [randomIcon] = useState(
-    Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />
-  );
+  // const [randomIcon] = useState(
+  //   Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />
+  // );
 
   function createGearStats(
     gears: SummaryGearWithNickName[],
@@ -259,6 +260,9 @@ export default function Stats() {
 
   useEffect(() => {
     let isMounted = true;
+
+    const icon = Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />;
+    setRandomIcon(icon);
 
     async function init() {
       try {
