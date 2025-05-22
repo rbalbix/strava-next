@@ -24,3 +24,17 @@
   width: 60%;
   background-color: var(--light-gray);
 }
+
+.emptyState {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: var(---light-gray);
+}
+
+.iconBrandStrava {
+  color: var(--orange-strava);
+}
