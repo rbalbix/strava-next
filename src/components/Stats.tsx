@@ -13,16 +13,13 @@ import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
 import { mergeGearStats } from '../services/mergeGearStats';
-import { TbBrandStrava } from 'react-icons/tb';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
     useContext(AuthContext);
 
-  const [gear, setGear] = useState<SummaryGearWithNickName[]>([]);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   function createGearStats(
     gears: SummaryGearWithNickName[],
@@ -254,8 +251,6 @@ export default function Stats() {
     } catch (error) {
       setErrorInfo(error);
       signOut();
-    } finally {
-      setIsLoading(false);
     }
   }
 
@@ -296,12 +291,8 @@ export default function Stats() {
           setAthleteInfoStats(stats);
         }
 
-        setGear(getGears(athlete));
-        if (!gear || gear.length === 0) {
-          setIsLoading(false);
-          return;
-        }
-        await updateStats(strava, gear);
+        const gears = getGears(athlete);
+        await updateStats(strava, gears);
       } catch (error) {
         if (isMounted) {
           setErrorInfo(error);
@@ -320,19 +311,9 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
-        {isLoading ? (
+        {gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
             <span>{randomIcon}</span>
-          </div>
-        ) : !gear || gear.length === 0 ? (
-          <div className={styles.emptyState}>
-            <TbBrandStrava size={35} className={styles.iconBrandStrava} />
-            <span>Nenhum equipamento cadastrado no Strava</span>
-          </div>
-        ) : !gearStats || gearStats.length === 0 ? (
-          <div className={styles.emptyState}>
-            <TbBrandStrava size={35} className={styles.iconBrandStrava} />
-            <span>Nenhuma atividade criada no Strava</span>
           </div>
         ) : (
           gearStats.map((gearStat) => {
