@@ -13,11 +13,14 @@ import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
 import { mergeGearStats } from '../services/mergeGearStats';
+import { TbBrandStrava } from 'react-icons/tb';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
     useContext(AuthContext);
 
+  const [hasGear, setHasGear] = useState<boolean>(true);
+  const [hasActivities, setHasActivities] = useState<boolean>(true);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
 
@@ -27,6 +30,11 @@ export default function Stats() {
     previousGearStats?: GearStats[]
   ) {
     const gearStats: GearStats[] = [];
+
+    if (!activities || activities.length == 0) {
+      setHasActivities(false);
+      return;
+    }
 
     activities.sort((a, b) => {
       if (a.gear_id !== b.gear_id) {
@@ -292,6 +300,10 @@ export default function Stats() {
         }
 
         const gears = getGears(athlete);
+        if (!gears || gears.length == 0) {
+          setHasGear(false);
+          return;
+        }
         await updateStats(strava, gears);
       } catch (error) {
         if (isMounted) {
@@ -311,7 +323,26 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
-        {gearStats.length === 0 ? (
+        {!hasGear ? (
+          <div className={styles.emptyState}>
+            <TbBrandStrava size={50} className={styles.iconBrandStrava} />
+            <span>Nenhum equipamento cadastrado no Strava</span>
+            <span className={styles.emptyStateInstructionsText}>
+              Vá em <code>Configurações &gt; Meu equipamento</code> e adicione
+              um novo equipamento.
+            </span>
+          </div>
+        ) : !hasActivities ? (
+          <div className={styles.emptyState}>
+            <TbBrandStrava size={50} className={styles.iconBrandStrava} />
+            <span>
+              Nenhuma atividade criada no Strava ou associada a um equipamento
+            </span>
+            <span className={styles.emptyStateInstructionsText}>
+              Crie uma atividade ou associe a atividade ao seu equipamento
+            </span>
+          </div>
+        ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
             <span>{randomIcon}</span>
           </div>

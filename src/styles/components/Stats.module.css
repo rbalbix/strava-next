@@ -27,14 +27,23 @@
 
 .emptyState {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
   color: var(---light-gray);
+  width: 80%;
+  margin: auto;
+  text-align: center;
 }
 
 .iconBrandStrava {
   color: var(--orange-strava);
+}
+
+.emptyStateInstructionsText {
+  width: 60%;
+  font: 400 1.1rem 'JetBrains Mono', sans-serif;
+  text-align: center;
 }

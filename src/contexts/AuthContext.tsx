@@ -95,10 +95,14 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   }
 
   function signOut() {
-    router.push('/');
+    sessionStorage.removeItem('athlete');
+    sessionStorage.removeItem('athleteStats');
+    sessionStorage.removeItem('athleteCacheTime');
 
     setCodeReturned(null);
     setAthlete(null);
+
+    router.push('/');
   }
 
   function handleOpenModal(id: string) {
