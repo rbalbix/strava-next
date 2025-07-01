@@ -19,7 +19,7 @@ export const Equipments = {
     show: 'Suspensão (nova)',
   },
   Shock: {
-    id: 'shock',
+    id: 'newshock',
     caption: 'shock:',
     show: 'Shock (novo)',
   },
