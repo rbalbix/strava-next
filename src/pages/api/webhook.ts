@@ -64,26 +64,26 @@ export default async function handler(
 
 // Funções de tratamento de eventos
 async function handleActivityEvent(event: StravaWebhookEvent) {
-  const strava = new Strava({
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-    refresh_token: '',
-  });
+  // const strava = new Strava({
+  //   client_id: CLIENT_ID,
+  //   client_secret: CLIENT_SECRET,
+  //   refresh_token: '',
+  // });
 
   // Buscar detalhes da atividade se for criação/atualização
-  if (event.aspect_type !== 'delete') {
-    const activity = await strava.activities.getActivityById({
-      id: event.object_id,
-      include_all_efforts: false,
-    });
+  // if (event.aspect_type !== 'delete') {
+  //   const activity = await strava.activities.getActivityById({
+  //     id: event.object_id,
+  //     include_all_efforts: false,
+  //   });
 
-    console.log('Detalhes da atividade:', activity.name);
+  //   console.log('Detalhes da atividade:', activity.name);
 
-    // Aqui você pode:
-    // - Atualizar seu banco de dados
-    // - Enviar notificações
-    // - Processar mudanças
-  }
+  // Aqui você pode:
+  // - Atualizar seu banco de dados
+  // - Enviar notificações
+  // - Processar mudanças
+  // }
 
   // Implemente sua lógica de negócios aqui
   // Exemplo: atualizar cache de atividades
