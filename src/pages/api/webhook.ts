@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import axios from 'axios';
+import { Strava } from 'strava';
 
-const CLIENT_ID = process.env.STRAVA_CLIENT_ID as string;
-const CLIENT_SECRET = process.env.STRAVA_CLIENT_SECRET as string;
-const VERIFY_TOKEN = process.env.VERIFY_TOKEN as string;
-const CALLBACK_URL = process.env.CALLBACK_URL as string;
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
 interface StravaWebhookEvent {
   aspect_type: 'create' | 'update' | 'delete';
@@ -16,25 +15,93 @@ interface StravaWebhookEvent {
   updates?: Record<string, unknown>;
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  // 1. Validação do webhook (GET)
   if (req.method === 'GET') {
     const mode = req.query['hub.mode'];
-    const challenge = req.query['hub.challenge'];
     const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
 
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('✅ Webhook validado com sucesso!');
+      console.log('✅ Webhook validado');
       return res.status(200).json({ 'hub.challenge': challenge });
-    } else {
-      return res.status(403).json({ message: 'Token inválido' });
+    }
+    return res.status(403).json({ error: 'Token inválido' });
+  }
+
+  // 2. Processamento de eventos (POST)
+  if (req.method === 'POST') {
+    try {
+      const event = req.body as StravaWebhookEvent;
+      console.log(
+        `📩 Evento recebido (${event.aspect_type}):`,
+        event.object_id
+      );
+
+      // 3. Processar diferentes tipos de eventos
+      switch (event.object_type) {
+        case 'activity':
+          await handleActivityEvent(event);
+          break;
+        case 'athlete':
+          await handleAthleteEvent(event);
+          break;
+      }
+
+      return res.status(200).json({ status: 'processed' });
+    } catch (error) {
+      console.error('Erro ao processar webhook:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 
-  if (req.method === 'POST') {
-    const evento = req.body as StravaWebhookEvent;
-    console.log('📩 Evento recebido:', evento);
+  // 4. Métodos não permitidos
+  return res.status(405).end();
+}
 
-    // Aqui você pode salvar o evento no banco, processar, etc.
-    return res.status(200).send('OK');
+// Funções de tratamento de eventos
+async function handleActivityEvent(event: StravaWebhookEvent) {
+  const strava = new Strava({
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    refresh_token: '',
+  });
+
+  // Buscar detalhes da atividade se for criação/atualização
+  if (event.aspect_type !== 'delete') {
+    const activity = await strava.activities.getActivityById({
+      id: event.object_id,
+      include_all_efforts: false,
+    });
+
+    console.log('Detalhes da atividade:', activity.name);
+
+    // Aqui você pode:
+    // - Atualizar seu banco de dados
+    // - Enviar notificações
+    // - Processar mudanças
   }
+
+  // Implemente sua lógica de negócios aqui
+  // Exemplo: atualizar cache de atividades
+  updateActivityCache(event.object_id, event.aspect_type);
+}
+
+async function handleAthleteEvent(event: StravaWebhookEvent) {
+  // Lógica para eventos relacionados ao atleta
+  console.log('Evento de atleta recebido:', event);
+}
+
+// Função auxiliar para atualizar cache
+function updateActivityCache(
+  activityId: number,
+  action: 'create' | 'update' | 'delete'
+) {
+  // Implemente sua lógica de cache aqui
+  console.log(
+    `Atividade ${activityId} ${action === 'delete' ? 'removida' : 'atualizada'}`
+  );
 }
