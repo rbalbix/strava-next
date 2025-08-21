@@ -1,8 +1,10 @@
 import axios from 'axios';
-import { baseURL } from '../config';
+import { baseURL, stravaAuth } from '../config';
 
 const api = axios.create({
   baseURL,
 });
 
-export default api;
+const apiStravaAuth = axios.create({ baseURL: stravaAuth });
+
+export { api, apiStravaAuth };

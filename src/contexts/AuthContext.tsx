@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
 import { ActivityStats, DetailedAthlete, Strava } from 'strava';
-import api from '../services/api';
+import { api, apiStravaAuth } from '../services/api';
 
 interface AuthContextData {
   codeReturned: string;
@@ -82,10 +82,21 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         },
       });
 
+      const { access_token, refresh_token, expires_at, athlete } =
+        response.data;
+
       const strava = new Strava({
         client_id,
         client_secret,
-        refresh_token: response.data.refresh_token,
+        refresh_token,
+      });
+
+      await apiStravaAuth.post('/', {
+        athleteId: athlete.id,
+        refreshToken: refresh_token,
+        accessToken: access_token,
+        expiresAt: expires_at,
+        athleteInfo: athlete,
       });
 
       return strava;

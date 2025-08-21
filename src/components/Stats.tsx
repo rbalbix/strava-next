@@ -7,7 +7,11 @@ import { ActivityBase, getActivities } from '../services/activity';
 import { getAthlete, getAthleteStats } from '../services/athlete';
 import { Equipment, Equipments } from '../services/equipment';
 import { GearStats, SummaryGearWithNickName, getGears } from '../services/gear';
-import { LocalActivity, saveLocalStat } from '../services/utils';
+import {
+  LocalActivity,
+  saveLocalStat,
+  saveRemoteStat,
+} from '../services/utils';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -194,6 +198,7 @@ export default function Stats() {
     const daysToSearch = 10;
     const cutoffDate = addDays(new Date(), -daysToSearch);
     try {
+      const { id } = JSON.parse(sessionStorage.getItem('athlete'));
       if (window.localStorage) {
         if (localStorage.getItem('local-stat') !== null) {
           const localStatData = localStorage.getItem('local-stat');
@@ -234,6 +239,14 @@ export default function Stats() {
                     ...localActivities.activities,
                   ],
                 });
+
+                await saveRemoteStat(id, {
+                  lastUpdated: getUnixTime(cutoffDate),
+                  activities: [
+                    ...activitiesToStore,
+                    ...localActivities.activities,
+                  ],
+                });
               }
             } catch (error) {
               console.warn('Erro ao carregar estatísticas locais:', error);
@@ -249,6 +262,11 @@ export default function Stats() {
           });
 
           saveLocalStat({
+            lastUpdated: getUnixTime(cutoffDate),
+            activities: activitiesToStore,
+          });
+
+          await saveRemoteStat(id, {
             lastUpdated: getUnixTime(cutoffDate),
             activities: activitiesToStore,
           });

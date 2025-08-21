@@ -2,11 +2,19 @@ import * as d3 from 'd3-format';
 import { ActivityBase } from './activity';
 import { format } from 'date-fns';
 import { Equipment } from './equipment';
+import apiStorage from './apiStorage';
 
 export type LocalActivity = {
   lastUpdated: number;
   activities: ActivityBase[];
 };
+
+export interface RemoteStorageResponse {
+  success: boolean;
+  data?: LocalActivity;
+  error?: string;
+  timestamp: Date;
+}
 
 const locale = d3.formatLocale({
   decimal: ',',
@@ -29,6 +37,65 @@ function secondsToHms(totalSeconds: number) {
 
 function saveLocalStat(value: LocalActivity) {
   localStorage.setItem('local-stat', JSON.stringify(value));
+}
+
+// async function saveRemoteStat(athlete: string, value: LocalActivity) {
+//   const response2 = await apiStorage.post('/', { athlete, value });
+//   console.log('Dentro da função saveRemoteStat POST', response2.data);
+// }
+
+async function saveRemoteStat(
+  athleteId: string,
+  activity: LocalActivity
+): Promise<RemoteStorageResponse> {
+  try {
+    // Validação de entrada
+    if (!athleteId || !activity) {
+      throw new Error('Dados inválidos: athleteId e activity são obrigatórios');
+    }
+
+    console.log(`🔄 Salvando atividades para athlete ${athleteId}`);
+
+    // Chamada à API com timeout
+    const response = await apiStorage.post<RemoteStorageResponse>(
+      '/',
+      {
+        athlete: athleteId,
+        value: activity,
+      },
+      {
+        timeout: 10000, // 10 segundos timeout
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Request-ID': generateRequestId(), // Para tracing
+        },
+      }
+    );
+
+    // Verifica se a resposta é bem-sucedida
+    if (response.status >= 200 && response.status < 300) {
+      console.log('✅ Atividade salva remotamente:', response.data);
+      return {
+        success: true,
+        data: activity,
+        timestamp: new Date(),
+      };
+    }
+
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  } catch (error) {
+    console.error('❌ Erro ao salvar atividade:', error);
+
+    return {
+      success: false,
+      error: error,
+      timestamp: new Date(),
+    };
+  }
+}
+
+export function generateRequestId(): string {
+  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 function fallbackCopyTextToClipboard(text: string) {
@@ -83,6 +150,7 @@ export {
   locale,
   secondsToHms,
   saveLocalStat,
+  saveRemoteStat,
   copyTextToClipboard,
   copyEventDetailsToClipboard,
 };
