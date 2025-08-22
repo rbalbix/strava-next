@@ -84,7 +84,6 @@ export async function getAthleteAccessToken(
   }
 }
 
-// Função para refresh do token
 export async function refreshStravaToken(refreshToken: string) {
   try {
     const response = await api.post(`/token`, null, {
@@ -96,6 +95,8 @@ export async function refreshStravaToken(refreshToken: string) {
       },
     });
 
+    console.log('Resposta do Strava', response);
+
     if (response.status >= 200 && response.status < 300) {
       return response.data;
     } else {
@@ -105,6 +106,9 @@ export async function refreshStravaToken(refreshToken: string) {
     }
   } catch (error) {
     // ✅ Tratamento de erro do Axios
+
+    console.log('Erro do Axios', error);
+
     if (axios.isAxiosError(error)) {
       throw new Error(
         `Refresh token failed: ${error.response?.status} ${error.message}`
