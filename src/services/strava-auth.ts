@@ -24,8 +24,12 @@ export async function getAthleteAccessToken(
       athleteInfo,
     } = JSON.parse(String(athleteData));
 
+    console.log('*** - TESTE', athleteInfo);
+
     // Verificar se o token ainda é válido
     const isExpired = Date.now() >= expiresAt * 1000;
+
+    console.log('*** - TESTE - Expriado ? ', isExpired);
 
     if (!isExpired) {
       // Token ainda válido, buscar do cache
