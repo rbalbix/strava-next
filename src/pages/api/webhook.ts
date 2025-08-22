@@ -79,6 +79,9 @@ async function handleActivityEvent(event: any) {
 
   // Buscar access token do atleta
   const accessToken = await getAthleteAccessToken(athleteId);
+
+  console.log('Access token: ', accessToken);
+
   if (!accessToken) {
     console.error(`❌ Token não encontrado para athlete ${athleteId}`);
     return;

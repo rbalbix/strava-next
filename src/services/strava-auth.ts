@@ -14,6 +14,9 @@ export async function getAthleteAccessToken(
   try {
     // Buscar refresh token do atleta (salvo durante OAuth)
     const athleteData = await redis.get(`strava:auth:${athleteId}`);
+
+    console.log('*** - TESTE', athleteData);
+
     if (!athleteData) {
       throw new Error(`Athlete ${athleteId} não encontrado`);
     }
