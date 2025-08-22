@@ -8,24 +8,38 @@ const REDIS_KEYS = {
   accessToken: (athleteId: number) => `strava:access_token:${athleteId}`,
 };
 
+export interface StravaAuthData {
+  refreshToken: string;
+  accessToken: string;
+  expiresAt: number;
+  lastUpdated: number;
+  athleteInfo: any; // Ou defina uma interface mais específica
+}
+
+export interface StravaTokens {
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  athlete?: any;
+}
+
 export async function getAthleteAccessToken(
   athleteId: number
 ): Promise<string | null> {
   try {
     // Buscar refresh token do atleta (salvo durante OAuth)
-    const athleteData = await redis.get(`strava:auth:${athleteId}`);
+    const athleteData: StravaAuthData = await redis.get(
+      `strava:auth:${athleteId}`
+    );
 
+    console.log('*** - TESTE', typeof athleteData);
     console.log('*** - TESTE', athleteData);
 
     if (!athleteData) {
       throw new Error(`Athlete ${athleteId} não encontrado`);
     }
 
-    const {
-      refresh_token: refreshToken,
-      expires_at: expiresAt,
-      athleteInfo,
-    } = JSON.parse(String(athleteData));
+    const { refreshToken, expiresAt, athleteInfo } = athleteData;
 
     console.log('*** - TESTE', athleteInfo);
 
