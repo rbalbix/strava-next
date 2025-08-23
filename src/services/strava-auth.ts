@@ -32,21 +32,14 @@ export async function getAthleteAccessToken(
       `strava:auth:${athleteId}`
     );
 
-    console.log('*** - TESTE', typeof athleteData);
-    console.log('*** - TESTE', athleteData);
-
     if (!athleteData) {
       throw new Error(`Athlete ${athleteId} não encontrado`);
     }
 
     const { refreshToken, expiresAt, athleteInfo } = athleteData;
 
-    console.log('*** - TESTE', athleteInfo);
-
     // Verificar se o token ainda é válido
     const isExpired = Date.now() >= expiresAt * 1000;
-
-    console.log('*** - TESTE - Expriado ? ', isExpired);
 
     if (!isExpired) {
       // Token ainda válido, buscar do cache

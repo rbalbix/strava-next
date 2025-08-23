@@ -80,8 +80,6 @@ async function handleActivityEvent(event: any) {
   // Buscar access token do atleta
   const accessToken = await getAthleteAccessToken(athleteId);
 
-  console.log('Access token: ', accessToken);
-
   if (!accessToken) {
     console.error(`❌ Token não encontrado para athlete ${athleteId}`);
     return;
@@ -90,7 +88,7 @@ async function handleActivityEvent(event: any) {
   // Buscar atividade completa
   try {
     const activity = await fetchStravaActivity(activityId, accessToken);
-    console.log('✅ Atividade recuperada:', activity.name);
+    console.log('✅ Atividade recuperada:', activity);
 
     // 9. Processar a atividade (salvar no DB, cache, etc.)
     // await processActivity(activity, athleteId);
