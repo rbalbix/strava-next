@@ -39,11 +39,6 @@ function saveLocalStat(value: LocalActivity) {
   localStorage.setItem('local-stat', JSON.stringify(value));
 }
 
-// async function saveRemoteStat(athlete: string, value: LocalActivity) {
-//   const response2 = await apiStorage.post('/', { athlete, value });
-//   console.log('Dentro da função saveRemoteStat POST', response2.data);
-// }
-
 async function saveRemoteStat(
   athleteId: string,
   activity: LocalActivity

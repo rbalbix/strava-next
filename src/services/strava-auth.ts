@@ -88,8 +88,6 @@ export async function refreshStravaToken(refreshToken: string) {
       },
     });
 
-    console.log('Resposta do Strava', response);
-
     if (response.status >= 200 && response.status < 300) {
       return response.data;
     } else {
