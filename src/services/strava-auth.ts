@@ -88,8 +88,8 @@ export async function refreshStravaToken(refreshToken: string) {
   try {
     const response = await api.post(`/token`, null, {
       params: {
-        client_id: process.env.STRAVA_CLIENT_ID,
-        client_secret: process.env.STRAVA_CLIENT_SECRET,
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
       },
