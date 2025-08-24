@@ -53,22 +53,29 @@ export async function getAthleteAccessToken(
     console.log(`🔄 Refreshing token for athlete ${athleteId}`);
     const newTokens = await refreshStravaToken(refreshToken);
 
-    // 4. Salvar novos tokens
-    await redis.setex(
-      `strava:access_token:${athleteId}`,
-      3600, // 1 hora (Strava tokens expiram em 1h)
-      newTokens.access_token
+    // // 4. Salvar novos tokens
+    // await redis.setex(
+    //   `strava:access_token:${athleteId}`,
+    //   3600, // 1 hora (Strava tokens expiram em 1h)
+    //   newTokens.access_token
+    // );
+
+    // const authData = {
+    //   refreshToken: newTokens.refresh_token,
+    //   accessToken: newTokens.access_token,
+    //   expiresAt: newTokens.expires_at,
+    //   lastUpdated: Math.floor(Date.now() / 1000),
+    //   athleteInfo,
+    // };
+
+    // await redis.set(`strava:auth:${athleteId}`, JSON.stringify(authData));
+    await saveStravaAuth(
+      athleteId,
+      newTokens.refresh_token,
+      newTokens.access_token,
+      newTokens.expires_at,
+      athleteInfo
     );
-
-    const authData = {
-      refreshToken: newTokens.refresh_token,
-      accessToken: newTokens.access_token,
-      expiresAt: newTokens.expires_at,
-      lastUpdated: Math.floor(Date.now() / 1000),
-      athleteInfo,
-    };
-
-    await redis.set(`strava:auth:${athleteId}`, JSON.stringify(authData));
 
     return newTokens.access_token;
   } catch (error) {
@@ -97,8 +104,6 @@ export async function refreshStravaToken(refreshToken: string) {
     }
   } catch (error) {
     // ✅ Tratamento de erro do Axios
-
-    console.log('Erro do Axios', error);
 
     if (axios.isAxiosError(error)) {
       throw new Error(

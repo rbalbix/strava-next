@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Strava } from 'strava';
 import { getAthleteAccessToken } from '../../services/strava-auth';
 import { fetchStravaActivity } from '../../services/strava-api';
+import { processActivity } from '../../services/activity-processor';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -90,8 +91,8 @@ async function handleActivityEvent(event: any) {
     const activity = await fetchStravaActivity(activityId, accessToken);
     console.log('✅ Atividade recuperada:', activity);
 
-    // 9. Processar a atividade (salvar no DB, cache, etc.)
-    // await processActivity(activity, athleteId);
+    // Processar a atividade (salvar no DB, cache, etc.)
+    await processActivity(activity, athleteId);
   } catch (error) {
     console.error(`❌ Erro ao buscar atividade ${activityId}:`, error);
   }
