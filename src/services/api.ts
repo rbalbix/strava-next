@@ -17,10 +17,14 @@ const apiStravaOauthToken = axios.create({
   baseURL: STRAVA_ENDPOINTS.oauthToken,
   ...commonConfig,
 });
+
 const apiStravaAuth = axios.create({
   baseURL: API_ROUTES.stravaAuthTokens,
   ...commonConfig,
 });
+
+console.log(`API - ${API_ROUTES.remoteStorage}`);
+
 const apiRemoteStorage = axios.create({
   baseURL: API_ROUTES.remoteStorage,
   ...commonConfig,
