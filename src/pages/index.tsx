@@ -55,7 +55,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 export default function Home(props: HomeProps) {
-  console.log(process.env.NODE_ENV);
+  console.log(`NODE ENV: ${process.env.NODE_ENV}`);
+  console.log(`VERCEL URI: ${process.env.VERCEL_URL}`);
   return (
     <AuthProvider
       codeReturned={props.code}
