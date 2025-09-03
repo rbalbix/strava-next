@@ -44,6 +44,7 @@ export default function Header() {
             />
           </div>
           <div>
+            {console.log(`Header - redirect - ${authQuery.redirect_uri}`)}
             <Link
               href={{
                 pathname: STRAVA_ENDPOINTS.authorize,
