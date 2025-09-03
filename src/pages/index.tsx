@@ -55,6 +55,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 };
 
 export default function Home(props: HomeProps) {
+  console.log(process.env.NODE_ENV);
   return (
     <AuthProvider
       codeReturned={props.code}
