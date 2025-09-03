@@ -1,6 +1,6 @@
 const baseAppURL =
   process.env.NODE_ENV === 'production'
-    ? process.env.VERCEL_URL
+    ? process.env.PUBLIC_APP_URL
     : 'http://localhost:3000';
 
 const baseStravaURL = 'https://www.strava.com';

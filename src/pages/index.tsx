@@ -6,6 +6,7 @@ import Header from '../components/Header';
 import Stats from '../components/Stats';
 import { AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
+import { APP_CONFIG } from '../config';
 
 interface HomeProps {
   code: string;
@@ -56,7 +57,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
 export default function Home(props: HomeProps) {
   console.log(`NODE ENV: ${process.env.NODE_ENV}`);
-  console.log(`VERCEL URI: ${process.env.VERCEL_URL}`);
+  console.log(`PUBLIC URL: ${APP_CONFIG.appUrl}`);
   return (
     <AuthProvider
       codeReturned={props.code}
