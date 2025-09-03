@@ -23,8 +23,6 @@ const apiStravaAuth = axios.create({
   ...commonConfig,
 });
 
-console.log(`API - ${API_ROUTES.remoteStorage}`);
-
 const apiRemoteStorage = axios.create({
   baseURL: API_ROUTES.remoteStorage,
   ...commonConfig,
