@@ -1,13 +1,19 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Strava } from 'strava';
+import { REDIS_KEYS } from '../../config';
+import {
+  fetchStravaActivity,
+  getActivities,
+  processActivities,
+  processActivity,
+} from '../../services/activity';
+import { apiRemoteStorage } from '../../services/api';
+import { getAthlete } from '../../services/athlete';
+import { getGears } from '../../services/gear';
+import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
-import { fetchStravaActivity } from '../../services/strava-api';
-import { processActivity } from '../../services/activity-processor';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
-
 interface StravaWebhookEvent {
   aspect_type: 'create' | 'update' | 'delete';
   event_time: number;
@@ -66,50 +72,75 @@ export default async function handler(
       return res.status(500).json({ error: 'Internal server error' });
     }
   }
-
   // Métodos não permitidos
   return res.status(405).end();
 }
 
-async function handleActivityEvent(event: any) {
-  const { object_id: activityId, owner_id: athleteId, aspect_type } = event;
-
-  console.log(
-    `🎯 Activity ${aspect_type}: ${activityId} by athlete ${athleteId}`
-  );
-
-  // Buscar access token do atleta
-  const accessToken = await getAthleteAccessToken(athleteId);
-
-  if (!accessToken) {
-    console.error(`❌ Token não encontrado para athlete ${athleteId}`);
-    return;
-  }
-
-  // Buscar atividade completa
+async function handleActivityEvent(event: StravaWebhookEvent) {
   try {
-    const activity = await fetchStravaActivity(activityId, accessToken);
-    console.log('✅ Atividade recuperada:', activity);
+    const { object_id: activityId, owner_id: athleteId } = event;
 
-    // Processar a atividade (salvar no DB, cache, etc.)
-    await processActivity(activity, athleteId);
+    // Buscar access token do atleta
+    const { accessToken, refreshToken } = await getAthleteAccessToken(
+      athleteId
+    );
+
+    if (!accessToken) {
+      console.error(`❌ Token não encontrado para athlete ${athleteId}`);
+      return;
+    }
+
+    const storedActivities = await apiRemoteStorage.get(
+      REDIS_KEYS.activities(athleteId)
+    );
+
+    const strava = new Strava({
+      client_id: process.env.CLIENT_ID,
+      client_secret: process.env.CLIENT_SECRET,
+      refresh_token: refreshToken,
+    });
+
+    if (
+      !storedActivities.data ||
+      storedActivities.data === null ||
+      storedActivities.data === undefined ||
+      Object.keys(storedActivities.data).length === 0
+    ) {
+      await updateStatistics(strava, athleteId);
+    } else {
+      if (event.aspect_type === 'update') {
+        // Buscar e processar atividade completa
+        const activity = await fetchStravaActivity(activityId, strava);
+        await processActivity(activity, athleteId);
+      } else if (event.aspect_type === 'create') {
+        // Recupera apenas as atividades criadas depois de lastUpdated
+        const athlete = await getAthlete(strava);
+        const gears = getGears(athlete);
+        const { lastUpdated, activities } = storedActivities.data;
+
+        const activitiesFromStravaAPI = await getActivities(
+          strava,
+          gears,
+          null,
+          lastUpdated
+        );
+
+        await processActivities(athleteId, [
+          ...activitiesFromStravaAPI,
+          ...activities,
+        ]);
+      }
+      await updateStatistics(strava, athleteId);
+    }
   } catch (error) {
-    console.error(`❌ Erro ao buscar atividade ${activityId}:`, error);
+    console.error(
+      `❌ Erro ao processar o evento para a atividade ${event.object_id}:`,
+      error
+    );
   }
 }
 
 async function handleAthleteEvent(event: StravaWebhookEvent) {
   // Lógica para eventos relacionados ao atleta
   console.log('Evento de atleta recebido:', event);
-}
-
-// Função auxiliar para atualizar cache
-function updateActivityCache(
-  activityId: number,
-  action: 'create' | 'update' | 'delete'
-) {
-  // Implemente sua lógica de cache aqui
-  console.log(
-    `Atividade ${activityId} ${action === 'delete' ? 'removida' : 'atualizada'}`
-  );
 }

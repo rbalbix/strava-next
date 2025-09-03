@@ -8,10 +8,10 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        let { id } = req.query;
-        id = typeof id === 'string' ? id : id[0];
-        const item = await redis.get(id);
-        return res.status(200).send({ item });
+        let { key } = req.query;
+        key = typeof key === 'string' ? key : key[0];
+        const value = await redis.get(key);
+        return res.status(200).send(value);
       } catch (error) {
         return res.status(500).json({ error: 'Failed to fetch' });
       }

@@ -1,7 +1,8 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
 import { ActivityStats, DetailedAthlete, Strava } from 'strava';
-import { api, apiStravaAuth } from '../services/api';
+import { REDIS_KEYS } from '../config';
+import { apiRemoteStorage } from '../services/api';
 
 interface AuthContextData {
   codeReturned: string;
@@ -9,7 +10,6 @@ interface AuthContextData {
   client_secret: string;
   grant_type: string;
   response_type: string;
-  redirect_uri: string;
   approval_prompt: string;
   scope: string;
   athlete: any;
@@ -23,9 +23,6 @@ interface AuthContextData {
   handleOpenModal: (id: string) => void;
   handleCloseModal: () => void;
 }
-
-export const AuthContext = createContext({} as AuthContextData);
-
 interface AuthProviderProps {
   children: ReactNode;
   codeReturned: string;
@@ -33,16 +30,18 @@ interface AuthProviderProps {
   client_secret: string;
   grant_type: string;
   response_type: string;
-  redirect_uri: string;
   approval_prompt: string;
   scope: string;
+  athlete_id: number;
   athlete?: DetailedAthlete;
   athleteStats?: ActivityStats;
   codeError?: Object;
 }
 
+export const AuthContext = createContext({} as AuthContextData);
+
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
-  const [codeReturned, setCodeReturned] = useState(rest.codeReturned ?? null);
+  const [codeReturned, setCodeReturned] = useState<string>(rest.codeReturned);
   const [athlete, setAthlete] = useState(rest.athlete);
   const [athleteStats, setAthleteStats] = useState(rest.athleteStats);
   const [codeError, setCodeError] = useState(rest.codeError);
@@ -54,9 +53,9 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     client_secret,
     grant_type,
     response_type,
-    redirect_uri,
     approval_prompt,
     scope,
+    athlete_id,
   } = rest;
 
   function setAthleteInfo(athlete: DetailedAthlete) {
@@ -73,34 +72,20 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
   async function signIn(): Promise<Strava> {
     try {
-      const response = await api.post(`/token`, null, {
-        params: {
-          client_id,
-          client_secret,
-          code: codeReturned,
-          grant_type,
-        },
-      });
-
-      const { access_token, refresh_token, expires_at, athlete } =
-        response.data;
+      const storedAuth = await apiRemoteStorage.get(
+        REDIS_KEYS.auth(athlete_id)
+      );
 
       const strava = new Strava({
         client_id,
         client_secret,
-        refresh_token,
-      });
-
-      await apiStravaAuth.post('/', {
-        athleteId: athlete.id,
-        refreshToken: refresh_token,
-        accessToken: access_token,
-        expiresAt: expires_at,
-        athleteInfo: athlete,
+        refresh_token: storedAuth.data.refreshToken,
       });
 
       return strava;
-    } catch {
+    } catch (error) {
+      console.error('💥 ERRO COMPLETO:', error);
+      console.error('Stack:', error.stack);
       signOut();
     }
   }
@@ -109,6 +94,9 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     sessionStorage.removeItem('athlete');
     sessionStorage.removeItem('athleteStats');
     sessionStorage.removeItem('athleteCacheTime');
+
+    document.cookie = 'strava_code=; Path=/; Max-Age=0';
+    document.cookie = 'strava_athleteId=; Path=/; Max-Age=0';
 
     setCodeReturned(null);
     setAthlete(null);
@@ -138,7 +126,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         client_secret,
         grant_type,
         response_type,
-        redirect_uri,
         approval_prompt,
         scope,
         athlete,

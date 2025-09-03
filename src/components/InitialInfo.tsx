@@ -25,7 +25,6 @@ export default function InitialInfo() {
             alt='Tela inicial do aplicativo com botão de login via Strava'
             width={203}
             height={387}
-            priority
           />
         </div>
 
@@ -61,7 +60,6 @@ export default function InitialInfo() {
             alt='Lista de Equipamentos'
             width={203}
             height={387}
-            priority
           />
         </div>
 
@@ -95,7 +93,6 @@ export default function InitialInfo() {
             alt='Lista de Componentes'
             width={203}
             height={387}
-            priority
           />
         </div>
 
@@ -126,7 +123,6 @@ export default function InitialInfo() {
             alt='Configuração na atividade'
             width={203}
             height={387}
-            priority
           />
         </div>
 
@@ -143,7 +139,6 @@ export default function InitialInfo() {
             alt='Lista de Códigos'
             width={203}
             height={387}
-            priority
           />
         </div>
 

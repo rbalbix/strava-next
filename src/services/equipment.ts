@@ -1,3 +1,13 @@
+export type Equipment = {
+  id: string;
+  caption: string;
+  show: string;
+  distance?: number;
+  movingTime?: number;
+  date?: string;
+  isRegistered?: boolean;
+};
+
 export const Equipments = {
   Lubrification: { id: 'lub', caption: 'lubrificada a:', show: 'Lubrificação' },
   Review: { id: 'review', caption: 'revisada a:', show: 'Revisão' },
@@ -24,7 +34,7 @@ export const Equipments = {
     show: 'Shock (novo)',
   },
   SuspensionKit: {
-    id: 'suspensionkit',
+    id: 'suspakit',
     caption: 'kit de suspensão:',
     show: 'Kit de Suspensão',
   },
@@ -72,14 +82,14 @@ export const Equipments = {
     show: 'Roda traseira',
   },
 
-  Break: { id: 'breaks', caption: 'par de freios:', show: 'Par de freios' },
-  FrontBreak: {
-    id: 'frontbreak',
+  Brake: { id: 'brakes', caption: 'par de freios:', show: 'Par de freios' },
+  FrontBrake: {
+    id: 'frontbrake',
     caption: 'freio[frente]:',
     show: 'Freio dianteiro',
   },
-  RearBreak: {
-    id: 'rearbreak',
+  RearBrake: {
+    id: 'rearbrake',
     caption: 'freio[traseiro]:',
     show: 'Freio traseiro',
   },
@@ -185,14 +195,4 @@ export const Equipments = {
     caption: 'sapatilha:',
     show: 'Sapatilha',
   },
-};
-
-export type Equipment = {
-  id: string;
-  caption: string;
-  show: string;
-  distance?: number;
-  movingTime?: number;
-  date?: string;
-  isRegistered?: boolean;
 };

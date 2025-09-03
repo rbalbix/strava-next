@@ -1,8 +1,9 @@
 import * as d3 from 'd3-format';
-import { ActivityBase } from './activity';
 import { format } from 'date-fns';
+import { ActivityBase } from './activity';
+import { apiRemoteStorage } from './api';
 import { Equipment } from './equipment';
-import apiStorage from './apiStorage';
+import { GearStats } from './gear';
 
 export type LocalActivity = {
   lastUpdated: number;
@@ -26,71 +27,60 @@ const locale = d3.formatLocale({
 function secondsToHms(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = Math.floor((totalSeconds % 3600) % 60);
 
-  const movingTime = `${String(hours).padStart(2, '0')}:${String(
-    minutes
-  ).padStart(2, '0')}`;
-
-  return movingTime;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
+    2,
+    '0'
+  )}`;
 }
 
 function saveLocalStat(value: LocalActivity) {
   localStorage.setItem('local-stat', JSON.stringify(value));
 }
 
-async function saveRemoteStat(
-  athleteId: string,
-  activity: LocalActivity
+async function saveRemote(
+  key: string,
+  value: any
 ): Promise<RemoteStorageResponse> {
   try {
     // Validação de entrada
-    if (!athleteId || !activity) {
-      throw new Error('Dados inválidos: athleteId e activity são obrigatórios');
+    if (!key?.trim() || value === undefined || value === null) {
+      throw new Error('Dados inválidos: key e value são obrigatórios');
     }
 
-    console.log(`🔄 Salvando atividades para athlete ${athleteId}`);
+    console.log(`🔄 Salvando ${key}`);
 
     // Chamada à API com timeout
-    const response = await apiStorage.post<RemoteStorageResponse>(
-      '/',
-      {
-        athlete: athleteId,
-        value: activity,
-      },
-      {
-        timeout: 10000, // 10 segundos timeout
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Request-ID': generateRequestId(), // Para tracing
-        },
-      }
-    );
+    const response = await Promise.race([
+      apiRemoteStorage.post<RemoteStorageResponse>('/', { key, value }),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Timeout ao salvar dados remotos')),
+          10000
+        )
+      ),
+    ]);
 
     // Verifica se a resposta é bem-sucedida
     if (response.status >= 200 && response.status < 300) {
-      console.log('✅ Atividade salva remotamente:', response.data);
+      console.log(`✅ ${key} salvo com sucesso`);
       return {
         success: true,
-        data: activity,
+        data: value,
         timestamp: new Date(),
       };
     }
 
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   } catch (error) {
-    console.error('❌ Erro ao salvar atividade:', error);
+    console.error(`❌ Erro ao salvar ${key}:`, error);
 
     return {
       success: false,
-      error: error,
+      error: error instanceof Error ? error.message : 'Erro desconhecido',
       timestamp: new Date(),
     };
   }
-}
-
-export function generateRequestId(): string {
-  return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
 function fallbackCopyTextToClipboard(text: string) {
@@ -141,11 +131,63 @@ function copyEventDetailsToClipboard(
   copyTextToClipboard(text);
 }
 
+function updateActivityInArray(
+  updatedActivity: Partial<ActivityBase>,
+  activities: ActivityBase[]
+): ActivityBase[] {
+  return activities.map((activity) =>
+    activity.id === updatedActivity.id
+      ? { ...activity, ...safeActivityParse(updatedActivity) }
+      : activity
+  );
+}
+
+function safeActivityParse(data: any): ActivityBase {
+  return {
+    id: data.id ?? 0,
+    name: data.name ?? '',
+    distance: data.distance ?? 0,
+    moving_time: data.moving_time ?? 0,
+    type: data.type ?? '',
+    start_date_local: data.start_date_local ?? '',
+    gear_id: data.gear_id,
+    private_note: data.private_note,
+  };
+}
+
+function mergeGearStats(
+  previous: GearStats[],
+  incoming: GearStats[]
+): GearStats[] {
+  const statsMap = new Map<string, GearStats>();
+
+  previous.forEach((stat) => statsMap.set(stat.id, stat));
+
+  incoming.forEach((newStat) => {
+    const oldStat = statsMap.get(newStat.id);
+    if (oldStat) {
+      statsMap.set(newStat.id, {
+        ...newStat,
+        count: oldStat.count + newStat.count,
+        distance: oldStat.distance + newStat.distance,
+        movingTime: oldStat.movingTime + newStat.movingTime,
+        equipments: [...oldStat.equipments, ...newStat.equipments],
+      });
+    } else {
+      statsMap.set(newStat.id, newStat);
+    }
+  });
+
+  return Array.from(statsMap.values());
+}
+
 export {
-  locale,
-  secondsToHms,
-  saveLocalStat,
-  saveRemoteStat,
-  copyTextToClipboard,
   copyEventDetailsToClipboard,
+  copyTextToClipboard,
+  locale,
+  mergeGearStats,
+  saveLocalStat,
+  saveRemote,
+  secondsToHms,
+  updateActivityInArray,
 };

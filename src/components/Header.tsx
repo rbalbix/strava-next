@@ -1,25 +1,21 @@
 import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { FaBars, FaInfoCircle } from 'react-icons/fa';
 import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
-import { baseURL } from '../config';
+import { API_ROUTES, STRAVA_ENDPOINTS } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
-import Sidebar from './Sidebar';
-import InitialInfoModal from './InitialInfoModal';
 import { PulseLoader } from 'react-spinners';
+import InitialInfoModal from './InitialInfoModal';
+import Sidebar from './Sidebar';
 
 export default function Header() {
-  const route = useRouter();
-
   const {
     athlete,
     codeReturned,
     client_id,
     response_type,
-    redirect_uri,
     approval_prompt,
     scope,
     signOut,
@@ -32,29 +28,10 @@ export default function Header() {
   const authQuery = {
     client_id,
     response_type,
-    redirect_uri,
     approval_prompt,
+    redirect_uri: API_ROUTES.authorizeUrl,
     scope,
   };
-
-  useEffect(() => {
-    const performanceEntries = window.performance.getEntries();
-    const firstEntry = performanceEntries.length ? performanceEntries[0] : null;
-
-    if (
-      firstEntry &&
-      (firstEntry as PerformanceNavigationTiming).type === 'reload'
-    ) {
-      if (codeReturned) {
-        route.replace({
-          pathname: `${baseURL}/authorize`,
-          query: authQuery,
-        });
-      } else {
-        signOut();
-      }
-    }
-  }, [codeReturned]);
 
   return (
     <div className={styles.headerContainer}>
@@ -67,7 +44,14 @@ export default function Header() {
             />
           </div>
           <div>
-            <Link href={{ pathname: `${baseURL}/authorize`, query: authQuery }}>
+            <Link
+              href={{
+                pathname: STRAVA_ENDPOINTS.authorize,
+                query: {
+                  ...authQuery,
+                },
+              }}
+            >
               <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>

@@ -1,10 +1,16 @@
+import axios from 'axios';
+import { getUnixTime } from 'date-fns';
 import {
   ActivityType,
   DetailedActivity,
+  DetailedAthlete,
   Strava,
   SummaryActivity,
   SummaryGear,
 } from 'strava';
+import { REDIS_KEYS } from '../config';
+import redis from './redis';
+import { saveRemote, updateActivityInArray } from './utils';
 
 export type ActivityBase = {
   id: number;
@@ -17,14 +23,18 @@ export type ActivityBase = {
   private_note: string;
 };
 
+export interface StravaAuthData {
+  lastUpdated: number;
+  activities: ActivityBase[];
+}
+
 async function getActivities(
   strava: Strava,
   gears: SummaryGear[],
   before: number,
   after: number
-) {
+): Promise<ActivityBase[]> {
   let page = 1;
-  let private_note = '';
   const activities: SummaryActivity[] = [];
   let data: SummaryActivity[] = [];
   const activitiesPreparedToStore: ActivityBase[] = [];
@@ -89,4 +99,85 @@ async function getActivities(
   return activitiesPreparedToStore;
 }
 
-export { getActivities };
+export async function fetchStravaActivity(
+  activityId: number,
+  strava: Strava
+): Promise<DetailedActivity> {
+  try {
+    const activity: DetailedActivity = await strava.activities.getActivityById({
+      id: activityId,
+    });
+
+    if (activity == null) {
+      throw new Error(`❌ Erro ao recuperar a atividade ${activityId}`);
+    } else {
+      return activity;
+    }
+  } catch (error) {
+    console.error(`❌ Falha ao buscar atividade ${activityId}:`, error);
+
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const message = error.response?.data?.message || error.message;
+      throw new Error(`Strava API error: ${status} - ${message}`);
+    }
+
+    throw error;
+  }
+}
+
+async function processActivity(
+  activity: DetailedActivity,
+  athleteId: number
+): Promise<ActivityBase[]> {
+  try {
+    const { activities }: StravaAuthData = await redis.get(
+      REDIS_KEYS.activities(athleteId)
+    );
+
+    const updatedActivities = updateActivityInArray(activity, activities);
+    await processActivities(athleteId, updatedActivities);
+
+    return updatedActivities;
+  } catch (error) {
+    console.error(`Erro ao processar atividade ${activity.id}:`, error);
+  }
+}
+
+async function processActivities(
+  athleteId: number,
+  updatedActivities: ActivityBase[]
+) {
+  const response = await saveRemote(
+    REDIS_KEYS.activities(athleteId),
+    JSON.stringify({
+      lastUpdated: getUnixTime(Date.now()),
+      activities: updatedActivities,
+    })
+  );
+  if (response.success) {
+    console.log(`✅ Atividades processadas para ${athleteId}`);
+  } else {
+    throw new Error(`Erro ao processar atividades para ${athleteId}`);
+  }
+}
+
+async function verifyIfHasAnyActivities(
+  strava: Strava,
+  athlete: DetailedAthlete
+): Promise<boolean> {
+  try {
+    const response = await strava.activities.getLoggedInAthleteActivities();
+    return response !== null && response !== undefined && response.length !== 0;
+  } catch (error) {
+    console.error('Falha ao verificar existência de atividades', error);
+    throw error;
+  }
+}
+
+export {
+  getActivities,
+  processActivities,
+  processActivity,
+  verifyIfHasAnyActivities,
+};

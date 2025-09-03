@@ -1,21 +1,21 @@
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 
 import {
-  FaTimes,
-  FaHome,
   FaChartBar,
-  FaMedapps,
+  FaHome,
   FaInfoCircle,
+  FaMedapps,
+  FaTimes,
 } from 'react-icons/fa';
 
+import { Divider } from '@mui/material';
+import Link from 'next/link';
+import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Sidebar.module.css';
 import AthleteAvatar from './AthleteAvatar';
 import AthleteStats from './AthleteStats';
-import { AuthContext } from '../contexts/AuthContext';
-import Link from 'next/link';
 import ComponentInfo from './ComponentInfo';
 import InitialInfoModal from './InitialInfoModal';
-import { Divider } from '@mui/material';
 interface SidebarProps {
   active: (state: boolean) => void;
 }
@@ -51,7 +51,6 @@ export default function Sidebar({ active }: SidebarProps) {
             passHref
             target='_blank'
             rel='noopener noreferrer'
-            prefetch
           >
             <span className={styles.linkText}>Meu Strava</span>
           </Link>
