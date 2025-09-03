@@ -58,7 +58,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 export default function Home(props: HomeProps) {
   console.log(`NODE ENV: ${process.env.NODE_ENV}`);
   console.log(`PUBLIC URL: ${APP_CONFIG.appUrl}`);
-  console.log(`PUBLIC URL do env vercel: ${process.env.PUBLIC_APP_URL}`);
+  console.log(`PUBLIC URL do env vercel: ${process.env.NEXT_PUBLIC_APP_URL}`);
   return (
     <AuthProvider
       codeReturned={props.code}
