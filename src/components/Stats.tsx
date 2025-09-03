@@ -217,8 +217,10 @@ export default function Stats() {
           </div>
         ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <span>Aguarde.</span>
-            <span>Carregando suas atividades ...</span>
+            <div>
+              <span>Aguarde.</span>
+              <span>Carregando suas atividades ...</span>
+            </div>
             <span>{randomIcon}</span>
           </div>
         ) : (

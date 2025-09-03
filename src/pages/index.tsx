@@ -22,8 +22,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req } = context;
   const cookies = req.headers.cookie || '';
 
-  console.log(cookies);
-
   let code = null;
   const codeCookie = cookies
     .split(';')
