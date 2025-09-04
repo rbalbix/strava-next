@@ -1,14 +1,36 @@
 .sidebarContainer {
-  background-color: var(--background-sidebar);
+  background-color: rgba(var(--background-sidebar-rgb), 0.62);
   position: fixed;
   height: 100%;
   top: 0;
-  left: 0;
+  left: -300px;
   width: 300px;
-
+  z-index: 1000;
   border-radius: 0 20px 20px 0;
+  transition: left 0.4s ease;
+  backdrop-filter: blur(8px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-  animation: showSidebar 0.4s;
+.sidebarOpen {
+  left: 0;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.sidebarOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+  display: none;
+}
+
+.sidebarOverlayVisible {
+  display: block;
 }
 
 .closeIcon {
@@ -19,21 +41,13 @@
   margin-top: 2.5rem;
   margin-left: 20px;
   cursor: pointer;
-}
-
-@keyframes showSidebar {
-  from {
-    opacity: 0;
-    width: 0;
-  }
-  to {
-    opacity: 1;
-    width: 300px;
-  }
+  z-index: 1001;
 }
 
 .sidebarContent {
   margin-top: 100px;
+  overflow-y: auto;
+  height: calc(100% - 100px);
 }
 
 .sidebarItemContainer {
@@ -64,7 +78,26 @@
 .divider {
   width: 300px;
   background-color: var(--light-gray);
-  animation: showSidebar 0.4s;
+}
+
+@keyframes showSidebar {
+  from {
+    opacity: 0;
+    width: 0;
+  }
+  to {
+    opacity: 1;
+    width: 300px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (max-width: 860px) {
@@ -77,9 +110,16 @@
 @media (max-width: 300px) {
   .sidebarContainer {
     width: 250px;
+    left: -250px;
   }
 
   .divider {
     width: 250px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebarContainer {
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
   }
 }

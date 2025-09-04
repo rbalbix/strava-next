@@ -62,7 +62,9 @@ export default function Header() {
           {athlete ? (
             <div className={styles.sidebarButton}>
               <FaBars onClick={showSidebar} className={styles.sidebarIcon} />
-              {sidebar && <Sidebar active={() => setSidebar(false)} />}
+              {/* {sidebar && <Sidebar active={() => setSidebar(false)} />} */}
+              <Sidebar active={setSidebar} isOpen={sidebar} />
+              {/* {sidebar && <Sidebar active={setSidebar} isOpen={sidebar} />} */}
             </div>
           ) : (
             <span className={styles.spinnerLoading}>

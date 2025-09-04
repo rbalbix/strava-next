@@ -12,6 +12,7 @@ html {
   --background: #f8f9fa;
   --background-card: #fff;
   --background-sidebar: #f0f2f5;
+  --background-sidebar-rgb: 240, 242, 245;
   --background-sidebar-item: #e5e7eb;
   --background-sidebar-item-hover: #d6d9de;
 
@@ -59,7 +60,8 @@ html {
     --background: #121212; /* Preto menos agressivo */
     --border-card: #252b33;
     --background-card: #1e1e1e;
-    --background-sidebar: #20232a; /* Um pouco mais claro para separar do fundo */
+    --background-sidebar: #2a2f3b; /* Azul/cinza escuro elegante */
+    --background-sidebar-rgb: 42, 47, 59;
     --background-sidebar-item: #282c34; /* Um tom acima para separação melhor */
     --background-sidebar-item-hover: #343a40; /* Hover com mais destaque */
 
@@ -110,6 +112,7 @@ html {
 
 body {
   font: 400 1.6rem 'JetBrains Mono', sans-serif;
+  overflow-y: auto;
 }
 
 button {
