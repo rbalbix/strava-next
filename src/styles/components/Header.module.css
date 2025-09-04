@@ -4,8 +4,15 @@
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 4px 6px 4px;
+  padding: 4px;
   border-bottom: 1px solid var(--light-gray);
+
+  position: fixed;
+  top: 0;
+  width: 100%;
+  max-width: 928px;
+  z-index: 100;
+  background-color: var(--background);
 }
 
 .headerContainer a {
@@ -72,6 +79,10 @@
 }
 
 @media (max-width: 860px) {
+  .headerContainer {
+    max-width: 88%;
+  }
+
   .headerLoginIcon {
     height: 2.8rem;
     width: 2.8rem;
