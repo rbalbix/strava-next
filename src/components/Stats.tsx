@@ -219,7 +219,7 @@ export default function Stats() {
           <div className={styles.spinnerLoading}>
             <div>
               <span>Aguarde.</span>
-              <span>Carregando suas atividades ...</span>
+              <span>Carregando suas estatísticas ...</span>
             </div>
             <span>{randomIcon}</span>
           </div>

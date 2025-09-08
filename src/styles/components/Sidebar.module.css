@@ -1,20 +1,24 @@
 .sidebarContainer {
   background-color: rgba(var(--background-sidebar-rgb), 0.62);
   position: fixed;
-  height: 100%;
-  top: 0;
+  height: 80vh;
+  top: 2rem;
   left: -300px;
-  width: 300px;
+  width: auto;
   z-index: 1000;
-  border-radius: 0 20px 20px 0;
+  border-radius: 30px;
   transition: left 0.4s ease;
   backdrop-filter: blur(2px);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
+
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebarOpen {
-  left: 0;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+  left: 1.5rem;
+  bottom: 1rem;
 }
 
 .sidebarOverlay {
@@ -35,49 +39,67 @@
 
 .closeIcon {
   position: fixed;
-  color: var(--sidebar-icon);
-  width: 2rem;
-  height: 2rem;
-  margin-top: 2.5rem;
-  margin-left: 20px;
+  color: var(--gray-notes);
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
   cursor: pointer;
   z-index: 1001;
+  transition: color 0.2s ease;
 }
 
-.sidebarContent {
-  margin-top: 100px;
-  overflow-y: auto;
-  height: calc(100% - 100px);
+.sidebarHeader {
+  padding: 1.5rem 1.5rem 1.5rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+  position: relative;
+  text-align: center;
+}
+
+.sidebarHeader::after {
+  content: '';
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--light-gray) 20%,
+    var(--light-gray) 80%,
+    transparent 100%
+  );
+  border-radius: 2px;
 }
 
 .sidebarItemContainer {
   display: flex;
-  flex: 1;
   align-items: center;
-  background-color: var(--background-sidebar-item);
-  font-size: 1.2rem !important;
+  padding: 0.8rem 0rem;
   color: var(--gray-notes);
-  padding: 20px 0 20px 10px;
   cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0.2rem 0.6rem;
+  border-radius: 8px;
+  background: transparent;
+}
 
-  &:hover {
-    background-color: var(--background-sidebar-item-hover);
-  }
+.sidebarItemContainer:hover {
+  padding-left: 0.3rem;
+  background-color: var(--background-sidebar-item-hover);
+  transform: translateX(3px);
 }
 
 .sidebarItemIcon {
-  margin: 0 20px;
-  width: 1.8rem;
-  height: 1.8rem;
+  margin-right: 0.5rem;
+  font-size: 1.3rem;
 }
 
 .linkText {
   font-size: 1.2rem !important;
-}
-
-.divider {
-  width: 300px;
-  background-color: var(--light-gray);
 }
 
 @keyframes showSidebar {
@@ -100,26 +122,28 @@
   }
 }
 
-@media (max-width: 860px) {
-  .closeIcon {
-    width: 2.5rem;
-    height: 2.5rem;
-  }
-}
-
 @media (max-width: 300px) {
   .sidebarContainer {
-    width: 250px;
+    width: auto;
     left: -250px;
-  }
-
-  .divider {
-    width: 250px;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .sidebarContainer {
     border-right: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebarHeader::after {
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(255, 255, 255, 0.3) 30%,
+      rgba(255, 255, 255, 0.3) 70%,
+      transparent 100%
+    );
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }

@@ -1,22 +1,31 @@
 .athleteInfoContainer {
   display: flex;
+  flex-direction: column;
   align-items: center;
-
-  padding: 0 0 20px 20px;
+  /* padding: 0 0 20px 20px; */
+  margin-bottom: 10px;
 }
 
 .athleteAvatar {
-  height: 3.2rem;
-  width: 3.2rem;
+  height: 5.8rem;
+  width: 5.8rem;
   border-radius: 50%;
-
-  margin-right: 10px;
+  object-fit: cover;
+  border: 3px solid var(--light-blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .athleteName {
   font-size: 1.3rem;
   color: var(--athlete-name);
   font-weight: normal;
+  text-align: center;
+}
 
-  padding: 0;
+.athleteCity {
+  font-size: 0.9rem;
+  color: var(--gray-notes);
+  font-weight: lighter;
+  text-align: center;
+  padding-bottom: 10px;
 }

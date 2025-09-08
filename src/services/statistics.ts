@@ -21,17 +21,6 @@ export async function updateStatistics(
     REDIS_KEYS.statistics(athleteId)
   );
 
-  console.log(
-    `Atividades: ${fromUnixTime(
-      storedActivities.data.lastUpdated
-    )} - Estatísticas: ${fromUnixTime(
-      storedStatistics.data.lastUpdated
-    )} --> Diferença (min): ${differenceInMinutes(
-      fromUnixTime(storedActivities.data.lastUpdated),
-      fromUnixTime(storedStatistics.data.lastUpdated)
-    )}`
-  );
-
   if (
     storedActivities.data !== null &&
     storedActivities.data !== undefined &&
@@ -44,20 +33,11 @@ export async function updateStatistics(
       fromUnixTime(storedActivities.data.lastUpdated)
     ) === 0
   ) {
-    console.log(
-      `Tem atividade e estatísticas e a diferença em minutos é ${differenceInMinutes(
-        fromUnixTime(storedStatistics.data.lastUpdated),
-        fromUnixTime(storedActivities.data.lastUpdated)
-      )}`
-    );
-    console.log(storedStatistics.data.statistics);
     return storedStatistics.data.statistics;
   } else {
     const athlete = await getAthlete(strava);
     const gears = getGears(athlete);
     let activitiesToNewStatistics: ActivityBase[] = [];
-
-    console.log(`Recalculando atividades e estatísticas ...`);
 
     if (
       !storedActivities.data ||
@@ -72,10 +52,6 @@ export async function updateStatistics(
         null,
         null
       );
-
-      console.log(
-        `Recuperou todas as atividades. Tamanho do array: ${activitiesToNewStatistics.length}`
-      );
     } else {
       // Recupera apenas as atividades criadas depois de lastUpdated
       const { lastUpdated, activities } = storedActivities.data;
@@ -87,16 +63,6 @@ export async function updateStatistics(
         lastUpdated
       );
       activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
-
-      console.log(
-        `Recuperou atividades apenas de ${fromUnixTime(
-          lastUpdated
-        )} em diante. Tamanho de activities: ${
-          activities.length
-        }. Tamanho de activities From Strava: ${
-          activitiesFromStravaAPI.length
-        }. Tamanho Total: ${activities.length + activitiesFromStravaAPI.length}`
-      );
     }
 
     await processActivities(athleteId, activitiesToNewStatistics);

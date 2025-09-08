@@ -16,12 +16,16 @@ export default function AthleteAvatar() {
           alt={`${athlete?.firstname || 'Athlete'}'s Profile`}
         />
       </div>
-
-      <span className={styles.athleteName}>
-        {athlete.firstname
-          ? `${athlete.firstname} ${athlete.lastname || ''}`
-          : 'Usuário Desconhecido'}
-      </span>
+      <div>
+        <span className={styles.athleteName}>
+          {athlete.firstname
+            ? `${athlete.firstname} ${athlete.lastname || ''}`
+            : 'Usuário Desconhecido'}
+        </span>
+      </div>
+      <div className={styles.athleteCity}>
+        <span>{athlete.city ? athlete.city : ''}</span>
+      </div>
     </div>
   );
 }

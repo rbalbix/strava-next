@@ -28,7 +28,6 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     active(false);
   };
 
-  // Fechar o sidebar ao pressionar a tecla ESC
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -45,7 +44,6 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     };
   }, [isOpen]);
 
-  // Fechar sidebar ao clicar fora dele
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       closeSidebar();
@@ -71,11 +69,12 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           className={styles.closeIcon}
           aria-label='Fechar menu lateral'
         />
-        <div className={styles.sidebarContent}>
+
+        <div className={styles.sidebarHeader}>
           <AthleteAvatar />
+        </div>
 
-          <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
+        <div>
           <div className={styles.sidebarItemContainer}>
             <FaHome
               className={styles.sidebarItemIcon}
@@ -93,7 +92,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             </Link>
           </div>
 
-          <Divider className={styles.divider} style={{ margin: 'auto' }} />
+          {/* <Divider className={styles.divider} /> */}
 
           <div className={styles.sidebarItemContainer}>
             <FaChartBar
@@ -111,7 +110,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             <AthleteStats />
           </div>
 
-          <Divider className={styles.divider} style={{ margin: 'auto' }} />
+          {/* <Divider className={styles.divider} /> */}
 
           <div className={styles.sidebarItemContainer}>
             <FaMedapps
@@ -120,7 +119,10 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             />
             <span
               className={styles.linkText}
-              onClick={() => handleOpenModal('equipments')}
+              onClick={() => {
+                handleOpenModal('equipments');
+                closeSidebar();
+              }}
               role='button'
               tabIndex={1}
             >
@@ -129,7 +131,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             <ComponentInfo />
           </div>
 
-          <Divider className={styles.divider} style={{ margin: 'auto' }} />
+          {/* <Divider className={styles.divider} /> */}
 
           <div className={styles.sidebarItemContainer}>
             <FaInfoCircle
@@ -147,7 +149,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             <InitialInfoModal />
           </div>
 
-          <Divider className={styles.divider} style={{ margin: 'auto' }} />
+          {/* <Divider className={styles.divider} style={{ margin: 'auto' }} /> */}
         </div>
       </div>
     </>

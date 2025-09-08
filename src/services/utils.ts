@@ -48,8 +48,6 @@ async function saveRemote(
       throw new Error('Dados inválidos: key e value são obrigatórios');
     }
 
-    console.log(`🔄 Salvando ${key}`);
-
     // Chamada à API com timeout
     const response = await Promise.race([
       apiRemoteStorage.post<RemoteStorageResponse>('/', { key, value }),
