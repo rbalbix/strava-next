@@ -1,6 +1,6 @@
-import styles from '../styles/components/AthleteAvatar.module.css';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import styles from '../styles/components/AthleteAvatar.module.css';
 
 export default function AthleteAvatar() {
   const { athlete } = useContext(AuthContext);

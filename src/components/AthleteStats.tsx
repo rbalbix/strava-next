@@ -1,17 +1,15 @@
+import Divider from '@mui/material/Divider';
 import { useContext } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
-import { Modal } from './Modal';
-import modalStyles from '../styles/components/Modal.module.css';
+import { FaArrowRight } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-import cardStyles from '../styles/components/Card.module.css';
-import { locale, secondsToHms } from '../services/utils';
-import { FaArrowRight } from 'react-icons/fa';
-import Divider from '@mui/material/Divider';
 import { ActivityTotal } from 'strava';
+import { AuthContext } from '../contexts/AuthContext';
+import { locale, secondsToHms } from '../services/utils';
+import cardStyles from '../styles/components/Card.module.css';
 
 export default function AthleteStats() {
-  const { athlete, athleteStats, handleCloseModal } = useContext(AuthContext);
+  const { athlete, athleteStats, closeModal } = useContext(AuthContext);
 
   if (!athleteStats) return null;
 
@@ -49,7 +47,9 @@ export default function AthleteStats() {
           <span>
             <FaArrowRight />
           </span>
-          <span>Últimas 4 semanas:</span>
+          <span>
+            <strong>&nbsp;Últimas 4 semanas:</strong>
+          </span>
         </p>
         <p>{`[${stats?.recent?.count || 0} atividades | ${locale.format(',.2f')(
           (stats?.recent?.distance || 0) / 1000
@@ -62,7 +62,9 @@ export default function AthleteStats() {
           <span>
             <FaArrowRight />
           </span>
-          <span>Último ano:</span>
+          <span>
+            <strong>&nbsp;Último ano:</strong>
+          </span>
         </p>
         <p>{`[${stats?.ytd?.count || 0} atividades | ${locale.format(',.2f')(
           (stats?.ytd?.distance || 0) / 1000
@@ -78,7 +80,9 @@ export default function AthleteStats() {
           <span>
             <FaArrowRight />
           </span>
-          <span>Totais:</span>
+          <span>
+            <strong>&nbsp;Totais:</strong>
+          </span>
         </p>
         <p>{`[${stats?.all?.count || 0} atividades | ${locale.format(',.2f')(
           (stats?.all?.distance || 0) / 1000
@@ -96,44 +100,39 @@ export default function AthleteStats() {
   return (
     <>
       {athleteStats && athlete?.id && (
-        <Modal id={athlete.id} closeModal={handleCloseModal}>
-          <main className={modalStyles.athleteStatInfoContent}>
-            <header>
+        <main className={cardStyles.athleteStatInfoContent}>
+          <header>
+            <div className={cardStyles.athleteStatInfoTitle}>
               <div>
-                <div>
-                  <span>
-                    <IoMdStats color='var(--stat-icon)' />
-                  </span>
-                  <span>Estatísticas:</span>
-                </div>
-                <div>
-                  <MdClose
-                    color='var(--stat-icon)'
-                    onClick={handleCloseModal}
-                  />
-                </div>
+                <span className={cardStyles.athleteStatInfoTitleIcon}>
+                  <IoMdStats color='var(--stat-icon)' />
+                </span>
+                <span>Estatísticas:</span>
               </div>
-            </header>
+              <div>
+                <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+              </div>
+            </div>
+          </header>
 
-            {renderStats('Ciclismo', {
-              biggestDistance: athleteStats?.biggest_ride_distance,
-              biggestClimb: athleteStats?.biggest_climb_elevation_gain,
-              recent: athleteStats?.recent_ride_totals,
-              ytd: athleteStats?.ytd_ride_totals,
-              all: athleteStats?.all_ride_totals,
-            })}
+          {renderStats('Ciclismo', {
+            biggestDistance: athleteStats?.biggest_ride_distance,
+            biggestClimb: athleteStats?.biggest_climb_elevation_gain,
+            recent: athleteStats?.recent_ride_totals,
+            ytd: athleteStats?.ytd_ride_totals,
+            all: athleteStats?.all_ride_totals,
+          })}
 
-            <Divider />
+          <Divider />
 
-            {renderStats('Corrida', {
-              recent: athleteStats?.recent_run_totals,
-              ytd: athleteStats?.ytd_run_totals,
-              all: athleteStats?.all_run_totals,
-            })}
+          {renderStats('Corrida', {
+            recent: athleteStats?.recent_run_totals,
+            ytd: athleteStats?.ytd_run_totals,
+            all: athleteStats?.all_run_totals,
+          })}
 
-            <Divider />
-          </main>
-        </Modal>
+          <Divider />
+        </main>
       )}
     </>
   );

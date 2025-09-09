@@ -3,6 +3,7 @@ import Head from 'next/head';
 import ErroMsg from '../components/ErroMsg';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import ModalContainer from '../components/ModalContainer';
 import Stats from '../components/Stats';
 import { AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
@@ -64,6 +65,7 @@ export default function Home(props: HomeProps) {
       scope={props.scope}
       athlete_id={props.athlete_id}
     >
+      <ModalContainer />
       <div className={styles.container}>
         <Head>
           <title>Stuff Stats</title>

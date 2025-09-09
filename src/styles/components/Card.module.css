@@ -73,3 +73,22 @@
   color: var(--orange-strava);
   background-color: var(--background-card);
 }
+
+.athleteStatInfoContent {
+  padding: 1rem;
+}
+
+.athleteStatInfoTitle {
+  font-size: 1.6rem;
+  font-weight: 600;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background-color: var(--background-card);
+}
+
+.athleteStatInfoTitleIcon {
+  margin-right: 5px;
+}

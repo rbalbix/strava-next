@@ -1,7 +1,7 @@
-import styles from '../styles/components/InitialInfo.module.css';
 import Divider from '@mui/material/Divider';
-import { FaMedapps } from 'react-icons/fa';
 import Image from 'next/image';
+import { FaMedapps } from 'react-icons/fa';
+import styles from '../styles/components/InitialInfo.module.css';
 
 export default function InitialInfo() {
   return (

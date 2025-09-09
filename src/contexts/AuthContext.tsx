@@ -15,13 +15,15 @@ interface AuthContextData {
   athlete: any;
   athleteStats: ActivityStats;
   codeError: any;
+  activeModal: string | null;
+  modalData: any;
   setAthleteInfo: (athele: DetailedAthlete) => void;
   setAthleteInfoStats: (atheleStats: ActivityStats) => void;
   setErrorInfo: (error: Object) => void;
   signIn: () => Promise<Strava>;
   signOut: () => void;
-  handleOpenModal: (id: string) => void;
-  handleCloseModal: () => void;
+  openModal: (modalType: string, data?: any) => void;
+  closeModal: () => void;
 }
 interface AuthProviderProps {
   children: ReactNode;
@@ -45,6 +47,9 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [athlete, setAthlete] = useState(rest.athlete);
   const [athleteStats, setAthleteStats] = useState(rest.athleteStats);
   const [codeError, setCodeError] = useState(rest.codeError);
+
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [modalData, setModalData] = useState<any>(null);
 
   const router = useRouter();
 
@@ -104,19 +109,15 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     router.push('/');
   }
 
-  function handleOpenModal(id: string) {
-    handleCloseModal();
-    document.getElementById(id).style.display = 'block';
-  }
+  const openModal = (modalType: string, data?: any) => {
+    setActiveModal(modalType);
+    setModalData(data);
+  };
 
-  function handleCloseModal() {
-    const itens = Array.from(
-      document.getElementsByClassName('modal') as HTMLCollectionOf<HTMLElement>
-    );
-    itens.map((item) => {
-      item.style.display = 'none';
-    });
-  }
+  const closeModal = () => {
+    setActiveModal(null);
+    setModalData(null);
+  };
 
   return (
     <AuthContext.Provider
@@ -131,13 +132,15 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         athlete,
         athleteStats,
         codeError,
+        activeModal,
+        modalData,
         setAthleteInfo,
         setAthleteInfoStats,
         setErrorInfo,
         signIn,
         signOut,
-        handleOpenModal,
-        handleCloseModal,
+        openModal,
+        closeModal,
       }}
     >
       {children}

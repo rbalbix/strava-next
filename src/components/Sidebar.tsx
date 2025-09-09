@@ -8,21 +8,17 @@ import {
   FaTimes,
 } from 'react-icons/fa';
 
-import { Divider } from '@mui/material';
 import Link from 'next/link';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Sidebar.module.css';
 import AthleteAvatar from './AthleteAvatar';
-import AthleteStats from './AthleteStats';
-import ComponentInfo from './ComponentInfo';
-import InitialInfoModal from './InitialInfoModal';
 interface SidebarProps {
   active: (state: boolean) => void;
   isOpen: boolean;
 }
 
 export default function Sidebar({ active, isOpen }: SidebarProps) {
-  const { athlete, handleOpenModal } = useContext(AuthContext);
+  const { athlete, openModal } = useContext(AuthContext);
 
   const closeSidebar = () => {
     active(false);
@@ -92,8 +88,6 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             </Link>
           </div>
 
-          {/* <Divider className={styles.divider} /> */}
-
           <div className={styles.sidebarItemContainer}>
             <FaChartBar
               className={styles.sidebarItemIcon}
@@ -101,16 +95,16 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             />
             <span
               className={styles.linkText}
-              onClick={() => handleOpenModal(athlete.id)}
+              onClick={() => {
+                openModal('stats');
+                closeSidebar();
+              }}
               role='button'
               tabIndex={0}
             >
               Estatísticas
             </span>
-            <AthleteStats />
           </div>
-
-          {/* <Divider className={styles.divider} /> */}
 
           <div className={styles.sidebarItemContainer}>
             <FaMedapps
@@ -120,7 +114,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             <span
               className={styles.linkText}
               onClick={() => {
-                handleOpenModal('equipments');
+                openModal('equipments');
                 closeSidebar();
               }}
               role='button'
@@ -128,10 +122,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             >
               Componentes
             </span>
-            <ComponentInfo />
           </div>
-
-          {/* <Divider className={styles.divider} /> */}
 
           <div className={styles.sidebarItemContainer}>
             <FaInfoCircle
@@ -140,16 +131,16 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             />
             <span
               className={styles.linkText}
-              onClick={() => handleOpenModal('info')}
+              onClick={() => {
+                openModal('info');
+                closeSidebar();
+              }}
               role='button'
               tabIndex={2}
             >
               Ajuda
             </span>
-            <InitialInfoModal />
           </div>
-
-          {/* <Divider className={styles.divider} style={{ margin: 'auto' }} /> */}
         </div>
       </div>
     </>

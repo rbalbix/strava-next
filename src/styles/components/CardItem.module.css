@@ -5,6 +5,7 @@ li.event {
   padding-left: 20px;
   margin-bottom: 0;
   padding-bottom: 5px;
+  list-style-type: none;
 }
 
 li div.bol {

@@ -7,7 +7,6 @@ import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
 import { PulseLoader } from 'react-spinners';
-import InitialInfoModal from './InitialInfoModal';
 import Sidebar from './Sidebar';
 
 export default function Header() {
@@ -19,7 +18,7 @@ export default function Header() {
     approval_prompt,
     scope,
     signOut,
-    handleOpenModal,
+    openModal,
   } = useContext(AuthContext);
 
   const [sidebar, setSidebar] = useState(false);
@@ -39,7 +38,7 @@ export default function Header() {
         <>
           <div>
             <FaInfoCircle
-              onClick={() => handleOpenModal('info')}
+              onClick={() => openModal('info')}
               className={styles.headerInfoIcon}
             />
           </div>
@@ -55,7 +54,6 @@ export default function Header() {
               <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>
-          <InitialInfoModal />
         </>
       ) : (
         <div className={styles.headerButtons}>

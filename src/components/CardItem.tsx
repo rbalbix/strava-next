@@ -1,7 +1,6 @@
 import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Equipments } from '../services/equipment';
-import { Equipment } from '../services/equipment';
+import { Equipment, Equipments } from '../services/equipment';
 import {
   copyEventDetailsToClipboard,
   locale,
