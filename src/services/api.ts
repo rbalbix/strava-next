@@ -28,4 +28,9 @@ const apiRemoteStorage = axios.create({
   ...commonConfig,
 });
 
-export { apiRemoteStorage, apiStravaAuth, apiStravaOauthToken };
+const apiEmail = axios.create({
+  baseURL: API_ROUTES.emailUrl,
+  ...commonConfig,
+});
+
+export { apiEmail, apiRemoteStorage, apiStravaAuth, apiStravaOauthToken };

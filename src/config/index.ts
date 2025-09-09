@@ -31,6 +31,7 @@ export const API_ROUTES = {
   authorizeUrl: `${APP_CONFIG.appUrl}/api/authorize`,
   remoteStorage: `${APP_CONFIG.appUrl}/api/remoteStorage`,
   stravaAuthTokens: `${APP_CONFIG.appUrl}/api/save-tokens`,
+  emailUrl: `${APP_CONFIG.appUrl}/api/send-email`,
 };
 
 // Endpoints Strava

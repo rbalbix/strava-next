@@ -12,6 +12,11 @@ import { getAthlete } from '../../services/athlete';
 import { getGears } from '../../services/gear';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
+import {
+  createContactEmailTemplate,
+  createErrorEmailTemplate,
+  sendEmail,
+} from '../../services/email';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 interface StravaWebhookEvent {
@@ -64,11 +69,18 @@ export default async function handler(
           break;
         default:
           console.log('Evento não tratado:', event.object_type);
+          throw new Error(`Evento não tratado: ${event.object_type}`);
       }
 
       return res.status(200).json({ received: true });
     } catch (error) {
       console.error('Erro no webhook:', error);
+      await sendEmail({
+        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+        subject: `[Stuff Stats] - Erro`,
+        html: createErrorEmailTemplate('Erro no Webhook', error),
+        from: process.env.RESEND_EMAIL_FROM,
+      });
       return res.status(500).json({ error: 'Internal server error' });
     }
   }

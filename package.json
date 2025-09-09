@@ -25,6 +25,7 @@
     "react-icons": "^4.2.0",
     "react-spinners": "^0.15.0",
     "react-window": "^1.8.11",
+    "resend": "^6.0.3",
     "strava": "^2.3.0"
   },
   "devDependencies": {
