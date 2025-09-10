@@ -2,6 +2,7 @@ import Divider from '@mui/material/Divider';
 import Image from 'next/image';
 import { FaMedapps } from 'react-icons/fa';
 import styles from '../styles/components/InitialInfo.module.css';
+import { IoLogInOutline } from 'react-icons/io5';
 
 export default function InitialInfo() {
   return (
@@ -30,8 +31,9 @@ export default function InitialInfo() {
 
         <ol>
           <li>
-            Clique no botão <span>Sign in</span> localizado no canto superior
-            direito da tela.
+            Clique no ícone{' '}
+            <IoLogInOutline color='var(--light-blue)' size={22} /> localizado no
+            canto superior direito da tela.
           </li>
           <li>
             Você será redirecionado para a página de autenticação do Strava.
