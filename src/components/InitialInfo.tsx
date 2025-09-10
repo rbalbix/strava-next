@@ -150,7 +150,7 @@ export default function InitialInfo() {
             O tema claro ou escuro é definido pela configuração do ambiente /
             navegador.
           </li>
-          <li>
+          {/* <li>
             Caso a atualização feita na atividade do Strava não apareça na lista
             de componentes do equipamento, você vai precisar limpar o cache do
             navegador.{' '}
@@ -161,7 +161,7 @@ export default function InitialInfo() {
             >
               Como limpar o cache do navegador?
             </a>
-          </li>
+          </li> */}
         </ul>
       </main>
     </div>
