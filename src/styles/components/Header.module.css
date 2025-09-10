@@ -5,7 +5,7 @@
   justify-content: space-between;
 
   padding: 6px 5px 4px 5px;
-  border-bottom: 1px solid var(--light-gray);
+  /* border-bottom: 1px solid var(--light-gray); */
 
   position: fixed;
   top: 0px;
@@ -13,6 +13,24 @@
   max-width: 928px;
   z-index: 100;
   background-color: var(--background);
+}
+
+.headerContainer::after {
+  content: '';
+  position: absolute;
+  bottom: 0.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--light-gray) 20%,
+    var(--light-gray) 80%,
+    transparent 100%
+  );
+  border-radius: 2px;
 }
 
 .headerContainer a {

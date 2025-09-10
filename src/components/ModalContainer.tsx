@@ -13,18 +13,28 @@ export default function ModalContainer() {
     if (activeModal) {
       // Salva a posição atual do scroll
       const scrollY = window.scrollY;
-      // Adiciona estilo para impedir scroll
+
+      // Calcula a largura da barra de rolagem para compensar
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      // Aplica estilos para prevenir o deslocamento
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
       document.body.style.overflow = 'hidden';
     } else {
-      // Remove o estilo quando modal fecha
+      // Restaura os estilos quando o modal fecha
       const scrollY = document.body.style.top;
       document.body.style.position = '';
       document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.paddingRight = '';
       document.body.style.overflow = '';
+
       // Restaura a posição do scroll
       window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
@@ -35,7 +45,9 @@ export default function ModalContainer() {
         const scrollY = document.body.style.top;
         document.body.style.position = '';
         document.body.style.top = '';
-        document.body.style.width = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.paddingRight = '';
         document.body.style.overflow = '';
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
       }
