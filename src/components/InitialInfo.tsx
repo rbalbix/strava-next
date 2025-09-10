@@ -114,9 +114,9 @@ export default function InitialInfo() {
         <div>
           Para monitorar diferentes tipos de <span>componentes</span> do
           equipamento, você precisa adicionar o <span>código</span>{' '}
-          correspondente no campo de
-          <span>Observações Privadas</span> na atividade do Strava e incluir um
-          <span>&quot;*&quot;</span> no título da atividade.
+          correspondente no campo de <span>Observações Privadas</span> na
+          atividade do Strava e incluir um <span>&quot;*&quot;</span> no título
+          da atividade.
         </div>
 
         <div className={styles.screen}>
@@ -131,8 +131,8 @@ export default function InitialInfo() {
         <h3>Lista dos códigos dos componentes:</h3>
         <div>
           Esta lista pode ser aberta clicando no ícone{' '}
-          <FaMedapps aria-label='Ícone de lista de componentes' />
-          que fica no final da lista de equipamentos.
+          <FaMedapps aria-label='Ícone de lista de componentes' /> que fica no
+          final da lista de equipamentos.
         </div>
 
         <div className={styles.screen}>
