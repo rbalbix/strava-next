@@ -5,6 +5,9 @@ import styles from '../styles/components/InitialInfo.module.css';
 import { IoLogInOutline } from 'react-icons/io5';
 
 export default function InitialInfo() {
+  const BLUR_DATA_URL =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
   return (
     <div className={styles.initialInfoContainer}>
       <main>
@@ -26,6 +29,9 @@ export default function InitialInfo() {
             alt='Tela inicial do aplicativo com botão de login via Strava'
             width={203}
             height={387}
+            priority={true}
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
           />
         </div>
 
@@ -62,6 +68,9 @@ export default function InitialInfo() {
             alt='Lista de Equipamentos'
             width={203}
             height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
           />
         </div>
 
@@ -95,6 +104,9 @@ export default function InitialInfo() {
             alt='Lista de Componentes'
             width={203}
             height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
           />
         </div>
 
@@ -125,6 +137,9 @@ export default function InitialInfo() {
             alt='Configuração na atividade'
             width={203}
             height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
           />
         </div>
 
@@ -141,6 +156,9 @@ export default function InitialInfo() {
             alt='Lista de Códigos'
             width={203}
             height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
           />
         </div>
 
@@ -164,6 +182,34 @@ export default function InitialInfo() {
               Como limpar o cache do navegador?
             </a>
           </li> */}
+          <li>
+            Para adicionar um ícone à tela de início do seu celular, clique no
+            ícone em destaque, que fica no rodapé do navegador.
+            <div className={styles.screen}>
+              <Image
+                src='/images/tela-inicio-1.jpeg'
+                alt='Ícone para tela início'
+                width={295}
+                height={136}
+                loading='lazy'
+                placeholder='blur'
+                blurDataURL={BLUR_DATA_URL}
+              />
+            </div>
+            E depois, nas opções que aparecem, clique em "Adicionar à Tela de
+            Início".
+            <div className={styles.screen}>
+              <Image
+                src='/images/tela-inicio-2.jpeg'
+                alt='Ícone para tela início'
+                width={295}
+                height={55}
+                loading='lazy'
+                placeholder='blur'
+                blurDataURL={BLUR_DATA_URL}
+              />
+            </div>
+          </li>
         </ul>
       </main>
     </div>
