@@ -98,6 +98,15 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
     );
 
     if (!accessToken) {
+      await sendEmail({
+        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+        subject: `[Stuff Stats] - Erro`,
+        html: createErrorEmailTemplate(
+          `❌ Token não encontrado para athlete ${athleteId}`,
+          ''
+        ),
+        from: process.env.RESEND_EMAIL_FROM,
+      });
       console.error(`❌ Token não encontrado para athlete ${athleteId}`);
       return;
     }
