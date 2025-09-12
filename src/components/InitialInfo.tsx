@@ -22,7 +22,6 @@ export default function InitialInfo() {
         </div>
         <h2>Passo 1: Acesso Inicial e Login</h2>
         <div>Ao abrir o aplicativo, você verá a seguinte tela inicial:</div>
-
         <div className={styles.screen}>
           <Image
             src='/images/login.png'
@@ -34,7 +33,6 @@ export default function InitialInfo() {
             blurDataURL={BLUR_DATA_URL}
           />
         </div>
-
         <ol>
           <li>
             Clique no ícone{' '}
@@ -53,15 +51,12 @@ export default function InitialInfo() {
             no Strava.
           </li>
         </ol>
-
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
         <h2>Passo 2: Lista de Equipamentos</h2>
         <div>
           Após realizar o login, você será redirecionado para o painel principal
           que lista todos os seus equipamentos registrados no Strava.
         </div>
-
         <div className={styles.screen}>
           <Image
             src='/images/equipments.png'
@@ -73,11 +68,9 @@ export default function InitialInfo() {
             blurDataURL={BLUR_DATA_URL}
           />
         </div>
-
         <div>
           Cada cartão representa um equipamento com as seguintes informações:
         </div>
-
         <ul>
           <li>Nome do equipamento.</li>
           <li>Número total de atividades realizadas.</li>
@@ -88,16 +81,13 @@ export default function InitialInfo() {
             corrente.
           </li>
         </ul>
-
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
         <h2>Passo 3: Detalhes de um Equipamento</h2>
         <div>
           Ao clicar no cartão do equipamento, o aplicativo abre uma tela
           detalhada com todas os componentes e eventos registrados para o
           equipamento.
         </div>
-
         <div className={styles.screen}>
           <Image
             src='/images/components.png'
@@ -109,7 +99,6 @@ export default function InitialInfo() {
             blurDataURL={BLUR_DATA_URL}
           />
         </div>
-
         <div>Nesta tela, você verá:</div>
         <ul>
           <li>Data da atividade: Quando a manutenção foi realizada.</li>
@@ -119,9 +108,7 @@ export default function InitialInfo() {
           </li>
           <li>Tempo total: Tempo de uso desde a última manutenção.</li>
         </ul>
-
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
         <h2>Passo 4: Lista de Códigos dos Componentes</h2>
         <div>
           Para monitorar diferentes tipos de <span>componentes</span> do
@@ -130,7 +117,6 @@ export default function InitialInfo() {
           atividade do Strava e incluir um <span>&quot;*&quot;</span> no título
           da atividade.
         </div>
-
         <div className={styles.screen}>
           <Image
             src='/images/strava-config.png'
@@ -142,14 +128,12 @@ export default function InitialInfo() {
             blurDataURL={BLUR_DATA_URL}
           />
         </div>
-
         <h3>Lista dos códigos dos componentes:</h3>
         <div>
           Esta lista pode ser aberta clicando no ícone{' '}
           <FaMedapps aria-label='Ícone de lista de componentes' /> que fica no
           final da lista de equipamentos.
         </div>
-
         <div className={styles.screen}>
           <Image
             src='/images/component-list.png'
@@ -161,16 +145,13 @@ export default function InitialInfo() {
             blurDataURL={BLUR_DATA_URL}
           />
         </div>
-
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
-
         <h3>Observações:</h3>
-        <ul>
-          <li>
-            O tema claro ou escuro é definido pela configuração do ambiente /
-            navegador.
-          </li>
-          {/* <li>
+        <div>
+          O tema claro ou escuro é definido pela configuração do ambiente /
+          navegador.
+        </div>
+        {/* <li>
             Caso a atualização feita na atividade do Strava não apareça na lista
             de componentes do equipamento, você vai precisar limpar o cache do
             navegador.{' '}
@@ -182,35 +163,37 @@ export default function InitialInfo() {
               Como limpar o cache do navegador?
             </a>
           </li> */}
-          <li>
-            Para adicionar um ícone à tela de início do seu celular, clique no
-            ícone em destaque, que fica no rodapé do navegador.
-            <div className={styles.screen}>
-              <Image
-                src='/images/tela-inicio-1.jpeg'
-                alt='Ícone para tela início'
-                width={295}
-                height={136}
-                loading='lazy'
-                placeholder='blur'
-                blurDataURL={BLUR_DATA_URL}
-              />
-            </div>
-            E depois, nas opções que aparecem, clique em "Adicionar à Tela de
-            Início".
-            <div className={styles.screen}>
-              <Image
-                src='/images/tela-inicio-2.jpeg'
-                alt='Ícone para tela início'
-                width={295}
-                height={55}
-                loading='lazy'
-                placeholder='blur'
-                blurDataURL={BLUR_DATA_URL}
-              />
-            </div>
-          </li>
-        </ul>
+        <div>
+          <br />
+          Para adicionar um ícone à tela de início do seu celular, clique no
+          ícone em destaque, que fica no rodapé do navegador.
+        </div>
+        <div className={styles.screen}>
+          <Image
+            src='/images/tela-inicio-1.jpeg'
+            alt='Ícone para tela início'
+            width={295}
+            height={109}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
+          />
+        </div>
+        <div>
+          E depois, nas opções que aparecem, clique em "Adicionar à Tela de
+          Início".
+        </div>
+        <div className={styles.screen}>
+          <Image
+            src='/images/tela-inicio-2.jpeg'
+            alt='Ícone para tela início'
+            width={295}
+            height={55}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
+          />
+        </div>
       </main>
     </div>
   );
