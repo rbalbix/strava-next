@@ -136,9 +136,12 @@ export function createStatistics(
 
     activities.forEach((activity) => {
       if (activity.gear_id === gear.id) {
-        if (activity.name.includes('*')) {
+        if (activity.name && activity.name.includes('*')) {
           equipments.forEach((equipment) => {
-            if (activity.private_note.includes(equipment.id)) {
+            if (
+              activity.private_note &&
+              activity.private_note.includes(equipment.id)
+            ) {
               let equipmentStat = equipmentsStatTemplate.find(
                 ({ id }) => id === equipment.id
               );
