@@ -59,6 +59,17 @@ export default async function handler(
       const event = req.body as StravaWebhookEvent;
       console.log(`📩 Webhook recebido: `, event);
 
+      await sendEmail({
+        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+        subject: `[Stuff Stats] - Erro`,
+        html: createContactEmailTemplate(
+          '📩 Webhook recebido: ',
+          'rbalbi@gmail.com',
+          JSON.stringify(event)
+        ),
+        from: process.env.RESEND_EMAIL_FROM,
+      });
+
       // Processar diferentes tipos de eventos
       switch (event.object_type) {
         case 'activity':
