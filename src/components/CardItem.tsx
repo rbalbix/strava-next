@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Equipment, Equipments } from '../services/equipment';
 import {
@@ -19,7 +19,9 @@ export default function CardItem({
 
   const localDate = parseISO(e.date.replace(/Z$/, ''));
   const formattedDate = format(localDate, 'dd/MM/yyyy');
-  const timeAgo = formatDistanceToNow(localDate, { locale: ptBR });
+  const timeAgo = formatDistanceToNowStrict(localDate, {
+    locale: ptBR,
+  });
 
   const renderEvent = (message: string) => (
     <li className={styles.event}>
@@ -49,11 +51,16 @@ export default function CardItem({
         <div className={styles.bol}>{formattedDate}</div>
         <div className={styles.txt}>
           <span className={styles.timeago}>{timeAgo}</span>
-          <div className={styles.textCont}>
-            {`${e.caption} ${locale.format(',.2f')(
-              e.distance / 1000
-            )}km [${secondsToHms(e.movingTime)}h]`}
+          <div className={styles.textCont}>{e.caption}</div>
+          <div className={styles.badges}>
+            <div className={styles.chipbadge}>
+              {`📏 ${locale.format(',.2f')(e.distance / 1000)}km`}
+            </div>
+            <div className={styles.chipbadge}>
+              {`⏱️ ${secondsToHms(e.movingTime)}h`}
+            </div>
           </div>
+
           <div className={styles.clear}></div>
         </div>
       </li>

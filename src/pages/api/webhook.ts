@@ -165,6 +165,15 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
       await updateStatistics(strava, athleteId);
     }
   } catch (error) {
+    await sendEmail({
+      to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+      subject: `[Stuff Stats] - Erro`,
+      html: createErrorEmailTemplate(
+        `❌ Erro ao processar o evento para a atividade ${event.object_id}`,
+        error
+      ),
+      from: process.env.RESEND_EMAIL_FROM,
+    });
     console.error(
       `❌ Erro ao processar o evento para a atividade ${event.object_id}:`,
       error

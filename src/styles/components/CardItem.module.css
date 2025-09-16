@@ -21,7 +21,7 @@ li div.bol {
   text-align: center;
   line-height: 1rem;
   letter-spacing: -0.5px;
-  font: 700 0.8rem 'JetBrains Mono', sans-serif;
+  font: 400 0.8rem 'JetBrains Mono', sans-serif;
   color: var(--background);
 }
 
@@ -42,6 +42,22 @@ li div.txt {
 
 .clear {
   clear: both;
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.chipbadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--dark-gray);
+  font-size: 0.9rem;
 }
 
 @media (prefers-color-scheme: dark) {
