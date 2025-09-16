@@ -1,4 +1,4 @@
-li.event {
+.event {
   border-left: 1px solid var(--event-border);
   margin-left: 16px;
   padding-top: 1px;
@@ -8,7 +8,18 @@ li.event {
   list-style-type: none;
 }
 
-li div.bol {
+.firstLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dateAndCaption {
+  display: flex;
+  align-items: flex-end;
+}
+
+.bol {
   border-radius: 10%;
   border: 1px solid var(--date-badge-border);
   padding: 0.8px 3px;
@@ -20,22 +31,18 @@ li div.bol {
   float: left;
   text-align: center;
   line-height: 1rem;
-  letter-spacing: -0.5px;
-  font: 400 0.8rem 'JetBrains Mono', sans-serif;
+  font: 400 0.9rem 'JetBrains Mono', sans-serif;
   color: var(--background);
 }
 
-li div.txt {
-  border-bottom: 1px solid var(--text-border-bottom);
-  padding-top: 0px;
-  padding-bottom: 10px;
+.caption {
   font-size: 1.1rem;
 }
 
 .timeago {
   float: right;
   display: block;
-  font-size: 0.7rem !important;
+  font-size: 0.8rem !important;
   color: var(--timeago) !important;
   margin-left: 5px;
 }
@@ -49,6 +56,11 @@ li div.txt {
   gap: 0.5rem;
   margin-top: 0.4rem;
   flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--event-border);
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .chipbadge {
@@ -56,7 +68,8 @@ li div.txt {
   align-items: center;
   padding: 4px 8px;
   border-radius: 12px;
-  border: 1px solid var(--dark-gray);
+  border: 1px solid var(--event-border);
+  background-color: var(--background);
   font-size: 0.9rem;
 }
 

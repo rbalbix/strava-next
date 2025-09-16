@@ -25,12 +25,14 @@ export default function CardItem({
 
   const renderEvent = (message: string) => (
     <li className={styles.event}>
-      <div className={styles.bol}>{formattedDate}</div>
-      <div className={styles.txt}>
-        <span className={styles.timeago}>{timeAgo}</span>
-        <div className={styles.textCont}>{message} &#x1F44F;</div>
-        <div className={styles.clear}></div>
+      <div className={styles.firstLine}>
+        <div className={styles.dateAndCaption}>
+          <div className={styles.bol}>{formattedDate}</div>
+          <div className={styles.caption}>{message} &#x1F44F;</div>
+        </div>
+        <div className={styles.timeago}>{timeAgo}</div>
       </div>
+      <div className={styles.badges}></div>
     </li>
   );
 
@@ -48,21 +50,24 @@ export default function CardItem({
         className={styles.event}
         onClick={() => copyEventDetailsToClipboard(e, distance, movingTime)}
       >
-        <div className={styles.bol}>{formattedDate}</div>
-        <div className={styles.txt}>
-          <span className={styles.timeago}>{timeAgo}</span>
-          <div className={styles.textCont}>{e.caption}</div>
-          <div className={styles.badges}>
-            <div className={styles.chipbadge}>
-              {`📏 ${locale.format(',.2f')(e.distance / 1000)}km`}
-            </div>
-            <div className={styles.chipbadge}>
-              {`⏱️ ${secondsToHms(e.movingTime)}h`}
-            </div>
+        <div className={styles.firstLine}>
+          <div className={styles.dateAndCaption}>
+            <div className={styles.bol}>{formattedDate}</div>
+            <div className={styles.caption}>{e.caption}</div>
           </div>
-
-          <div className={styles.clear}></div>
+          <div className={styles.timeago}>{timeAgo}</div>
         </div>
+
+        <div className={styles.badges}>
+          <div className={styles.chipbadge}>
+            {`${locale.format(',.2f')(e.distance / 1000)}km`}
+          </div>
+          <div className={styles.chipbadge}>
+            {`⏱️ ${secondsToHms(e.movingTime)}h`}
+          </div>
+        </div>
+
+        <div className={styles.clear}></div>
       </li>
     );
   }

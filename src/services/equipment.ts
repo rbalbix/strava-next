@@ -9,9 +9,9 @@ export type Equipment = {
 };
 
 export const Equipments = {
-  Lubrification: { id: 'lub', caption: 'lubrificada a:', show: 'Lubrificação' },
-  Review: { id: 'review', caption: 'revisada a:', show: 'Revisão' },
-  Clean: { id: 'clean', caption: 'lavada a:', show: 'Lavagem' },
+  Lubrification: { id: 'lub', caption: 'lubrificação:', show: 'Lubrificação' },
+  Review: { id: 'review', caption: 'revisão completa:', show: 'Revisão' },
+  Clean: { id: 'clean', caption: 'lavagem completa:', show: 'Lavagem' },
 
   SuspensionReview: {
     id: 'suspareview',

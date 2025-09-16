@@ -57,13 +57,13 @@ html {
   }
 
   :root {
-    --background: #121212; /* Preto menos agressivo */
+    --background: #121212;
     --border-card: #252b33;
     --background-card: #1e1e1e;
-    --background-sidebar: #2a2f3b; /* Azul/cinza escuro elegante */
+    --background-sidebar: #2a2f3b;
     --background-sidebar-rgb: 42, 47, 59;
-    --background-sidebar-item: #282c34; /* Um tom acima para separação melhor */
-    --background-sidebar-item-hover: #343a40; /* Hover com mais destaque */
+    --background-sidebar-item: #282c34;
+    --background-sidebar-item-hover: #343a40;
 
     --dark-gray: var(--light-gray);
     --gray-notes: #c0c0c0;
