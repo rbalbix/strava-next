@@ -31,7 +31,7 @@
   float: left;
   text-align: center;
   line-height: 1rem;
-  font: 400 0.9rem 'JetBrains Mono', sans-serif;
+  font: 700 0.9rem 'JetBrains Mono', sans-serif;
   color: var(--background);
 }
 
@@ -70,11 +70,26 @@
   border-radius: 12px;
   border: 1px solid var(--event-border);
   background-color: var(--background);
-  font-size: 0.9rem;
+  /* font-size: 1rem; */
+  font: 700 1rem 'JetBrains Mono', sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   .cardItemContainer:nth-child(odd) span {
     color: var(--background-card);
+  }
+}
+
+@media (max-width: 768px) {
+  .bol {
+    font-size: 1rem;
+  }
+
+  .caption {
+    font-size: 1.2rem;
+  }
+
+  .timeago {
+    font-size: 0.9rem !important;
   }
 }
