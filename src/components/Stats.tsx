@@ -21,6 +21,7 @@ import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
+import VeloIcon from './VeloIcon';
 
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signIn, signOut } =
@@ -138,8 +139,12 @@ export default function Stats() {
   useEffect(() => {
     let isMounted = true;
 
-    const icon = Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />;
-    setRandomIcon(icon);
+    const icons = [<DiskIcon />, <TireIcon />, <VeloIcon />];
+    const randomIndex = Math.floor(Math.random() * icons.length);
+    setRandomIcon(icons[randomIndex]);
+
+    // const icon = Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />;
+    // setRandomIcon(icon);
 
     async function init() {
       try {
