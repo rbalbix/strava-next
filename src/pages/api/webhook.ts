@@ -9,14 +9,10 @@ import {
 } from '../../services/activity';
 import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
+import { createErrorEmailTemplate, sendEmail } from '../../services/email';
 import { getGears } from '../../services/gear';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
-import {
-  createContactEmailTemplate,
-  createErrorEmailTemplate,
-  sendEmail,
-} from '../../services/email';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 interface StravaWebhookEvent {
@@ -58,17 +54,6 @@ export default async function handler(
     try {
       const event = req.body as StravaWebhookEvent;
       console.log(`📩 Webhook recebido: `, event);
-
-      await sendEmail({
-        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-        subject: `[Stuff Stats] - Erro`,
-        html: createContactEmailTemplate(
-          '📩 Webhook recebido: ',
-          'rbalbi@gmail.com',
-          JSON.stringify(event)
-        ),
-        from: process.env.RESEND_EMAIL_FROM,
-      });
 
       // Processar diferentes tipos de eventos
       switch (event.object_type) {
@@ -169,7 +154,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
       to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
       subject: `[Stuff Stats] - Erro`,
       html: createErrorEmailTemplate(
-        `❌ Erro ao processar o evento para a atividade ${event.object_id}`,
+        `❌ Erro ao processar o evento ${event} - Atividade: https://www.strava.com/activities/${event.object_id}`,
         error
       ),
       from: process.env.RESEND_EMAIL_FROM,

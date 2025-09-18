@@ -4,7 +4,7 @@
   height: 80vh;
   top: 2rem;
   left: -300px;
-  width: auto;
+  width: 15vw;
   z-index: 1000;
   border-radius: 30px;
   transition: left 0.4s ease;
@@ -94,8 +94,9 @@
 }
 
 .sidebarItemIcon {
-  margin-right: 0.5rem;
-  font-size: 1.3rem;
+  margin-left: 0.5rem;
+  margin-right: 0.6rem;
+  font-size: 1.2rem;
 }
 
 .linkText {
@@ -119,6 +120,34 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@media (max-width: 1800px) {
+  .sidebarContainer {
+    width: 20vw;
+  }
+}
+
+@media (max-width: 1300px) {
+  .sidebarContainer {
+    width: 25vw;
+  }
+}
+
+@media (max-width: 1000px) {
+  .sidebarContainer {
+    width: 30vw;
+  }
+
+  .linkText {
+    font-size: 1.3rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebarContainer {
+    width: 50vw;
   }
 }
 

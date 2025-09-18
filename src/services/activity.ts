@@ -159,15 +159,6 @@ async function processActivities(
   if (response.success) {
     console.log(`✅ Atividades processadas para ${athleteId}`);
   } else {
-    await sendEmail({
-      to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-      subject: `[Stuff Stats] - Erro`,
-      html: createErrorEmailTemplate(
-        'Erro no Webhook',
-        `Erro ao processar atividades para ${athleteId}`
-      ),
-      from: process.env.RESEND_EMAIL_FROM,
-    });
     throw new Error(`Erro ao processar atividades para ${athleteId}`);
   }
 }
