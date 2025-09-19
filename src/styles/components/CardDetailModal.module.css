@@ -26,3 +26,30 @@
 .cardDetailModalContainer main section {
   margin-bottom: 10px;
 }
+
+.statCardContainer {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 10px;
+
+  margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .cardDetailModalContainer main span {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 470px) {
+  .statCardContainer {
+    gap: 5px;
+  }
+}
+
+@media (max-width: 338px) {
+  .statCardContainer {
+    gap: 2px;
+  }
+}

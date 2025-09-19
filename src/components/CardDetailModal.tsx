@@ -3,6 +3,7 @@ import { GearStats } from '../services/gear';
 import { locale, secondsToHms } from '../services/utils';
 import styles from '../styles/components/CardDetailModal.module.css';
 import CardItem from './CardItem';
+import StatCard from './StatCard';
 
 interface CardDetailModalProps {
   gearStat: GearStats;
@@ -37,11 +38,24 @@ export default function CardDetailModal({
             </div>
           </div>
           <section>
-            <span>
+            {/* <span>
               {`[${count} | 
               ${locale.format(',.2f')(distance / 1000)}km | 
               ${secondsToHms(movingTime)}h]`}
-            </span>
+            </span> */}
+            <div className={styles.statCardContainer}>
+              <StatCard value={count} label='Atividades' icon='📊' />
+              <StatCard
+                value={`${locale.format(',.2f')(distance / 1000)}km`}
+                label='Distância Total'
+                icon='📍'
+              />
+              <StatCard
+                value={`${secondsToHms(movingTime)}h`}
+                label='Tempo Total'
+                icon='⏱️'
+              />
+            </div>
           </section>
         </header>
         <ul className={styles.timeline}>

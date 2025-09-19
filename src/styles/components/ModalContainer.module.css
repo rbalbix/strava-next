@@ -69,7 +69,43 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1400px) {
+  .modalContent {
+    width: 35vw;
+  }
+}
+
+@media (max-width: 1400px) {
+  .modalContent {
+    width: 40vw;
+  }
+}
+
+@media (max-width: 1020px) {
+  .modalContent {
+    width: 50vw;
+  }
+}
+
+@media (max-width: 825px) {
+  .modalContent {
+    width: 60vw;
+  }
+}
+
+@media (max-width: 680px) {
+  .modalContent {
+    width: 65vw;
+  }
+}
+
+@media (max-width: 600px) {
+  .modalContent {
+    width: 75vw;
+  }
+}
+
+@media (max-width: 550px) {
   .modalContent {
     width: 85vw;
   }

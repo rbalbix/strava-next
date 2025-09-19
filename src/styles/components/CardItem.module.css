@@ -16,7 +16,7 @@
 
 .dateAndCaption {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .bol {
@@ -90,5 +90,11 @@
 
   .timeago {
     font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 398px) {
+  .caption {
+    font-size: 1.15rem;
   }
 }

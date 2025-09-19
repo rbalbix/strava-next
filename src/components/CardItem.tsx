@@ -28,7 +28,7 @@ export default function CardItem({
       <div className={styles.firstLine}>
         <div className={styles.dateAndCaption}>
           <div className={styles.bol}>{formattedDate}</div>
-          <div className={styles.caption}>{message} &#x1F44F;</div>
+          <div className={styles.caption}>{message}</div>
         </div>
         <div className={styles.timeago}>{timeAgo}</div>
       </div>
