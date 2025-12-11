@@ -9,7 +9,6 @@ import {
   SummaryGear,
 } from 'strava';
 import { REDIS_KEYS } from '../config';
-import { createErrorEmailTemplate, sendEmail } from './email';
 import redis from './redis';
 import { saveRemote, updateActivityInArray } from './utils';
 
