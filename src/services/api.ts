@@ -1,4 +1,5 @@
 import axios from 'axios';
+import axiosRetry, { isNetworkOrIdempotentRequestError } from 'axios-retry';
 import { API_ROUTES, STRAVA_ENDPOINTS } from '../config';
 
 const commonConfig = {
@@ -32,5 +33,23 @@ const apiEmail = axios.create({
   baseURL: API_ROUTES.emailUrl,
   ...commonConfig,
 });
+
+// Configure retries with exponential backoff for transient failures
+const retryOptions = {
+  retries: 3,
+  retryDelay: axiosRetry.exponentialDelay,
+  // Retry on network errors or 5xx responses
+  retryCondition: (error: any) => {
+    return (
+      isNetworkOrIdempotentRequestError(error) ||
+      Boolean(error.response && error.response.status >= 500)
+    );
+  },
+};
+
+axiosRetry(apiStravaOauthToken, retryOptions);
+axiosRetry(apiRemoteStorage, retryOptions);
+axiosRetry(apiStravaAuth, retryOptions);
+axiosRetry(apiEmail, retryOptions);
 
 export { apiEmail, apiRemoteStorage, apiStravaAuth, apiStravaOauthToken };

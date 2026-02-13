@@ -1,0 +1,44 @@
+# Regras rápidas do agente para strava-next
+
+Propósito: regras concisas e práticas para um agente AI atuar com segurança e consistência neste repositório.
+
+- Ambiente
+  - Runtime: Next.js + TypeScript (Node >=16). Use `npm run dev` / `yarn dev` para testes locais.
+  - Não leia nem escreva segredos no repo. Use `.env.local` para variáveis sensíveis.
+
+- Dependências importantes (impacto em regras)
+  - `@upstash/redis`: acesso ao Redis é server-only; qualquer arquivo que importe `src/services/redis.ts` roda apenas no servidor.
+  - `axios`: todas as chamadas externas usam instâncias em `src/services/api.ts`. Adicione novos clientes ali para herdar timeout e `X-Request-ID`.
+  - `strava` (SDK): utilizar via token refresh/refresh flow implementado em `src/services/strava-auth.ts`.
+  - `resend`: usado para envio de e-mail em `src/services/email.ts`; trate falhas com retries e não exponha credenciais.
+
+- Regras de codificação e segurança
+  - Nunca mover acesso a Redis para código client-side; arquivos em `src/pages/api/*` ou que importem `src/services/redis.ts` são server-only.
+  - Cookies sensíveis devem ser `HttpOnly; Secure` em produção e usar `SameSite=Strict`. Ver `src/pages/api/authorize.tsx`.
+  - Tokens persistidos em Redis: tratar como dados sensíveis — não logar tokens nem partes deles. Use `REDIS_KEYS` em `src/config/index.ts`.
+
+- Confiabilidade e concorrência
+  - Serializar refresh de token por atleta usando lock Redis (`SET NX` com TTL). Implementado em `src/services/strava-auth.ts` — siga esse padrão.
+  - Implementar deduplicação de webhooks por `owner_id`+`object_id`+`aspect_type` usando Redis com TTL (ver `src/pages/api/webhook.ts`).
+  - Adicionar retries exponenciais para chamadas externas (usar `axios-retry` em `src/services/api.ts`).
+
+- Observabilidade
+  - Propagar `X-Request-ID` (já presente) em logs e requests externas.
+  - Substituir `console.*` por logger estruturado (pino/winston) para produção.
+
+- Validação e testes
+  - Validar payloads recebidos (webhook / authorize / save-tokens) antes de processar.
+  - Escrever testes unitários para `strava-auth` (refresh logic & lock) e `webhook` (dedupe + handler branches).
+
+- Mudanças e PRs
+  - Prefira patches pequenos e focados. Para novos endpoints externos, adicione cliente em `src/services/api.ts` e re-use headers/timeouts.
+  - Documente qualquer esquema de Redis (chaves/TTL) em `src/config/index.ts`.
+
+- Referências rápidas (inspecionar antes de alterar)
+  - OAuth: `src/pages/api/authorize.tsx`
+  - Tokens / refresh: `src/services/strava-auth.ts`
+  - Webhook: `src/pages/api/webhook.ts`
+  - HTTP clients: `src/services/api.ts`
+  - Redis init: `src/services/redis.ts`
+
+Se uma regra conflitar com design existente, abra uma PR explicando a razão e inclua testes e documentação.

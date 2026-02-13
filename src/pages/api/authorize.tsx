@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { apiStravaAuth, apiStravaOauthToken } from '../../services/api';
+import { getLogger } from '../../services/logger';
 
 export default async function Authorize(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   const { code } = req.query;
 
@@ -14,6 +15,7 @@ export default async function Authorize(
   }
 
   try {
+    const log = getLogger(req.headers['x-request-id'] as string);
     const response = await apiStravaOauthToken.post('', null, {
       params: {
         client_id: process.env.CLIENT_ID,
@@ -25,9 +27,11 @@ export default async function Authorize(
 
     const { access_token, refresh_token, expires_at, athlete } = response.data;
 
+    const secureFlag = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+
     res.setHeader('Set-Cookie', [
-      `strava_code=${code}; Path=/; SameSite=Lax; Max-Age=300`, // 5 minutos
-      `strava_athleteId=${athlete.id}; Path=/; SameSite=Lax; Max-Age=300`,
+      `strava_code=${code}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=Strict`, // 5 minutos
+      `strava_athleteId=${athlete.id}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=Strict`,
     ]);
 
     await apiStravaAuth.post('/', {
@@ -40,8 +44,8 @@ export default async function Authorize(
 
     res.redirect('/');
   } catch (error) {
-    console.error('💥 ERRO COMPLETO:', error);
-    console.error('Stack:', error.stack);
+    const log = getLogger(req.headers['x-request-id'] as string);
+    log.error({ err: error }, 'Authorize route failed');
 
     res.redirect(`/404`);
   }

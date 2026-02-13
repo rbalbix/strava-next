@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Strava } from 'strava';
 import { REDIS_KEYS } from '../../config';
+import redis from '../../services/redis';
+import { getLogger } from '../../services/logger';
 import {
   fetchStravaActivity,
   getActivities,
@@ -27,7 +29,7 @@ interface StravaWebhookEvent {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Validação do webhook (GET)
   if (req.method === 'GET') {
@@ -44,16 +46,41 @@ export default async function handler(
 
   // Processamento de eventos (POST)
   if (req.method === 'POST') {
-    const verifyToken = process.env.VERIFY_TOKEN;
-    if (req.query['hub.verify_token'] === verifyToken) {
-      return res
-        .status(200)
-        .json({ 'hub.challenge': req.query['hub.challenge'] });
+    // Reject attempts to use the verification query on POST (verification is GET-only)
+    if (req.query['hub.verify_token']) {
+      return res.status(400).json({ error: 'Invalid method for verification' });
     }
 
     try {
       const event = req.body as StravaWebhookEvent;
-      console.log(`📩 Webhook recebido: `, event);
+      const log = getLogger(req.headers['x-request-id'] as string);
+      log.info({ event }, 'Webhook recebido');
+
+      // Basic payload validation
+      if (!event || !event.object_type || !event.object_id || !event.owner_id) {
+        log.warn({ event }, 'Webhook payload inválido');
+        return res.status(400).json({ error: 'Invalid payload' });
+      }
+
+      // Deduplicate events: set processed key with NX and short TTL
+      try {
+        const processedKey = REDIS_KEYS.processedEvent(
+          event.owner_id,
+          event.object_id,
+          event.aspect_type,
+        );
+        const set = await redis.set(processedKey, '1', {
+          nx: true,
+          ex: 24 * 3600,
+        });
+        if (!set) {
+          log.info({ processedKey }, 'Evento já processado, ignorando');
+          return res.status(200).json({ received: true, deduped: true });
+        }
+      } catch (e) {
+        log.error({ err: e }, 'Erro ao marcar evento processado');
+        // continue processing — dedupe best-effort
+      }
 
       // Processar diferentes tipos de eventos
       switch (event.object_type) {
@@ -89,9 +116,8 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
     const { object_id: activityId, owner_id: athleteId } = event;
 
     // Buscar access token do atleta
-    const { accessToken, refreshToken } = await getAthleteAccessToken(
-      athleteId
-    );
+    const { accessToken, refreshToken } =
+      await getAthleteAccessToken(athleteId);
 
     if (!accessToken) {
       // await sendEmail({
@@ -108,7 +134,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
     }
 
     const storedActivities = await apiRemoteStorage.get(
-      REDIS_KEYS.activities(athleteId)
+      REDIS_KEYS.activities(athleteId),
     );
 
     const strava = new Strava({
@@ -139,7 +165,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
           strava,
           gears,
           null,
-          lastUpdated
+          lastUpdated,
         );
 
         await processActivities(athleteId, [
@@ -161,7 +187,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
     // });
     console.error(
       `❌ Erro ao processar o evento para a atividade ${event.object_id}:`,
-      error
+      error,
     );
   }
 }
