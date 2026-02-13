@@ -78,7 +78,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   async function signIn(): Promise<Strava> {
     try {
       const storedAuth = await apiRemoteStorage.get(
-        REDIS_KEYS.auth(athlete_id)
+        REDIS_KEYS.auth(athlete_id),
       );
 
       const strava = new Strava({
@@ -95,18 +95,29 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     }
   }
 
-  function signOut() {
+  async function signOut() {
+    // Invalidate server-side cookies (HttpOnly) via API
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (err) {
+      // proceed even if server-side logout fails
+      console.warn('Server logout failed', err);
+    }
+
     sessionStorage.removeItem('athlete');
     sessionStorage.removeItem('athleteStats');
     sessionStorage.removeItem('athleteCacheTime');
 
+    // Clear non-HttpOnly cookies (best-effort)
     document.cookie = 'strava_code=; Path=/; Max-Age=0';
     document.cookie = 'strava_athleteId=; Path=/; Max-Age=0';
 
     setCodeReturned(null);
     setAthlete(null);
+    setAthleteStats(null);
 
-    router.push('/');
+    // Navigate to home; use replace to avoid back-button returning logged-in state
+    router.replace('/');
   }
 
   const openModal = (modalType: string, data?: any) => {
