@@ -27,11 +27,13 @@ export default async function Authorize(
 
     const { access_token, refresh_token, expires_at, athlete } = response.data;
 
-    const secureFlag = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+    const isProd = process.env.NODE_ENV === 'production';
+    const secureFlag = isProd ? 'Secure; ' : '';
+    const sameSite = isProd ? 'None' : 'Lax';
 
     res.setHeader('Set-Cookie', [
-      `strava_code=${code}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=Strict`, // 5 minutos
-      `strava_athleteId=${athlete.id}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=Strict`,
+      `strava_code=${code}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=${sameSite}`, // 5 minutos
+      `strava_athleteId=${athlete.id}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=${sameSite}`,
     ]);
 
     await apiStravaAuth.post('/', {

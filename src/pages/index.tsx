@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const athleteIdCookie = cookies
     .split(';')
     .find((c) => c.trim().startsWith('strava_athleteId='));
-  if (codeCookie) {
+  if (athleteIdCookie) {
     athlete_id = athleteIdCookie.split('=')[1];
   }
 
