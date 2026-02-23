@@ -26,9 +26,6 @@ export const REDIS_KEYS = {
   statistics: (athleteId: number) => `strava:statistics:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
-  // Processed event key to deduplicate webhook events
-  processedEvent: (athleteId: number, objectId: number, aspect: string) =>
-    `strava:processed:${athleteId}:${objectId}:${aspect}`,
 };
 
 // URLs completas da nossa API

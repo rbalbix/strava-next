@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Strava } from 'strava';
 import { REDIS_KEYS } from '../../config';
-import redis from '../../services/redis';
-import { getLogger } from '../../services/logger';
 import {
   fetchStravaActivity,
   getActivities,
@@ -13,6 +11,7 @@ import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
 import { createErrorEmailTemplate, sendEmail } from '../../services/email';
 import { getGears } from '../../services/gear';
+import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
 
@@ -60,26 +59,6 @@ export default async function handler(
       if (!event || !event.object_type || !event.object_id || !event.owner_id) {
         log.warn({ event }, 'Webhook payload inválido');
         return res.status(400).json({ error: 'Invalid payload' });
-      }
-
-      // Deduplicate events: set processed key with NX and short TTL
-      try {
-        const processedKey = REDIS_KEYS.processedEvent(
-          event.owner_id,
-          event.object_id,
-          event.aspect_type,
-        );
-        const set = await redis.set(processedKey, '1', {
-          nx: true,
-          ex: 24 * 3600,
-        });
-        if (!set) {
-          log.info({ processedKey }, 'Evento já processado, ignorando');
-          return res.status(200).json({ received: true, deduped: true });
-        }
-      } catch (e) {
-        log.error({ err: e }, 'Erro ao marcar evento processado');
-        // continue processing — dedupe best-effort
       }
 
       // Processar diferentes tipos de eventos
