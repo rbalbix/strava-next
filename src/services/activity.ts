@@ -12,6 +12,7 @@ import { REDIS_KEYS } from '../config';
 import redis from './redis';
 import { saveRemote, updateActivityInArray, mergeActivities } from './utils';
 import { getLogger } from './logger';
+import { activityProcessed, activityFailed } from './metrics';
 
 export type ActivityBase = {
   id: number;
@@ -140,12 +141,19 @@ async function processActivity(
     const updatedActivities = updateActivityInArray(activity, activities || []);
     await processActivities(athleteId, updatedActivities);
 
+    try {
+      activityProcessed.inc();
+    } catch (_) {}
+
     return updatedActivities;
   } catch (error) {
     getLogger().error(
       { err: error, activityId: activity.id },
       'Erro ao processar atividade',
     );
+    try {
+      activityFailed.inc();
+    } catch (_) {}
   }
 }
 
@@ -161,7 +169,10 @@ async function processActivities(
     }),
   );
   if (response.success) {
-    console.log(`✅ Atividades processadas para ${athleteId}`);
+    getLogger().info({ athleteId }, `Atividades processadas para ${athleteId}`);
+    try {
+      activityProcessed.inc();
+    } catch (_) {}
   } else {
     throw new Error(`Erro ao processar atividades para ${athleteId}`);
   }
@@ -175,7 +186,13 @@ async function verifyIfHasAnyActivities(
     const response = await strava.activities.getLoggedInAthleteActivities();
     return response !== null && response !== undefined && response.length !== 0;
   } catch (error) {
-    console.error('Falha ao verificar existência de atividades', error);
+    getLogger().error(
+      { err: error },
+      'Falha ao verificar existência de atividades',
+    );
+    try {
+      activityFailed.inc();
+    } catch (_) {}
     throw error;
   }
 }

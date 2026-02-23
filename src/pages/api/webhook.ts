@@ -24,6 +24,7 @@ import {
   type StravaWebhookEvent,
 } from '../../services/webhook-validation';
 import { mergeActivities } from '../../services/utils';
+import { webhookEvents, webhookValidationFailed } from '../../services/metrics';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
@@ -68,11 +69,20 @@ export default async function handler(
           { payload: req.body, details },
           'Webhook payload failed validation',
         );
+        try {
+          webhookValidationFailed.inc();
+        } catch (_) {}
         return res.status(400).json({ error: 'Invalid payload', details });
       }
 
       const event = (validation as { success: true; data: StravaWebhookEvent })
         .data;
+      try {
+        webhookEvents.inc({
+          object_type: event.object_type,
+          aspect_type: event.aspect_type,
+        });
+      } catch (_) {}
       log.info(
         {
           objectType: event.object_type,

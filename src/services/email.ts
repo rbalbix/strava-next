@@ -1,5 +1,6 @@
 import { apiEmail } from './api';
 import { getLogger } from './logger';
+import { emailSent, emailFailed } from './metrics';
 
 export interface EmailData {
   to: string | string[];
@@ -13,6 +14,9 @@ export async function sendEmail(emailData: EmailData) {
     const response = await apiEmail.post('/', JSON.stringify(emailData));
 
     if (response.status >= 200 && response.status < 300) {
+      try {
+        emailSent.inc();
+      } catch (_) {}
       return response.data;
     } else {
       throw new Error(
@@ -20,6 +24,9 @@ export async function sendEmail(emailData: EmailData) {
       );
     }
   } catch (error) {
+    try {
+      emailFailed.inc();
+    } catch (_) {}
     const log = getLogger();
     log.error(
       { error, to: emailData.to, subject: emailData.subject },

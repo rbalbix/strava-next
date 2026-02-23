@@ -2,6 +2,11 @@ import axios from 'axios';
 import { getUnixTime } from 'date-fns';
 import { REDIS_KEYS } from '../config';
 import { getLogger } from './logger';
+import {
+  tokenRefreshAttempts,
+  tokenRefreshSuccess,
+  tokenRefreshFailure,
+} from './metrics';
 import { apiStravaOauthToken } from './api';
 import redis from './redis';
 
@@ -108,10 +113,7 @@ export async function getAthleteAccessToken(
           await redis.del(lockKey);
           log.debug({ athleteId }, 'Lock liberado com sucesso');
         } catch (e) {
-          log.error(
-            { err: e, athleteId },
-            'Erro ao liberar lock de refresh',
-          );
+          log.error({ err: e, athleteId }, 'Erro ao liberar lock de refresh');
         }
       }
     } else {
@@ -220,6 +222,9 @@ export async function refreshStravaToken(
 
   for (let attempt = 0; attempt < RETRY_CONFIG.maxAttempts; attempt++) {
     try {
+      try {
+        tokenRefreshAttempts.inc();
+      } catch (_) {}
       if (attempt > 0) {
         const delay =
           RETRY_CONFIG.initialDelayMs *
@@ -255,6 +260,9 @@ export async function refreshStravaToken(
       });
 
       if (response.status >= 200 && response.status < 300) {
+        try {
+          tokenRefreshSuccess.inc();
+        } catch (_) {}
         log.info(
           { athleteId, attempt: attempt + 1 },
           'Refresh de token bem-sucedido',
@@ -266,8 +274,7 @@ export async function refreshStravaToken(
         );
       }
     } catch (error) {
-      lastError =
-        error instanceof Error ? error : new Error(String(error));
+      lastError = error instanceof Error ? error : new Error(String(error));
 
       if (axios.isAxiosError(error)) {
         const statusCode = error.response?.status;
@@ -310,6 +317,9 @@ export async function refreshStravaToken(
   }
 
   // All retries exhausted
+  try {
+    tokenRefreshFailure.inc();
+  } catch (_) {}
   log.error(
     {
       athleteId,
