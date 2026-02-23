@@ -1,6 +1,6 @@
 import * as d3 from 'd3-format';
 import { format } from 'date-fns';
-import { ActivityBase } from './activity';
+import type { ActivityBase } from './activity';
 import { apiRemoteStorage } from './api';
 import { Equipment } from './equipment';
 import { GearStats } from './gear';
@@ -30,7 +30,7 @@ function secondsToHms(totalSeconds: number) {
 
   return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(
     2,
-    '0'
+    '0',
   )}`;
 }
 
@@ -40,7 +40,7 @@ function saveLocalStat(value: LocalActivity) {
 
 async function saveRemote(
   key: string,
-  value: any
+  value: any,
 ): Promise<RemoteStorageResponse> {
   try {
     // Validação de entrada
@@ -54,8 +54,8 @@ async function saveRemote(
       new Promise<never>((_, reject) =>
         setTimeout(
           () => reject(new Error('Timeout ao salvar dados remotos')),
-          10000
-        )
+          10000,
+        ),
       ),
     ]);
 
@@ -115,12 +115,12 @@ function copyTextToClipboard(text: string) {
 function copyEventDetailsToClipboard(
   equipment: Equipment,
   distance: number,
-  movingTime: number
+  movingTime: number,
 ) {
   const formattedDate = format(new Date(), 'dd/MM/yyyy');
   const formattedDistance = locale.format(',.2f')(distance / 1000);
   const formattedEquipmentDistance = locale.format(',.2f')(
-    equipment.distance / 1000
+    equipment.distance / 1000,
   );
   const formattedTime = secondsToHms(movingTime);
 
@@ -131,12 +131,52 @@ function copyEventDetailsToClipboard(
 
 function updateActivityInArray(
   updatedActivity: Partial<ActivityBase>,
-  activities: ActivityBase[]
+  activities: ActivityBase[],
 ): ActivityBase[] {
-  return activities.map((activity) =>
-    activity.id === updatedActivity.id
-      ? { ...activity, ...safeActivityParse(updatedActivity) }
-      : activity
+  // If activity exists, update it; otherwise prepend new activity
+  const exists = activities.find((a) => a.id === updatedActivity.id);
+  const parsed = safeActivityParse(updatedActivity);
+  if (exists) {
+    return activities.map((activity) =>
+      activity.id === updatedActivity.id
+        ? { ...activity, ...parsed }
+        : activity,
+    );
+  }
+
+  return [parsed, ...activities];
+}
+
+/**
+ * Merge two activity arrays and deduplicate by id.
+ * Preference is given to the activity with the newest `start_date_local`.
+ */
+function mergeActivities(
+  incoming: ActivityBase[],
+  existing: ActivityBase[],
+): ActivityBase[] {
+  const map = new Map<number, ActivityBase>();
+
+  const add = (a: ActivityBase) => {
+    const current = map.get(a.id);
+    if (!current) {
+      map.set(a.id, a);
+      return;
+    }
+    // prefer the one with later start_date_local
+    const curDate = new Date(current.start_date_local).getTime();
+    const newDate = new Date(a.start_date_local).getTime();
+    if (newDate >= curDate) map.set(a.id, a);
+  };
+
+  // add existing first, then incoming (incoming may override)
+  existing.forEach(add);
+  incoming.forEach(add);
+
+  return Array.from(map.values()).sort(
+    (a, b) =>
+      new Date(b.start_date_local).getTime() -
+      new Date(a.start_date_local).getTime(),
   );
 }
 
@@ -155,7 +195,7 @@ function safeActivityParse(data: any): ActivityBase {
 
 function mergeGearStats(
   previous: GearStats[],
-  incoming: GearStats[]
+  incoming: GearStats[],
 ): GearStats[] {
   const statsMap = new Map<string, GearStats>();
 
@@ -188,4 +228,5 @@ export {
   saveRemote,
   secondsToHms,
   updateActivityInArray,
+  mergeActivities,
 };

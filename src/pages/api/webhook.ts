@@ -23,6 +23,7 @@ import {
   validateWebhookEvent,
   type StravaWebhookEvent,
 } from '../../services/webhook-validation';
+import { mergeActivities } from '../../services/utils';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
@@ -171,29 +172,43 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       refresh_token: refreshToken,
     });
 
-    if (
-      !storedActivities.data ||
-      storedActivities.data === null ||
-      storedActivities.data === undefined ||
-      Object.keys(storedActivities.data).length === 0
-    ) {
+    const hasStored =
+      storedActivities &&
+      storedActivities.data &&
+      Object.keys(storedActivities.data).length !== 0;
+
+    if (!hasStored) {
+      // First-time sync: process the single activity (if present) and then build stats
       log.info(
-        { athleteId },
-        'Sem atividades armazenadas, atualizando estatísticas',
+        { athleteId, activityId, aspect_type },
+        'No stored activities: handling initial sync',
       );
+      if (aspect_type === 'create' || aspect_type === 'update') {
+        try {
+          const activity = await fetchStravaActivity(activityId, strava);
+          await processActivity(activity, athleteId);
+        } catch (e) {
+          log.warn(
+            { err: e, athleteId, activityId },
+            'Failed to fetch/process single activity during initial sync',
+          );
+        }
+      }
       await updateStatistics(strava, athleteId);
     } else {
+      const { lastUpdated, activities } = storedActivities.data;
+
       if (aspect_type === 'update') {
-        log.info({ athleteId, activityId }, 'Atualizando atividade existente');
-        // Buscar e processar atividade completa
+        log.info({ athleteId, activityId }, 'Updating existing activity');
         const activity = await fetchStravaActivity(activityId, strava);
         await processActivity(activity, athleteId);
       } else if (aspect_type === 'create') {
-        log.info({ athleteId, activityId }, 'Processando nova atividade');
-        // Recupera apenas as atividades criadas depois de lastUpdated
+        log.info(
+          { athleteId, activityId },
+          'Processing new activity and merging with stored list',
+        );
         const athlete = await getAthlete(strava);
         const gears = getGears(athlete);
-        const { lastUpdated, activities } = storedActivities.data;
 
         const activitiesFromStravaAPI = await getActivities(
           strava,
@@ -202,16 +217,29 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
           lastUpdated,
         );
 
-        await processActivities(athleteId, [
-          ...activitiesFromStravaAPI,
-          ...activities,
-        ]);
+        // Merge and dedupe, preferring newest start_date_local
+        const merged = mergeActivities(
+          activitiesFromStravaAPI,
+          activities || [],
+        );
+        await processActivities(athleteId, merged);
       } else if (aspect_type === 'delete') {
         log.info(
           { athleteId, activityId },
-          'Atividade deletada - sincronizando estatísticas',
+          'Activity deleted - removing from storage and updating statistics',
         );
+        try {
+          const existing = activities || [];
+          const filtered = existing.filter((a: any) => a.id !== activityId);
+          await processActivities(athleteId, filtered);
+        } catch (e) {
+          log.error(
+            { err: e, athleteId, activityId },
+            'Error removing deleted activity from storage',
+          );
+        }
       }
+
       await updateStatistics(strava, athleteId);
     }
   } catch (error) {

@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { saveStravaAuth } from '../../services/strava-auth';
+import { getLogger } from '../../services/logger';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Permitir apenas POST
   if (req.method !== 'POST') {
@@ -19,7 +20,10 @@ export default async function handler(
       return res.status(400).json({ error: 'Dados incompletos' });
     }
 
-    console.log(`💾 Salvando tokens para athlete ${athleteId}`);
+    getLogger().info(
+      { athleteId },
+      `Salvando tokens para athlete ${athleteId}`,
+    );
 
     // Salvar no Redis (lado servidor)
     await saveStravaAuth(
@@ -27,7 +31,7 @@ export default async function handler(
       refreshToken,
       accessToken,
       expiresAt,
-      athleteInfo
+      athleteInfo,
     );
 
     res.status(200).json({
@@ -35,7 +39,7 @@ export default async function handler(
       message: 'Tokens salvos com sucesso',
     });
   } catch (error) {
-    console.error('Erro ao salvar tokens:', error);
+    getLogger().error({ err: error }, 'Erro ao salvar tokens');
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }

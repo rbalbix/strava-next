@@ -8,17 +8,18 @@ import { getAthlete } from './athlete';
 import { Equipment, Equipments } from './equipment';
 import { GearStats, getGears } from './gear';
 import { saveRemote } from './utils';
+import { getLogger } from './logger';
 
 export async function updateStatistics(
   strava: Strava,
-  athleteId: number
+  athleteId: number,
 ): Promise<GearStats[]> {
   const storedActivities = await apiRemoteStorage.get(
-    REDIS_KEYS.activities(athleteId)
+    REDIS_KEYS.activities(athleteId),
   );
 
   const storedStatistics = await apiRemoteStorage.get(
-    REDIS_KEYS.statistics(athleteId)
+    REDIS_KEYS.statistics(athleteId),
   );
 
   if (
@@ -30,7 +31,7 @@ export async function updateStatistics(
     Object.keys(storedStatistics.data).length !== 0 &&
     differenceInMinutes(
       fromUnixTime(storedStatistics.data.lastUpdated),
-      fromUnixTime(storedActivities.data.lastUpdated)
+      fromUnixTime(storedActivities.data.lastUpdated),
     ) === 0
   ) {
     return storedStatistics.data.statistics;
@@ -50,7 +51,7 @@ export async function updateStatistics(
         strava,
         gears,
         null,
-        null
+        null,
       );
     } else {
       // Recupera apenas as atividades criadas depois de lastUpdated
@@ -60,7 +61,7 @@ export async function updateStatistics(
         strava,
         gears,
         null,
-        lastUpdated
+        lastUpdated,
       );
       activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
     }
@@ -69,7 +70,7 @@ export async function updateStatistics(
     const updatedStatistics = await processStatistics(
       strava,
       athleteId,
-      activitiesToNewStatistics
+      activitiesToNewStatistics,
     );
     return updatedStatistics;
   }
@@ -78,7 +79,7 @@ export async function updateStatistics(
 export async function processStatistics(
   strava: Strava,
   athleteId: number,
-  updatedActivities: ActivityBase[]
+  updatedActivities: ActivityBase[],
 ): Promise<GearStats[]> {
   const athlete = await getAthlete(strava);
   const gears = getGears(athlete);
@@ -89,10 +90,10 @@ export async function processStatistics(
     JSON.stringify({
       lastUpdated: getUnixTime(Date.now()),
       statistics: updatedStatistics,
-    })
+    }),
   );
   if (response.success) {
-    console.log(`✅ Estatística processada para ${athleteId}`);
+    getLogger().info({ athleteId }, `Estatística processada para ${athleteId}`);
     return updatedStatistics;
   } else {
     throw new Error(`Erro ao processar estatísticas para ${athleteId}`);
@@ -101,7 +102,7 @@ export async function processStatistics(
 
 export function createStatistics(
   activities: ActivityBase[],
-  gears: SummaryGear[]
+  gears: SummaryGear[],
 ): GearStats[] {
   const gearStats: GearStats[] = [];
 
@@ -143,7 +144,7 @@ export function createStatistics(
               activity.private_note.includes(equipment.id)
             ) {
               let equipmentStat = equipmentsStatTemplate.find(
-                ({ id }) => id === equipment.id
+                ({ id }) => id === equipment.id,
               );
 
               switch (equipment.id) {
@@ -201,7 +202,7 @@ export function createStatistics(
               // review seems to be a new review.
               // Checks if the word "review" is isolated in private_note
               const hasStandaloneReview = /\breview\b/.test(
-                activity.private_note.toLowerCase()
+                activity.private_note.toLowerCase(),
               );
               if (
                 equipment.id === Equipments.Review.id &&

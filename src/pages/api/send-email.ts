@@ -1,13 +1,14 @@
 // pages/api/send-email.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
+import { getLogger } from '../../services/logger';
 
 // Inicializa o Resend com sua API Key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Apenas permite requisições POST
   if (req.method !== 'POST') {
@@ -33,7 +34,7 @@ export default async function handler(
     });
 
     if (error) {
-      console.error('Resend error:', error);
+      getLogger().error({ err: error }, 'Resend error');
       return res.status(400).json({
         error: error.message || 'Failed to send email',
       });
@@ -46,7 +47,7 @@ export default async function handler(
       message: 'Email sent successfully',
     });
   } catch (error) {
-    console.error('Email sending error:', error);
+    getLogger().error({ err: error }, 'Email sending error');
     res.status(500).json({
       error: 'Internal server error',
     });

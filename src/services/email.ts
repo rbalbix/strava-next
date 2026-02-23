@@ -1,4 +1,5 @@
 import { apiEmail } from './api';
+import { getLogger } from './logger';
 
 export interface EmailData {
   to: string | string[];
@@ -19,7 +20,11 @@ export async function sendEmail(emailData: EmailData) {
       );
     }
   } catch (error) {
-    console.error('Email service error:', error);
+    const log = getLogger();
+    log.error(
+      { error, to: emailData.to, subject: emailData.subject },
+      'Email service error',
+    );
     throw error;
   }
 }
