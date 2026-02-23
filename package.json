@@ -29,7 +29,8 @@
     "react-spinners": "^0.15.0",
     "react-window": "^1.8.11",
     "resend": "^6.0.3",
-    "strava": "^2.3.0"
+    "strava": "^2.3.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/d3-format": "^2.0.0",

@@ -19,17 +19,12 @@ import { getGears } from '../../services/gear';
 import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
+import {
+  validateWebhookEvent,
+  type StravaWebhookEvent,
+} from '../../services/webhook-validation';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
-interface StravaWebhookEvent {
-  aspect_type: 'create' | 'update' | 'delete';
-  event_time: number;
-  object_id: number;
-  object_type: 'activity' | 'athlete';
-  owner_id: number;
-  subscription_id: number;
-  updates?: Record<string, unknown>;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -61,26 +56,33 @@ export default async function handler(
     }
 
     try {
-      const event = req.body as StravaWebhookEvent;
       const log = getLogger(req.headers['x-request-id'] as string);
-      log.info({ event }, 'Webhook recebido');
+      log.info({ payload: req.body }, 'Webhook recebido');
 
-      // Basic payload validation
-      if (!event || !event.object_type || !event.object_id || !event.owner_id) {
-        log.warn({ event }, 'Webhook payload inválido');
-        return res.status(400).json({ error: 'Invalid payload' });
+      // Validate payload with Zod schema
+      const validation = validateWebhookEvent(req.body);
+      if (!validation.success) {
+        const details = (validation as { success: false; error: string }).error;
+        log.warn(
+          { payload: req.body, details },
+          'Webhook payload failed validation',
+        );
+        return res.status(400).json({ error: 'Invalid payload', details });
       }
 
-      // Validate aspect_type
-      if (
-        !event.aspect_type ||
-        !['create', 'update', 'delete'].includes(event.aspect_type)
-      ) {
-        log.warn({ event }, 'aspect_type inválido');
-        return res.status(400).json({ error: 'Invalid aspect_type' });
-      }
+      const event = (validation as { success: true; data: StravaWebhookEvent })
+        .data;
+      log.info(
+        {
+          objectType: event.object_type,
+          objectId: event.object_id,
+          athleteId: event.owner_id,
+          aspectType: event.aspect_type,
+        },
+        'Webhook validated',
+      );
 
-      // Processar diferentes tipos de eventos
+      // Process events
       switch (event.object_type) {
         case 'activity':
           await handleActivityEvent(event, log);
@@ -89,10 +91,7 @@ export default async function handler(
           await handleAthleteEvent(event, log);
           break;
         default:
-          log.error(
-            { objectType: event.object_type },
-            'Tipo de evento não tratado',
-          );
+          log.error({ objectType: event.object_type }, 'Unhandled event type');
           throw new Error(`Evento não tratado: ${event.object_type}`);
       }
 
