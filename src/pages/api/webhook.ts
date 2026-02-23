@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import type { Logger } from 'pino';
 import { Strava } from 'strava';
 import { REDIS_KEYS } from '../../config';
 import {
@@ -9,7 +10,11 @@ import {
 } from '../../services/activity';
 import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
-import { createErrorEmailTemplate, sendEmail } from '../../services/email';
+import {
+  createErrorEmailTemplate,
+  sendEmail,
+  type WebhookErrorContext,
+} from '../../services/email';
 import { getGears } from '../../services/gear';
 import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
@@ -32,14 +37,19 @@ export default async function handler(
 ) {
   // Validação do webhook (GET)
   if (req.method === 'GET') {
+    const log = getLogger(req.headers['x-request-id'] as string);
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      console.log('✅ Webhook validado');
+      log.info('Webhook validado com sucesso');
       return res.status(200).json({ 'hub.challenge': challenge });
     }
+    log.warn(
+      { receivedToken: token },
+      'Falha na validação do webhook - token inválido',
+    );
     return res.status(403).json({ error: 'Token inválido' });
   }
 
@@ -61,28 +71,48 @@ export default async function handler(
         return res.status(400).json({ error: 'Invalid payload' });
       }
 
+      // Validate aspect_type
+      if (
+        !event.aspect_type ||
+        !['create', 'update', 'delete'].includes(event.aspect_type)
+      ) {
+        log.warn({ event }, 'aspect_type inválido');
+        return res.status(400).json({ error: 'Invalid aspect_type' });
+      }
+
       // Processar diferentes tipos de eventos
       switch (event.object_type) {
         case 'activity':
-          await handleActivityEvent(event);
+          await handleActivityEvent(event, log);
           break;
         case 'athlete':
-          await handleAthleteEvent(event);
+          await handleAthleteEvent(event, log);
           break;
         default:
-          console.log('Evento não tratado:', event.object_type);
+          log.error(
+            { objectType: event.object_type },
+            'Tipo de evento não tratado',
+          );
           throw new Error(`Evento não tratado: ${event.object_type}`);
       }
 
       return res.status(200).json({ received: true });
     } catch (error) {
-      console.error('Erro no webhook:', error);
-      await sendEmail({
-        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-        subject: `[Stuff Stats] - Erro`,
-        html: createErrorEmailTemplate('Erro no Webhook', error),
-        from: process.env.RESEND_EMAIL_FROM,
-      });
+      const log = getLogger(req.headers['x-request-id'] as string);
+      log.error({ err: error }, 'Erro ao processar webhook');
+      try {
+        await sendEmail({
+          to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+          subject: `[Stuff Stats] - Erro no Webhook`,
+          html: createErrorEmailTemplate(
+            'Erro no Processamento do Webhook',
+            error,
+          ),
+          from: process.env.RESEND_EMAIL_FROM,
+        });
+      } catch (emailError) {
+        log.error({ err: emailError }, 'Erro ao enviar email de erro');
+      }
       return res.status(500).json({ error: 'Internal server error' });
     }
   }
@@ -90,25 +120,45 @@ export default async function handler(
   return res.status(405).end();
 }
 
-async function handleActivityEvent(event: StravaWebhookEvent) {
+async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
   try {
-    const { object_id: activityId, owner_id: athleteId } = event;
+    const { object_id: activityId, owner_id: athleteId, aspect_type } = event;
+    log.info(
+      { athleteId, activityId, aspectType: aspect_type },
+      'Processando evento de atividade',
+    );
 
     // Buscar access token do atleta
     const { accessToken, refreshToken } =
       await getAthleteAccessToken(athleteId);
 
     if (!accessToken) {
-      // await sendEmail({
-      //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-      //   subject: `[Stuff Stats] - Erro`,
-      //   html: createErrorEmailTemplate(
-      //     `❌ Token não encontrado para athlete ${athleteId}`,
-      //     ''
-      //   ),
-      //   from: process.env.RESEND_EMAIL_FROM,
-      // });
-      console.error(`❌ Token não encontrado para athlete ${athleteId}`);
+      const errorContext: WebhookErrorContext = {
+        message: 'Token não encontrado',
+        error: `Nenhum token disponível para athlete ${athleteId}`,
+        eventType: 'activity',
+        athleteId,
+        objectId: activityId,
+        activityUrl: `https://www.strava.com/activities/${activityId}`,
+      };
+      log.error({ athleteId }, 'Token não encontrado para atleta');
+      try {
+        await sendEmail({
+          to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+          subject: `[Stuff Stats] - Token não encontrado para atleta ${athleteId}`,
+          html: createErrorEmailTemplate(
+            'Token não encontrado',
+            new Error(`Athlete ${athleteId} sem token`),
+            errorContext,
+          ),
+          from: process.env.RESEND_EMAIL_FROM,
+        });
+      } catch (emailError) {
+        log.error(
+          { err: emailError },
+          'Erro ao enviar email de token não encontrado',
+        );
+      }
       return;
     }
 
@@ -128,13 +178,19 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
       storedActivities.data === undefined ||
       Object.keys(storedActivities.data).length === 0
     ) {
+      log.info(
+        { athleteId },
+        'Sem atividades armazenadas, atualizando estatísticas',
+      );
       await updateStatistics(strava, athleteId);
     } else {
-      if (event.aspect_type === 'update') {
+      if (aspect_type === 'update') {
+        log.info({ athleteId, activityId }, 'Atualizando atividade existente');
         // Buscar e processar atividade completa
         const activity = await fetchStravaActivity(activityId, strava);
         await processActivity(activity, athleteId);
-      } else if (event.aspect_type === 'create') {
+      } else if (aspect_type === 'create') {
+        log.info({ athleteId, activityId }, 'Processando nova atividade');
         // Recupera apenas as atividades criadas depois de lastUpdated
         const athlete = await getAthlete(strava);
         const gears = getGears(athlete);
@@ -151,27 +207,68 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
           ...activitiesFromStravaAPI,
           ...activities,
         ]);
+      } else if (aspect_type === 'delete') {
+        log.info(
+          { athleteId, activityId },
+          'Atividade deletada - sincronizando estatísticas',
+        );
       }
       await updateStatistics(strava, athleteId);
     }
   } catch (error) {
-    // await sendEmail({
-    //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-    //   subject: `[Stuff Stats] - Erro`,
-    //   html: createErrorEmailTemplate(
-    //     `❌ Erro ao processar o evento ${event} - Atividade: https://www.strava.com/activities/${event.object_id}`,
-    //     error
-    //   ),
-    //   from: process.env.RESEND_EMAIL_FROM,
-    // });
-    console.error(
-      `❌ Erro ao processar o evento para a atividade ${event.object_id}:`,
-      error,
-    );
+    log.error({ err: error, event }, 'Erro ao processar evento de atividade');
+    try {
+      const errorContext: WebhookErrorContext = {
+        message: 'Erro ao processar evento de atividade',
+        error,
+        eventType: event.aspect_type,
+        athleteId: event.owner_id,
+        objectId: event.object_id,
+        activityUrl: `https://www.strava.com/activities/${event.object_id}`,
+      };
+      await sendEmail({
+        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+        subject: `[Stuff Stats] - Erro ao processar atividade ${event.object_id}`,
+        html: createErrorEmailTemplate(
+          'Erro ao processar evento de atividade',
+          error,
+          errorContext,
+        ),
+        from: process.env.RESEND_EMAIL_FROM,
+      });
+    } catch (emailError) {
+      log.error(
+        { err: emailError },
+        'Erro ao enviar email após falha em processamento de atividade',
+      );
+    }
   }
 }
 
-async function handleAthleteEvent(event: StravaWebhookEvent) {
-  // Lógica para eventos relacionados ao atleta
-  console.log('Evento de atleta recebido:', event);
+async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
+  const { owner_id: athleteId, aspect_type } = event;
+  log.info({ athleteId, aspectType: aspect_type }, 'Evento de atleta recebido');
+
+  // TODO: Implementar handlers para eventos de atleta
+  // - 'update': sincronizar perfil (peso, altura, etc)
+  // - 'delete': limpar dados do atleta
+  switch (aspect_type) {
+    case 'update':
+      log.debug(
+        { athleteId },
+        'Evento de atualização de atleta - implementação pendente',
+      );
+      break;
+    case 'delete':
+      log.debug(
+        { athleteId },
+        'Evento de exclusão de atleta - implementação pendente',
+      );
+      break;
+    default:
+      log.warn(
+        { athleteId, aspectType: aspect_type },
+        'Tipo de evento de atleta não tratado',
+      );
+  }
 }
