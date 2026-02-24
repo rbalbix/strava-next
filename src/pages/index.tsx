@@ -80,7 +80,8 @@ export default function Home(props: HomeProps) {
             <div className={styles.homeText}>
               <ErroMsg />
               <h1>GearLife</h1>
-              <h2>Monitor your gear. Ride smarter.</h2>
+              <h2>Monitor your gear.</h2>
+              <h2> Ride smarter.</h2>
             </div>
           )}
         </section>
