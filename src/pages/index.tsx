@@ -79,8 +79,8 @@ export default function Home(props: HomeProps) {
           ) : (
             <div className={styles.homeText}>
               <ErroMsg />
-              <h1>Gearlytics</h1>
-              <h2>Smart Equipment Tracking powered by Strava</h2>
+              <h1>GearLife</h1>
+              <h2>Monitor your gear. Ride smarter.</h2>
             </div>
           )}
         </section>
