@@ -59,7 +59,7 @@
 
 @media (max-width: 660px) {
   .homeText {
-    height: 40vh;
+    height: 55vh;
   }
 
   .homeText h1 {
@@ -78,7 +78,7 @@
 
 @media (max-width: 500px) {
   .homeText {
-    height: 40vh;
+    height: 55vh;
   }
 
   .homeText h1 {
@@ -97,7 +97,7 @@
 
 @media (max-width: 400px) {
   .homeText {
-    height: 40vh;
+    height: 55vh;
   }
 
   .homeText h1 {

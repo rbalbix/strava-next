@@ -153,16 +153,20 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       };
       log.error({ athleteId }, 'Token não encontrado para atleta');
       try {
-        await sendEmail({
-          to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-          subject: `[Stuff Stats] - Token não encontrado para atleta ${athleteId}`,
-          html: createErrorEmailTemplate(
-            'Token não encontrado',
-            new Error(`Athlete ${athleteId} sem token`),
-            errorContext,
-          ),
-          from: process.env.RESEND_EMAIL_FROM,
-        });
+        // await sendEmail({
+        //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+        //   subject: `[Stuff Stats] - Token não encontrado para atleta ${athleteId}`,
+        //   html: createErrorEmailTemplate(
+        //     'Token não encontrado',
+        //     new Error(`Athlete ${athleteId} sem token`),
+        //     errorContext,
+        //   ),
+        //   from: process.env.RESEND_EMAIL_FROM,
+        // });
+        log.error(
+          { err: new Error(`Athlete ${athleteId} sem token`) },
+          `Token não encontrado para atleta ${athleteId}`,
+        );
       } catch (emailError) {
         log.error(
           { err: emailError },
@@ -263,16 +267,20 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         objectId: event.object_id,
         activityUrl: `https://www.strava.com/activities/${event.object_id}`,
       };
-      await sendEmail({
-        to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-        subject: `[Stuff Stats] - Erro ao processar atividade ${event.object_id}`,
-        html: createErrorEmailTemplate(
-          'Erro ao processar evento de atividade',
-          error,
-          errorContext,
-        ),
-        from: process.env.RESEND_EMAIL_FROM,
-      });
+      // await sendEmail({
+      //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+      //   subject: `[Stuff Stats] - Erro ao processar atividade ${event.object_id}`,
+      //   html: createErrorEmailTemplate(
+      //     'Erro ao processar evento de atividade',
+      //     error,
+      //     errorContext,
+      //   ),
+      //   from: process.env.RESEND_EMAIL_FROM,
+      // });
+      log.error(
+        { err: new Error(`Erro ao processar atividade ${event.object_id}`) },
+        `Erro ao processar atividade ${event.object_id}`,
+      );
     } catch (emailError) {
       log.error(
         { err: emailError },
