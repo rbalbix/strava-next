@@ -10,6 +10,15 @@ export default async function handler(
       try {
         let { key } = req.query;
         key = typeof key === 'string' ? key : key[0];
+
+        if (!key || key.trim().length === 0) {
+          return res.status(400).json({ error: 'Invalid key' });
+        }
+
+        if (key.startsWith('strava:auth:')) {
+          return res.status(403).json({ error: 'Forbidden key namespace' });
+        }
+
         const value = await redis.get(key);
         return res.status(200).send(value);
       } catch (error) {

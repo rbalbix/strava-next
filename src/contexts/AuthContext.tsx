@@ -1,13 +1,10 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useState } from 'react';
-import { ActivityStats, DetailedAthlete, Strava } from 'strava';
-import { REDIS_KEYS } from '../config';
-import { apiRemoteStorage } from '../services/api';
+import { ActivityStats, DetailedAthlete } from 'strava';
 
 interface AuthContextData {
   codeReturned: string;
   client_id: string;
-  client_secret: string;
   grant_type: string;
   response_type: string;
   approval_prompt: string;
@@ -20,7 +17,6 @@ interface AuthContextData {
   setAthleteInfo: (athele: DetailedAthlete) => void;
   setAthleteInfoStats: (atheleStats: ActivityStats) => void;
   setErrorInfo: (error: Object) => void;
-  signIn: () => Promise<Strava>;
   signOut: () => void;
   openModal: (modalType: string, data?: any) => void;
   closeModal: () => void;
@@ -29,7 +25,6 @@ interface AuthProviderProps {
   children: ReactNode;
   codeReturned: string;
   client_id: string;
-  client_secret: string;
   grant_type: string;
   response_type: string;
   approval_prompt: string;
@@ -55,7 +50,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
   const {
     client_id,
-    client_secret,
     grant_type,
     response_type,
     approval_prompt,
@@ -73,26 +67,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
   function setErrorInfo(errorObj: Object) {
     setCodeError(errorObj);
-  }
-
-  async function signIn(): Promise<Strava> {
-    try {
-      const storedAuth = await apiRemoteStorage.get(
-        REDIS_KEYS.auth(athlete_id),
-      );
-
-      const strava = new Strava({
-        client_id,
-        client_secret,
-        refresh_token: storedAuth.data.refreshToken,
-      });
-
-      return strava;
-    } catch (error) {
-      console.error('💥 ERRO COMPLETO:', error);
-      console.error('Stack:', error.stack);
-      signOut();
-    }
   }
 
   async function signOut() {
@@ -135,7 +109,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
       value={{
         codeReturned,
         client_id,
-        client_secret,
         grant_type,
         response_type,
         approval_prompt,
@@ -148,7 +121,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         setAthleteInfo,
         setAthleteInfoStats,
         setErrorInfo,
-        signIn,
         signOut,
         openModal,
         closeModal,

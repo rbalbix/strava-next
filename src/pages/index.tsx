@@ -11,7 +11,6 @@ import styles from '../styles/pages/Home.module.css';
 interface HomeProps {
   code: string;
   client_id: string;
-  client_secret: string;
   grant_type: string;
   response_type: string;
   approval_prompt: string;
@@ -43,7 +42,6 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       code,
       client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
       grant_type: process.env.GRANT_TYPE,
       response_type: process.env.RESPONSE_TYPE,
       approval_prompt: process.env.APPROVAL_PROMPT,
@@ -58,7 +56,6 @@ export default function Home(props: HomeProps) {
     <AuthProvider
       codeReturned={props.code}
       client_id={props.client_id}
-      client_secret={props.client_secret}
       grant_type={props.grant_type}
       response_type={props.response_type}
       approval_prompt={props.approval_prompt}
