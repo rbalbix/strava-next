@@ -8,7 +8,7 @@ export type GearStats = {
   name: string;
   distance: number;
   movingTime: number;
-  activityType: ActivityType;
+  activityType: ActivityType | null;
   count: number;
   equipments: Equipment[];
 };

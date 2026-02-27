@@ -5,8 +5,14 @@ import styles from '../styles/components/ErroMsg.module.css';
 
 export default function ErroMsg() {
   const { codeError } = useContext(AuthContext);
+  const status =
+    typeof codeError === 'object' &&
+    codeError !== null &&
+    'status' in codeError
+      ? (codeError as { status?: number }).status
+      : undefined;
 
-  if (codeError?.status !== 429) return null;
+  if (status !== 429) return null;
 
   return (
     <div className={styles.erroMsgContainer}>

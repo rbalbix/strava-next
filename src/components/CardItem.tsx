@@ -16,6 +16,8 @@ export default function CardItem({
   movingTime,
 }: Props) {
   if (!e.date) return null;
+  const equipmentDistance = e.distance ?? 0;
+  const equipmentMovingTime = e.movingTime ?? 0;
 
   const localDate = parseISO(e.date.replace(/Z$/, ''));
   const formattedDate = format(localDate, 'dd/MM/yyyy');
@@ -36,15 +38,15 @@ export default function CardItem({
     </li>
   );
 
-  if (e.id === Equipments.Lubrification.id && e.distance === 0) {
+  if (e.id === Equipments.Lubrification.id && equipmentDistance === 0) {
     return renderEvent('Bike lubrificada.');
   }
 
-  if (e.id === Equipments.Clean.id && e.distance === 0) {
+  if (e.id === Equipments.Clean.id && equipmentDistance === 0) {
     return renderEvent('Bike limpinha.');
   }
 
-  if (e.distance !== 0) {
+  if (equipmentDistance !== 0) {
     return (
       <li
         className={styles.event}
@@ -60,10 +62,10 @@ export default function CardItem({
 
         <div className={styles.badges}>
           <div className={styles.chipbadge}>
-            {`${locale.format(',.2f')(e.distance / 1000)}km`}
+            {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
           </div>
           <div className={styles.chipbadge}>
-            {`⏱️ ${secondsToHms(e.movingTime)}h`}
+            {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import type { Logger } from 'pino';
 import { Strava } from 'strava';
 import { REDIS_KEYS } from '../../config';
 import {
+  ActivityBase,
   fetchStravaActivity,
   getActivities,
   processActivities,
@@ -25,8 +26,48 @@ import {
 } from '../../services/webhook-validation';
 import { mergeActivities } from '../../services/utils';
 import { webhookEvents, webhookValidationFailed } from '../../services/metrics';
+import redis from '../../services/redis';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const WEBHOOK_RATE_LIMIT_MAX_PER_MINUTE = 60;
+const WEBHOOK_REPLAY_TTL_SECONDS = 2 * 60 * 60; // 2 hours
+
+function getClientIp(req: NextApiRequest): string {
+  const xff = req.headers['x-forwarded-for'];
+  if (Array.isArray(xff) && xff.length > 0) {
+    return xff[0].split(',')[0].trim();
+  }
+  if (typeof xff === 'string' && xff.length > 0) {
+    return xff.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
+async function enforceWebhookRateLimit(
+  req: NextApiRequest,
+  athleteId: number,
+): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+  const ip = getClientIp(req);
+  const window = Math.floor(Date.now() / 60000);
+  const rateKey = `strava:webhook:rate:${athleteId}:${ip}:${window}`;
+  const current = await redis.incr(rateKey);
+  if (current === 1) {
+    await redis.expire(rateKey, 120);
+  }
+  if (current > WEBHOOK_RATE_LIMIT_MAX_PER_MINUTE) {
+    return { ok: false, retryAfter: 60 };
+  }
+  return { ok: true };
+}
+
+async function guardWebhookReplay(event: StravaWebhookEvent): Promise<boolean> {
+  const replayKey = `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
+  const inserted = await redis.set(replayKey, '1', {
+    nx: true,
+    ex: WEBHOOK_REPLAY_TTL_SECONDS,
+  });
+  return Boolean(inserted);
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -77,6 +118,35 @@ export default async function handler(
 
       const event = (validation as { success: true; data: StravaWebhookEvent })
         .data;
+
+      const hasAuth = await redis.exists(REDIS_KEYS.auth(event.owner_id));
+      if (!hasAuth) {
+        log.warn(
+          { athleteId: event.owner_id, objectId: event.object_id },
+          'Webhook ignored: athlete without stored auth',
+        );
+        return res.status(403).json({ error: 'Athlete not authorized' });
+      }
+
+      const allowed = await enforceWebhookRateLimit(req, event.owner_id);
+      if (!allowed.ok) {
+        log.warn(
+          { athleteId: event.owner_id, retryAfter: allowed.retryAfter },
+          'Webhook rate limit exceeded',
+        );
+        res.setHeader('Retry-After', String(allowed.retryAfter));
+        return res.status(429).json({ error: 'Rate limit exceeded' });
+      }
+
+      const isNewEvent = await guardWebhookReplay(event);
+      if (!isNewEvent) {
+        log.info(
+          { athleteId: event.owner_id, objectId: event.object_id },
+          'Duplicate webhook ignored',
+        );
+        return res.status(200).json({ received: true, duplicate: true });
+      }
+
       try {
         webhookEvents.inc({
           object_type: event.object_type,
@@ -111,14 +181,19 @@ export default async function handler(
       const log = getLogger(req.headers['x-request-id'] as string);
       log.error({ err: error }, 'Erro ao processar webhook');
       try {
+        const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+        const resendFrom = process.env.RESEND_EMAIL_FROM;
+        if (!contactEmail || !resendFrom) {
+          throw new Error('Missing email configuration');
+        }
         await sendEmail({
-          to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
+          to: contactEmail,
           subject: `[Stuff Stats] - Erro no Webhook`,
           html: createErrorEmailTemplate(
             'Erro no Processamento do Webhook',
             error,
           ),
-          from: process.env.RESEND_EMAIL_FROM,
+          from: resendFrom,
         });
       } catch (emailError) {
         log.error({ err: emailError }, 'Erro ao enviar email de erro');
@@ -139,8 +214,11 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
     );
 
     // Buscar access token do atleta
-    const { accessToken, refreshToken } =
-      await getAthleteAccessToken(athleteId);
+    const tokens = await getAthleteAccessToken(athleteId);
+    if (!tokens?.accessToken || !tokens.refreshToken) {
+      throw new Error(`Token não encontrado para athlete ${athleteId}`);
+    }
+    const { accessToken, refreshToken } = tokens;
 
     if (!accessToken) {
       const errorContext: WebhookErrorContext = {
@@ -179,6 +257,10 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
     const storedActivities = await apiRemoteStorage.get(
       REDIS_KEYS.activities(athleteId),
     );
+
+    if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+      throw new Error('Missing Strava API configuration');
+    }
 
     const strava = new Strava({
       client_id: process.env.CLIENT_ID,
@@ -243,8 +325,8 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
           'Activity deleted - removing from storage and updating statistics',
         );
         try {
-          const existing = activities || [];
-          const filtered = existing.filter((a: any) => a.id !== activityId);
+          const existing: ActivityBase[] = activities || [];
+          const filtered = existing.filter((a) => a.id !== activityId);
           await processActivities(athleteId, filtered);
         } catch (e) {
           log.error(

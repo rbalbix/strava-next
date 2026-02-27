@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import { GearStats } from '../services/gear';
 import styles from '../styles/components/ModalContainer.module.css';
 import AthleteStats from './AthleteStats';
 import CardDetailModal from './CardDetailModal';
@@ -86,7 +87,7 @@ export default function ModalContainer() {
       break;
     case 'card-detail':
       modalContent = (
-        <CardDetailModal gearStat={modalData} onClose={closeModal} />
+        <CardDetailModal gearStat={modalData as GearStats} onClose={closeModal} />
       );
       break;
     default:

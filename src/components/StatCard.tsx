@@ -1,6 +1,12 @@
 import styles from '../styles/components/StatCard.module.css';
 
-export default function StatCard({ value, label, icon }) {
+interface StatCardProps {
+  value: string | number;
+  label: string;
+  icon: string;
+}
+
+export default function StatCard({ value, label, icon }: StatCardProps) {
   return (
     <div className={styles.statCard}>
       <div className={styles.statIcon}>{icon}</div>

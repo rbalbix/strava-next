@@ -120,7 +120,7 @@ function copyEventDetailsToClipboard(
   const formattedDate = format(new Date(), 'dd/MM/yyyy');
   const formattedDistance = locale.format(',.2f')(distance / 1000);
   const formattedEquipmentDistance = locale.format(',.2f')(
-    equipment.distance / 1000,
+    (equipment.distance ?? 0) / 1000,
   );
   const formattedTime = secondsToHms(movingTime);
 

@@ -3,50 +3,56 @@ import { createContext, ReactNode, useState } from 'react';
 import { ActivityStats, DetailedAthlete } from 'strava';
 
 interface AuthContextData {
-  codeReturned: string;
-  client_id: string;
-  grant_type: string;
-  response_type: string;
-  approval_prompt: string;
-  scope: string;
+  codeReturned: string | null;
+  client_id?: string;
+  grant_type?: string;
+  response_type?: string;
+  approval_prompt?: string;
+  scope?: string;
   oauth_state: string;
-  athlete: any;
-  athleteStats: ActivityStats;
-  codeError: any;
+  athlete: DetailedAthlete | null;
+  athleteStats: ActivityStats | null;
+  codeError: unknown;
   activeModal: string | null;
-  modalData: any;
-  setAthleteInfo: (athele: DetailedAthlete) => void;
-  setAthleteInfoStats: (atheleStats: ActivityStats) => void;
-  setErrorInfo: (error: Object) => void;
+  modalData: unknown;
+  setAthleteInfo: (athlete: DetailedAthlete | null) => void;
+  setAthleteInfoStats: (athleteStats: ActivityStats | null) => void;
+  setErrorInfo: (error: unknown) => void;
   signOut: () => void;
-  openModal: (modalType: string, data?: any) => void;
+  openModal: (modalType: string, data?: unknown) => void;
   closeModal: () => void;
 }
 interface AuthProviderProps {
   children: ReactNode;
-  codeReturned: string;
-  client_id: string;
-  grant_type: string;
-  response_type: string;
-  approval_prompt: string;
-  scope: string;
+  codeReturned: string | null;
+  client_id?: string;
+  grant_type?: string;
+  response_type?: string;
+  approval_prompt?: string;
+  scope?: string;
   oauth_state: string;
-  athlete_id: number;
+  athlete_id: number | null;
   athlete?: DetailedAthlete;
   athleteStats?: ActivityStats;
-  codeError?: Object;
+  codeError?: unknown;
 }
 
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children, ...rest }: AuthProviderProps) {
-  const [codeReturned, setCodeReturned] = useState<string>(rest.codeReturned);
-  const [athlete, setAthlete] = useState(rest.athlete);
-  const [athleteStats, setAthleteStats] = useState(rest.athleteStats);
-  const [codeError, setCodeError] = useState(rest.codeError);
+  const [codeReturned, setCodeReturned] = useState<string | null>(
+    rest.codeReturned,
+  );
+  const [athlete, setAthlete] = useState<DetailedAthlete | null>(
+    rest.athlete || null,
+  );
+  const [athleteStats, setAthleteStats] = useState<ActivityStats | null>(
+    rest.athleteStats || null,
+  );
+  const [codeError, setCodeError] = useState<unknown>(rest.codeError);
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [modalData, setModalData] = useState<any>(null);
+  const [modalData, setModalData] = useState<unknown>(null);
 
   const router = useRouter();
 
@@ -57,18 +63,17 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     approval_prompt,
     scope,
     oauth_state,
-    athlete_id,
   } = rest;
 
-  function setAthleteInfo(athlete: DetailedAthlete) {
+  function setAthleteInfo(athlete: DetailedAthlete | null) {
     setAthlete(athlete);
   }
 
-  function setAthleteInfoStats(athleteStats: ActivityStats) {
+  function setAthleteInfoStats(athleteStats: ActivityStats | null) {
     setAthleteStats(athleteStats);
   }
 
-  function setErrorInfo(errorObj: Object) {
+  function setErrorInfo(errorObj: unknown) {
     setCodeError(errorObj);
   }
 
@@ -97,7 +102,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     router.replace('/');
   }
 
-  const openModal = (modalType: string, data?: any) => {
+  const openModal = (modalType: string, data?: unknown) => {
     setActiveModal(modalType);
     setModalData(data);
   };

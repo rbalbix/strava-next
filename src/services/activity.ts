@@ -33,8 +33,8 @@ export interface StravaAuthData {
 async function getActivities(
   strava: Strava,
   gears: SummaryGear[],
-  before: number,
-  after: number,
+  before: number | null,
+  after: number | null,
 ): Promise<ActivityBase[]> {
   let page = 1;
   const activities: SummaryActivity[] = [];
@@ -131,14 +131,13 @@ export async function fetchStravaActivity(
 async function processActivity(
   activity: DetailedActivity,
   athleteId: number,
-): Promise<ActivityBase[]> {
+): Promise<ActivityBase[] | null> {
   try {
-    const { activities }: StravaAuthData = await redis.get(
-      REDIS_KEYS.activities(athleteId),
-    );
+    const stored = await redis.get<StravaAuthData>(REDIS_KEYS.activities(athleteId));
+    const activities = stored?.activities || [];
 
     // Update or insert the single activity
-    const updatedActivities = updateActivityInArray(activity, activities || []);
+    const updatedActivities = updateActivityInArray(activity, activities);
     await processActivities(athleteId, updatedActivities);
 
     try {
@@ -154,6 +153,7 @@ async function processActivity(
     try {
       activityFailed.inc();
     } catch (_) {}
+    return null;
   }
 }
 

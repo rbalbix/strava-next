@@ -28,6 +28,9 @@ export default async function handler(
     if (!tokens?.accessToken || !tokens?.refreshToken || !tokens?.expiresAt) {
       return res.status(401).json({ error: 'Missing auth tokens' });
     }
+    if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+      return res.status(500).json({ error: 'Server auth config missing' });
+    }
 
     const strava = new Strava(
       {

@@ -13,10 +13,15 @@ export default async function handler(
   switch (req.method) {
     case 'GET':
       try {
-        let { key } = req.query;
-        key = typeof key === 'string' ? key : key[0];
+        const queryKey = req.query.key;
+        const key =
+          typeof queryKey === 'string'
+            ? queryKey
+            : Array.isArray(queryKey)
+              ? queryKey[0]
+              : undefined;
 
-        if (!key || key.trim().length === 0) {
+        if (typeof key !== 'string' || key.trim().length === 0) {
           return res.status(400).json({ error: 'Invalid key' });
         }
 

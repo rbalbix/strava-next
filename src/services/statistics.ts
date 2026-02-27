@@ -117,7 +117,7 @@ export function createStatistics(
     let count = 0;
     let distance = 0;
     let movingTime = 0;
-    let activityType: ActivityType = null;
+    let activityType: ActivityType | null = null;
 
     const equipmentsStatTemplate: Equipment[] = [];
     const equipmentsStat: Equipment[] = [];

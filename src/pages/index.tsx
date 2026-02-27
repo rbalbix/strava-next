@@ -10,14 +10,14 @@ import { AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
 
 interface HomeProps {
-  code: string;
-  client_id: string;
-  grant_type: string;
-  response_type: string;
-  approval_prompt: string;
-  scope: string;
+  code: string | null;
+  client_id?: string;
+  grant_type?: string;
+  response_type?: string;
+  approval_prompt?: string;
+  scope?: string;
   oauth_state: string;
-  athlete_id: number;
+  athlete_id: number | null;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -34,12 +34,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     code = codeCookie.split('=')[1];
   }
 
-  let athlete_id = null;
+  let athlete_id: number | null = null;
   const athleteIdCookie = cookies
     .split(';')
     .find((c) => c.trim().startsWith('strava_athleteId='));
   if (athleteIdCookie) {
-    athlete_id = athleteIdCookie.split('=')[1];
+    const parsed = Number(athleteIdCookie.split('=')[1]);
+    athlete_id = Number.isFinite(parsed) ? parsed : null;
   }
 
   const oauthState = randomBytes(24).toString('hex');

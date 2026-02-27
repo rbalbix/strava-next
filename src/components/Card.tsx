@@ -19,6 +19,8 @@ export default function Card({
   const { openModal } = useContext(AuthContext);
   const isRide = activityType === 'Ride';
   const lub = equipments.find(({ id }) => id === Equipments.Lubrification.id);
+  const lubDistance = lub?.distance ?? 0;
+  const lubMovingTime = lub?.movingTime ?? 0;
 
   const handleCardClick = () => {
     openModal('card-detail', {
@@ -49,10 +51,10 @@ export default function Card({
 
         {isRide && lub && (
           <div>
-            {lub.distance != 0 ? (
+            {lubDistance !== 0 ? (
               <p>{`. lubrificada a: ${locale.format(',.2f')(
-                lub.distance / 1000
-              )} km  | ${secondsToHms(lub.movingTime)}h`}</p>
+                lubDistance / 1000
+              )} km  | ${secondsToHms(lubMovingTime)}h`}</p>
             ) : (
               <p>Bike lubrificada. &#x1F44F;</p>
             )}

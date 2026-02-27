@@ -1,8 +1,4 @@
-/**
- * Simples sistema de métricas em memória (sem dependências externas).
- * Funciona tanto no cliente quanto no servidor com no-ops no cliente.
- * Expõe formato Prometheus-compatível via /api/metrics.
- */
+import redis from './redis';
 
 interface Counter {
   inc: (labels?: Record<string, string> | number) => void;
@@ -16,11 +12,71 @@ interface Registry {
   contentType: string;
 }
 
+interface MetricDefinition {
+  help: string;
+  labelNames: string[];
+}
+
 // In-memory metrics store
 const metricsStore: Map<
   string,
   Array<{ labels: Record<string, string>; value: number }>
 > = new Map();
+const metricDefinitions: Map<string, MetricDefinition> = new Map();
+
+function stableLabels(labels: Record<string, string>): Record<string, string> {
+  return Object.keys(labels)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = labels[key];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+}
+
+function labelsToKey(labels: Record<string, string>): string {
+  return JSON.stringify(stableLabels(labels));
+}
+
+function keyToLabels(key: string): Record<string, string> {
+  try {
+    return JSON.parse(key);
+  } catch (_) {
+    return {};
+  }
+}
+
+async function persistIncrement(
+  metricName: string,
+  labels: Record<string, string>,
+): Promise<void> {
+  try {
+    const field = labelsToKey(labels);
+    await redis.hincrby(`metrics:counter:${metricName}`, field, 1);
+  } catch (_) {
+    // best-effort persistence
+  }
+}
+
+async function getPersistentMetric(
+  metricName: string,
+): Promise<Array<{ labels: Record<string, string>; value: number }> | null> {
+  try {
+    const raw = await redis.hgetall<Record<string, number | string>>(
+      `metrics:counter:${metricName}`,
+    );
+    if (!raw) return null;
+
+    return Object.entries(raw).map(([labelsKey, value]) => ({
+      labels: keyToLabels(labelsKey),
+      value: typeof value === 'number' ? value : Number(value || 0),
+    }));
+  } catch (_) {
+    return null;
+  }
+}
 
 /**
  * Create a counter that tracks increments with optional labels.
@@ -33,6 +89,7 @@ function createCounter(
   if (!metricsStore.has(name)) {
     metricsStore.set(name, []);
   }
+  metricDefinitions.set(name, { help, labelNames });
 
   return {
     inc: (labels?: Record<string, string> | number) => {
@@ -40,19 +97,22 @@ function createCounter(
 
       const labelObj =
         typeof labels === 'object' && labels !== null ? labels : {};
+      const normalizedLabels = stableLabels(labelObj);
 
       const store = metricsStore.get(name) || [];
       const existing = store.find(
-        (entry) => JSON.stringify(entry.labels) === JSON.stringify(labelObj),
+        (entry) =>
+          JSON.stringify(entry.labels) === JSON.stringify(normalizedLabels),
       );
 
       if (existing) {
         existing.value++;
       } else {
-        store.push({ labels: labelObj, value: 1 });
+        store.push({ labels: normalizedLabels, value: 1 });
       }
 
       metricsStore.set(name, store);
+      void persistIncrement(name, normalizedLabels);
     },
 
     getName: () => name,
@@ -79,10 +139,12 @@ function createRegistry(): Registry {
       if (typeof window !== 'undefined') return ''; // no-op on client
 
       let output = '';
-
-      // Iterate over all registered metrics
-      metricsStore.forEach((entries, metricName) => {
-        output += `# HELP ${metricName} Custom metric\n`;
+      const metricNames = Array.from(metricDefinitions.keys());
+      for (const metricName of metricNames) {
+        const definition = metricDefinitions.get(metricName);
+        const persistedEntries = await getPersistentMetric(metricName);
+        const entries = persistedEntries ?? metricsStore.get(metricName) ?? [];
+        output += `# HELP ${metricName} ${definition?.help || 'Custom metric'}\n`;
         output += `# TYPE ${metricName} counter\n`;
 
         entries.forEach(({ labels, value }) => {
@@ -95,7 +157,7 @@ function createRegistry(): Registry {
           }
           output += `${metricName}${labelString} ${value}\n`;
         });
-      });
+      }
 
       return output;
     },
