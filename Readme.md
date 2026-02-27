@@ -173,6 +173,55 @@ O projeto estará disponível em `http://localhost:3000`
 A aplicação consome a API do Strava para obter dados do usuário. Para mais detalhes sobre os endpoints disponíveis, consulte a documentação oficial:
 🔗 [Strava API Docs](https://developers.strava.com/docs/reference/)
 
+## 📈 Métricas e Validação
+
+### Como consultar as métricas
+
+As métricas são expostas em formato Prometheus no endpoint:
+
+```sh
+GET /api/metrics
+```
+
+Exemplo local:
+
+```sh
+curl -s http://localhost:3000/api/metrics
+```
+
+Exemplo em produção:
+
+```sh
+curl -s https://SEU_DOMINIO/api/metrics
+```
+
+Contadores principais monitorados:
+
+- `webhook_events_total`
+- `webhook_validation_failed_total`
+- `token_refresh_attempts_total`
+- `token_refresh_success_total`
+- `token_refresh_failure_total`
+- `activity_processed_total`
+- `activity_failed_total`
+- `email_sent_total`
+- `email_failed_total`
+
+As métricas são persistidas no Redis para refletir contagem agregada entre instâncias.
+
+### Checklist de validação
+
+1. Confirmar variáveis obrigatórias em ambiente:
+   `CLIENT_ID`, `CLIENT_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `INTERNAL_API_TOKEN`.
+2. Subir aplicação e validar build:
+   `yarn build`.
+3. Disparar fluxo de login OAuth e confirmar retorno sem erro.
+4. Consultar `/api/metrics` e verificar se os contadores retornam em texto Prometheus.
+5. Enviar webhook válido e verificar incremento em `webhook_events_total`.
+6. Enviar payload inválido e verificar incremento em `webhook_validation_failed_total`.
+7. Simular envio de email interno e validar `email_sent_total` (ou `email_failed_total` em caso de erro).
+8. Validar logs estruturados (`pino`) nos módulos de webhook, estatísticas, tokens e email.
+
 ## ✅ Melhorias Futuras
 
 - [ ] Melhorar a interface para dispositivos móveis 📱

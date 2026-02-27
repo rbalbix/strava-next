@@ -14,65 +14,77 @@ export async function updateStatistics(
   strava: Strava,
   athleteId: number,
 ): Promise<GearStats[]> {
-  const storedActivities = await apiRemoteStorage.get(
-    REDIS_KEYS.activities(athleteId),
-  );
+  const log = getLogger();
+  try {
+    const storedActivities = await apiRemoteStorage.get(
+      REDIS_KEYS.activities(athleteId),
+    );
 
-  const storedStatistics = await apiRemoteStorage.get(
-    REDIS_KEYS.statistics(athleteId),
-  );
-
-  if (
-    storedActivities.data !== null &&
-    storedActivities.data !== undefined &&
-    Object.keys(storedActivities.data).length !== 0 &&
-    storedStatistics.data !== null &&
-    storedStatistics.data !== undefined &&
-    Object.keys(storedStatistics.data).length !== 0 &&
-    differenceInMinutes(
-      fromUnixTime(storedStatistics.data.lastUpdated),
-      fromUnixTime(storedActivities.data.lastUpdated),
-    ) === 0
-  ) {
-    return storedStatistics.data.statistics;
-  } else {
-    const athlete = await getAthlete(strava);
-    const gears = getGears(athlete);
-    let activitiesToNewStatistics: ActivityBase[] = [];
+    const storedStatistics = await apiRemoteStorage.get(
+      REDIS_KEYS.statistics(athleteId),
+    );
 
     if (
-      !storedActivities.data ||
-      storedActivities.data === null ||
-      storedActivities.data === undefined ||
-      Object.keys(storedActivities.data).length === 0
+      storedActivities.data !== null &&
+      storedActivities.data !== undefined &&
+      Object.keys(storedActivities.data).length !== 0 &&
+      storedStatistics.data !== null &&
+      storedStatistics.data !== undefined &&
+      Object.keys(storedStatistics.data).length !== 0 &&
+      differenceInMinutes(
+        fromUnixTime(storedStatistics.data.lastUpdated),
+        fromUnixTime(storedActivities.data.lastUpdated),
+      ) === 0
     ) {
-      // Recupera todas as atividades
-      activitiesToNewStatistics = await getActivities(
-        strava,
-        gears,
-        null,
-        null,
-      );
+      log.debug({ athleteId }, 'Using cached statistics');
+      return storedStatistics.data.statistics;
     } else {
-      // Recupera apenas as atividades criadas depois de lastUpdated
-      const { lastUpdated, activities } = storedActivities.data;
+      log.info({ athleteId }, 'Recomputing statistics');
+      const athlete = await getAthlete(strava);
+      const gears = getGears(athlete);
+      let activitiesToNewStatistics: ActivityBase[] = [];
 
-      const activitiesFromStravaAPI = await getActivities(
-        strava,
-        gears,
-        null,
-        lastUpdated,
+      if (
+        !storedActivities.data ||
+        storedActivities.data === null ||
+        storedActivities.data === undefined ||
+        Object.keys(storedActivities.data).length === 0
+      ) {
+        // Recupera todas as atividades
+        activitiesToNewStatistics = await getActivities(
+          strava,
+          gears,
+          null,
+          null,
+        );
+      } else {
+        // Recupera apenas as atividades criadas depois de lastUpdated
+        const { lastUpdated, activities } = storedActivities.data;
+
+        const activitiesFromStravaAPI = await getActivities(
+          strava,
+          gears,
+          null,
+          lastUpdated,
+        );
+        activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
+      }
+
+      log.info(
+        { athleteId, activitiesCount: activitiesToNewStatistics.length },
+        'Persisting activities before statistics processing',
       );
-      activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
+      await processActivities(athleteId, activitiesToNewStatistics);
+      const updatedStatistics = await processStatistics(
+        strava,
+        athleteId,
+        activitiesToNewStatistics,
+      );
+      return updatedStatistics;
     }
-
-    await processActivities(athleteId, activitiesToNewStatistics);
-    const updatedStatistics = await processStatistics(
-      strava,
-      athleteId,
-      activitiesToNewStatistics,
-    );
-    return updatedStatistics;
+  } catch (error) {
+    log.error({ err: error, athleteId }, 'Failed to update statistics');
+    throw error;
   }
 }
 
@@ -81,6 +93,7 @@ export async function processStatistics(
   athleteId: number,
   updatedActivities: ActivityBase[],
 ): Promise<GearStats[]> {
+  const log = getLogger();
   const athlete = await getAthlete(strava);
   const gears = getGears(athlete);
 
@@ -93,9 +106,13 @@ export async function processStatistics(
     }),
   );
   if (response.success) {
-    getLogger().info({ athleteId }, `Estatística processada para ${athleteId}`);
+    log.info(
+      { athleteId, statsCount: updatedStatistics.length },
+      `Estatística processada para ${athleteId}`,
+    );
     return updatedStatistics;
   } else {
+    log.error({ athleteId, responseError: response.error }, 'Failed to save statistics');
     throw new Error(`Erro ao processar estatísticas para ${athleteId}`);
   }
 }

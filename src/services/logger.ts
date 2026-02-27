@@ -1,10 +1,11 @@
 import pino from 'pino';
 
 const isDev = process.env.NODE_ENV !== 'production';
+const isBrowser = typeof window !== 'undefined';
 
 const logger = pino({
   level: process.env.LOG_LEVEL || (isDev ? 'debug' : 'info'),
-  transport: isDev
+  transport: !isBrowser && isDev
     ? {
         target: 'pino-pretty',
         options: {

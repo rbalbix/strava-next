@@ -4,6 +4,7 @@ import type { ActivityBase } from './activity';
 import { apiRemoteStorage } from './api';
 import { Equipment } from './equipment';
 import { GearStats } from './gear';
+import { getLogger } from './logger';
 
 export type LocalActivity = {
   lastUpdated: number;
@@ -61,7 +62,7 @@ async function saveRemote(
 
     // Verifica se a resposta é bem-sucedida
     if (response.status >= 200 && response.status < 300) {
-      console.log(`✅ ${key} salvo com sucesso`);
+      getLogger().info({ key }, 'Remote data saved successfully');
       return {
         success: true,
         data: value,
@@ -71,7 +72,7 @@ async function saveRemote(
 
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   } catch (error) {
-    console.error(`❌ Erro ao salvar ${key}:`, error);
+    getLogger().error({ err: error, key }, 'Error saving remote data');
 
     return {
       success: false,
@@ -109,7 +110,7 @@ function copyTextToClipboard(text: string) {
     .then(() => {
       return;
     })
-    .catch((err) => console.error('Erro ao copiar:', err));
+    .catch((err) => getLogger().error({ err }, 'Error copying text'));
 }
 
 function copyEventDetailsToClipboard(
