@@ -36,7 +36,7 @@ export default function ComponentInfo() {
       <section>
         <div className={styles.orientationRow}>
           Para controlar um componente do equipamento deve-se escrever seu
-          código no campo 'OBSERVAÇÕES PRIVADAS' e incluir um * no título da
+          código no campo &apos;OBSERVAÇÕES PRIVADAS&apos; e incluir um * no título da
           Atividade.
         </div>
         <table className={styles.footerEquipmentTable}>

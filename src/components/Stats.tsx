@@ -30,7 +30,11 @@ export default function Stats() {
   useEffect(() => {
     let isMounted = true;
 
-    const icons = [<DiskIcon />, <TireIcon />, <VeloIcon />];
+    const icons = [
+      <DiskIcon key='disk' />,
+      <TireIcon key='tire' />,
+      <VeloIcon key='velo' />,
+    ];
     const randomIndex = Math.floor(Math.random() * icons.length);
     setRandomIcon(icons[randomIndex]);
 

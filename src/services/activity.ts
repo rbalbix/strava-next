@@ -19,7 +19,7 @@ export type ActivityBase = {
   name: string;
   distance: number;
   moving_time: number;
-  type: ActivityType;
+  type: ActivityType | null;
   start_date_local: string;
   gear_id: string;
   private_note: string;

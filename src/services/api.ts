@@ -42,10 +42,11 @@ const retryOptions = {
   retries: 3,
   retryDelay: axiosRetry.exponentialDelay,
   // Retry on network errors or 5xx responses
-  retryCondition: (error: any) => {
+  retryCondition: (error: unknown) => {
+    const axiosError = axios.isAxiosError(error) ? error : null;
     return (
-      isNetworkOrIdempotentRequestError(error) ||
-      Boolean(error.response && error.response.status >= 500)
+      Boolean(axiosError && isNetworkOrIdempotentRequestError(axiosError)) ||
+      Boolean(axiosError?.response && axiosError.response.status >= 500)
     );
   },
 };

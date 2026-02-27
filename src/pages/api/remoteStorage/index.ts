@@ -2,6 +2,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { hasValidInternalApiKey } from '../../../services/internal-api-auth';
 import redis from '../../../services/redis';
 
+function isAllowedRemoteStorageKey(key: string): boolean {
+  const match = /^strava:(activities|statistics):(\d+)$/.exec(key);
+  if (!match) return false;
+  const athleteId = Number(match[2]);
+  return Number.isFinite(athleteId) && athleteId > 0;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -19,8 +26,8 @@ export default async function handler(
           return res.status(400).json({ error: 'Invalid key' });
         }
 
-        if (key.startsWith('strava:auth:')) {
-          return res.status(403).json({ error: 'Forbidden key namespace' });
+        if (!isAllowedRemoteStorageKey(key)) {
+          return res.status(403).json({ error: 'Forbidden key' });
         }
 
         await redis.set(key, value);

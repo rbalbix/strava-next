@@ -13,7 +13,7 @@ export type LocalActivity = {
 
 export interface RemoteStorageResponse {
   success: boolean;
-  data?: LocalActivity;
+  data?: unknown;
   error?: string;
   timestamp: Date;
 }
@@ -41,7 +41,7 @@ function saveLocalStat(value: LocalActivity) {
 
 async function saveRemote(
   key: string,
-  value: any,
+  value: unknown,
 ): Promise<RemoteStorageResponse> {
   try {
     // Validação de entrada
@@ -181,16 +181,16 @@ function mergeActivities(
   );
 }
 
-function safeActivityParse(data: any): ActivityBase {
+function safeActivityParse(data: Partial<ActivityBase>): ActivityBase {
   return {
     id: data.id ?? 0,
     name: data.name ?? '',
     distance: data.distance ?? 0,
     moving_time: data.moving_time ?? 0,
-    type: data.type ?? '',
+    type: data.type ?? null,
     start_date_local: data.start_date_local ?? '',
-    gear_id: data.gear_id,
-    private_note: data.private_note,
+    gear_id: data.gear_id ?? '',
+    private_note: data.private_note ?? '',
   };
 }
 

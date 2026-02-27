@@ -180,8 +180,8 @@ export default function InitialInfo() {
           />
         </div>
         <div>
-          E depois, nas opções que aparecem, clique em "Adicionar à Tela de
-          Início".
+          E depois, nas opções que aparecem, clique em &quot;Adicionar à Tela de
+          Início&quot;.
         </div>
         <div className={styles.screen}>
           <Image

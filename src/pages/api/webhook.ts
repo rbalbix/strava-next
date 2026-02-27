@@ -100,16 +100,19 @@ export default async function handler(
 
     try {
       const log = getLogger(req.headers['x-request-id'] as string);
-      log.info({ payload: req.body }, 'Webhook recebido');
+      log.info(
+        {
+          contentType: req.headers['content-type'],
+          contentLength: req.headers['content-length'],
+        },
+        'Webhook recebido',
+      );
 
       // Validate payload with Zod schema
       const validation = validateWebhookEvent(req.body);
       if (!validation.success) {
         const details = (validation as { success: false; error: string }).error;
-        log.warn(
-          { payload: req.body, details },
-          'Webhook payload failed validation',
-        );
+        log.warn({ details }, 'Webhook payload failed validation');
         try {
           webhookValidationFailed.inc();
         } catch (_) {}
@@ -121,30 +124,39 @@ export default async function handler(
 
       const hasAuth = await redis.exists(REDIS_KEYS.auth(event.owner_id));
       if (!hasAuth) {
-        log.warn(
-          { athleteId: event.owner_id, objectId: event.object_id },
-          'Webhook ignored: athlete without stored auth',
-        );
-        return res.status(403).json({ error: 'Athlete not authorized' });
+        if (event.object_type === 'athlete' && event.aspect_type === 'delete') {
+          log.info(
+            { athleteId: event.owner_id },
+            'Athlete delete webhook for non-existing auth; treating as idempotent',
+          );
+        } else {
+          log.warn(
+            { athleteId: event.owner_id, objectId: event.object_id },
+            'Webhook ignored: athlete without stored auth',
+          );
+          return res.status(403).json({ error: 'Athlete not authorized' });
+        }
       }
 
-      const allowed = await enforceWebhookRateLimit(req, event.owner_id);
-      if (!allowed.ok) {
-        log.warn(
-          { athleteId: event.owner_id, retryAfter: allowed.retryAfter },
-          'Webhook rate limit exceeded',
-        );
-        res.setHeader('Retry-After', String(allowed.retryAfter));
-        return res.status(429).json({ error: 'Rate limit exceeded' });
-      }
+      if (hasAuth) {
+        const allowed = await enforceWebhookRateLimit(req, event.owner_id);
+        if (!allowed.ok) {
+          log.warn(
+            { athleteId: event.owner_id, retryAfter: allowed.retryAfter },
+            'Webhook rate limit exceeded',
+          );
+          res.setHeader('Retry-After', String(allowed.retryAfter));
+          return res.status(429).json({ error: 'Rate limit exceeded' });
+        }
 
-      const isNewEvent = await guardWebhookReplay(event);
-      if (!isNewEvent) {
-        log.info(
-          { athleteId: event.owner_id, objectId: event.object_id },
-          'Duplicate webhook ignored',
-        );
-        return res.status(200).json({ received: true, duplicate: true });
+        const isNewEvent = await guardWebhookReplay(event);
+        if (!isNewEvent) {
+          log.info(
+            { athleteId: event.owner_id, objectId: event.object_id },
+            'Duplicate webhook ignored',
+          );
+          return res.status(200).json({ received: true, duplicate: true });
+        }
       }
 
       try {
@@ -376,22 +388,45 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
   const { owner_id: athleteId, aspect_type } = event;
   log.info({ athleteId, aspectType: aspect_type }, 'Evento de atleta recebido');
 
-  // TODO: Implementar handlers para eventos de atleta
-  // - 'update': sincronizar perfil (peso, altura, etc)
-  // - 'delete': limpar dados do atleta
   switch (aspect_type) {
-    case 'update':
-      log.debug(
-        { athleteId },
-        'Evento de atualização de atleta - implementação pendente',
-      );
+    case 'update': {
+      try {
+        const tokens = await getAthleteAccessToken(athleteId);
+        if (!tokens?.refreshToken) {
+          log.warn({ athleteId }, 'Athlete update ignored: missing tokens');
+          return;
+        }
+        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+          throw new Error('Missing Strava API configuration');
+        }
+
+        const strava = new Strava({
+          client_id: process.env.CLIENT_ID,
+          client_secret: process.env.CLIENT_SECRET,
+          refresh_token: tokens.refreshToken,
+        });
+
+        await updateStatistics(strava, athleteId);
+        log.info({ athleteId }, 'Athlete update processed');
+      } catch (error) {
+        log.error({ err: error, athleteId }, 'Failed to process athlete update');
+      }
       break;
-    case 'delete':
-      log.debug(
-        { athleteId },
-        'Evento de exclusão de atleta - implementação pendente',
-      );
+    }
+    case 'delete': {
+      try {
+        await redis.del(
+          REDIS_KEYS.auth(athleteId),
+          REDIS_KEYS.activities(athleteId),
+          REDIS_KEYS.statistics(athleteId),
+          REDIS_KEYS.refreshLock(athleteId),
+        );
+        log.info({ athleteId }, 'Athlete data deleted from storage');
+      } catch (error) {
+        log.error({ err: error, athleteId }, 'Failed to delete athlete data');
+      }
       break;
+    }
     default:
       log.warn(
         { athleteId, aspectType: aspect_type },

@@ -30,14 +30,44 @@ export interface StravaAuthData {
   accessToken: string;
   expiresAt: number;
   lastUpdated: number;
-  athleteInfo: any;
+  athleteInfo: unknown;
 }
 
 export interface StravaTokens {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
-  athlete?: any;
+  athlete?: unknown;
+}
+
+function deserializeAuthData(raw: unknown): StravaAuthData | null {
+  if (!raw) return null;
+  try {
+    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    const data = parsed as Partial<StravaAuthData>;
+    if (
+      typeof data.refreshToken !== 'string' ||
+      typeof data.accessToken !== 'string' ||
+      typeof data.expiresAt !== 'number'
+    ) {
+      return null;
+    }
+
+    return {
+      refreshToken: data.refreshToken,
+      accessToken: data.accessToken,
+      expiresAt: data.expiresAt,
+      lastUpdated:
+        typeof data.lastUpdated === 'number'
+          ? data.lastUpdated
+          : getUnixTime(Date.now()),
+      athleteInfo: data.athleteInfo,
+    };
+  } catch (_) {
+    return null;
+  }
 }
 
 export async function getAthleteAccessToken(
@@ -46,10 +76,8 @@ export async function getAthleteAccessToken(
   const log = getLogger();
   try {
     // Buscar refresh token do atleta (salvo durante OAuth)
-    const athleteRaw: any = await redis.get(REDIS_KEYS.auth(athleteId));
-
-    const athleteData: StravaAuthData =
-      typeof athleteRaw === 'string' ? JSON.parse(athleteRaw) : athleteRaw;
+    const athleteRaw = await redis.get(REDIS_KEYS.auth(athleteId));
+    const athleteData = deserializeAuthData(athleteRaw);
 
     if (!athleteData) {
       log.error({ athleteId }, 'Athlete não encontrado no Redis');
@@ -127,11 +155,8 @@ export async function getAthleteAccessToken(
 
       while (Date.now() - startWaitTime < LOCK_CONFIG.maxWaitMs) {
         await wait(LOCK_CONFIG.pollIntervalMs);
-        const refreshedRaw: any = await redis.get(REDIS_KEYS.auth(athleteId));
-        const refreshed: StravaAuthData =
-          typeof refreshedRaw === 'string'
-            ? JSON.parse(refreshedRaw)
-            : refreshedRaw;
+        const refreshedRaw = await redis.get(REDIS_KEYS.auth(athleteId));
+        const refreshed = deserializeAuthData(refreshedRaw);
 
         if (
           refreshed &&
@@ -336,7 +361,7 @@ export async function saveStravaAuth(
   refreshToken: string,
   accessToken: string,
   expiresAt: number,
-  athleteInfo: any,
+  athleteInfo: unknown,
 ) {
   const log = getLogger();
   const authData = {
@@ -356,9 +381,8 @@ export async function saveStravaAuth(
     );
 
     // Health check: verify token was saved correctly
-    const savedRaw: any = await redis.get(REDIS_KEYS.auth(athleteId));
-    const saved: StravaAuthData =
-      typeof savedRaw === 'string' ? JSON.parse(savedRaw) : savedRaw;
+    const savedRaw = await redis.get(REDIS_KEYS.auth(athleteId));
+    const saved = deserializeAuthData(savedRaw);
 
     if (!saved || saved.accessToken !== accessToken) {
       log.error(
