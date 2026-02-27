@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import { useContext } from 'react';
+import ChainIcon from '../components/ChainIcon';
 import ErroMsg from '../components/ErroMsg';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
@@ -23,18 +24,26 @@ interface HomeProps {
 
 function HomeContent() {
   const { codeReturned } = useContext(AuthContext);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'v0.2.0';
 
   return (
-    <section>
+    <section className={styles.homeSection}>
       {codeReturned ? (
         <Stats />
       ) : (
-        <div className={styles.homeText}>
-          <ErroMsg />
-          <h1>GearLife</h1>
-          <h2>Monitor your gear.</h2>
-          <h2>Ride smarter.</h2>
-        </div>
+        <>
+          <div className={styles.homeText}>
+            <ErroMsg />
+            <h1>GearLife</h1>
+            <h2>Monitor your gear.</h2>
+            <h2>Ride smarter.</h2>
+          </div>
+
+          <div className={styles.versionMark} aria-hidden='true'>
+            <ChainIcon className={styles.chainIcon} />
+            <small className={styles.versionText}>{appVersion}</small>
+          </div>
+        </>
       )}
     </section>
   );

@@ -8,6 +8,11 @@
   flex-direction: column;
 }
 
+.homeSection {
+  position: relative;
+  flex: 1;
+}
+
 .homeText {
   height: 70vh;
 
@@ -17,6 +22,31 @@
   justify-content: center;
 
   font-family: 'Inter', 'JetBrains Mono', sans-serif;
+}
+
+.versionMark {
+  position: absolute;
+  left: 50%;
+  bottom: 0.8rem;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.chainIcon {
+  width: 3.4rem;
+  height: auto;
+  color: var(--light-gray);
+}
+
+.versionText {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--light-gray);
 }
 
 .homeText h1 {
@@ -73,6 +103,15 @@
     line-height: 2rem;
     letter-spacing: 0rem;
     text-align: center;
+  }
+
+  .versionMark {
+    bottom: 0.5rem;
+    opacity: 0.4;
+  }
+
+  .chainIcon {
+    width: 3rem;
   }
 }
 
