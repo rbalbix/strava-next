@@ -1,12 +1,13 @@
 import { randomBytes } from 'crypto';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
+import { useContext } from 'react';
 import ErroMsg from '../components/ErroMsg';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import ModalContainer from '../components/ModalContainer';
 import Stats from '../components/Stats';
-import { AuthProvider } from '../contexts/AuthContext';
+import { AuthContext, AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
 
 interface HomeProps {
@@ -18,6 +19,25 @@ interface HomeProps {
   scope?: string;
   oauth_state: string;
   athlete_id: number | null;
+}
+
+function HomeContent() {
+  const { codeReturned } = useContext(AuthContext);
+
+  return (
+    <section>
+      {codeReturned ? (
+        <Stats />
+      ) : (
+        <div className={styles.homeText}>
+          <ErroMsg />
+          <h1>GearLife</h1>
+          <h2>Monitor your gear.</h2>
+          <h2>Ride smarter.</h2>
+        </div>
+      )}
+    </section>
+  );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
@@ -87,19 +107,7 @@ export default function Home(props: HomeProps) {
         </Head>
 
         <Header />
-
-        <section>
-          {props.code ? (
-            <Stats />
-          ) : (
-            <div className={styles.homeText}>
-              <ErroMsg />
-              <h1>GearLife</h1>
-              <h2>Monitor your gear.</h2>
-              <h2> Ride smarter.</h2>
-            </div>
-          )}
-        </section>
+        <HomeContent />
 
         <Footer />
       </div>
