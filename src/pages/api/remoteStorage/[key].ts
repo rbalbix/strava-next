@@ -1,10 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { hasValidInternalApiKey } from '../../../services/internal-api-auth';
 import redis from '../../../services/redis';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   switch (req.method) {
     case 'GET':
       try {

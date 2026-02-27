@@ -17,6 +17,7 @@ export default function Header() {
     response_type,
     approval_prompt,
     scope,
+    oauth_state,
     signOut,
     openModal,
   } = useContext(AuthContext);
@@ -30,6 +31,7 @@ export default function Header() {
     approval_prompt,
     redirect_uri: API_ROUTES.authorizeUrl,
     scope,
+    state: oauth_state,
   };
 
   return (

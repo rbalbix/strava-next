@@ -7,6 +7,9 @@ const commonConfig = {
   headers: {
     'Content-Type': 'application/json',
     'X-Request-ID': generateRequestId(), // Para tracing
+    ...(process.env.INTERNAL_API_TOKEN
+      ? { 'X-Internal-Api-Key': process.env.INTERNAL_API_TOKEN }
+      : {}),
   },
 };
 

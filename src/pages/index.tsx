@@ -1,3 +1,4 @@
+import { randomBytes } from 'crypto';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import ErroMsg from '../components/ErroMsg';
@@ -15,12 +16,15 @@ interface HomeProps {
   response_type: string;
   approval_prompt: string;
   scope: string;
+  oauth_state: string;
   athlete_id: number;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { req } = context;
+  const { req, res } = context;
   const cookies = req.headers.cookie || '';
+  const isProd = process.env.NODE_ENV === 'production';
+  const secureFlag = isProd ? 'Secure; ' : '';
 
   let code = null;
   const codeCookie = cookies
@@ -38,6 +42,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     athlete_id = athleteIdCookie.split('=')[1];
   }
 
+  const oauthState = randomBytes(24).toString('hex');
+  const oauthStateCookie = `strava_oauth_state=${oauthState}; Path=/; Max-Age=600; HttpOnly; ${secureFlag}SameSite=Lax`;
+  const currentSetCookie = res.getHeader('Set-Cookie');
+  if (!currentSetCookie) {
+    res.setHeader('Set-Cookie', oauthStateCookie);
+  } else if (Array.isArray(currentSetCookie)) {
+    res.setHeader('Set-Cookie', [...currentSetCookie, oauthStateCookie]);
+  } else {
+    res.setHeader('Set-Cookie', [String(currentSetCookie), oauthStateCookie]);
+  }
+
   return {
     props: {
       code,
@@ -46,6 +61,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       response_type: process.env.RESPONSE_TYPE,
       approval_prompt: process.env.APPROVAL_PROMPT,
       scope: process.env.STRAVA_SCOPE,
+      oauth_state: oauthState,
       athlete_id,
     },
   };
@@ -60,6 +76,7 @@ export default function Home(props: HomeProps) {
       response_type={props.response_type}
       approval_prompt={props.approval_prompt}
       scope={props.scope}
+      oauth_state={props.oauth_state}
       athlete_id={props.athlete_id}
     >
       <ModalContainer />

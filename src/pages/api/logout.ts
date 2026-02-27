@@ -10,6 +10,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const cookies = [
     'strava_code=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict',
     'strava_athleteId=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict',
+    'strava_oauth_state=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict',
   ];
 
   // In production, cookies should be Secure

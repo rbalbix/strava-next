@@ -9,6 +9,7 @@ interface AuthContextData {
   response_type: string;
   approval_prompt: string;
   scope: string;
+  oauth_state: string;
   athlete: any;
   athleteStats: ActivityStats;
   codeError: any;
@@ -29,6 +30,7 @@ interface AuthProviderProps {
   response_type: string;
   approval_prompt: string;
   scope: string;
+  oauth_state: string;
   athlete_id: number;
   athlete?: DetailedAthlete;
   athleteStats?: ActivityStats;
@@ -54,6 +56,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     response_type,
     approval_prompt,
     scope,
+    oauth_state,
     athlete_id,
   } = rest;
 
@@ -113,6 +116,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
         response_type,
         approval_prompt,
         scope,
+        oauth_state,
         athlete,
         athleteStats,
         codeError,

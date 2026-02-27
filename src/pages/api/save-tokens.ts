@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { hasValidInternalApiKey } from '../../services/internal-api-auth';
 import { saveStravaAuth } from '../../services/strava-auth';
 import { getLogger } from '../../services/logger';
 
@@ -6,6 +7,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   // Permitir apenas POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });

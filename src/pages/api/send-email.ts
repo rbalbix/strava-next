@@ -1,6 +1,7 @@
 // pages/api/send-email.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
+import { hasValidInternalApiKey } from '../../services/internal-api-auth';
 import { getLogger } from '../../services/logger';
 
 // Inicializa o Resend com sua API Key
@@ -10,6 +11,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  if (!hasValidInternalApiKey(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   // Apenas permite requisições POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
