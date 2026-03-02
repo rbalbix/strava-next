@@ -128,7 +128,7 @@ RESPONSE_TYPE=code
 APPROVAL_PROMPT=auto
 STRAVA_SCOPE=read,profile:read_all,activity:read_all
 VERIFY_TOKEN=SEU_VERIFY_TOKEN_WEBHOOK
-WEBHOOK_ALLOWED_IPS=IP_OU_CIDR1,IP_OU_CIDR2
+WEBHOOK_ALLOWED_IPS=IP_OU_CIDR1,IP_OU_CIDR2 # opcional
 WEBHOOK_SUBSCRIPTION_ID=SEU_SUBSCRIPTION_ID
 UPSTASH_REDIS_REST_URL=SUA_UPSTASH_REDIS_REST_URL
 UPSTASH_REDIS_REST_TOKEN=SEU_UPSTASH_REDIS_REST_TOKEN
@@ -218,7 +218,8 @@ As métricas são persistidas no Redis para refletir contagem agregada entre ins
 ### Checklist de validação
 
 1. Confirmar variáveis obrigatórias em ambiente:
-   `CLIENT_ID`, `CLIENT_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `INTERNAL_API_TOKEN`, `WEBHOOK_ALLOWED_IPS`, `WEBHOOK_SUBSCRIPTION_ID`.
+   `CLIENT_ID`, `CLIENT_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `INTERNAL_API_TOKEN`, `WEBHOOK_SUBSCRIPTION_ID`.
+   Opcional: `WEBHOOK_ALLOWED_IPS` para restringir origem por IP/CIDR.
 2. Subir aplicação e validar build:
    `yarn build`.
 3. Disparar fluxo de login OAuth e confirmar retorno sem erro.

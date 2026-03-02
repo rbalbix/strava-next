@@ -154,12 +154,8 @@ export default async function handler(
   if (req.method === 'POST') {
     const log = getLogger(req.headers['x-request-id'] as string);
 
-    // In production, deny processing when origin verification is not configured.
+    // In production, require subscription pinning. IP allowlist is optional.
     if (process.env.NODE_ENV === 'production') {
-      if (WEBHOOK_ALLOWED_IPS.length === 0) {
-        log.error('Missing WEBHOOK_ALLOWED_IPS in production');
-        return res.status(500).json({ error: 'Webhook origin guard not configured' });
-      }
       if (
         WEBHOOK_SUBSCRIPTION_ID === null ||
         !Number.isFinite(WEBHOOK_SUBSCRIPTION_ID) ||
