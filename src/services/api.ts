@@ -7,11 +7,12 @@ const commonConfig = {
   headers: {
     'Content-Type': 'application/json',
     'X-Request-ID': generateRequestId(), // Para tracing
-    ...(process.env.INTERNAL_API_TOKEN
-      ? { 'X-Internal-Api-Key': process.env.INTERNAL_API_TOKEN }
-      : {}),
   },
 };
+
+const internalApiHeaders = process.env.INTERNAL_API_TOKEN
+  ? { 'X-Internal-Api-Key': process.env.INTERNAL_API_TOKEN }
+  : {};
 
 function generateRequestId(): string {
   return `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
@@ -23,18 +24,30 @@ const apiStravaOauthToken = axios.create({
 });
 
 const apiStravaAuth = axios.create({
-  baseURL: API_ROUTES.stravaAuthTokens,
   ...commonConfig,
+  baseURL: API_ROUTES.stravaAuthTokens,
+  headers: {
+    ...commonConfig.headers,
+    ...internalApiHeaders,
+  },
 });
 
 const apiRemoteStorage = axios.create({
-  baseURL: API_ROUTES.remoteStorage,
   ...commonConfig,
+  baseURL: API_ROUTES.remoteStorage,
+  headers: {
+    ...commonConfig.headers,
+    ...internalApiHeaders,
+  },
 });
 
 const apiEmail = axios.create({
-  baseURL: API_ROUTES.emailUrl,
   ...commonConfig,
+  baseURL: API_ROUTES.emailUrl,
+  headers: {
+    ...commonConfig.headers,
+    ...internalApiHeaders,
+  },
 });
 
 // Configure retries with exponential backoff for transient failures
