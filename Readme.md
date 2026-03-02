@@ -186,13 +186,17 @@ GET /api/metrics
 Exemplo local:
 
 ```sh
-curl -s http://localhost:3000/api/metrics
+curl -s \
+  -H "X-Internal-Api-Key: $INTERNAL_API_TOKEN" \
+  http://localhost:3000/api/metrics
 ```
 
 Exemplo em produção:
 
 ```sh
-curl -s https://SEU_DOMINIO/api/metrics
+curl -s \
+  -H "X-Internal-Api-Key: $INTERNAL_API_TOKEN" \
+  https://SEU_DOMINIO/api/metrics
 ```
 
 Contadores principais monitorados:
