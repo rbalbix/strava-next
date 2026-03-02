@@ -29,6 +29,13 @@ import { webhookEvents, webhookValidationFailed } from '../../services/metrics';
 import redis from '../../services/redis';
 
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const WEBHOOK_ALLOWED_IPS = (process.env.WEBHOOK_ALLOWED_IPS || '')
+  .split(',')
+  .map((value) => value.trim())
+  .filter(Boolean);
+const WEBHOOK_SUBSCRIPTION_ID = process.env.WEBHOOK_SUBSCRIPTION_ID
+  ? Number(process.env.WEBHOOK_SUBSCRIPTION_ID)
+  : null;
 const WEBHOOK_RATE_LIMIT_MAX_PER_MINUTE = 60;
 const WEBHOOK_REPLAY_TTL_SECONDS = 2 * 60 * 60; // 2 hours
 
@@ -41,6 +48,58 @@ function getClientIp(req: NextApiRequest): string {
     return xff.split(',')[0].trim();
   }
   return req.socket.remoteAddress || 'unknown';
+}
+
+function normalizeIp(ip: string): string {
+  const trimmed = ip.trim();
+  if (trimmed.startsWith('::ffff:')) {
+    return trimmed.replace('::ffff:', '');
+  }
+  return trimmed;
+}
+
+function isIPv4(value: string): boolean {
+  const parts = value.split('.');
+  if (parts.length !== 4) return false;
+  return parts.every((part) => {
+    const n = Number(part);
+    return Number.isInteger(n) && n >= 0 && n <= 255 && String(n) === part;
+  });
+}
+
+function ipv4ToInt(value: string): number {
+  return value
+    .split('.')
+    .map((part) => Number(part))
+    .reduce((acc, octet) => (acc << 8) + octet, 0) >>> 0;
+}
+
+function isIpInCidr(ip: string, cidr: string): boolean {
+  const [base, prefixText] = cidr.split('/');
+  if (!base || prefixText === undefined) return false;
+  if (!isIPv4(base) || !isIPv4(ip)) return false;
+
+  const prefix = Number(prefixText);
+  if (!Number.isInteger(prefix) || prefix < 0 || prefix > 32) return false;
+
+  if (prefix === 0) return true;
+
+  const mask = (0xffffffff << (32 - prefix)) >>> 0;
+  const ipInt = ipv4ToInt(ip);
+  const baseInt = ipv4ToInt(base);
+  return (ipInt & mask) === (baseInt & mask);
+}
+
+function isAllowedWebhookSource(sourceIp: string): boolean {
+  const ip = normalizeIp(sourceIp);
+  if (!ip || ip === 'unknown') return false;
+
+  return WEBHOOK_ALLOWED_IPS.some((entry) => {
+    if (entry.includes('/')) {
+      return isIpInCidr(ip, entry);
+    }
+    return normalizeIp(entry) === ip;
+  });
 }
 
 async function enforceWebhookRateLimit(
@@ -93,15 +152,41 @@ export default async function handler(
 
   // Processamento de eventos (POST)
   if (req.method === 'POST') {
+    const log = getLogger(req.headers['x-request-id'] as string);
+
+    // In production, deny processing when origin verification is not configured.
+    if (process.env.NODE_ENV === 'production') {
+      if (WEBHOOK_ALLOWED_IPS.length === 0) {
+        log.error('Missing WEBHOOK_ALLOWED_IPS in production');
+        return res.status(500).json({ error: 'Webhook origin guard not configured' });
+      }
+      if (
+        WEBHOOK_SUBSCRIPTION_ID === null ||
+        !Number.isFinite(WEBHOOK_SUBSCRIPTION_ID) ||
+        WEBHOOK_SUBSCRIPTION_ID <= 0
+      ) {
+        log.error('Missing WEBHOOK_SUBSCRIPTION_ID in production');
+        return res
+          .status(500)
+          .json({ error: 'Webhook subscription guard not configured' });
+      }
+    }
+
+    const sourceIp = getClientIp(req);
+    if (WEBHOOK_ALLOWED_IPS.length > 0 && !isAllowedWebhookSource(sourceIp)) {
+      log.warn({ sourceIp }, 'Webhook denied: source IP not allowed');
+      return res.status(403).json({ error: 'Webhook source not allowed' });
+    }
+
     // Reject attempts to use the verification query on POST (verification is GET-only)
     if (req.query['hub.verify_token']) {
       return res.status(400).json({ error: 'Invalid method for verification' });
     }
 
     try {
-      const log = getLogger(req.headers['x-request-id'] as string);
       log.info(
         {
+          sourceIp,
           contentType: req.headers['content-type'],
           contentLength: req.headers['content-length'],
         },
@@ -121,6 +206,21 @@ export default async function handler(
 
       const event = (validation as { success: true; data: StravaWebhookEvent })
         .data;
+
+      if (
+        WEBHOOK_SUBSCRIPTION_ID !== null &&
+        Number.isFinite(WEBHOOK_SUBSCRIPTION_ID) &&
+        event.subscription_id !== WEBHOOK_SUBSCRIPTION_ID
+      ) {
+        log.warn(
+          {
+            receivedSubscriptionId: event.subscription_id,
+            expectedSubscriptionId: WEBHOOK_SUBSCRIPTION_ID,
+          },
+          'Webhook denied: subscription_id mismatch',
+        );
+        return res.status(403).json({ error: 'Invalid subscription' });
+      }
 
       const hasAuth = await redis.exists(REDIS_KEYS.auth(event.owner_id));
       if (!hasAuth) {
