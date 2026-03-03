@@ -80,12 +80,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     athlete_id = Number.isFinite(parsed) ? parsed : null;
   }
 
-  const isAnonymous = !code && athlete_id === null;
-  if (isAnonymous) {
-    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
-  } else {
-    res.setHeader('Cache-Control', 'private, no-store');
-  }
+  // This page depends on auth cookies and must not be edge-cached.
+  res.setHeader('Cache-Control', 'private, no-store');
 
   return {
     props: {
