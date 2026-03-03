@@ -1,3 +1,4 @@
-# Allow all crawlers
 User-agent: *
 Allow: /
+
+Sitemap: https://gearlife.vercel.app/sitemap.xml

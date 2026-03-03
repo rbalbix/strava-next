@@ -1,12 +1,13 @@
 import { randomBytes } from 'crypto';
 import { GetServerSideProps } from 'next';
-import Head from 'next/head';
+import Link from 'next/link';
 import { useContext } from 'react';
 import ChainIcon from '../components/ChainIcon';
 import ErroMsg from '../components/ErroMsg';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import ModalContainer from '../components/ModalContainer';
+import SeoHead from '../components/SeoHead';
 import Stats from '../components/Stats';
 import { AuthContext, AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
@@ -39,9 +40,15 @@ function HomeContent() {
             <h2>Ride smarter.</h2>
           </div>
 
-          <div className={styles.versionMark} aria-hidden='true'>
+          <div className={styles.versionMark}>
             <ChainIcon className={styles.chainIcon} />
             <small className={styles.versionText}>{appVersion}</small>
+            <nav className={styles.marketingNav} aria-label='Conteúdo público'>
+              <Link href='/como-funciona'>Como funciona</Link>
+              <Link href='/faq'>FAQ</Link>
+              <Link href='/privacidade'>Privacidade</Link>
+              <Link href='/contato'>Contato</Link>
+            </nav>
           </div>
         </>
       )}
@@ -111,9 +118,11 @@ export default function Home(props: HomeProps) {
     >
       <ModalContainer />
       <div className={styles.container}>
-        <Head>
-          <title>Stuff Stats</title>
-        </Head>
+        <SeoHead
+          title='GearLife | Monitor your gear and ride smarter'
+          description='Conecte sua conta Strava, acompanhe estatísticas dos seus equipamentos e saiba o momento certo de manutenção.'
+          path='/'
+        />
 
         <Header />
         <HomeContent />
