@@ -21,7 +21,16 @@
   align-items: center;
   justify-content: center;
 
-  font-family: 'Inter', 'JetBrains Mono', sans-serif;
+  font-family: var(--font-inter), var(--font-jetbrains), sans-serif;
+}
+
+.homeLoading {
+  min-height: 38vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-gray-notes);
+  font-size: 1rem;
 }
 
 .versionMark {

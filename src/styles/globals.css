@@ -9,6 +9,9 @@ html {
 }
 
 :root {
+  --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-jetbrains: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
   --background: #f8f9fa;
   --background-card: #fff;
   --background-sidebar: #f0f2f5;
@@ -111,7 +114,7 @@ html {
 }
 
 body {
-  font: 400 1.6rem 'JetBrains Mono', sans-serif;
+  font: 400 1.6rem var(--font-jetbrains), sans-serif;
   overflow-y: auto;
 }
 

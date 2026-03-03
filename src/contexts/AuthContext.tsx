@@ -89,6 +89,9 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
     sessionStorage.removeItem('athlete');
     sessionStorage.removeItem('athleteStats');
+    sessionStorage.removeItem('gearStats');
+    sessionStorage.removeItem('hasGear');
+    sessionStorage.removeItem('hasActivities');
     sessionStorage.removeItem('athleteCacheTime');
 
     // Clear non-HttpOnly cookies (best-effort)

@@ -1,16 +1,19 @@
-import { randomBytes } from 'crypto';
 import { GetServerSideProps } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useContext } from 'react';
 import ChainIcon from '../components/ChainIcon';
 import ErroMsg from '../components/ErroMsg';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import ModalContainer from '../components/ModalContainer';
 import SeoHead from '../components/SeoHead';
-import Stats from '../components/Stats';
 import { AuthContext, AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
+
+const Stats = dynamic(() => import('../components/Stats'), {
+  loading: () => <div className={styles.homeLoading}>Carregando...</div>,
+});
+const ModalContainer = dynamic(() => import('../components/ModalContainer'));
 
 interface HomeProps {
   code: string | null;
@@ -59,8 +62,6 @@ function HomeContent() {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req, res } = context;
   const cookies = req.headers.cookie || '';
-  const isProd = process.env.NODE_ENV === 'production';
-  const secureFlag = isProd ? 'Secure; ' : '';
 
   let code = null;
   const codeCookie = cookies
@@ -79,26 +80,22 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     athlete_id = Number.isFinite(parsed) ? parsed : null;
   }
 
-  const oauthState = randomBytes(24).toString('hex');
-  const oauthStateCookie = `strava_oauth_state=${oauthState}; Path=/; Max-Age=600; HttpOnly; ${secureFlag}SameSite=Lax`;
-  const currentSetCookie = res.getHeader('Set-Cookie');
-  if (!currentSetCookie) {
-    res.setHeader('Set-Cookie', oauthStateCookie);
-  } else if (Array.isArray(currentSetCookie)) {
-    res.setHeader('Set-Cookie', [...currentSetCookie, oauthStateCookie]);
+  const isAnonymous = !code && athlete_id === null;
+  if (isAnonymous) {
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
   } else {
-    res.setHeader('Set-Cookie', [String(currentSetCookie), oauthStateCookie]);
+    res.setHeader('Cache-Control', 'private, no-store');
   }
 
   return {
     props: {
       code,
-      client_id: process.env.CLIENT_ID,
-      grant_type: process.env.GRANT_TYPE,
-      response_type: process.env.RESPONSE_TYPE,
-      approval_prompt: process.env.APPROVAL_PROMPT,
-      scope: process.env.STRAVA_SCOPE,
-      oauth_state: oauthState,
+      client_id: '',
+      grant_type: '',
+      response_type: '',
+      approval_prompt: '',
+      scope: '',
+      oauth_state: '',
       athlete_id,
     },
   };

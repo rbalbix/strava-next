@@ -18,6 +18,44 @@ interface DashboardResponse {
   gearStats: GearStats[];
 }
 
+const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function readCachedDashboard(): DashboardResponse | null {
+  try {
+    const cacheTimeRaw = sessionStorage.getItem('athleteCacheTime');
+    if (!cacheTimeRaw) return null;
+
+    const cacheTime = Number(cacheTimeRaw);
+    if (!Number.isFinite(cacheTime)) return null;
+    if (Date.now() - cacheTime > DASHBOARD_CACHE_TTL_MS) return null;
+
+    const athleteRaw = sessionStorage.getItem('athlete');
+    const athleteStatsRaw = sessionStorage.getItem('athleteStats');
+    const gearStatsRaw = sessionStorage.getItem('gearStats');
+    const hasGearRaw = sessionStorage.getItem('hasGear');
+    const hasActivitiesRaw = sessionStorage.getItem('hasActivities');
+
+    if (!athleteRaw || !athleteStatsRaw || !gearStatsRaw) return null;
+
+    const athlete = JSON.parse(athleteRaw) as DetailedAthlete;
+    const athleteStats = JSON.parse(athleteStatsRaw) as ActivityStats;
+    const gearStats = JSON.parse(gearStatsRaw) as GearStats[];
+    const hasGear = hasGearRaw === null ? true : hasGearRaw === 'true';
+    const hasActivities =
+      hasActivitiesRaw === null ? true : hasActivitiesRaw === 'true';
+
+    return {
+      athlete,
+      athleteStats,
+      hasGear,
+      hasActivities,
+      gearStats,
+    };
+  } catch (_) {
+    return null;
+  }
+}
+
 export default function Stats() {
   const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut } =
     useContext(AuthContext);
@@ -29,6 +67,7 @@ export default function Stats() {
 
   useEffect(() => {
     let isMounted = true;
+    let hasFreshCache = false;
 
     const icons = [
       <DiskIcon key='disk' />,
@@ -38,8 +77,15 @@ export default function Stats() {
     const randomIndex = Math.floor(Math.random() * icons.length);
     setRandomIcon(icons[randomIndex]);
 
-    // const icon = Math.random() < 0.5 ? <DiskIcon /> : <TireIcon />;
-    // setRandomIcon(icon);
+    const cachedData = readCachedDashboard();
+    if (cachedData && isMounted) {
+      hasFreshCache = true;
+      setAthleteInfo(cachedData.athlete);
+      setAthleteInfoStats(cachedData.athleteStats);
+      setHasGear(cachedData.hasGear);
+      setHasActivities(cachedData.hasActivities);
+      setGearStats(cachedData.gearStats || []);
+    }
 
     async function init() {
       try {
@@ -53,6 +99,9 @@ export default function Stats() {
 
         sessionStorage.setItem('athlete', JSON.stringify(data.athlete));
         sessionStorage.setItem('athleteStats', JSON.stringify(data.athleteStats));
+        sessionStorage.setItem('gearStats', JSON.stringify(data.gearStats || []));
+        sessionStorage.setItem('hasGear', String(data.hasGear));
+        sessionStorage.setItem('hasActivities', String(data.hasActivities));
         sessionStorage.setItem('athleteCacheTime', Date.now().toString());
 
         setAthleteInfo(data.athlete);
@@ -63,7 +112,9 @@ export default function Stats() {
       } catch (error) {
         if (isMounted) {
           setErrorInfo(error);
-          signOut();
+          if (!hasFreshCache) {
+            signOut();
+          }
         }
       }
     }

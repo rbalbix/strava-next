@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { useContext, useState } from 'react';
 import { FaBars, FaInfoCircle } from 'react-icons/fa';
 import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
-import { API_ROUTES, STRAVA_ENDPOINTS } from '../config';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Header.module.css';
 
@@ -13,26 +12,12 @@ export default function Header() {
   const {
     athlete,
     codeReturned,
-    client_id,
-    response_type,
-    approval_prompt,
-    scope,
-    oauth_state,
     signOut,
     openModal,
   } = useContext(AuthContext);
 
   const [sidebar, setSidebar] = useState(false);
   const showSidebar = () => setSidebar(!sidebar);
-
-  const authQuery = {
-    client_id,
-    response_type,
-    approval_prompt,
-    redirect_uri: API_ROUTES.authorizeUrl,
-    scope,
-    state: oauth_state,
-  };
 
   return (
     <div className={styles.headerContainer}>
@@ -45,14 +30,7 @@ export default function Header() {
             />
           </div>
           <div>
-            <Link
-              href={{
-                pathname: STRAVA_ENDPOINTS.authorize,
-                query: {
-                  ...authQuery,
-                },
-              }}
-            >
+            <Link href='/api/oauth/start' prefetch={false}>
               <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>
