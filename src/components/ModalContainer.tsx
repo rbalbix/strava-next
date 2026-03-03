@@ -69,7 +69,7 @@ export default function ModalContainer() {
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, [activeModal]);
+  }, [activeModal, closeModal]);
 
   if (!activeModal) return null;
 

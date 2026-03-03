@@ -6,7 +6,6 @@ const commonConfig = {
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-    'X-Request-ID': generateRequestId(), // Para tracing
   },
 };
 
@@ -50,6 +49,27 @@ const apiEmail = axios.create({
   },
 });
 
+function ensureRequestIdHeader(instance: typeof apiStravaOauthToken) {
+  instance.interceptors.request.use((config) => {
+    const headers = config.headers || {};
+    const hasRequestId =
+      (typeof (headers as Record<string, unknown>)['X-Request-ID'] ===
+        'string' &&
+        String((headers as Record<string, unknown>)['X-Request-ID']).length >
+          0) ||
+      (typeof (headers as Record<string, unknown>)['x-request-id'] ===
+        'string' &&
+        String((headers as Record<string, unknown>)['x-request-id']).length >
+          0);
+
+    if (!hasRequestId) {
+      (headers as Record<string, string>)['X-Request-ID'] = generateRequestId();
+    }
+    config.headers = headers;
+    return config;
+  });
+}
+
 // Configure retries with exponential backoff for transient failures
 const retryOptions = {
   retries: 3,
@@ -68,5 +88,9 @@ axiosRetry(apiStravaOauthToken, retryOptions);
 axiosRetry(apiRemoteStorage, retryOptions);
 axiosRetry(apiStravaAuth, retryOptions);
 axiosRetry(apiEmail, retryOptions);
+ensureRequestIdHeader(apiStravaOauthToken);
+ensureRequestIdHeader(apiRemoteStorage);
+ensureRequestIdHeader(apiStravaAuth);
+ensureRequestIdHeader(apiEmail);
 
 export { apiEmail, apiRemoteStorage, apiStravaAuth, apiStravaOauthToken };

@@ -1,11 +1,21 @@
 // pages/api/send-email.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
+import { z } from 'zod';
 import { hasValidInternalApiKey } from '../../services/internal-api-auth';
 import { getLogger } from '../../services/logger';
 
 // Inicializa o Resend com sua API Key
 const resend = new Resend(process.env.RESEND_API_KEY);
+const MAX_EMAIL_RECIPIENTS = 5;
+
+const SendEmailSchema = z
+  .object({
+    to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
+    subject: z.string().min(1).max(200),
+    html: z.string().min(1).max(20000),
+  })
+  .strict();
 
 export default async function handler(
   req: NextApiRequest,
@@ -25,30 +35,46 @@ export default async function handler(
   }
 
   try {
-    const { to, subject, html, from = 'onboarding@resend.dev' } = req.body;
-
-    // Validação básica dos campos obrigatórios
-    if (!to || !subject || !html) {
-      log.warn('Missing required fields in send-email payload');
+    const parsed = SendEmailSchema.safeParse(req.body);
+    if (!parsed.success) {
+      log.warn({ issues: parsed.error.issues }, 'Invalid send-email payload');
       return res.status(400).json({
-        error: 'Missing required fields: to, subject, or html',
+        error: 'Invalid payload',
+      });
+    }
+
+    const resendFrom = process.env.RESEND_EMAIL_FROM;
+    if (!resendFrom) {
+      log.error('Missing RESEND_EMAIL_FROM env var');
+      return res.status(400).json({
+        error: 'Missing email sender configuration',
+      });
+    }
+
+    const recipients = Array.isArray(parsed.data.to)
+      ? parsed.data.to
+      : [parsed.data.to];
+    if (recipients.length > MAX_EMAIL_RECIPIENTS) {
+      log.warn({ recipients: recipients.length }, 'Too many email recipients');
+      return res.status(400).json({
+        error: `Maximum recipients exceeded (${MAX_EMAIL_RECIPIENTS})`,
       });
     }
 
     log.info(
       {
-        recipients: Array.isArray(to) ? to.length : 1,
-        subject,
+        recipients: recipients.length,
+        subject: parsed.data.subject,
       },
       'Sending email via Resend',
     );
 
     // Envia o email usando o Resend
     const { data, error } = await resend.emails.send({
-      from: from,
-      to: Array.isArray(to) ? to : [to],
-      subject: subject,
-      html: html,
+      from: resendFrom,
+      to: recipients,
+      subject: parsed.data.subject,
+      html: parsed.data.html,
     });
 
     if (error) {
@@ -60,7 +86,7 @@ export default async function handler(
 
     // Retorna sucesso
     log.info(
-      { recipients: Array.isArray(to) ? to.length : 1, subject },
+      { recipients: recipients.length, subject: parsed.data.subject },
       'Email sent successfully',
     );
     res.status(200).json({

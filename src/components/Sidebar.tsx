@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 
 import {
   FaChartBar,
@@ -20,9 +20,9 @@ interface SidebarProps {
 export default function Sidebar({ active, isOpen }: SidebarProps) {
   const { athlete, openModal } = useContext(AuthContext);
 
-  const closeSidebar = () => {
+  const closeSidebar = useCallback(() => {
     active(false);
-  };
+  }, [active]);
 
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -38,7 +38,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     return () => {
       document.removeEventListener('keydown', handleEscKey);
     };
-  }, [isOpen]);
+  }, [isOpen, closeSidebar]);
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {

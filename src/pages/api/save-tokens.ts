@@ -1,7 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { z } from 'zod';
 import { hasValidInternalApiKey } from '../../services/internal-api-auth';
 import { saveStravaAuth } from '../../services/strava-auth';
 import { getLogger } from '../../services/logger';
+
+const SaveTokensSchema = z
+  .object({
+    athleteId: z.number().int().positive(),
+    refreshToken: z.string().min(1),
+    accessToken: z.string().min(1),
+    expiresAt: z.number().int().positive(),
+    athleteInfo: z.unknown().optional(),
+  })
+  .strict();
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,14 +32,14 @@ export default async function handler(
   }
 
   try {
-    // Validar dados da requisição
-    const { athleteId, refreshToken, accessToken, expiresAt, athleteInfo } =
-      req.body;
-
-    if (!athleteId || !refreshToken || !accessToken || !expiresAt) {
-      log.warn({ athleteId }, 'Incomplete token payload');
-      return res.status(400).json({ error: 'Dados incompletos' });
+    const parsed = SaveTokensSchema.safeParse(req.body);
+    if (!parsed.success) {
+      log.warn({ issues: parsed.error.issues }, 'Invalid token payload');
+      return res.status(400).json({ error: 'Invalid payload' });
     }
+
+    const { athleteId, refreshToken, accessToken, expiresAt, athleteInfo } =
+      parsed.data;
 
     log.info(
       { athleteId },

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { createContext, ReactNode, useState } from 'react';
+import { createContext, ReactNode, useCallback, useMemo, useState } from 'react';
 import { ActivityStats, DetailedAthlete } from 'strava';
 import { getLogger } from '../services/logger';
 
@@ -66,19 +66,19 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     oauth_state,
   } = rest;
 
-  function setAthleteInfo(athlete: DetailedAthlete | null) {
+  const setAthleteInfo = useCallback((athlete: DetailedAthlete | null) => {
     setAthlete(athlete);
-  }
+  }, []);
 
-  function setAthleteInfoStats(athleteStats: ActivityStats | null) {
+  const setAthleteInfoStats = useCallback((athleteStats: ActivityStats | null) => {
     setAthleteStats(athleteStats);
-  }
+  }, []);
 
-  function setErrorInfo(errorObj: unknown) {
+  const setErrorInfo = useCallback((errorObj: unknown) => {
     setCodeError(errorObj);
-  }
+  }, []);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     // Invalidate server-side cookies (HttpOnly) via API
     try {
       await fetch('/api/logout', { method: 'POST' });
@@ -101,41 +101,63 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
 
     // Navigate to home; use replace to avoid back-button returning logged-in state
     router.replace('/');
-  }
+  }, [router]);
 
-  const openModal = (modalType: string, data?: unknown) => {
+  const openModal = useCallback((modalType: string, data?: unknown) => {
     setActiveModal(modalType);
     setModalData(data);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setActiveModal(null);
     setModalData(null);
-  };
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      codeReturned,
+      client_id,
+      grant_type,
+      response_type,
+      approval_prompt,
+      scope,
+      oauth_state,
+      athlete,
+      athleteStats,
+      codeError,
+      activeModal,
+      modalData,
+      setAthleteInfo,
+      setAthleteInfoStats,
+      setErrorInfo,
+      signOut,
+      openModal,
+      closeModal,
+    }),
+    [
+      codeReturned,
+      client_id,
+      grant_type,
+      response_type,
+      approval_prompt,
+      scope,
+      oauth_state,
+      athlete,
+      athleteStats,
+      codeError,
+      activeModal,
+      modalData,
+      setAthleteInfo,
+      setAthleteInfoStats,
+      setErrorInfo,
+      signOut,
+      openModal,
+      closeModal,
+    ],
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        codeReturned,
-        client_id,
-        grant_type,
-        response_type,
-        approval_prompt,
-        scope,
-        oauth_state,
-        athlete,
-        athleteStats,
-        codeError,
-        activeModal,
-        modalData,
-        setAthleteInfo,
-        setAthleteInfoStats,
-        setErrorInfo,
-        signOut,
-        openModal,
-        closeModal,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

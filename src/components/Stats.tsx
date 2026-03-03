@@ -73,7 +73,7 @@ export default function Stats() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut]);
 
   return (
     <div className={styles.statsContainer}>

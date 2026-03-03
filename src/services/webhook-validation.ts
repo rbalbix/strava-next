@@ -40,10 +40,18 @@ export function validateWebhookEvent(payload: unknown): { success: true; data: S
     if (e instanceof z.ZodError) {
       const details = e.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('; ');
       const msg = `Webhook validation failed: ${details}`;
-      log.warn({ payload, issues: e.issues }, msg);
+      const payloadMeta =
+        payload && typeof payload === 'object'
+          ? { keys: Object.keys(payload as Record<string, unknown>) }
+          : { payloadType: typeof payload };
+      log.warn({ issues: e.issues, payloadMeta }, msg);
       return { success: false, error: msg };
     }
-    log.error({ err: e, payload }, 'Unknown error validating webhook payload');
+    const payloadMeta =
+      payload && typeof payload === 'object'
+        ? { keys: Object.keys(payload as Record<string, unknown>) }
+        : { payloadType: typeof payload };
+    log.error({ err: e, payloadMeta }, 'Unknown error validating webhook payload');
     return { success: false, error: 'Unknown validation error' };
   }
 }
