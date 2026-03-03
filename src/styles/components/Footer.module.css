@@ -49,6 +49,21 @@
   color: var(--footer-icon-hover);
 }
 
+.footerIconButton {
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.footerIconButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .footerContainer footer {
   font-size: 0.9rem;
   text-align: center;

@@ -42,6 +42,24 @@
   transition: background ease-in 0.2s;
 }
 
+.iconButton,
+.iconButtonLink {
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.iconButton:focus-visible,
+.iconButtonLink:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .spinnerLoading {
   margin: 0 15px;
 }

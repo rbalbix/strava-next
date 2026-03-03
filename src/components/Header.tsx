@@ -24,13 +24,22 @@ export default function Header() {
       {!codeReturned ? (
         <>
           <div>
-            <FaInfoCircle
+            <button
+              type='button'
               onClick={() => openModal('info')}
-              className={styles.headerInfoIcon}
-            />
+              className={styles.iconButton}
+              aria-label='Abrir informações'
+            >
+              <FaInfoCircle className={styles.headerInfoIcon} />
+            </button>
           </div>
           <div>
-            <Link href='/api/oauth/start' prefetch={false}>
+            <Link
+              href='/api/oauth/start'
+              prefetch={false}
+              className={styles.iconButtonLink}
+              aria-label='Entrar com Strava'
+            >
               <IoLogInOutline className={styles.headerLoginIcon} />
             </Link>
           </div>
@@ -39,7 +48,14 @@ export default function Header() {
         <div className={styles.headerButtons}>
           {athlete ? (
             <div className={styles.sidebarButton}>
-              <FaBars onClick={showSidebar} className={styles.sidebarIcon} />
+              <button
+                type='button'
+                onClick={showSidebar}
+                className={styles.iconButton}
+                aria-label='Abrir menu lateral'
+              >
+                <FaBars className={styles.sidebarIcon} />
+              </button>
               <Sidebar active={setSidebar} isOpen={sidebar} />
             </div>
           ) : (
@@ -52,15 +68,16 @@ export default function Header() {
             </span>
           )}
 
-          <Link
-            onClick={(e) => {
-              e.preventDefault();
+          <button
+            type='button'
+            className={styles.iconButton}
+            onClick={() => {
               signOut();
             }}
-            href='/'
+            aria-label='Sair da conta'
           >
             <IoLogOutOutline className={styles.headerLogoutIcon} />
-          </Link>
+          </button>
         </div>
       )}
     </div>
