@@ -278,3 +278,21 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 <a href="https://github.com/rbalbix/strava-stats/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=rbalbix/strava-stats" alt="Lista de contribuidores"/>
 </a>
+
+<!-- TEST_STATUS_START -->
+## Test Status
+
+Last update: 2026-03-03T20:30:42.769Z
+
+| Metric | Coverage |
+| --- | ---: |
+| Lines | 66.98% |
+| Statements | 66.98% |
+| Functions | 70.00% |
+| Branches | 64.72% |
+
+Run locally:
+- `yarn test:unit`
+- `yarn test:regression`
+- `yarn test:coverage`
+<!-- TEST_STATUS_END -->
