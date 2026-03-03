@@ -109,6 +109,11 @@
   color: var(--light-blue);
 }
 
+.headerInfoIcon {
+  width: 2rem;
+  height: 2rem;
+}
+
 .divider {
   width: 60%;
   background-color: var(--light-gray);
