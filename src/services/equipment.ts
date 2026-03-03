@@ -195,4 +195,9 @@ export const Equipments = {
     caption: 'sapatilha:',
     show: 'Sapatilha',
   },
+  Freehub: {
+    id: 'freehub',
+    caption: 'freehub:',
+    show: 'Freehub',
+  },
 };
