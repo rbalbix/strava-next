@@ -110,7 +110,12 @@ describe('activity service', () => {
       },
     } as any;
 
-    const result = await getActivities(strava, [{ id: 'g1' }] as any, null, null);
+    const result = await getActivities(
+      strava,
+      [{ id: 'g1' }] as any,
+      null,
+      null,
+    );
     const byId = [...result].sort((a, b) => a.id - b.id);
 
     expect(result).toHaveLength(2);
@@ -142,7 +147,9 @@ describe('activity service', () => {
     } as any;
 
     const result = await getActivities(strava, [{ id: 'g1' }] as any, 11, 22);
-    expect(strava.activities.getLoggedInAthleteActivities).toHaveBeenCalledTimes(2);
+    expect(
+      strava.activities.getLoggedInAthleteActivities,
+    ).toHaveBeenCalledTimes(2);
     const firstCallParams =
       strava.activities.getLoggedInAthleteActivities.mock.calls[0][0];
     expect(firstCallParams.before).toBe(11);
@@ -175,7 +182,12 @@ describe('activity service', () => {
       },
     } as any;
 
-    const result = await getActivities(strava, [{ id: 'g1' }] as any, null, null);
+    const result = await getActivities(
+      strava,
+      [{ id: 'g1' }] as any,
+      null,
+      null,
+    );
     expect(result[0].private_note).toBe('');
   });
 
@@ -250,7 +262,9 @@ describe('activity service', () => {
       },
     } as any;
 
-    await expect(fetchStravaActivity(201, strava)).rejects.toThrow('unexpected');
+    await expect(fetchStravaActivity(201, strava)).rejects.toThrow(
+      'unexpected',
+    );
   });
 
   it('processActivities persists payload and increments processed metric', async () => {
@@ -285,7 +299,9 @@ describe('activity service', () => {
       }),
     });
 
-    await expect(processActivities(123, [{ id: 1 }] as any)).resolves.toBeUndefined();
+    await expect(
+      processActivities(123, [{ id: 1 }] as any),
+    ).resolves.toBeUndefined();
   });
 
   it('processActivity updates activities and returns merged list', async () => {
@@ -315,15 +331,18 @@ describe('activity service', () => {
       }),
     });
 
-    await expect(processActivity({ id: 1 } as any, 111)).resolves.toEqual(merged);
+    await expect(processActivity({ id: 1 } as any, 111)).resolves.toEqual(
+      merged,
+    );
   });
 
   it('processActivity returns null and increments failed metric when processing fails', async () => {
-    const { processActivity, activityFailedInc, logger } = await loadActivityModule({
-      redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
-      saveRemoteResult: { success: false },
-      updateActivityInArrayResult: [{ id: 2 }],
-    });
+    const { processActivity, activityFailedInc, logger } =
+      await loadActivityModule({
+        redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+        saveRemoteResult: { success: false },
+        updateActivityInArrayResult: [{ id: 2 }],
+      });
 
     const result = await processActivity({ id: 2 } as any, 321);
 
@@ -346,7 +365,8 @@ describe('activity service', () => {
   });
 
   it('verifyIfHasAnyActivities returns false for empty activity list and throws on errors', async () => {
-    const { verifyIfHasAnyActivities, activityFailedInc } = await loadActivityModule();
+    const { verifyIfHasAnyActivities, activityFailedInc } =
+      await loadActivityModule();
     const strava = {
       activities: {
         getLoggedInAthleteActivities: vi.fn().mockResolvedValue([]),
@@ -372,7 +392,9 @@ describe('activity service', () => {
       },
     } as any;
 
-    await expect(verifyIfHasAnyActivities(strava, {} as any)).resolves.toBe(true);
+    await expect(verifyIfHasAnyActivities(strava, {} as any)).resolves.toBe(
+      true,
+    );
   });
 
   it('verifyIfHasAnyActivities rethrows even when failed metric increment throws', async () => {
@@ -383,10 +405,14 @@ describe('activity service', () => {
     });
     const strava = {
       activities: {
-        getLoggedInAthleteActivities: vi.fn().mockRejectedValue(new Error('boom')),
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockRejectedValue(new Error('boom')),
       },
     } as any;
 
-    await expect(verifyIfHasAnyActivities(strava, {} as any)).rejects.toThrow('boom');
+    await expect(verifyIfHasAnyActivities(strava, {} as any)).rejects.toThrow(
+      'boom',
+    );
   });
 });
