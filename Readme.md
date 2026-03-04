@@ -282,14 +282,14 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 <!-- TEST_STATUS_START -->
 ## Test Status
 
-Last update: 2026-03-03T23:27:28.750Z
+Last update: 2026-03-04T14:20:13.192Z
 
 | Metric | Coverage |
 | --- | ---: |
-| Lines | 66.98% |
-| Statements | 66.98% |
-| Functions | 70.00% |
-| Branches | 64.72% |
+| Lines | 99.31% |
+| Statements | 99.31% |
+| Functions | 97.91% |
+| Branches | 92.54% |
 
 Run locally:
 - `yarn test:unit`

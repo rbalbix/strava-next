@@ -67,4 +67,73 @@ describe('Sidebar component', () => {
 
     act(() => root.unmount());
   });
+
+  it('closes on Escape when open and ignores Escape when closed', () => {
+    const active = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(active).toHaveBeenCalledWith(false);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={false} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    const callsAfterClose = active.mock.calls.length;
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(active.mock.calls.length).toBe(callsAfterClose);
+
+    act(() => root.unmount());
+  });
+
+  it('only closes on overlay when target equals currentTarget', () => {
+    const active = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    const overlay = container.querySelector('[aria-hidden="true"]') as HTMLDivElement;
+    act(() => {
+      overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(active).toHaveBeenCalledWith(false);
+
+    const countAfterOverlay = active.mock.calls.length;
+    const fakeEvent = {
+      target: document.createElement('div'),
+      currentTarget: overlay,
+    } as unknown as React.MouseEvent<HTMLDivElement>;
+    const onClick = (overlay as any).onclick as ((e: React.MouseEvent<HTMLDivElement>) => void) | null;
+    expect(onClick).toBeTruthy();
+    act(() => {
+      onClick?.(fakeEvent);
+    });
+    expect(active.mock.calls.length).toBe(countAfterOverlay);
+
+    act(() => root.unmount());
+  });
 });

@@ -35,6 +35,36 @@ function ctx(overrides: Record<string, unknown> = {}) {
 }
 
 describe('AthleteStats component', () => {
+  it('renders nothing when athleteStats is missing', () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx({ athleteStats: null })}>
+          <AthleteStats />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.innerHTML).toBe('');
+    act(() => root.unmount());
+  });
+
+  it('renders nothing when athlete id is missing', () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx({ athlete: null })}>
+          <AthleteStats />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.innerHTML).toBe('');
+    act(() => root.unmount());
+  });
+
   it('renders stats sections and closes modal', () => {
     const closeModal = vi.fn();
     const container = document.createElement('div');
@@ -58,6 +88,35 @@ describe('AthleteStats component', () => {
     act(() => closeIcon.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(closeModal).toHaveBeenCalled();
 
+    act(() => root.unmount());
+  });
+
+  it('renders zero fallbacks when totals are missing', () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <AuthContext.Provider
+          value={ctx({
+            athleteStats: {
+              biggest_ride_distance: undefined,
+              biggest_climb_elevation_gain: undefined,
+              recent_ride_totals: {} as any,
+              ytd_ride_totals: {} as any,
+              all_ride_totals: {} as any,
+              recent_run_totals: {} as any,
+              ytd_run_totals: {} as any,
+              all_run_totals: {} as any,
+            },
+          })}
+        >
+          <AthleteStats />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.textContent).toContain('Maior distância: 0,00km');
+    expect(container.textContent).toContain('Maior escalada: 0,00m');
     act(() => root.unmount());
   });
 });

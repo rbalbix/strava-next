@@ -2,14 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type LoadOptions = {
   postImpl?: ReturnType<typeof vi.fn>;
+  emailSentIncImpl?: ReturnType<typeof vi.fn>;
+  emailFailedIncImpl?: ReturnType<typeof vi.fn>;
 };
 
 async function loadEmailModule(options: LoadOptions = {}) {
   vi.resetModules();
 
   const post = options.postImpl ?? vi.fn();
-  const emailSentInc = vi.fn();
-  const emailFailedInc = vi.fn();
+  const emailSentInc = options.emailSentIncImpl ?? vi.fn();
+  const emailFailedInc = options.emailFailedIncImpl ?? vi.fn();
   const logger = { error: vi.fn() };
 
   vi.doMock('../../../src/services/api', () => ({
@@ -92,6 +94,33 @@ describe('email service', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
+  it('sendEmail continues when metric increment throws', async () => {
+    const postImpl = vi
+      .fn()
+      .mockResolvedValueOnce({ status: 200, data: { ok: true } })
+      .mockRejectedValueOnce(new Error('network fail'));
+
+    const { sendEmail, logger } = await loadEmailModule({
+      postImpl,
+      emailSentIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric sent fail');
+      }),
+      emailFailedIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric failed fail');
+      }),
+    });
+
+    await expect(
+      sendEmail({ to: 'foo@example.com', subject: 'A', html: '<p>x</p>' }),
+    ).resolves.toEqual({ ok: true });
+
+    await expect(
+      sendEmail({ to: 'foo@example.com', subject: 'B', html: '<p>y</p>' }),
+    ).rejects.toThrow('network fail');
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
   it('createContactEmailTemplate renders contact fields', async () => {
     const { createContactEmailTemplate } = await loadEmailModule();
     const html = createContactEmailTemplate('Ana', 'ana@example.com', 'Oi!');
@@ -119,5 +148,28 @@ describe('email service', () => {
     expect(html).toContain('activity');
     expect(html).toContain('123');
     expect(html).toContain('456');
+  });
+
+  it('createErrorEmailTemplate renders without context and supports non-Error values', async () => {
+    const { createErrorEmailTemplate } = await loadEmailModule();
+    const html = createErrorEmailTemplate('Erro simples', { code: 500 });
+
+    expect(html).toContain('Erro simples');
+    expect(html).toContain('[object Object]');
+    expect(html).not.toContain('Contexto do Evento');
+  });
+
+  it('createErrorEmailTemplate with partial context omits absent optional fields', async () => {
+    const { createErrorEmailTemplate } = await loadEmailModule();
+    const html = createErrorEmailTemplate('Erro parcial', new Error('boom'), {
+      message: 'm',
+      error: 'e',
+    });
+
+    expect(html).toContain('Contexto do Evento');
+    expect(html).not.toContain('Tipo de Evento');
+    expect(html).not.toContain('ID do Atleta');
+    expect(html).not.toContain('ID do Objeto');
+    expect(html).not.toContain('Link da Atividade');
   });
 });

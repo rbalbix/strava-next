@@ -119,4 +119,45 @@ describe('statistics.createStatistics', () => {
     const result = createStatistics(activities as any, gears as any);
     expect(result).toHaveLength(0);
   });
+
+  it('registers pair items and suppresses single related components', () => {
+    const activities = [
+      {
+        id: 2,
+        name: '* pair components',
+        distance: 1500,
+        moving_time: 150,
+        type: 'Ride',
+        start_date_local: '2026-01-05T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: 'brakes suspension newshock review',
+      },
+      {
+        id: 1,
+        name: '* single components',
+        distance: 500,
+        moving_time: 50,
+        type: 'Ride',
+        start_date_local: '2026-01-04T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note:
+          'frontbrake rearbrake suspareview suspakit shockreview shockkit',
+      },
+    ] as any[];
+    const gears = [{ id: 'bike-1', name: 'Bike One' }] as any[];
+
+    const result = createStatistics(activities as any, gears as any);
+    const ids = result[0]?.equipments.map((e) => e.id) ?? [];
+
+    expect(ids).toContain('brakes');
+    expect(ids).not.toContain('frontbrake');
+    expect(ids).not.toContain('rearbrake');
+    expect(ids).toContain('suspension');
+    expect(ids).not.toContain('suspareview');
+    expect(ids).not.toContain('suspakit');
+    expect(ids).toContain('newshock');
+    expect(ids).not.toContain('shockreview');
+    expect(ids).not.toContain('shockkit');
+    expect(ids).toContain('review');
+  });
 });

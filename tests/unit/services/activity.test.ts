@@ -5,6 +5,8 @@ type LoadOptions = {
   saveRemoteResult?: { success: boolean };
   updateActivityInArrayResult?: unknown[];
   isAxiosError?: (value: unknown) => boolean;
+  activityProcessedIncImpl?: ReturnType<typeof vi.fn>;
+  activityFailedIncImpl?: ReturnType<typeof vi.fn>;
 };
 
 async function loadActivityModule(options: LoadOptions = {}) {
@@ -24,8 +26,8 @@ async function loadActivityModule(options: LoadOptions = {}) {
     info: vi.fn(),
     error: vi.fn(),
   };
-  const activityProcessedInc = vi.fn();
-  const activityFailedInc = vi.fn();
+  const activityProcessedInc = options.activityProcessedIncImpl ?? vi.fn();
+  const activityFailedInc = options.activityFailedIncImpl ?? vi.fn();
 
   vi.doMock('../../../src/services/redis', () => ({
     default: redis,
@@ -117,6 +119,40 @@ describe('activity service', () => {
     expect(strava.activities.getActivityById).toHaveBeenCalledTimes(1);
   });
 
+  it('getActivities forwards before/after params and tolerates detail fetch failures', async () => {
+    const { getActivities, logger } = await loadActivityModule();
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockResolvedValueOnce([
+            {
+              id: 10,
+              name: '* broken-detail',
+              distance: 1200,
+              moving_time: 100,
+              type: 'Ride',
+              start_date_local: '2026-02-01T00:00:00Z',
+              gear_id: 'g1',
+            },
+          ])
+          .mockResolvedValueOnce([]),
+        getActivityById: vi.fn().mockRejectedValue(new Error('detail down')),
+      },
+    } as any;
+
+    const result = await getActivities(strava, [{ id: 'g1' }] as any, 11, 22);
+    expect(strava.activities.getLoggedInAthleteActivities).toHaveBeenCalledTimes(2);
+    const firstCallParams =
+      strava.activities.getLoggedInAthleteActivities.mock.calls[0][0];
+    expect(firstCallParams.before).toBe(11);
+    expect(firstCallParams.after).toBe(22);
+    expect(firstCallParams.per_page).toBe(200);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: 10, private_note: '' });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
   it('fetchStravaActivity returns activity on success', async () => {
     const { fetchStravaActivity } = await loadActivityModule();
     const strava = {
@@ -147,6 +183,32 @@ describe('activity service', () => {
     );
   });
 
+  it('fetchStravaActivity throws for null activity response', async () => {
+    const { fetchStravaActivity } = await loadActivityModule();
+    const strava = {
+      activities: {
+        getActivityById: vi.fn().mockResolvedValue(null),
+      },
+    } as any;
+
+    await expect(fetchStravaActivity(999, strava)).rejects.toThrow(
+      'Erro ao recuperar a atividade 999',
+    );
+  });
+
+  it('fetchStravaActivity rethrows non-axios errors', async () => {
+    const { fetchStravaActivity } = await loadActivityModule({
+      isAxiosError: () => false,
+    });
+    const strava = {
+      activities: {
+        getActivityById: vi.fn().mockRejectedValue(new Error('unexpected')),
+      },
+    } as any;
+
+    await expect(fetchStravaActivity(201, strava)).rejects.toThrow('unexpected');
+  });
+
   it('processActivities persists payload and increments processed metric', async () => {
     const { processActivities, saveRemote, activityProcessedInc } =
       await loadActivityModule({
@@ -171,6 +233,17 @@ describe('activity service', () => {
     );
   });
 
+  it('processActivities succeeds even when processed metric increment throws', async () => {
+    const { processActivities } = await loadActivityModule({
+      saveRemoteResult: { success: true },
+      activityProcessedIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric fail');
+      }),
+    });
+
+    await expect(processActivities(123, [{ id: 1 }] as any)).resolves.toBeUndefined();
+  });
+
   it('processActivity updates activities and returns merged list', async () => {
     const merged = [{ id: 2 }, { id: 1 }];
     const { processActivity, updateActivityInArray, activityProcessedInc } =
@@ -185,6 +258,33 @@ describe('activity service', () => {
     expect(updateActivityInArray).toHaveBeenCalledTimes(1);
     expect(result).toEqual(merged);
     expect(activityProcessedInc).toHaveBeenCalledTimes(2);
+  });
+
+  it('processActivity returns null and increments failed metric when processing fails', async () => {
+    const { processActivity, activityFailedInc, logger } = await loadActivityModule({
+      redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+      saveRemoteResult: { success: false },
+      updateActivityInArrayResult: [{ id: 2 }],
+    });
+
+    const result = await processActivity({ id: 2 } as any, 321);
+
+    expect(result).toBeNull();
+    expect(activityFailedInc).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('processActivity still returns null when failed metric increment throws', async () => {
+    const { processActivity } = await loadActivityModule({
+      redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+      saveRemoteResult: { success: false },
+      updateActivityInArrayResult: [{ id: 2 }],
+      activityFailedIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric fail');
+      }),
+    });
+
+    await expect(processActivity({ id: 2 } as any, 321)).resolves.toBeNull();
   });
 
   it('verifyIfHasAnyActivities returns false for empty activity list and throws on errors', async () => {
@@ -204,5 +304,31 @@ describe('activity service', () => {
       'boom',
     );
     expect(activityFailedInc).toHaveBeenCalledTimes(1);
+  });
+
+  it('verifyIfHasAnyActivities returns true when list has items', async () => {
+    const { verifyIfHasAnyActivities } = await loadActivityModule();
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi.fn().mockResolvedValue([{ id: 1 }]),
+      },
+    } as any;
+
+    await expect(verifyIfHasAnyActivities(strava, {} as any)).resolves.toBe(true);
+  });
+
+  it('verifyIfHasAnyActivities rethrows even when failed metric increment throws', async () => {
+    const { verifyIfHasAnyActivities } = await loadActivityModule({
+      activityFailedIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric fail');
+      }),
+    });
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi.fn().mockRejectedValue(new Error('boom')),
+      },
+    } as any;
+
+    await expect(verifyIfHasAnyActivities(strava, {} as any)).rejects.toThrow('boom');
   });
 });

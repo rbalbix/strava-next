@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockPost: vi.fn(),
@@ -22,6 +22,7 @@ vi.mock('../../../src/services/logger', () => ({
 import {
   mergeActivities,
   mergeGearStats,
+  saveLocalStat,
   saveRemote,
   secondsToHms,
   updateActivityInArray,
@@ -30,6 +31,23 @@ import {
 describe('utils service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    const store = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key: string) => store.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => {
+        store.set(key, value);
+      }),
+      removeItem: vi.fn((key: string) => {
+        store.delete(key);
+      }),
+      clear: vi.fn(() => {
+        store.clear();
+      }),
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('formats seconds to HH:MM', () => {
@@ -60,6 +78,39 @@ describe('utils service', () => {
     expect(result[0].distance).toBe(2000);
   });
 
+  it('updates one activity and keeps other items unchanged', () => {
+    const existing = [
+      {
+        id: 1,
+        name: 'A',
+        distance: 1000,
+        moving_time: 100,
+        type: 'Ride',
+        start_date_local: '2026-01-01T00:00:00Z',
+        gear_id: 'g1',
+        private_note: '',
+      },
+      {
+        id: 2,
+        name: 'B',
+        distance: 1500,
+        moving_time: 150,
+        type: 'Ride',
+        start_date_local: '2026-01-02T00:00:00Z',
+        gear_id: 'g1',
+        private_note: '',
+      },
+    ] as any[];
+
+    const result = updateActivityInArray(
+      { id: 1, name: 'A2', distance: 2000 },
+      existing as any,
+    );
+    expect(result).toHaveLength(2);
+    expect(result.find((a) => a.id === 1)?.name).toBe('A2');
+    expect(result.find((a) => a.id === 2)?.name).toBe('B');
+  });
+
   it('prepends new activity when id does not exist', () => {
     const existing = [
       {
@@ -87,6 +138,20 @@ describe('utils service', () => {
     );
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe(2);
+  });
+
+  it('prepends parsed defaults when incoming activity has missing fields', () => {
+    const result = updateActivityInArray({} as any, []);
+    expect(result[0]).toMatchObject({
+      id: 0,
+      name: '',
+      distance: 0,
+      moving_time: 0,
+      type: null,
+      start_date_local: '',
+      gear_id: '',
+      private_note: '',
+    });
   });
 
   it('merges activities and keeps newest by id', () => {
@@ -181,10 +246,32 @@ describe('utils service', () => {
     expect(mocks.mockLoggerInfo).toHaveBeenCalledTimes(1);
   });
 
+  it('saveRemote returns failure when API responds with non-2xx status', async () => {
+    mocks.mockPost.mockResolvedValueOnce({ status: 500, statusText: 'Internal' });
+    const result = await saveRemote('key-2', { foo: 'bar' });
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('HTTP 500');
+    expect(mocks.mockLoggerError).toHaveBeenCalledTimes(1);
+  });
+
   it('saveRemote returns failure for invalid input', async () => {
     const result = await saveRemote('', { foo: 'bar' });
     expect(result.success).toBe(false);
     expect(result.error).toContain('Dados inválidos');
     expect(mocks.mockLoggerError).toHaveBeenCalledTimes(1);
+  });
+
+  it('saveRemote maps non-Error failures to unknown error message', async () => {
+    mocks.mockPost.mockRejectedValueOnce('plain failure');
+    const result = await saveRemote('key-3', { foo: 'bar' });
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Erro desconhecido');
+  });
+
+  it('saveLocalStat stores serialized payload', () => {
+    saveLocalStat({ lastUpdated: 123, activities: [] });
+    expect(localStorage.getItem('local-stat')).toBe(
+      JSON.stringify({ lastUpdated: 123, activities: [] }),
+    );
   });
 });

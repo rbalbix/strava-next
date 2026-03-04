@@ -6,7 +6,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import { validateWebhookEvent } from '../../../src/services/webhook-validation';
+import * as webhookValidation from '../../../src/services/webhook-validation';
 
 function makePayload(overrides: Record<string, unknown> = {}) {
   return {
@@ -32,13 +32,13 @@ describe('validateWebhookEvent', () => {
   });
 
   it('accepts a valid webhook payload', () => {
-    const result = validateWebhookEvent(makePayload());
+    const result = webhookValidation.validateWebhookEvent(makePayload());
     expect(result.success).toBe(true);
   });
 
   it('rejects payload older than 1 hour', () => {
     const oldTimestamp = Math.floor(Date.now() / 1000) - 2 * 60 * 60;
-    const result = validateWebhookEvent(
+    const result = webhookValidation.validateWebhookEvent(
       makePayload({ event_time: oldTimestamp }),
     );
 
@@ -49,9 +49,14 @@ describe('validateWebhookEvent', () => {
   });
 
   it('rejects payload with invalid enum values', () => {
-    const result = validateWebhookEvent(
+    const result = webhookValidation.validateWebhookEvent(
       makePayload({ aspect_type: 'invalid-value' }),
     );
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects non-object payload and reports payload type', () => {
+    const result = webhookValidation.validateWebhookEvent('invalid-payload');
     expect(result.success).toBe(false);
   });
 
@@ -60,7 +65,37 @@ describe('validateWebhookEvent', () => {
       ...makePayload(),
       unexpected: 'field',
     };
-    const result = validateWebhookEvent(payload);
+    const result = webhookValidation.validateWebhookEvent(payload);
     expect(result.success).toBe(false);
+  });
+
+  it('returns unknown validation error when parser throws non-zod error', () => {
+    const spy = vi
+      .spyOn(webhookValidation.StravaWebhookEventSchema, 'parse')
+      .mockImplementationOnce(() => {
+        throw new Error('unexpected');
+      });
+
+    const result = webhookValidation.validateWebhookEvent(makePayload());
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe('Unknown validation error');
+    }
+    spy.mockRestore();
+  });
+
+  it('returns unknown validation error for non-object payload when parser throws', () => {
+    const spy = vi
+      .spyOn(webhookValidation.StravaWebhookEventSchema, 'parse')
+      .mockImplementationOnce(() => {
+        throw new Error('unexpected');
+      });
+
+    const result = webhookValidation.validateWebhookEvent(123);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBe('Unknown validation error');
+    }
+    spy.mockRestore();
   });
 });

@@ -226,4 +226,12 @@ describe('statistics flow service', () => {
     expect(saveRemote).toHaveBeenCalledTimes(1);
     expect(saveRemote.mock.calls[0][0]).toBe('strava:statistics:123');
   });
+
+  it('updateStatistics rethrows when remote fetch fails', async () => {
+    const remoteGetImpl = vi.fn().mockRejectedValue(new Error('remote down'));
+    const { updateStatistics, logger } = await loadStatisticsModule({ remoteGetImpl });
+
+    await expect(updateStatistics({} as any, 55)).rejects.toThrow('remote down');
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
 });
