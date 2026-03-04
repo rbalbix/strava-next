@@ -20,6 +20,12 @@ export default defineConfig({
         '**/*.config.*',
         'next-env.d.ts',
       ],
+      thresholds: {
+        statements: 99,
+        lines: 99,
+        functions: 97,
+        branches: 94,
+      },
     },
   },
 });
