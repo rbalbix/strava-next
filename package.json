@@ -19,7 +19,8 @@
     "test:typecheck": "tsc --noEmit",
     "test:e2e:smoke:playwright": "node scripts/e2e-smoke.mjs",
     "test:e2e:smoke:http": "node scripts/e2e-http-smoke.mjs",
-    "test:e2e:smoke": "node scripts/e2e-smoke-runner.mjs"
+    "test:e2e:smoke": "node scripts/e2e-smoke-runner.mjs",
+    "test:e2e:ui": "node scripts/e2e-ui-runner.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
