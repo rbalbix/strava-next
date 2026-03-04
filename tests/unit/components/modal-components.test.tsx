@@ -101,6 +101,41 @@ describe('modal child components', () => {
     act(() => root.unmount());
   });
 
+  it('CardDetailModal supports non-ride activity without rendering timeline items', () => {
+    const onClose = vi.fn();
+    const { container, root } = mount(
+      <CardDetailModal
+        onClose={onClose}
+        gearStat={{
+          id: 'g2',
+          name: 'Run',
+          activityType: 'Run',
+          count: 1,
+          distance: 5000,
+          movingTime: 1800,
+          equipments: [
+            {
+              id: Equipments.Chain.id,
+              show: Equipments.Chain.show,
+              caption: Equipments.Chain.caption,
+              date: '2026-01-01T00:00:00Z',
+              distance: 1000,
+              movingTime: 100,
+            },
+          ],
+        } as any}
+      />,
+    );
+
+    expect(container.textContent).toContain('Run');
+    expect(container.textContent).toContain('Tempo Total');
+    expect(container.querySelectorAll('ul li').length).toBe(0);
+    const close = container.querySelector('[style*="cursor: pointer"]') as HTMLElement;
+    act(() => close.dispatchEvent(new MouseEvent('click', { bubbles: true })));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    act(() => root.unmount());
+  });
+
   it('ComponentInfo renders equipments and copies code on row click', () => {
     const closeModal = vi.fn();
     const { container, root } = mount(

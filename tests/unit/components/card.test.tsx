@@ -100,4 +100,63 @@ describe('Card component', () => {
       root.unmount();
     });
   });
+
+  it('shows lubrication distance summary when lubrication distance is non-zero', () => {
+    const authValue = makeAuthContext();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Card
+            id='bike-1'
+            name='Bike One'
+            activityType='Ride'
+            count={1}
+            distance={1000}
+            movingTime={100}
+            equipments={[
+              {
+                id: 'lub',
+                caption: 'lub:',
+                show: 'Lubrification',
+                distance: 42000,
+                movingTime: 7200,
+              },
+            ]}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.textContent).toContain('lubrificada a: 42,00 km');
+    act(() => root.unmount());
+  });
+
+  it('renders run card without lubrication section', () => {
+    const authValue = makeAuthContext();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Card
+            id='run-1'
+            name='Run One'
+            activityType='Run'
+            count={2}
+            distance={5000}
+            movingTime={1800}
+            equipments={[]}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.textContent).toContain('Run One');
+    expect(container.textContent).not.toContain('lubrificada');
+    act(() => root.unmount());
+  });
 });

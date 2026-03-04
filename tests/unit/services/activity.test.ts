@@ -153,6 +153,32 @@ describe('activity service', () => {
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
 
+  it('getActivities normalizes missing private_note from activity detail', async () => {
+    const { getActivities } = await loadActivityModule();
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockResolvedValueOnce([
+            {
+              id: 99,
+              name: '* detail-empty',
+              distance: 1000,
+              moving_time: 100,
+              type: 'Ride',
+              start_date_local: '2026-02-01T00:00:00Z',
+              gear_id: 'g1',
+            },
+          ])
+          .mockResolvedValueOnce([]),
+        getActivityById: vi.fn().mockResolvedValue({ private_note: undefined }),
+      },
+    } as any;
+
+    const result = await getActivities(strava, [{ id: 'g1' }] as any, null, null);
+    expect(result[0].private_note).toBe('');
+  });
+
   it('fetchStravaActivity returns activity on success', async () => {
     const { fetchStravaActivity } = await loadActivityModule();
     const strava = {
@@ -180,6 +206,24 @@ describe('activity service', () => {
 
     await expect(fetchStravaActivity(200, strava)).rejects.toThrow(
       'Strava API error: 503 - unavailable',
+    );
+  });
+
+  it('fetchStravaActivity uses axios error.message when response payload has no message', async () => {
+    const { fetchStravaActivity } = await loadActivityModule({
+      isAxiosError: () => true,
+    });
+    const strava = {
+      activities: {
+        getActivityById: vi.fn().mockRejectedValue({
+          response: { status: 503, data: {} },
+          message: 'fallback-msg',
+        }),
+      },
+    } as any;
+
+    await expect(fetchStravaActivity(201, strava)).rejects.toThrow(
+      'Strava API error: 503 - fallback-msg',
     );
   });
 
@@ -258,6 +302,20 @@ describe('activity service', () => {
     expect(updateActivityInArray).toHaveBeenCalledTimes(1);
     expect(result).toEqual(merged);
     expect(activityProcessedInc).toHaveBeenCalledTimes(2);
+  });
+
+  it('processActivity supports empty stored payload and metric increment failures', async () => {
+    const merged = [{ id: 1 }];
+    const { processActivity } = await loadActivityModule({
+      redisGet: vi.fn().mockResolvedValue(null),
+      saveRemoteResult: { success: true },
+      updateActivityInArrayResult: merged,
+      activityProcessedIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('metric failed');
+      }),
+    });
+
+    await expect(processActivity({ id: 1 } as any, 111)).resolves.toEqual(merged);
   });
 
   it('processActivity returns null and increments failed metric when processing fails', async () => {

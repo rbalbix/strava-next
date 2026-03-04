@@ -7,6 +7,9 @@ type LoadModuleOptions = {
   redisSetex?: ReturnType<typeof vi.fn>;
   oauthPost?: ReturnType<typeof vi.fn>;
   isAxiosError?: (value: unknown) => boolean;
+  tokenRefreshAttemptsIncImpl?: ReturnType<typeof vi.fn>;
+  tokenRefreshSuccessIncImpl?: ReturnType<typeof vi.fn>;
+  tokenRefreshFailureIncImpl?: ReturnType<typeof vi.fn>;
 };
 
 async function loadStravaAuthModule(options: LoadModuleOptions = {}) {
@@ -26,9 +29,9 @@ async function loadStravaAuthModule(options: LoadModuleOptions = {}) {
     error: vi.fn(),
   };
 
-  const tokenRefreshAttemptsInc = vi.fn();
-  const tokenRefreshSuccessInc = vi.fn();
-  const tokenRefreshFailureInc = vi.fn();
+  const tokenRefreshAttemptsInc = options.tokenRefreshAttemptsIncImpl ?? vi.fn();
+  const tokenRefreshSuccessInc = options.tokenRefreshSuccessIncImpl ?? vi.fn();
+  const tokenRefreshFailureInc = options.tokenRefreshFailureIncImpl ?? vi.fn();
 
   vi.doMock('../../../src/services/redis', () => ({ default: redis }));
   vi.doMock('../../../src/services/logger', () => ({
@@ -520,5 +523,48 @@ describe('strava-auth service', () => {
     expect(result).toEqual({ access_token: 'a', refresh_token: 'r', expires_at: 999 });
     expect(tokenRefreshAttemptsInc).toHaveBeenCalledTimes(1);
     expect(tokenRefreshSuccessInc).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshStravaToken succeeds even when attempts/success metrics throw', async () => {
+    const oauthPost = vi.fn().mockResolvedValue({
+      status: 200,
+      data: { access_token: 'a', refresh_token: 'r', expires_at: 123 },
+    });
+    const { refreshStravaToken } = await loadStravaAuthModule({
+      oauthPost,
+      tokenRefreshAttemptsIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('attempt metric fail');
+      }),
+      tokenRefreshSuccessIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('success metric fail');
+      }),
+    });
+
+    await expect(refreshStravaToken('r0', 1)).resolves.toEqual({
+      access_token: 'a',
+      refresh_token: 'r',
+      expires_at: 123,
+    });
+  });
+
+  it('refreshStravaToken still throws last error when failure metric throws', async () => {
+    const oauthPost = vi.fn().mockRejectedValue(new Error('network down'));
+    const setTimeoutSpy = vi
+      .spyOn(globalThis, 'setTimeout')
+      .mockImplementation((fn: any) => {
+        fn();
+        return 0 as any;
+      });
+
+    const { refreshStravaToken } = await loadStravaAuthModule({
+      oauthPost,
+      isAxiosError: () => false,
+      tokenRefreshFailureIncImpl: vi.fn().mockImplementation(() => {
+        throw new Error('failure metric fail');
+      }),
+    });
+
+    await expect(refreshStravaToken('r0', 1)).rejects.toThrow('network down');
+    setTimeoutSpy.mockRestore();
   });
 });
