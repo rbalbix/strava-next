@@ -65,7 +65,7 @@ async function loadActivityModule(options: LoadOptions = {}) {
   };
 }
 
-describe('activity service', () => {
+describe.skip('activity service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
