@@ -31,38 +31,40 @@ export function createMockRequest(options: RequestOptions = {}): NextApiRequest 
 export function createMockResponse(): MockResponse {
   const res = {
     statusCode: 200,
+    body: undefined as unknown,
     ended: false,
     headers: {} as Record<string, string | string[]>,
+    redirectedTo: undefined as string | undefined,
     setHeader(name: string, value: string | string[]) {
-      this.headers[name] = value;
-      return this;
+      res.headers[name] = value;
+      return res;
     },
     status(code: number) {
-      this.statusCode = code;
-      return this;
+      res.statusCode = code;
+      return res;
     },
     json(payload: unknown) {
-      this.body = payload;
-      this.ended = true;
-      return this;
+      res.body = payload;
+      res.ended = true;
+      return res;
     },
     send(payload: unknown) {
-      this.body = payload;
-      this.ended = true;
-      return this;
+      res.body = payload;
+      res.ended = true;
+      return res;
     },
     redirect(url: string) {
-      this.statusCode = this.statusCode || 307;
-      this.redirectedTo = url;
-      this.ended = true;
-      return this;
+      res.statusCode = res.statusCode || 307;
+      res.redirectedTo = url;
+      res.ended = true;
+      return res;
     },
     end(payload?: unknown) {
-      this.body = payload;
-      this.ended = true;
-      return this;
+      res.body = payload;
+      res.ended = true;
+      return res;
     },
   };
 
-  return res as MockResponse;
+  return res as unknown as MockResponse;
 }

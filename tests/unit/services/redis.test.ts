@@ -4,9 +4,9 @@ async function loadRedisModule(nodeEnv: string | undefined) {
   vi.resetModules();
 
   if (nodeEnv === undefined) {
-    delete process.env.NODE_ENV;
+    delete (process.env as Record<string, string | undefined>).NODE_ENV;
   } else {
-    process.env.NODE_ENV = nodeEnv;
+    (process.env as Record<string, string | undefined>).NODE_ENV = nodeEnv;
   }
 
   const fromEnv = vi.fn().mockReturnValue({ client: 'redis' });

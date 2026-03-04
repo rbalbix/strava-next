@@ -25,13 +25,18 @@ type LoadWebhookOptions = {
 async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
   vi.resetModules();
 
-  process.env.VERIFY_TOKEN = options.verifyToken ?? 'verify-token';
-  process.env.NODE_ENV = options.nodeEnv ?? 'test';
-  process.env.WEBHOOK_ALLOWED_IPS = options.webhookAllowedIps ?? '';
+  (process.env as Record<string, string | undefined>).VERIFY_TOKEN =
+    options.verifyToken ?? 'verify-token';
+  (process.env as Record<string, string | undefined>).NODE_ENV =
+    options.nodeEnv ?? 'test';
+  (process.env as Record<string, string | undefined>).WEBHOOK_ALLOWED_IPS =
+    options.webhookAllowedIps ?? '';
   if (options.webhookSubscriptionId !== undefined) {
-    process.env.WEBHOOK_SUBSCRIPTION_ID = options.webhookSubscriptionId;
+    (process.env as Record<string, string | undefined>).WEBHOOK_SUBSCRIPTION_ID =
+      options.webhookSubscriptionId;
   } else {
-    delete process.env.WEBHOOK_SUBSCRIPTION_ID;
+    delete (process.env as Record<string, string | undefined>)
+      .WEBHOOK_SUBSCRIPTION_ID;
   }
 
   const mockLogger = {
@@ -159,8 +164,9 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
     Strava: vi.fn().mockImplementation(() => ({})),
   }));
 
-  process.env.CLIENT_ID = 'client-id';
-  process.env.CLIENT_SECRET = 'client-secret';
+  (process.env as Record<string, string | undefined>).CLIENT_ID = 'client-id';
+  (process.env as Record<string, string | undefined>).CLIENT_SECRET =
+    'client-secret';
 
   const { default: webhookHandler } = await import('../../src/pages/api/webhook');
 

@@ -12,7 +12,7 @@ describe('/api/logout integration', () => {
   });
 
   it('clears cookies and returns success for POST', async () => {
-    process.env.NODE_ENV = 'test';
+    (process.env as Record<string, string | undefined>).NODE_ENV = 'test';
     const req = createMockRequest({ method: 'POST' });
     const res = createMockResponse();
 
