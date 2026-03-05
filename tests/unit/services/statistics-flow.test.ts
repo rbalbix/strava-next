@@ -141,6 +141,7 @@ describe('statistics flow service', () => {
         distance: 500,
         moving_time: 50,
         type: 'Ride',
+        sport_type: 'Ride',
         start_date_local: '2025-12-31T00:00:00Z',
         gear_id: 'bike-1',
         private_note: '',
@@ -153,6 +154,7 @@ describe('statistics flow service', () => {
         distance: 1000,
         moving_time: 100,
         type: 'Ride',
+        sport_type: 'Ride',
         start_date_local: '2026-01-01T00:00:00Z',
         gear_id: 'bike-1',
         private_note: '',
@@ -189,6 +191,65 @@ describe('statistics flow service', () => {
       1700000000,
     );
     expect(processActivities).toHaveBeenCalledWith(123, [...incoming, ...existing]);
+  });
+
+  it('updateStatistics rebuilds from scratch when stored cache has legacy activities without sport_type', async () => {
+    const existing = [
+      {
+        id: 1,
+        name: 'Old',
+        distance: 500,
+        moving_time: 50,
+        type: 'Ride',
+        start_date_local: '2025-12-31T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: '',
+      },
+    ];
+    const rebuilt = [
+      {
+        id: 2,
+        name: 'New',
+        distance: 1000,
+        moving_time: 100,
+        type: 'MountainBikeRide',
+        sport_type: 'MountainBikeRide',
+        start_date_local: '2026-01-01T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: '',
+      },
+    ];
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: { lastUpdated: 1700000000, activities: existing },
+      })
+      .mockResolvedValueOnce({
+        data: { lastUpdated: 1690000000, statistics: [{ id: 'old' }] },
+      });
+
+    const getActivitiesImpl = vi.fn().mockResolvedValue(rebuilt);
+    const processActivitiesImpl = vi.fn().mockResolvedValue(undefined);
+
+    const { updateStatistics, getActivities, processActivities } =
+      await loadStatisticsModule({
+        remoteGetImpl,
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+        getActivitiesImpl,
+        processActivitiesImpl,
+        saveRemoteImpl: vi.fn().mockResolvedValue({ success: true }),
+      });
+
+    await updateStatistics({} as any, 123);
+
+    expect(getActivities).toHaveBeenCalledWith(
+      expect.any(Object),
+      [{ id: 'bike-1', name: 'Bike' }],
+      null,
+      null,
+    );
+    expect(processActivities).toHaveBeenCalledWith(123, rebuilt);
   });
 
   it('processStatistics throws when saveRemote fails', async () => {

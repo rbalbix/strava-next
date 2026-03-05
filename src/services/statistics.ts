@@ -61,14 +61,37 @@ export async function updateStatistics(
       } else {
         // Recupera apenas as atividades criadas depois de lastUpdated
         const { lastUpdated, activities } = storedActivities.data;
+        const hasLegacyActivities =
+          Array.isArray(activities) &&
+          activities.some(
+            (activity: ActivityBase) =>
+              !activity.sport_type &&
+              typeof activity.type === 'string' &&
+              activity.type.length > 0,
+          );
 
-        const activitiesFromStravaAPI = await getActivities(
-          strava,
-          gears,
-          null,
-          lastUpdated,
-        );
-        activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
+        if (hasLegacyActivities) {
+          // One-time migration path:
+          // rebuild from Strava API so cached activities include sport_type
+          log.info(
+            { athleteId },
+            'Legacy activities detected without sport_type; rebuilding activities cache',
+          );
+          activitiesToNewStatistics = await getActivities(
+            strava,
+            gears,
+            null,
+            null,
+          );
+        } else {
+          const activitiesFromStravaAPI = await getActivities(
+            strava,
+            gears,
+            null,
+            lastUpdated,
+          );
+          activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
+        }
       }
 
       log.info(

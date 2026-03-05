@@ -73,19 +73,33 @@ async function getActivities(
   await Promise.all(
     activitiesFilteredByActiveGear.map(async (activity) => {
       let private_note = '';
-      const sportType = getActivitySportType(activity);
+      let sportType = getActivitySportType(activity);
+      const requiresDetailedSportType = !sportType || sportType === 'Ride';
+      const requiresPrivateNote = activity.name.includes('*');
+      const shouldFetchDetail = requiresPrivateNote || requiresDetailedSportType;
 
-      if (activity.name.includes('*')) {
+      if (shouldFetchDetail) {
         try {
           const detail: DetailedActivity =
             await strava.activities.getActivityById({
               id: activity.id,
             });
-          private_note = detail.private_note || '';
+          const detailedSportType = getActivitySportType(detail);
+          if (detailedSportType) {
+            sportType = detailedSportType;
+          }
+          if (requiresPrivateNote) {
+            private_note = detail.private_note || '';
+          }
         } catch (error) {
           getLogger().error(
-            { err: error, activityId: activity.id },
-            'Erro ao obter detalhes da atividade',
+            {
+              err: error,
+              activityId: activity.id,
+              requiresPrivateNote,
+              requiresDetailedSportType,
+            },
+            'Erro ao obter detalhes da atividade para enriquecer dados',
           );
         }
       }

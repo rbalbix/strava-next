@@ -1,9 +1,14 @@
-import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+import { MdClose } from 'react-icons/md';
 import { GearStats } from '../services/gear';
 import { locale, secondsToHms } from '../services/utils';
 import styles from '../styles/components/CardDetailModal.module.css';
 import CardItem from './CardItem';
 import StatCard from './StatCard';
+import {
+  getActivityVisualType,
+  isBikeActivityType,
+  renderActivityIcon,
+} from './activity-type-visual';
 
 interface CardDetailModalProps {
   gearStat: GearStats;
@@ -16,7 +21,8 @@ export default function CardDetailModal({
 }: CardDetailModalProps) {
   const { name, activityType, count, distance, movingTime, equipments } =
     gearStat;
-  const isRide = activityType === 'Ride';
+  const visualType = getActivityVisualType(activityType);
+  const isBikeActivity = isBikeActivityType(activityType);
 
   return (
     <div className={styles.cardDetailModalContainer}>
@@ -25,10 +31,14 @@ export default function CardDetailModal({
           <div>
             <div>
               <span>
-                {isRide ? (
-                  <MdDirectionsBike color='var(--light-blue)' />
-                ) : (
-                  <MdDirectionsRun color='var(--orange-strava)' />
+                {renderActivityIcon(
+                  visualType,
+                  undefined,
+                  visualType === 'run'
+                    ? 'var(--orange-strava)'
+                    : visualType === 'mountain-bike'
+                      ? '#2e7d32'
+                      : 'var(--light-blue)',
                 )}
               </span>
               <span>{name}</span>
@@ -59,7 +69,7 @@ export default function CardDetailModal({
           </section>
         </header>
         <ul className={styles.timeline}>
-          {isRide &&
+          {isBikeActivity &&
             equipments.map((e) => (
               <CardItem
                 key={e.id}
