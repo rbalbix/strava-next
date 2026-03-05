@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { getUnixTime } from 'date-fns';
 import { REDIS_KEYS } from '../config';
 import { getLogger } from './logger';
@@ -9,6 +8,7 @@ import {
 } from './metrics';
 import { apiStravaOauthToken } from './api';
 import redis from './redis';
+import { getStravaErrorDetails } from './strava-sdk';
 
 // Retry configuration for token refresh
 const RETRY_CONFIG = {
@@ -300,37 +300,29 @@ export async function refreshStravaToken(
       }
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
+      const details = getStravaErrorDetails(error);
+      const statusCode = details.status;
+      const isRetryable = !statusCode || statusCode >= 500 || statusCode === 429;
 
-      if (axios.isAxiosError(error)) {
-        const statusCode = error.response?.status;
-        const isRetryable =
-          !statusCode || statusCode >= 500 || statusCode === 429;
+      log.warn(
+        {
+          athleteId,
+          attempt: attempt + 1,
+          statusCode,
+          isRetryable,
+          message: details.message,
+        },
+        'Erro ao fazer refresh de token',
+      );
 
-        log.warn(
-          {
-            athleteId,
-            attempt: attempt + 1,
-            statusCode,
-            isRetryable,
-            message: error.message,
-          },
-          'Erro ao fazer refresh de token',
+      if (!isRetryable) {
+        // Non-retryable errors: 4xx (except 429)
+        log.error(
+          { athleteId, statusCode, message: details.message },
+          'Erro não-retentável ao fazer refresh de token',
         );
-
-        if (!isRetryable) {
-          // Non-retryable errors: 4xx (except 429)
-          log.error(
-            { athleteId, statusCode, message: error.message },
-            'Erro não-retentável ao fazer refresh de token',
-          );
-          throw new Error(
-            `Refresh token failed (não-retentável): ${statusCode} ${error.message}`,
-          );
-        }
-      } else {
-        log.warn(
-          { athleteId, attempt: attempt + 1, err: error },
-          'Erro inesperado ao fazer refresh de token',
+        throw new Error(
+          `Refresh token failed (não-retentável): ${statusCode} ${details.message}`,
         );
       }
 

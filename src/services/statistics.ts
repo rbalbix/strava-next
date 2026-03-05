@@ -1,4 +1,4 @@
-import { ActivityType, Strava, SummaryGear } from 'strava';
+import { Strava, SummaryGear } from 'strava';
 import { REDIS_KEYS } from '../config';
 import { ActivityBase, getActivities, processActivities } from './activity';
 
@@ -9,6 +9,7 @@ import { Equipment, Equipments } from './equipment';
 import { GearStats, getGears } from './gear';
 import { saveRemote } from './utils';
 import { getLogger } from './logger';
+import { ActivitySportType } from './strava-sdk';
 
 export async function updateStatistics(
   strava: Strava,
@@ -134,7 +135,7 @@ export function createStatistics(
     let count = 0;
     let distance = 0;
     let movingTime = 0;
-    let activityType: ActivityType | null = null;
+    let activityType: ActivitySportType | null = null;
 
     const equipmentsStatTemplate: Equipment[] = [];
     const equipmentsStat: Equipment[] = [];
@@ -241,7 +242,7 @@ export function createStatistics(
 
         movingTime += activity.moving_time;
         distance += activity.distance;
-        activityType = activity.type;
+        activityType = activity.sport_type ?? activity.type;
         count++;
       }
     });

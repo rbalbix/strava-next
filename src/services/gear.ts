@@ -1,5 +1,6 @@
-import { ActivityType, DetailedAthlete, SummaryGear } from 'strava';
+import { DetailedAthlete, SummaryGear } from 'strava';
 import { Equipment } from './equipment';
+import { ActivitySportType } from './strava-sdk';
 
 export type GearType = 'bike' | 'shoes';
 
@@ -8,7 +9,7 @@ export type GearStats = {
   name: string;
   distance: number;
   movingTime: number;
-  activityType: ActivityType | null;
+  activityType: ActivitySportType | null;
   count: number;
   equipments: Equipment[];
 };
