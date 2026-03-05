@@ -96,9 +96,46 @@ describe('Card component', () => {
     });
 
     expect(container.textContent).toContain('Bike lubrificada. 👏');
+    expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
     act(() => {
       root.unmount();
     });
+  });
+
+  it('renders mountain bike icon and keeps lubrication section for MountainBikeRide', () => {
+    const authValue = makeAuthContext();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Card
+            id='mtb-1'
+            name='MTB One'
+            activityType='MountainBikeRide'
+            count={1}
+            distance={1000}
+            movingTime={100}
+            equipments={[
+              {
+                id: 'lub',
+                caption: 'lub:',
+                show: 'Lubrification',
+                distance: 0,
+                movingTime: 0,
+              },
+            ]}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.textContent).toContain('Bike lubrificada. 👏');
+    expect(
+      container.querySelector('[data-testid="icon-mountain-bike"]'),
+    ).toBeTruthy();
+    act(() => root.unmount());
   });
 
   it('shows lubrication distance summary when lubrication distance is non-zero', () => {
@@ -157,6 +194,7 @@ describe('Card component', () => {
 
     expect(container.textContent).toContain('Run One');
     expect(container.textContent).not.toContain('lubrificada');
+    expect(container.querySelector('[data-testid="icon-run"]')).toBeTruthy();
     act(() => root.unmount());
   });
 });

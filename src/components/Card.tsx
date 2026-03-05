@@ -1,7 +1,11 @@
-import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import styles from '../styles/components/Card.module.css';
 
 import { useContext } from 'react';
+import {
+  getActivityVisualType,
+  isBikeActivityType,
+  renderActivityIcon,
+} from './activity-type-visual';
 import { AuthContext } from '../contexts/AuthContext';
 import { Equipments } from '../services/equipment';
 import { GearStats } from '../services/gear';
@@ -17,7 +21,8 @@ export default function Card({
   equipments,
 }: GearStats) {
   const { openModal } = useContext(AuthContext);
-  const isRide = activityType === 'Ride';
+  const visualType = getActivityVisualType(activityType);
+  const isBikeActivity = isBikeActivityType(activityType);
   const lub = equipments.find(({ id }) => id === Equipments.Lubrification.id);
   const lubDistance = lub?.distance ?? 0;
   const lubMovingTime = lub?.movingTime ?? 0;
@@ -38,10 +43,13 @@ export default function Card({
     <div className={styles.cardContainer} onClick={handleCardClick}>
       <header>
         {name}
-        {isRide ? (
-          <MdDirectionsBike className={styles.iconBike} />
-        ) : (
-          <MdDirectionsRun className={styles.iconRun} />
+        {renderActivityIcon(
+          visualType,
+          visualType === 'run'
+            ? styles.iconRun
+            : visualType === 'mountain-bike'
+              ? styles.iconMountainBike
+              : styles.iconBike,
         )}
       </header>
       <main>
@@ -49,7 +57,7 @@ export default function Card({
         <p>{`${locale.format(',.2f')(distance / 1000)} km`}</p>
         <p>{`${secondsToHms(movingTime)}h`}</p>
 
-        {isRide && lub && (
+        {isBikeActivity && lub && (
           <div>
             {lubDistance !== 0 ? (
               <p>{`. lubrificada a: ${locale.format(',.2f')(

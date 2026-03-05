@@ -95,6 +95,8 @@ describe('modal child components', () => {
     expect(container.textContent).toContain('Bike');
     expect(container.textContent).toContain('Atividades');
     expect(container.textContent).toContain('Distância Total');
+    expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
+    expect(container.querySelectorAll('ul li').length).toBe(1);
     const close = container.querySelector('[style*="cursor: pointer"]') as HTMLElement;
     act(() => close.dispatchEvent(new MouseEvent("click", { bubbles: true })));
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -129,10 +131,44 @@ describe('modal child components', () => {
 
     expect(container.textContent).toContain('Run');
     expect(container.textContent).toContain('Tempo Total');
+    expect(container.querySelector('[data-testid="icon-run"]')).toBeTruthy();
     expect(container.querySelectorAll('ul li').length).toBe(0);
     const close = container.querySelector('[style*="cursor: pointer"]') as HTMLElement;
     act(() => close.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(onClose).toHaveBeenCalledTimes(1);
+    act(() => root.unmount());
+  });
+
+  it('CardDetailModal renders mountain bike icon and timeline for MountainBikeRide', () => {
+    const onClose = vi.fn();
+    const { container, root } = mount(
+      <CardDetailModal
+        onClose={onClose}
+        gearStat={{
+          id: 'g3',
+          name: 'MTB',
+          activityType: 'MountainBikeRide',
+          count: 1,
+          distance: 7000,
+          movingTime: 2000,
+          equipments: [
+            {
+              id: Equipments.Chain.id,
+              show: Equipments.Chain.show,
+              caption: Equipments.Chain.caption,
+              date: '2026-01-01T00:00:00Z',
+              distance: 1000,
+              movingTime: 100,
+            },
+          ],
+        } as any}
+      />,
+    );
+
+    expect(
+      container.querySelector('[data-testid="icon-mountain-bike"]'),
+    ).toBeTruthy();
+    expect(container.querySelectorAll('ul li').length).toBe(1);
     act(() => root.unmount());
   });
 

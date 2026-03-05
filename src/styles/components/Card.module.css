@@ -69,6 +69,11 @@
   background-color: var(--background-card);
 }
 
+.iconMountainBike {
+  color: #2e7d32;
+  background-color: var(--background-card);
+}
+
 .iconRun {
   color: var(--orange-strava);
   background-color: var(--background-card);
