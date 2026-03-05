@@ -1,7 +1,5 @@
-import axios from 'axios';
 import { getUnixTime } from 'date-fns';
 import {
-  ActivityType,
   DetailedActivity,
   DetailedAthlete,
   Strava,
@@ -13,13 +11,19 @@ import redis from './redis';
 import { saveRemote, updateActivityInArray, mergeActivities } from './utils';
 import { getLogger } from './logger';
 import { activityProcessed, activityFailed } from './metrics';
+import {
+  ActivitySportType,
+  getActivitySportType,
+  getStravaErrorDetails,
+} from './strava-sdk';
 
 export type ActivityBase = {
   id: number;
   name: string;
   distance: number;
   moving_time: number;
-  type: ActivityType | null;
+  type: ActivitySportType | null;
+  sport_type?: ActivitySportType | null;
   start_date_local: string;
   gear_id: string;
   private_note: string;
@@ -69,6 +73,7 @@ async function getActivities(
   await Promise.all(
     activitiesFilteredByActiveGear.map(async (activity) => {
       let private_note = '';
+      const sportType = getActivitySportType(activity);
 
       if (activity.name.includes('*')) {
         try {
@@ -90,7 +95,8 @@ async function getActivities(
         name: activity.name,
         distance: activity.distance,
         moving_time: activity.moving_time,
-        type: activity.type,
+        type: sportType,
+        sport_type: sportType,
         start_date_local: activity.start_date_local,
         gear_id: activity.gear_id,
         private_note,
@@ -117,14 +123,10 @@ export async function fetchStravaActivity(
     }
   } catch (error) {
     getLogger().error({ err: error, activityId }, 'Falha ao buscar atividade');
-
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const message = error.response?.data?.message || error.message;
-      throw new Error(`Strava API error: ${status} - ${message}`);
-    }
-
-    throw error;
+    const { status, message } = getStravaErrorDetails(error);
+    throw new Error(
+      status ? `Strava API error: ${status} - ${message}` : `Strava API error: ${message}`,
+    );
   }
 }
 

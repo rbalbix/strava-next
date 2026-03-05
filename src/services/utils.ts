@@ -5,6 +5,7 @@ import { apiRemoteStorage } from './api';
 import { Equipment } from './equipment';
 import { GearStats } from './gear';
 import { getLogger } from './logger';
+import { getActivitySportType } from './strava-sdk';
 
 export type LocalActivity = {
   lastUpdated: number;
@@ -182,12 +183,14 @@ function mergeActivities(
 }
 
 function safeActivityParse(data: Partial<ActivityBase>): ActivityBase {
+  const sportType = getActivitySportType(data);
   return {
     id: data.id ?? 0,
     name: data.name ?? '',
     distance: data.distance ?? 0,
     moving_time: data.moving_time ?? 0,
-    type: data.type ?? null,
+    type: sportType,
+    sport_type: sportType,
     start_date_local: data.start_date_local ?? '',
     gear_id: data.gear_id ?? '',
     private_note: data.private_note ?? '',

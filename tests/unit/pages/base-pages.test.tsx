@@ -35,7 +35,7 @@ describe('base pages', () => {
   });
 
   it('_document render returns html structure', () => {
-    const doc = new MyDocument({});
+    const doc = new (MyDocument as any)({});
     const tree = doc.render() as any;
     expect(tree).toBeTruthy();
   });
