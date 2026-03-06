@@ -76,7 +76,7 @@ async function getActivities(
       let sportType = getActivitySportType(activity);
       const requiresDetailedSportType = !sportType || sportType === 'Ride';
       const requiresPrivateNote = activity.name.includes('*');
-      const shouldFetchDetail = requiresPrivateNote || requiresDetailedSportType;
+      const shouldFetchDetail = requiresPrivateNote; //|| requiresDetailedSportType;
 
       if (shouldFetchDetail) {
         try {
@@ -139,7 +139,9 @@ export async function fetchStravaActivity(
     getLogger().error({ err: error, activityId }, 'Falha ao buscar atividade');
     const { status, message } = getStravaErrorDetails(error);
     throw new Error(
-      status ? `Strava API error: ${status} - ${message}` : `Strava API error: ${message}`,
+      status
+        ? `Strava API error: ${status} - ${message}`
+        : `Strava API error: ${message}`,
     );
   }
 }
@@ -149,7 +151,9 @@ async function processActivity(
   athleteId: number,
 ): Promise<ActivityBase[] | null> {
   try {
-    const stored = await redis.get<StravaAuthData>(REDIS_KEYS.activities(athleteId));
+    const stored = await redis.get<StravaAuthData>(
+      REDIS_KEYS.activities(athleteId),
+    );
     const activities = stored?.activities || [];
 
     // Update or insert the single activity
