@@ -123,14 +123,14 @@
   }
 
   .homeText h1 {
-    font-size: 6rem;
+    font-size: 7rem;
     line-height: 6rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 1.4rem;
-    line-height: 2rem;
+    font-size: 2.4rem;
+    line-height: 3rem;
     letter-spacing: 0rem;
     text-align: center;
   }
@@ -152,18 +152,18 @@
 
 @media (max-width: 500px) {
   .homeText {
-    height: 55vh;
+    height: 45vh;
   }
 
   .homeText h1 {
-    font-size: 5rem;
+    font-size: 6rem;
     line-height: 5rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 1.25rem;
-    line-height: 1.8rem;
+    font-size: 2.25rem;
+    line-height: 2.8rem;
     letter-spacing: 0rem;
     text-align: center;
   }
@@ -175,18 +175,18 @@
 
 @media (max-width: 400px) {
   .homeText {
-    height: 55vh;
+    height: 40vh;
   }
 
   .homeText h1 {
-    font-size: 4.5rem;
+    font-size: 5.5rem;
     line-height: 6rem;
     letter-spacing: -0.1rem;
   }
 
   .homeText h2 {
-    font-size: 1.1rem;
-    line-height: 1.6rem;
+    font-size: 2.3rem;
+    line-height: 2.6rem;
     letter-spacing: 0rem;
     text-align: center;
   }
