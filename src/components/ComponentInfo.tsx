@@ -26,7 +26,12 @@ export default function ComponentInfo() {
             <span className={cardStyles.athleteStatInfoTitleIcon}>
               <FaMedapps color='var(--stat-icon)' />
             </span>
-            <span>Componentes:</span>
+            <h2
+              id='modal-title-equipments'
+              className={cardStyles.athleteStatInfoHeading}
+            >
+              Componentes:
+            </h2>
           </div>
           <div>
             <button

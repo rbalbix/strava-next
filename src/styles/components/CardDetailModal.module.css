@@ -27,6 +27,13 @@
   margin-bottom: 10px;
 }
 
+.modalTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-right: 10px;
+}
+
 .closeButton {
   background: transparent;
   border: none;

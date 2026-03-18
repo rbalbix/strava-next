@@ -12,18 +12,18 @@ export default function ModalContainer() {
   const modalRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
-  const modalLabel = useMemo(() => {
+  const modalLabelId = useMemo(() => {
     switch (activeModal) {
       case 'stats':
-        return 'Estatísticas';
+        return 'modal-title-stats';
       case 'equipments':
-        return 'Componentes';
+        return 'modal-title-equipments';
       case 'info':
-        return 'Informações';
+        return 'modal-title-info';
       case 'card-detail':
-        return 'Detalhes do equipamento';
+        return 'modal-title-card-detail';
       default:
-        return 'Janela';
+        return 'modal-title';
     }
   }, [activeModal]);
 
@@ -184,7 +184,7 @@ export default function ModalContainer() {
         onClick={(e) => e.stopPropagation()}
         role='dialog'
         aria-modal='true'
-        aria-label={modalLabel}
+        aria-labelledby={modalLabelId}
         tabIndex={-1}
         ref={modalRef}
       >

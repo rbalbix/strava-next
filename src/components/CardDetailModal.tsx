@@ -41,7 +41,9 @@ export default function CardDetailModal({
                       : 'var(--light-blue)',
                 )}
               </span>
-              <span>{name}</span>
+              <h2 id='modal-title-card-detail' className={styles.modalTitle}>
+                {name}
+              </h2>
             </div>
             <div>
               <button

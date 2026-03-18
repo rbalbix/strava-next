@@ -21,6 +21,12 @@ export default function InitialInfoModal() {
                 color='var(--stat-icon)'
               />
             </span>
+            <h2
+              id='modal-title-info'
+              className={cardStyles.athleteStatInfoHeading}
+            >
+              Informações
+            </h2>
           </div>
           <div>
             <button
