@@ -63,6 +63,7 @@
   font-weight: 700;
   line-height: 8.8rem;
   letter-spacing: -0.3rem;
+  text-align: center;
 
   -webkit-background-clip: text;
   background-clip: text;
@@ -80,6 +81,7 @@
   font-weight: 400;
   line-height: 2.8rem;
   letter-spacing: -0.1rem;
+  text-align: center;
 
   -webkit-background-clip: text;
   background-clip: text;
@@ -129,16 +131,15 @@
   }
 
   .homeText h1 {
-    font-size: 7rem;
-    line-height: 6rem;
+    font-size: 6.2rem;
+    line-height: 6.6rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 2.4rem;
-    line-height: 3rem;
+    font-size: 1.6rem;
+    line-height: 2.2rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 
   .versionMark {
@@ -162,16 +163,15 @@
   }
 
   .homeText h1 {
-    font-size: 6rem;
-    line-height: 5rem;
+    font-size: 5rem;
+    line-height: 5.4rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 2.25rem;
-    line-height: 2.8rem;
+    font-size: 1.35rem;
+    line-height: 1.9rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 
   .marketingNav a {
@@ -185,15 +185,14 @@
   }
 
   .homeText h1 {
-    font-size: 5.5rem;
-    line-height: 6rem;
+    font-size: 4.4rem;
+    line-height: 4.8rem;
     letter-spacing: -0.1rem;
   }
 
   .homeText h2 {
-    font-size: 2.3rem;
-    line-height: 2.6rem;
+    font-size: 1.15rem;
+    line-height: 1.6rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 }
