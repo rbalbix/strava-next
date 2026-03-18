@@ -23,7 +23,14 @@ export default function InitialInfoModal() {
             </span>
           </div>
           <div>
-            <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+            <button
+              type='button'
+              onClick={closeModal}
+              className={styles.closeButton}
+              aria-label='Fechar informações'
+            >
+              <MdClose />
+            </button>
           </div>
         </div>
       </header>

@@ -37,15 +37,26 @@
   display: block;
 }
 
-.closeIcon {
+.closeButton {
   position: fixed;
+  margin-top: 1rem;
+  margin-left: 1rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  z-index: 1001;
+  cursor: pointer;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.closeIcon {
   color: var(--gray-notes);
   width: 1.4rem;
   height: 1.4rem;
-  margin-top: 1rem;
-  margin-left: 1rem;
-  cursor: pointer;
-  z-index: 1001;
   transition: color 0.2s ease;
 }
 
@@ -101,6 +112,20 @@
 
 .linkText {
   font-size: 1.2rem !important;
+}
+
+.sidebarAction {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sidebarAction:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
 }
 
 @keyframes showSidebar {

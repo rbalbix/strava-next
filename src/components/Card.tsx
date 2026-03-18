@@ -40,7 +40,12 @@ export default function Card({
   };
 
   return (
-    <div className={styles.cardContainer} onClick={handleCardClick}>
+    <button
+      type='button'
+      className={styles.cardContainer}
+      onClick={handleCardClick}
+      aria-label={`Abrir detalhes de ${name}`}
+    >
       <header>
         {name}
         {renderActivityIcon(
@@ -69,6 +74,6 @@ export default function Card({
           </div>
         )}
       </main>
-    </div>
+    </button>
   );
 }

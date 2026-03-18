@@ -83,7 +83,7 @@ describe('AthleteStats component', () => {
     expect(container.textContent).toContain('0,90km');
 
     const closeIcon = container.querySelector(
-      '[style*="cursor: pointer"]',
+      'button[aria-label="Fechar estatísticas"]',
     ) as HTMLElement;
     act(() => closeIcon.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(closeModal).toHaveBeenCalled();

@@ -110,7 +110,14 @@ export default function AthleteStats() {
                 <span>Estatísticas:</span>
               </div>
               <div>
-                <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+                <button
+                  type='button'
+                  onClick={closeModal}
+                  className={cardStyles.closeButton}
+                  aria-label='Fechar estatísticas'
+                >
+                  <MdClose />
+                </button>
               </div>
             </div>
           </header>

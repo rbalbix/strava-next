@@ -44,7 +44,14 @@ export default function CardDetailModal({
               <span>{name}</span>
             </div>
             <div>
-              <MdClose onClick={onClose} style={{ cursor: 'pointer' }} />
+              <button
+                type='button'
+                onClick={onClose}
+                className={styles.closeButton}
+                aria-label='Fechar detalhes'
+              >
+                <MdClose />
+              </button>
             </div>
           </div>
           <section>

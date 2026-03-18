@@ -52,16 +52,16 @@ describe('Sidebar component', () => {
       );
     });
 
-    const stats = Array.from(container.querySelectorAll('span')).find((n) =>
+    const stats = Array.from(container.querySelectorAll('button')).find((n) =>
       n.textContent?.includes('Estatísticas'),
-    ) as HTMLSpanElement;
+    ) as HTMLButtonElement;
     act(() => stats.click());
     expect(openModal).toHaveBeenCalledWith('stats');
     expect(active).toHaveBeenCalledWith(false);
 
-    const help = Array.from(container.querySelectorAll('span')).find((n) =>
+    const help = Array.from(container.querySelectorAll('button')).find((n) =>
       n.textContent?.includes('Ajuda'),
-    ) as HTMLSpanElement;
+    ) as HTMLButtonElement;
     act(() => help.click());
     expect(openModal).toHaveBeenCalledWith('info');
 

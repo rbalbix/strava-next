@@ -27,6 +27,19 @@
   margin-bottom: 10px;
 }
 
+.closeButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .statCardContainer {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr);

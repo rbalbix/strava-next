@@ -9,10 +9,33 @@
   margin-bottom: 0.8rem;
 
   cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  appearance: none;
+  color: inherit;
 }
 
 .cardContainer:last-child {
   margin-bottom: 2rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.cardContainer:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
 }
 
 .cardContainer header {

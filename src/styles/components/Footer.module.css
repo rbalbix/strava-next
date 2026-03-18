@@ -64,6 +64,38 @@
   outline-offset: 2px;
 }
 
+.closeButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.copyButton {
+  background: transparent;
+  border: none;
+  padding: 2px 4px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.copyButton:hover {
+  text-decoration: underline;
+}
+
+.copyButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .footerContainer footer {
   font-size: 0.9rem;
   text-align: center;

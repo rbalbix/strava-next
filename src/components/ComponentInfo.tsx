@@ -29,7 +29,14 @@ export default function ComponentInfo() {
             <span>Componentes:</span>
           </div>
           <div>
-            <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+            <button
+              type='button'
+              onClick={closeModal}
+              className={styles.closeButton}
+              aria-label='Fechar componentes'
+            >
+              <MdClose />
+            </button>
           </div>
         </div>
       </header>
@@ -49,9 +56,18 @@ export default function ComponentInfo() {
           <tbody>
             {equipment.map((e) => {
               return (
-                <tr key={e.id} onClick={() => copyTextToClipboard(e.id)}>
+                <tr key={e.id}>
                   <td>{e.show}</td>
-                  <td>{e.id}</td>
+                  <td>
+                    <button
+                      type='button'
+                      className={styles.copyButton}
+                      onClick={() => copyTextToClipboard(e.id)}
+                      aria-label={`Copiar codigo ${e.id}`}
+                    >
+                      {e.id}
+                    </button>
+                  </td>
                 </tr>
               );
             })}
