@@ -34,12 +34,22 @@ function mount(el: React.ReactElement) {
   const container = document.createElement('div');
   const root = createRoot(container);
   act(() => root.render(el));
+  document.body.appendChild(container);
+  const originalUnmount = root.unmount.bind(root);
+  (root as unknown as { unmount: () => void }).unmount = () => {
+    originalUnmount();
+    container.remove();
+  };
   return { container, root };
 }
 
 describe('ModalContainer', () => {
   beforeEach(() => {
     vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders nothing when activeModal is null', () => {
@@ -107,5 +117,82 @@ describe('ModalContainer', () => {
 
     expect(closeModal).toHaveBeenCalledTimes(1);
     act(() => root.unmount());
+  });
+
+  it('focuses first focusable element and traps focus with Tab', () => {
+    const { container, root } = mount(
+      <AuthContext.Provider value={ctx({ activeModal: 'info' })}>
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+
+    const modal = container.querySelector('[role="dialog"]') as HTMLElement;
+    const buttonA = document.createElement('button');
+    buttonA.textContent = 'first';
+    const buttonB = document.createElement('button');
+    buttonB.textContent = 'last';
+    modal.appendChild(buttonA);
+    modal.appendChild(buttonB);
+
+    act(() => {
+      vi.runAllTimers();
+    });
+    expect(document.activeElement).toBe(buttonA);
+
+    buttonB.focus();
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    });
+    expect(document.activeElement).toBe(buttonA);
+
+    buttonA.focus();
+    act(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }),
+      );
+    });
+    expect(document.activeElement).toBe(buttonB);
+
+    act(() => root.unmount());
+  });
+
+  it('focuses dialog when there are no focusable elements', () => {
+    const { container, root } = mount(
+      <AuthContext.Provider value={ctx({ activeModal: 'info' })}>
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+
+    const modal = container.querySelector('[role="dialog"]') as HTMLElement;
+
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    expect(document.activeElement).toBe(modal);
+    act(() => root.unmount());
+  });
+
+  it('restores focus to the previously active element after close', () => {
+    const closeModal = vi.fn();
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const { root } = mount(
+      <AuthContext.Provider value={ctx({ activeModal: 'info', closeModal })}>
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+    expect(closeModal).toHaveBeenCalledTimes(1);
+
+    act(() => root.unmount());
+    expect(document.activeElement).toBe(trigger);
+
+    document.body.removeChild(trigger);
   });
 });

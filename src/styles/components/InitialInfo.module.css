@@ -1,11 +1,7 @@
 .initialInfoContainer {
   padding: 0 4px 6px 4px;
 
-  text-align: justify;
-  text-justify: inter-word;
-  hyphens: auto;
-  -webkit-hyphens: auto;
-  -ms-hyphens: auto;
+  text-align: left;
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
@@ -86,12 +82,6 @@
 .divider {
   width: 60%;
   background-color: var(--light-gray);
-}
-
-@media (max-width: 768px) {
-  .initialInfoContainer {
-    text-align: left;
-  }
 }
 
 @media (max-width: 430px) {

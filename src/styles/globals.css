@@ -114,7 +114,7 @@ html {
 }
 
 body {
-  font: 400 1.6rem var(--font-jetbrains), sans-serif;
+  font: 400 1.6rem var(--font-inter), sans-serif;
   overflow-y: auto;
 }
 

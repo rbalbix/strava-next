@@ -42,20 +42,20 @@
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  opacity: 0.45;
+  opacity: 0.7;
   pointer-events: auto;
 }
 
 .chainIcon {
   width: 3.4rem;
   height: auto;
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .versionText {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .homeText h1 {
@@ -106,15 +106,21 @@
 
 .marketingNav a {
   font-size: 0.72rem;
-  color: var(--light-gray);
+  color: var(--gray-notes);
   font-weight: 500;
   letter-spacing: 0.01em;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .marketingNav a:hover {
-  color: var(--light-gray);
+  color: var(--dark-gray);
   text-decoration: underline;
+}
+
+.marketingNav a:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 @media (max-width: 660px) {
@@ -137,7 +143,7 @@
 
   .versionMark {
     bottom: 0.5rem;
-    opacity: 0.4;
+    opacity: 0.65;
   }
 
   .chainIcon {
