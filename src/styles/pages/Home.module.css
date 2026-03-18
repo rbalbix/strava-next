@@ -1,8 +1,8 @@
 .container {
-  height: 100vh;
+  min-height: 100vh;
   max-width: 992px;
   margin: 0 auto;
-  padding: 2.5rem 2rem;
+  padding: 4.5rem 2rem 2.5rem;
 
   display: flex;
   flex-direction: column;
@@ -14,7 +14,7 @@
 }
 
 .homeText {
-  height: 70vh;
+  min-height: 60vh;
 
   display: flex;
   flex-direction: column;
@@ -127,7 +127,7 @@
 
 @media (max-width: 660px) {
   .homeText {
-    height: 55vh;
+    min-height: 48vh;
   }
 
   .homeText h1 {
@@ -159,7 +159,7 @@
 
 @media (max-width: 500px) {
   .homeText {
-    height: 45vh;
+    min-height: 42vh;
   }
 
   .homeText h1 {
@@ -181,7 +181,7 @@
 
 @media (max-width: 400px) {
   .homeText {
-    height: 40vh;
+    min-height: 38vh;
   }
 
   .homeText h1 {
