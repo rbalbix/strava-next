@@ -39,7 +39,7 @@
 }
 
 .cardContainer header {
-  font-size: 1.8rem;
+  font-size: var(--text-lg);
   font-weight: 600;
 
   display: flex;
@@ -69,7 +69,7 @@
 }
 
 .cardContainer main p {
-  font-size: 1.4rem;
+  font-size: var(--text-sm);
 
   background-color: var(--background-card);
 }
@@ -79,7 +79,7 @@
 }
 
 .cardContainer div p {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   color: var(--light-gray-notes);
 }
 
@@ -107,7 +107,7 @@
 }
 
 .athleteStatInfoTitle {
-  font-size: 1.6rem;
+  font-size: var(--title-sm);
   font-weight: 600;
 
   display: flex;

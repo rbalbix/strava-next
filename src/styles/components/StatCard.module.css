@@ -15,16 +15,16 @@
 }
 
 .statIcon {
-  font-size: 1.2rem;
+  font-size: var(--text-sm);
 }
 
 .statValue {
-  font-size: 1.2rem;
+  font-size: var(--text-sm);
   font-weight: bold;
 }
 
 .statLabel {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--gray-signOut);
   text-align: center;
 }

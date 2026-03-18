@@ -29,17 +29,19 @@
 }
 
 .content {
-  line-height: 1.7;
+  line-height: var(--line-base);
   color: var(--dark-gray);
 }
 
 .content h1 {
-  font-size: 2.3rem;
+  font-size: var(--title-lg);
+  line-height: var(--line-tight);
   margin-bottom: 1rem;
 }
 
 .content h2 {
-  font-size: 1.4rem;
+  font-size: var(--title-sm);
+  line-height: var(--line-tight);
   margin-top: 2rem;
   margin-bottom: 0.8rem;
 }

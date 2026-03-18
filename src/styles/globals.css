@@ -12,6 +12,15 @@ html {
   --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-jetbrains: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
+  --text-base: 1.6rem;
+  --text-sm: 1.4rem;
+  --text-xs: 1.2rem;
+  --text-lg: 1.9rem;
+  --title-lg: 2.4rem;
+  --title-md: 2rem;
+  --title-sm: 1.6rem;
+  --line-base: 1.6;
+  --line-tight: 1.25;
   --background: #f8f9fa;
   --background-card: #fff;
   --background-sidebar: #f0f2f5;
@@ -31,7 +40,7 @@ html {
   --dark-gray: #222;
 
   --event-border: #666;
-  --date-badge-border: #777;
+  --date-badge-border: #666;
   --text-border-bottom: #bbb;
   --timeago: rgb(20, 140, 10);
 
@@ -61,16 +70,17 @@ html {
 
   :root {
     --background: #121212;
-    --border-card: #252b33;
+    --border-card: #2e3238;
     --background-card: #1e1e1e;
     --background-sidebar: #2a2f3b;
     --background-sidebar-rgb: 42, 47, 59;
     --background-sidebar-item: #282c34;
     --background-sidebar-item-hover: #343a40;
 
-    --dark-gray: var(--light-gray);
-    --gray-notes: #c0c0c0;
-    --light-gray-lines: #bbb;
+    --dark-gray: #f0f0f0;
+    --gray-notes: #d0d4da;
+    --light-gray-lines: #9aa3ad;
+    --light-gray-notes: #aab2bb;
 
     --gray-signOut: #bbb;
     --gray-signOut-hover: #ddd;
@@ -81,10 +91,10 @@ html {
     --card-box-shadow: rgba(0, 0, 0, 0.2);
     --errorContainer: var(--background-card);
 
-    --timeago: rgb(120, 200, 60);
+    --timeago: rgb(140, 220, 80);
 
     --table-head-text: var(--background-card);
-    --equipment-row-background: var(--border-card);
+    --equipment-row-background: #262a30;
     --footer-icon-hover: var(--end-gradient-color);
   }
 }
@@ -114,7 +124,7 @@ html {
 }
 
 body {
-  font: 400 1.6rem var(--font-inter), sans-serif;
+  font: 400 var(--text-base) var(--font-inter), sans-serif;
   overflow-y: auto;
 }
 
