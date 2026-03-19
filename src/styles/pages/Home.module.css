@@ -1,8 +1,8 @@
 .container {
-  height: 100vh;
+  min-height: 100vh;
   max-width: 992px;
   margin: 0 auto;
-  padding: 2.5rem 2rem;
+  padding: 4.5rem 2rem 2.5rem;
 
   display: flex;
   flex-direction: column;
@@ -14,7 +14,7 @@
 }
 
 .homeText {
-  height: 70vh;
+  min-height: 60vh;
 
   display: flex;
   flex-direction: column;
@@ -42,20 +42,20 @@
   flex-direction: column;
   align-items: center;
   gap: 0.15rem;
-  opacity: 0.45;
+  opacity: 0.7;
   pointer-events: auto;
 }
 
 .chainIcon {
   width: 3.4rem;
   height: auto;
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .versionText {
   font-size: 0.75rem;
   letter-spacing: 0.08em;
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .homeText h1 {
@@ -63,6 +63,7 @@
   font-weight: 700;
   line-height: 8.8rem;
   letter-spacing: -0.3rem;
+  text-align: center;
 
   -webkit-background-clip: text;
   background-clip: text;
@@ -80,6 +81,7 @@
   font-weight: 400;
   line-height: 2.8rem;
   letter-spacing: -0.1rem;
+  text-align: center;
 
   -webkit-background-clip: text;
   background-clip: text;
@@ -106,38 +108,46 @@
 
 .marketingNav a {
   font-size: 0.72rem;
-  color: var(--light-gray);
+  color: var(--gray-notes);
   font-weight: 500;
   letter-spacing: 0.01em;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .marketingNav a:hover {
-  color: var(--light-gray);
+  color: var(--dark-gray);
   text-decoration: underline;
 }
 
+.marketingNav a:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 @media (max-width: 660px) {
+  .container {
+    padding-top: 4.8rem;
+  }
   .homeText {
-    height: 55vh;
+    min-height: 48vh;
   }
 
   .homeText h1 {
-    font-size: 7rem;
-    line-height: 6rem;
+    font-size: 6.2rem;
+    line-height: 6.6rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 2.4rem;
-    line-height: 3rem;
+    font-size: 1.6rem;
+    line-height: 2.2rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 
   .versionMark {
     bottom: 0.5rem;
-    opacity: 0.4;
+    opacity: 0.65;
   }
 
   .chainIcon {
@@ -151,21 +161,23 @@
 }
 
 @media (max-width: 500px) {
+  .container {
+    padding-top: 5.2rem;
+  }
   .homeText {
-    height: 45vh;
+    min-height: 42vh;
   }
 
   .homeText h1 {
-    font-size: 6rem;
-    line-height: 5rem;
+    font-size: 5rem;
+    line-height: 5.4rem;
     letter-spacing: -0.2rem;
   }
 
   .homeText h2 {
-    font-size: 2.25rem;
-    line-height: 2.8rem;
+    font-size: 1.35rem;
+    line-height: 1.9rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 
   .marketingNav a {
@@ -174,20 +186,22 @@
 }
 
 @media (max-width: 400px) {
+  .container {
+    padding-top: 5.6rem;
+  }
   .homeText {
-    height: 40vh;
+    min-height: 38vh;
   }
 
   .homeText h1 {
-    font-size: 5.5rem;
-    line-height: 6rem;
+    font-size: 4.4rem;
+    line-height: 4.8rem;
     letter-spacing: -0.1rem;
   }
 
   .homeText h2 {
-    font-size: 2.3rem;
-    line-height: 2.6rem;
+    font-size: 1.15rem;
+    line-height: 1.6rem;
     letter-spacing: 0rem;
-    text-align: center;
   }
 }

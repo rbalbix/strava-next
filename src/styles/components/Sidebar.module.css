@@ -4,7 +4,9 @@
   height: 80vh;
   top: 2rem;
   left: -300px;
-  width: 15vw;
+  width: min(320px, 80vw);
+  min-width: 240px;
+  max-width: 360px;
   z-index: 1000;
   border-radius: 30px;
   transition: left 0.4s ease;
@@ -37,15 +39,26 @@
   display: block;
 }
 
-.closeIcon {
+.closeButton {
   position: fixed;
+  margin-top: 1rem;
+  margin-left: 1rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  z-index: 1001;
+  cursor: pointer;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.closeIcon {
   color: var(--gray-notes);
   width: 1.4rem;
   height: 1.4rem;
-  margin-top: 1rem;
-  margin-left: 1rem;
-  cursor: pointer;
-  z-index: 1001;
   transition: color 0.2s ease;
 }
 
@@ -103,6 +116,26 @@
   font-size: 1.2rem !important;
 }
 
+.linkText:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.sidebarAction {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sidebarAction:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 @keyframes showSidebar {
   from {
     opacity: 0;
@@ -123,38 +156,15 @@
   }
 }
 
-@media (max-width: 1800px) {
-  .sidebarContainer {
-    width: 20vw;
-  }
-}
-
-@media (max-width: 1300px) {
-  .sidebarContainer {
-    width: 25vw;
-  }
-}
-
 @media (max-width: 1000px) {
-  .sidebarContainer {
-    width: 30vw;
-  }
-
   .linkText {
     font-size: 1.3rem !important;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 420px) {
   .sidebarContainer {
-    width: 50vw;
-  }
-}
-
-@media (max-width: 300px) {
-  .sidebarContainer {
-    width: auto;
-    left: -250px;
+    min-width: 200px;
   }
 }
 

@@ -31,6 +31,7 @@ export default function InitialInfo() {
             priority={true}
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
           />
         </div>
         <ol>
@@ -66,6 +67,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
           />
         </div>
         <div>
@@ -97,6 +99,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
           />
         </div>
         <div>Nesta tela, você verá:</div>
@@ -126,6 +129,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
           />
         </div>
         <h3>Lista dos códigos dos componentes:</h3>
@@ -143,6 +147,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
           />
         </div>
         <Divider className={styles.divider} style={{ margin: 'auto' }} />
@@ -177,6 +182,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 320px'
           />
         </div>
         <div>
@@ -192,6 +198,7 @@ export default function InitialInfo() {
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 320px'
           />
         </div>
       </main>

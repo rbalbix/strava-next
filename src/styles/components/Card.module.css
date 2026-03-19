@@ -1,23 +1,47 @@
 .cardContainer {
   background-color: var(--background-card);
   border: 1px solid var(--border-card);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 0 60px var(--card-box-shadow);
 
-  padding: 1rem 1rem;
+  padding: 1.2rem 1.2rem;
   margin-top: 0.8rem;
   margin-bottom: 0.8rem;
 
   cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  appearance: none;
+  color: inherit;
 }
 
 .cardContainer:last-child {
   margin-bottom: 2rem;
 }
 
+.closeButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.cardContainer:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .cardContainer header {
-  font-size: 1.8rem;
+  font-size: var(--text-lg);
   font-weight: 600;
+  gap: 0.75rem;
 
   display: flex;
   justify-content: space-between;
@@ -46,22 +70,22 @@
 }
 
 .cardContainer main p {
-  font-size: 1.4rem;
+  font-size: var(--text-sm);
 
   background-color: var(--background-card);
 }
 
 .cardContainer main > :first-child {
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .cardContainer div p {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   color: var(--light-gray-notes);
 }
 
 .cardContainer div p:first-child {
-  margin-top: 0.6rem;
+  margin-top: 0.75rem;
 }
 
 .iconBike {
@@ -80,20 +104,27 @@
 }
 
 .athleteStatInfoContent {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .athleteStatInfoTitle {
-  font-size: 1.6rem;
+  font-size: var(--title-sm);
   font-weight: 600;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 
   background-color: var(--background-card);
 }
 
 .athleteStatInfoTitleIcon {
   margin-right: 5px;
+}
+
+.athleteStatInfoHeading {
+  font-size: inherit;
+  font-weight: inherit;
+  margin: 0;
 }

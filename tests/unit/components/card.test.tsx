@@ -53,7 +53,7 @@ describe('Card component', () => {
     expect(container.textContent).toContain('12,00 km');
     expect(container.textContent).toContain('01:00h');
 
-    const clickable = container.querySelector('header') as HTMLElement;
+    const clickable = container.querySelector('button') as HTMLElement;
     act(() => {
       clickable.click();
     });

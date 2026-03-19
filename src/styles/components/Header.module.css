@@ -26,8 +26,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    var(--light-gray) 20%,
-    var(--light-gray) 80%,
+    var(--light-gray-lines) 20%,
+    var(--light-gray-lines) 80%,
     transparent 100%
   );
   border-radius: 2px;
@@ -60,6 +60,11 @@
   outline-offset: 2px;
 }
 
+.iconButton:hover,
+.iconButtonLink:hover {
+  background-color: rgba(var(--background-sidebar-rgb), 0.35);
+}
+
 .spinnerLoading {
   margin: 0 15px;
 }
@@ -69,6 +74,20 @@
   width: 2rem;
   height: 2rem;
   cursor: pointer;
+}
+
+.sidebarIcon,
+.headerLoginIcon,
+.headerLogoutIcon,
+.headerInfoIcon {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.sidebarIcon:hover,
+.headerLoginIcon:hover,
+.headerLogoutIcon:hover,
+.headerInfoIcon:hover {
+  transform: translateY(-1px);
 }
 
 .headerButtons {

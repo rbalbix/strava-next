@@ -7,6 +7,7 @@ import {
   secondsToHms,
 } from '../services/utils';
 import styles from '../styles/components/CardItem.module.css';
+import { useToast } from '../contexts/ToastContext';
 
 type Props = { equipment: Equipment; distance: number; movingTime: number };
 
@@ -15,6 +16,7 @@ export default function CardItem({
   distance,
   movingTime,
 }: Props) {
+  const { showToast } = useToast();
   if (!e.date) return null;
   const equipmentDistance = e.distance ?? 0;
   const equipmentMovingTime = e.movingTime ?? 0;
@@ -48,28 +50,35 @@ export default function CardItem({
 
   if (equipmentDistance !== 0) {
     return (
-      <li
-        className={styles.event}
-        onClick={() => copyEventDetailsToClipboard(e, distance, movingTime)}
-      >
-        <div className={styles.firstLine}>
-          <div className={styles.dateAndCaption}>
-            <div className={styles.bol}>{formattedDate}</div>
-            <div className={styles.caption}>{e.caption}</div>
+      <li className={styles.event}>
+        <button
+          type='button'
+          className={styles.eventButton}
+          onClick={() => {
+            copyEventDetailsToClipboard(e, distance, movingTime);
+            showToast('Detalhes copiados', 'success');
+          }}
+          aria-label={`Copiar detalhes de ${e.caption}`}
+        >
+          <div className={styles.firstLine}>
+            <div className={styles.dateAndCaption}>
+              <div className={styles.bol}>{formattedDate}</div>
+              <div className={styles.caption}>{e.caption}</div>
+            </div>
+            <div className={styles.timeago}>{timeAgo}</div>
           </div>
-          <div className={styles.timeago}>{timeAgo}</div>
-        </div>
 
-        <div className={styles.badges}>
-          <div className={styles.chipbadge}>
-            {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
+          <div className={styles.badges}>
+            <div className={styles.chipbadge}>
+              {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
+            </div>
+            <div className={styles.chipbadge}>
+              {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
+            </div>
           </div>
-          <div className={styles.chipbadge}>
-            {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
-          </div>
-        </div>
 
-        <div className={styles.clear}></div>
+          <div className={styles.clear}></div>
+        </button>
       </li>
     );
   }

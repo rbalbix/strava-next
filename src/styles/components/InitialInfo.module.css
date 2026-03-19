@@ -1,17 +1,16 @@
 .initialInfoContainer {
   padding: 0 4px 6px 4px;
 
-  text-align: justify;
-  text-justify: inter-word;
-  hyphens: auto;
-  -webkit-hyphens: auto;
-  -ms-hyphens: auto;
+  text-align: left;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
 }
 
 .initialInfoContainer div {
-  font-size: 0.9rem;
+  font-size: var(--text-xs);
+  color: var(--dark-gray);
 }
 
 .screen {
@@ -28,37 +27,37 @@
 }
 
 .initialInfoContainer h1 {
-  font-size: 1.6rem;
+  font-size: var(--title-sm);
   font-weight: 600;
-  line-height: 1.6rem;
+  line-height: var(--line-tight);
 }
 
 .initialInfoContainer h1 > span {
-  font-size: 1.6rem;
+  font-size: var(--title-sm);
   font-weight: 600;
   color: var(--orange-strava);
 }
 
 .initialInfoContainer h2 {
-  font-size: 1.25rem;
+  font-size: var(--text-lg);
   font-weight: 600;
 
   margin-top: 0.5rem;
 }
 
 .initialInfoContainer h3 {
-  font-size: 1.05rem;
+  font-size: var(--text-sm);
 
   margin-top: 0.5rem;
 }
 
 .initialInfoContainer div > span {
-  font-size: 0.9rem;
+  font-size: var(--text-xs);
   color: var(--end-gradient-color);
 }
 
 .initialInfoContainer ol {
-  font-size: 0.9rem;
+  font-size: var(--text-xs);
   list-style-type: decimal;
 
   margin-bottom: 0.5rem;
@@ -66,13 +65,13 @@
 }
 
 .initialInfoContainer ol li > span {
-  font-size: 0.9rem;
+  font-size: var(--text-xs);
   color: var(--light-blue);
   margin: 0;
 }
 
 .initialInfoContainer ul {
-  font-size: 0.9rem;
+  font-size: var(--text-xs);
   list-style-type: disc;
 
   margin-bottom: 0.5rem;
@@ -86,12 +85,6 @@
 .divider {
   width: 60%;
   background-color: var(--light-gray);
-}
-
-@media (max-width: 768px) {
-  .initialInfoContainer {
-    text-align: left;
-  }
 }
 
 @media (max-width: 430px) {

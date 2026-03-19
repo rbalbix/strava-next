@@ -41,10 +41,19 @@ export default function CardDetailModal({
                       : 'var(--light-blue)',
                 )}
               </span>
-              <span>{name}</span>
+              <h2 id='modal-title-card-detail' className={styles.modalTitle}>
+                {name}
+              </h2>
             </div>
             <div>
-              <MdClose onClick={onClose} style={{ cursor: 'pointer' }} />
+              <button
+                type='button'
+                onClick={onClose}
+                className={styles.closeButton}
+                aria-label='Fechar detalhes'
+              >
+                <MdClose />
+              </button>
             </div>
           </div>
           <section>

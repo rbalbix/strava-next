@@ -46,7 +46,7 @@
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
-  color: var(---light-gray);
+  color: var(--gray-notes);
   width: 80%;
   margin: auto;
   text-align: center;
@@ -60,4 +60,5 @@
   width: 60%;
   font: 400 1.1rem 'JetBrains Mono', sans-serif;
   text-align: center;
+  color: var(--dark-gray);
 }

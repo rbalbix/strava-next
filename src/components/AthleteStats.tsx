@@ -107,10 +107,22 @@ export default function AthleteStats() {
                 <span className={cardStyles.athleteStatInfoTitleIcon}>
                   <IoMdStats color='var(--stat-icon)' />
                 </span>
-                <span>Estatísticas:</span>
+                <h2
+                  id='modal-title-stats'
+                  className={cardStyles.athleteStatInfoHeading}
+                >
+                  Estatísticas:
+                </h2>
               </div>
               <div>
-                <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+                <button
+                  type='button'
+                  onClick={closeModal}
+                  className={cardStyles.closeButton}
+                  aria-label='Fechar estatísticas'
+                >
+                  <MdClose />
+                </button>
               </div>
             </div>
           </header>

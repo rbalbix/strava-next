@@ -9,6 +9,8 @@
   margin-bottom: 0.5rem;
 
   align-self: center;
+
+  animation: dropIn 0.2s ease;
 }
 
 .headerContainer {
@@ -38,4 +40,15 @@
   color: var(--light-gray-notes);
 
   padding: 0.8rem 1.5rem;
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

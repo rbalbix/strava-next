@@ -1,11 +1,12 @@
 .cardDetailModalContainer {
-  padding: 1rem 1.2rem;
+  padding: 1rem 1.4rem 1.2rem;
 }
 
 .cardDetailModalContainer main header div {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .cardDetailModalContainer main header section span {
@@ -27,13 +28,33 @@
   margin-bottom: 10px;
 }
 
+.modalTitle {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-right: 10px;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
 .statCardContainer {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr);
 
-  gap: 10px;
+  gap: 12px;
 
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 @media (max-width: 768px) {

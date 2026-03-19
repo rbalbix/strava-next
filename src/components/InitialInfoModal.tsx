@@ -21,13 +21,26 @@ export default function InitialInfoModal() {
                 color='var(--stat-icon)'
               />
             </span>
+            <h2
+              id='modal-title-info'
+              className={cardStyles.athleteStatInfoHeading}
+            >
+              Informações
+            </h2>
           </div>
           <div>
-            <MdClose onClick={closeModal} style={{ cursor: 'pointer' }} />
+            <button
+              type='button'
+              onClick={closeModal}
+              className={styles.closeButton}
+              aria-label='Fechar informações'
+            >
+              <MdClose />
+            </button>
           </div>
         </div>
       </header>
-      <section>
+      <section id='modal-desc-info'>
         <InitialInfo />
       </section>
       <footer>

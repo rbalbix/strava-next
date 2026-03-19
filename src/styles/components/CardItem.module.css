@@ -1,11 +1,28 @@
 .event {
-  border-left: 1px solid var(--event-border);
+  border-left: 1px solid var(--light-gray-lines);
   margin-left: 16px;
-  padding-top: 1px;
+  padding-top: 2px;
   padding-left: 20px;
   margin-bottom: 0;
-  padding-bottom: 5px;
+  padding-bottom: 10px;
   list-style-type: none;
+}
+
+.eventButton {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.eventButton:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
 }
 
 .firstLine {
@@ -22,7 +39,7 @@
 .bol {
   border-radius: 10%;
   border: 1px solid var(--date-badge-border);
-  padding: 0.8px 3px;
+  padding: 1px 4px;
 
   margin-left: -48px;
   margin-right: 0.5rem;
@@ -37,6 +54,7 @@
 
 .caption {
   font-size: 1.1rem;
+  line-height: 1.35;
 }
 
 .timeago {
@@ -54,10 +72,10 @@
 .badges {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.4rem;
+  margin-top: 0.6rem;
   flex-wrap: wrap;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--event-border);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--light-gray-lines);
   width: 90%;
   margin-left: auto;
   margin-right: auto;
@@ -66,11 +84,11 @@
 .chipbadge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
   border: 1px solid var(--event-border);
-  background-color: var(--background);
-  font: 700 1rem 'JetBrains Mono', sans-serif;
+  background-color: var(--background-card);
+  font: 600 1rem var(--font-jetbrains), sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

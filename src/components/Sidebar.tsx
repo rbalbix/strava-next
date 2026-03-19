@@ -60,11 +60,14 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           isOpen ? styles.sidebarOpen : ''
         }`}
       >
-        <FaTimes
+        <button
+          type='button'
           onClick={closeSidebar}
-          className={styles.closeIcon}
+          className={styles.closeButton}
           aria-label='Fechar menu lateral'
-        />
+        >
+          <FaTimes className={styles.closeIcon} />
+        </button>
 
         <div className={styles.sidebarHeader}>
           <AthleteAvatar />
@@ -83,8 +86,9 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
               passHref
               target='_blank'
               rel='noopener noreferrer'
+              className={styles.linkText}
             >
-              <span className={styles.linkText}>Meu Strava</span>
+              Meu Strava
             </Link>
           </div>
 
@@ -93,17 +97,16 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
               className={styles.sidebarItemIcon}
               aria-label='Estatísticas'
             />
-            <span
-              className={styles.linkText}
+            <button
+              type='button'
+              className={`${styles.linkText} ${styles.sidebarAction}`}
               onClick={() => {
                 openModal('stats');
                 closeSidebar();
               }}
-              role='button'
-              tabIndex={0}
             >
               Estatísticas
-            </span>
+            </button>
           </div>
 
           <div className={styles.sidebarItemContainer}>
@@ -111,17 +114,16 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
               className={styles.sidebarItemIcon}
               aria-label='Componentes'
             />
-            <span
-              className={styles.linkText}
+            <button
+              type='button'
+              className={`${styles.linkText} ${styles.sidebarAction}`}
               onClick={() => {
                 openModal('equipments');
                 closeSidebar();
               }}
-              role='button'
-              tabIndex={1}
             >
               Componentes
-            </span>
+            </button>
           </div>
 
           <div className={styles.sidebarItemContainer}>
@@ -129,17 +131,16 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
               className={styles.sidebarItemIcon}
               aria-label='Ajuda'
             />
-            <span
-              className={styles.linkText}
+            <button
+              type='button'
+              className={`${styles.linkText} ${styles.sidebarAction}`}
               onClick={() => {
                 openModal('info');
                 closeSidebar();
               }}
-              role='button'
-              tabIndex={2}
             >
               Ajuda
-            </span>
+            </button>
           </div>
         </div>
       </div>

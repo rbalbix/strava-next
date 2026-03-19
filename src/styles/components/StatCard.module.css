@@ -7,24 +7,24 @@
   margin-bottom: 4px;
   padding: 12px;
   background-color: var(--background-card);
-  border: 1px solid var(--dark-gray);
-  border-radius: 8px;
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   height: 100%;
 }
 
 .statIcon {
-  font-size: 1.2rem;
+  font-size: var(--text-sm);
 }
 
 .statValue {
-  font-size: 1.2rem;
+  font-size: var(--text-sm);
   font-weight: bold;
 }
 
 .statLabel {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--gray-signOut);
   text-align: center;
 }
