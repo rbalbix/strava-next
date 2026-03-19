@@ -4,6 +4,8 @@
   text-align: left;
   overflow-wrap: break-word;
   word-wrap: break-word;
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
 }
 
 .initialInfoContainer div {
