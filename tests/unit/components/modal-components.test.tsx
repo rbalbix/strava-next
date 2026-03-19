@@ -8,6 +8,7 @@ import CardItem from '../../../src/components/CardItem';
 import ComponentInfo from '../../../src/components/ComponentInfo';
 import InitialInfoModal from '../../../src/components/InitialInfoModal';
 import { AuthContext } from '../../../src/contexts/AuthContext';
+import { ToastProvider } from '../../../src/contexts/ToastContext';
 import { Equipments } from '../../../src/services/equipment';
 import {
   copyEventDetailsToClipboard,
@@ -71,27 +72,29 @@ describe('modal child components', () => {
   it('CardDetailModal renders totals and close callback for ride', () => {
     const onClose = vi.fn();
     const { container, root } = mount(
-      <CardDetailModal
-        onClose={onClose}
-        gearStat={{
-          id: 'g1',
-          name: 'Bike',
-          activityType: 'Ride',
-          count: 2,
-          distance: 10000,
-          movingTime: 3600,
-          equipments: [
-            {
-              id: Equipments.Chain.id,
-              show: Equipments.Chain.show,
-              caption: Equipments.Chain.caption,
-              date: '2026-01-01T00:00:00Z',
-              distance: 1000,
-              movingTime: 100,
-            },
-          ],
-        } as any}
-      />,
+      <ToastProvider>
+        <CardDetailModal
+          onClose={onClose}
+          gearStat={{
+            id: 'g1',
+            name: 'Bike',
+            activityType: 'Ride',
+            count: 2,
+            distance: 10000,
+            movingTime: 3600,
+            equipments: [
+              {
+                id: Equipments.Chain.id,
+                show: Equipments.Chain.show,
+                caption: Equipments.Chain.caption,
+                date: '2026-01-01T00:00:00Z',
+                distance: 1000,
+                movingTime: 100,
+              },
+            ],
+          } as any}
+        />
+      </ToastProvider>,
     );
 
     expect(container.textContent).toContain('Bike');
@@ -110,27 +113,29 @@ describe('modal child components', () => {
   it('CardDetailModal supports non-ride activity without rendering timeline items', () => {
     const onClose = vi.fn();
     const { container, root } = mount(
-      <CardDetailModal
-        onClose={onClose}
-        gearStat={{
-          id: 'g2',
-          name: 'Run',
-          activityType: 'Run',
-          count: 1,
-          distance: 5000,
-          movingTime: 1800,
-          equipments: [
-            {
-              id: Equipments.Chain.id,
-              show: Equipments.Chain.show,
-              caption: Equipments.Chain.caption,
-              date: '2026-01-01T00:00:00Z',
-              distance: 1000,
-              movingTime: 100,
-            },
-          ],
-        } as any}
-      />,
+      <ToastProvider>
+        <CardDetailModal
+          onClose={onClose}
+          gearStat={{
+            id: 'g2',
+            name: 'Run',
+            activityType: 'Run',
+            count: 1,
+            distance: 5000,
+            movingTime: 1800,
+            equipments: [
+              {
+                id: Equipments.Chain.id,
+                show: Equipments.Chain.show,
+                caption: Equipments.Chain.caption,
+                date: '2026-01-01T00:00:00Z',
+                distance: 1000,
+                movingTime: 100,
+              },
+            ],
+          } as any}
+        />
+      </ToastProvider>,
     );
 
     expect(container.textContent).toContain('Run');
@@ -148,27 +153,29 @@ describe('modal child components', () => {
   it('CardDetailModal renders mountain bike icon and timeline for MountainBikeRide', () => {
     const onClose = vi.fn();
     const { container, root } = mount(
-      <CardDetailModal
-        onClose={onClose}
-        gearStat={{
-          id: 'g3',
-          name: 'MTB',
-          activityType: 'MountainBikeRide',
-          count: 1,
-          distance: 7000,
-          movingTime: 2000,
-          equipments: [
-            {
-              id: Equipments.Chain.id,
-              show: Equipments.Chain.show,
-              caption: Equipments.Chain.caption,
-              date: '2026-01-01T00:00:00Z',
-              distance: 1000,
-              movingTime: 100,
-            },
-          ],
-        } as any}
-      />,
+      <ToastProvider>
+        <CardDetailModal
+          onClose={onClose}
+          gearStat={{
+            id: 'g3',
+            name: 'MTB',
+            activityType: 'MountainBikeRide',
+            count: 1,
+            distance: 7000,
+            movingTime: 2000,
+            equipments: [
+              {
+                id: Equipments.Chain.id,
+                show: Equipments.Chain.show,
+                caption: Equipments.Chain.caption,
+                date: '2026-01-01T00:00:00Z',
+                distance: 1000,
+                movingTime: 100,
+              },
+            ],
+          } as any}
+        />
+      </ToastProvider>,
     );
 
     expect(
@@ -181,9 +188,11 @@ describe('modal child components', () => {
   it('ComponentInfo renders equipments and copies code on row click', () => {
     const closeModal = vi.fn();
     const { container, root } = mount(
-      <AuthContext.Provider value={ctx({ closeModal })}>
-        <ComponentInfo />
-      </AuthContext.Provider>,
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ closeModal })}>
+          <ComponentInfo />
+        </AuthContext.Provider>
+      </ToastProvider>,
     );
 
     expect(container.textContent).toContain('Componentes:');
@@ -205,75 +214,89 @@ describe('modal child components', () => {
 
   it('CardItem covers null, zero-distance and click-to-copy branches', () => {
     const noDate = mount(
-      <CardItem equipment={{ id: 'x', show: 'x', caption: 'x' }} distance={1000} movingTime={100} />,
+      <ToastProvider>
+        <CardItem
+          equipment={{ id: 'x', show: 'x', caption: 'x' }}
+          distance={1000}
+          movingTime={100}
+        />
+      </ToastProvider>,
     );
     expect(noDate.container.innerHTML).toBe('');
     act(() => noDate.root.unmount());
 
     const lubrified = mount(
-      <CardItem
-        equipment={{
-          id: Equipments.Lubrification.id,
-          show: Equipments.Lubrification.show,
-          caption: Equipments.Lubrification.caption,
-          date: '2026-01-01T00:00:00Z',
-          distance: 0,
-          movingTime: 0,
-        }}
-        distance={5000}
-        movingTime={500}
-      />,
+      <ToastProvider>
+        <CardItem
+          equipment={{
+            id: Equipments.Lubrification.id,
+            show: Equipments.Lubrification.show,
+            caption: Equipments.Lubrification.caption,
+            date: '2026-01-01T00:00:00Z',
+            distance: 0,
+            movingTime: 0,
+          }}
+          distance={5000}
+          movingTime={500}
+        />
+      </ToastProvider>,
     );
     expect(lubrified.container.textContent).toContain('Bike lubrificada.');
     act(() => lubrified.root.unmount());
 
     const cleaned = mount(
-      <CardItem
-        equipment={{
-          id: Equipments.Clean.id,
-          show: Equipments.Clean.show,
-          caption: Equipments.Clean.caption,
-          date: '2026-01-02T00:00:00Z',
-          distance: 0,
-          movingTime: 0,
-        }}
-        distance={5000}
-        movingTime={500}
-      />,
+      <ToastProvider>
+        <CardItem
+          equipment={{
+            id: Equipments.Clean.id,
+            show: Equipments.Clean.show,
+            caption: Equipments.Clean.caption,
+            date: '2026-01-02T00:00:00Z',
+            distance: 0,
+            movingTime: 0,
+          }}
+          distance={5000}
+          movingTime={500}
+        />
+      </ToastProvider>,
     );
     expect(cleaned.container.textContent).toContain('Bike limpinha.');
     act(() => cleaned.root.unmount());
 
     const zeroDistanceOther = mount(
-      <CardItem
-        equipment={{
-          id: Equipments.Chain.id,
-          show: Equipments.Chain.show,
-          caption: Equipments.Chain.caption,
-          date: '2026-01-01T00:00:00Z',
-          distance: 0,
-          movingTime: 0,
-        }}
-        distance={5000}
-        movingTime={500}
-      />,
+      <ToastProvider>
+        <CardItem
+          equipment={{
+            id: Equipments.Chain.id,
+            show: Equipments.Chain.show,
+            caption: Equipments.Chain.caption,
+            date: '2026-01-01T00:00:00Z',
+            distance: 0,
+            movingTime: 0,
+          }}
+          distance={5000}
+          movingTime={500}
+        />
+      </ToastProvider>,
     );
     expect(zeroDistanceOther.container.innerHTML).toBe('');
     act(() => zeroDistanceOther.root.unmount());
 
     const normal = mount(
-      <CardItem
-        equipment={{
-          id: Equipments.Chain.id,
-          show: Equipments.Chain.show,
-          caption: Equipments.Chain.caption,
-          date: '2026-01-01T00:00:00Z',
-          distance: 1000,
-          movingTime: 100,
-        }}
-        distance={5000}
-        movingTime={500}
-      />,
+      <ToastProvider>
+        <CardItem
+          equipment={{
+            id: Equipments.Chain.id,
+            show: Equipments.Chain.show,
+            caption: Equipments.Chain.caption,
+            date: '2026-01-01T00:00:00Z',
+            distance: 1000,
+            movingTime: 100,
+          }}
+          distance={5000}
+          movingTime={500}
+        />
+      </ToastProvider>,
     );
     const item = normal.container.querySelector('button') as HTMLButtonElement;
     act(() => item.click());

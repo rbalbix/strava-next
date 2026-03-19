@@ -10,6 +10,7 @@ import PublicPageNav from '../../../src/components/PublicPageNav';
 import SeoHead from '../../../src/components/SeoHead';
 import StatCard from '../../../src/components/StatCard';
 import { AuthContext } from '../../../src/contexts/AuthContext';
+import { ToastProvider } from '../../../src/contexts/ToastContext';
 
 vi.mock('next/image', () => ({
   default: ({ src, alt }: any) => <img src={src} alt={alt} />,
@@ -103,17 +104,21 @@ describe('misc components', () => {
 
   it('ErroMsg renders only for status 429', () => {
     const c1 = mount(
-      <AuthContext.Provider value={ctx({ codeError: { status: 500 } })}>
-        <ErroMsg />
-      </AuthContext.Provider>,
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ codeError: { status: 500 } })}>
+          <ErroMsg />
+        </AuthContext.Provider>
+      </ToastProvider>,
     );
     expect(c1.container.innerHTML).toBe('');
     act(() => c1.root.unmount());
 
     const c2 = mount(
-      <AuthContext.Provider value={ctx({ codeError: { status: 429 } })}>
-        <ErroMsg />
-      </AuthContext.Provider>,
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ codeError: { status: 429 } })}>
+          <ErroMsg />
+        </AuthContext.Provider>
+      </ToastProvider>,
     );
     expect(c2.container.textContent).toContain('Limite excedido');
     act(() => c2.root.unmount());
@@ -121,9 +126,11 @@ describe('misc components', () => {
 
   it('ErroMsg returns null for non-object errors', () => {
     const c = mount(
-      <AuthContext.Provider value={ctx({ codeError: '429' })}>
-        <ErroMsg />
-      </AuthContext.Provider>,
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ codeError: '429' })}>
+          <ErroMsg />
+        </AuthContext.Provider>
+      </ToastProvider>,
     );
     expect(c.container.innerHTML).toBe('');
     act(() => c.root.unmount());

@@ -7,7 +7,7 @@ import {
   secondsToHms,
 } from '../services/utils';
 import styles from '../styles/components/CardItem.module.css';
-import { useEffect, useState } from 'react';
+import { useToast } from '../contexts/ToastContext';
 
 type Props = { equipment: Equipment; distance: number; movingTime: number };
 
@@ -16,7 +16,7 @@ export default function CardItem({
   distance,
   movingTime,
 }: Props) {
-  const [copied, setCopied] = useState(false);
+  const { showToast } = useToast();
   if (!e.date) return null;
   const equipmentDistance = e.distance ?? 0;
   const equipmentMovingTime = e.movingTime ?? 0;
@@ -48,12 +48,6 @@ export default function CardItem({
     return renderEvent('Bike limpinha.');
   }
 
-  useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 1600);
-    return () => window.clearTimeout(timer);
-  }, [copied]);
-
   if (equipmentDistance !== 0) {
     return (
       <li className={styles.event}>
@@ -62,7 +56,7 @@ export default function CardItem({
           className={styles.eventButton}
           onClick={() => {
             copyEventDetailsToClipboard(e, distance, movingTime);
-            setCopied(true);
+            showToast('Detalhes copiados', 'success');
           }}
           aria-label={`Copiar detalhes de ${e.caption}`}
         >
@@ -81,10 +75,6 @@ export default function CardItem({
             <div className={styles.chipbadge}>
               {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
             </div>
-          </div>
-
-          <div className={styles.copiedHint} aria-live='polite'>
-            {copied ? 'Copiado' : ''}
           </div>
 
           <div className={styles.clear}></div>

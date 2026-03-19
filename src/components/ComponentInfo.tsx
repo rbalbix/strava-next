@@ -6,28 +6,23 @@ import { Equipment, Equipments } from '../services/equipment';
 import { Divider } from '@mui/material';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { copyTextToClipboard } from '../services/utils';
 import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/Footer.module.css';
 
 export default function ComponentInfo() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const { closeModal } = useContext(AuthContext);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (Equipments) setEquipment(Object.values(Equipments));
   }, []);
 
-  useEffect(() => {
-    if (!copiedCode) return;
-    const timer = window.setTimeout(() => setCopiedCode(null), 1600);
-    return () => window.clearTimeout(timer);
-  }, [copiedCode]);
-
   const handleCopyCode = (code: string) => {
     copyTextToClipboard(code);
-    setCopiedCode(code);
+    showToast(`Copiado: ${code}`, 'success');
   };
 
   return (
@@ -63,9 +58,7 @@ export default function ComponentInfo() {
           código no campo &apos;OBSERVAÇÕES PRIVADAS&apos; e incluir um * no título da
           Atividade.
         </div>
-        <div className={styles.copyHint} aria-live='polite'>
-          {copiedCode ? `Copiado: ${copiedCode}` : 'Clique no código para copiar.'}
-        </div>
+        <div className={styles.copyHint}>Clique no código para copiar.</div>
         <table className={styles.footerEquipmentTable}>
           <thead>
             <tr>
@@ -84,7 +77,6 @@ export default function ComponentInfo() {
                       className={styles.copyButton}
                       onClick={() => handleCopyCode(e.id)}
                       aria-label={`Copiar codigo ${e.id}`}
-                      data-active={copiedCode === e.id ? 'true' : 'false'}
                     >
                       {e.id}
                     </button>
