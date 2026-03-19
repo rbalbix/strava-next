@@ -80,6 +80,13 @@
   margin-right: auto;
 }
 
+.copiedHint {
+  font-size: 0.9rem;
+  color: var(--light-blue);
+  margin-top: 6px;
+  min-height: 1.1rem;
+}
+
 .chipbadge {
   display: inline-flex;
   align-items: center;
