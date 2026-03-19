@@ -8,7 +8,7 @@ export default function Footer() {
   const { athlete, openModal } = useContext(AuthContext);
 
   return (
-    <div className={styles.footerContainer}>
+    <footer className={styles.footerContainer} aria-label='Ações do rodapé'>
       {athlete && (
         <div>
           <button
@@ -21,6 +21,6 @@ export default function Footer() {
           </button>
         </div>
       )}
-    </div>
+    </footer>
   );
 }

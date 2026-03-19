@@ -15,7 +15,7 @@ export default function ErroMsg() {
   if (status !== 429) return null;
 
   return (
-    <div className={styles.erroMsgContainer}>
+    <div className={styles.erroMsgContainer} role='alert' aria-live='assertive'>
       <div className={styles.headerContainer}>
         <header>Limite excedido</header>
       </div>

@@ -20,7 +20,7 @@ export default function Header() {
   const showSidebar = () => setSidebar(!sidebar);
 
   return (
-    <div className={styles.headerContainer}>
+    <header className={styles.headerContainer}>
       {!codeReturned ? (
         <>
           <div>
@@ -80,6 +80,6 @@ export default function Header() {
           </button>
         </div>
       )}
-    </div>
+    </header>
   );
 }

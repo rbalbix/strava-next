@@ -31,7 +31,7 @@ function HomeContent() {
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'v0.2.0';
 
   return (
-    <section className={styles.homeSection}>
+    <main className={styles.homeSection} aria-live='polite'>
       {codeReturned ? (
         <Stats />
       ) : (
@@ -55,7 +55,7 @@ function HomeContent() {
           </div>
         </>
       )}
-    </section>
+    </main>
   );
 }
 
