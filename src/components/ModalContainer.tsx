@@ -27,6 +27,17 @@ export default function ModalContainer() {
     }
   }, [activeModal]);
 
+  const modalDescriptionId = useMemo(() => {
+    switch (activeModal) {
+      case 'equipments':
+        return 'modal-desc-equipments';
+      case 'info':
+        return 'modal-desc-info';
+      default:
+        return undefined;
+    }
+  }, [activeModal]);
+
   const getFocusableElements = () => {
     if (!modalRef.current) return [];
     const elements = Array.from(
@@ -185,6 +196,7 @@ export default function ModalContainer() {
         role='dialog'
         aria-modal='true'
         aria-labelledby={modalLabelId}
+        aria-describedby={modalDescriptionId}
         tabIndex={-1}
         ref={modalRef}
       >

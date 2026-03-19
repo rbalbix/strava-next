@@ -67,6 +67,10 @@
   padding: 2px;
 }
 
+.footerIconButton:hover {
+  background-color: rgba(var(--background-sidebar-rgb), 0.35);
+}
+
 .footerIconButton:focus-visible {
   outline: 2px solid var(--light-blue);
   outline-offset: 2px;
@@ -97,6 +101,7 @@
 
 .copyButton:hover {
   text-decoration: underline;
+  color: var(--light-blue-hover);
 }
 
 .copyButton:focus-visible {

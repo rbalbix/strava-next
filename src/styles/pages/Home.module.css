@@ -126,6 +126,9 @@
 }
 
 @media (max-width: 660px) {
+  .container {
+    padding-top: 4.8rem;
+  }
   .homeText {
     min-height: 48vh;
   }
@@ -158,6 +161,9 @@
 }
 
 @media (max-width: 500px) {
+  .container {
+    padding-top: 5.2rem;
+  }
   .homeText {
     min-height: 42vh;
   }
@@ -180,6 +186,9 @@
 }
 
 @media (max-width: 400px) {
+  .container {
+    padding-top: 5.6rem;
+  }
   .homeText {
     min-height: 38vh;
   }

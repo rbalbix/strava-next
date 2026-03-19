@@ -40,7 +40,7 @@ export default function InitialInfoModal() {
           </div>
         </div>
       </header>
-      <section>
+      <section id='modal-desc-info'>
         <InitialInfo />
       </section>
       <footer>

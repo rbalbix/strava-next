@@ -23,6 +23,7 @@
   position: relative;
   box-shadow: 0 10px 30px var(--card-box-shadow);
   animation: slideIn 0.3s ease;
+  padding: 0.5rem 0;
 
   overflow-y: auto;
   scrollbar-width: none;

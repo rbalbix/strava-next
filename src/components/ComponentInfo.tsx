@@ -53,7 +53,7 @@ export default function ComponentInfo() {
         </div>
       </header>
       <section>
-        <div className={styles.orientationRow}>
+        <div className={styles.orientationRow} id='modal-desc-equipments'>
           Para controlar um componente do equipamento deve-se escrever seu
           código no campo &apos;OBSERVAÇÕES PRIVADAS&apos; e incluir um * no título da
           Atividade.
