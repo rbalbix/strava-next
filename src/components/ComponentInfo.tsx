@@ -12,11 +12,23 @@ import styles from '../styles/components/Footer.module.css';
 
 export default function ComponentInfo() {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const { closeModal } = useContext(AuthContext);
 
   useEffect(() => {
     if (Equipments) setEquipment(Object.values(Equipments));
   }, []);
+
+  useEffect(() => {
+    if (!copiedCode) return;
+    const timer = window.setTimeout(() => setCopiedCode(null), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copiedCode]);
+
+  const handleCopyCode = (code: string) => {
+    copyTextToClipboard(code);
+    setCopiedCode(code);
+  };
 
   return (
     <main className={cardStyles.athleteStatInfoContent}>
@@ -51,6 +63,9 @@ export default function ComponentInfo() {
           código no campo &apos;OBSERVAÇÕES PRIVADAS&apos; e incluir um * no título da
           Atividade.
         </div>
+        <div className={styles.copyHint} aria-live='polite'>
+          {copiedCode ? `Copiado: ${copiedCode}` : 'Clique no código para copiar.'}
+        </div>
         <table className={styles.footerEquipmentTable}>
           <thead>
             <tr>
@@ -67,8 +82,9 @@ export default function ComponentInfo() {
                     <button
                       type='button'
                       className={styles.copyButton}
-                      onClick={() => copyTextToClipboard(e.id)}
+                      onClick={() => handleCopyCode(e.id)}
                       aria-label={`Copiar codigo ${e.id}`}
+                      data-active={copiedCode === e.id ? 'true' : 'false'}
                     >
                       {e.id}
                     </button>

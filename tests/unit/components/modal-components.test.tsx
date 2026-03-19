@@ -187,6 +187,7 @@ describe('modal child components', () => {
     );
 
     expect(container.textContent).toContain('Componentes:');
+    expect(container.textContent).toContain('Clique no código para copiar.');
     const copyButton = container.querySelector(
       'button[aria-label^="Copiar codigo"]',
     ) as HTMLButtonElement;
