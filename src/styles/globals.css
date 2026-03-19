@@ -81,6 +81,9 @@ html {
     --gray-notes: #d0d4da;
     --light-gray-lines: #9aa3ad;
     --light-gray-notes: #aab2bb;
+    --event-border: #9aa3ad;
+    --date-badge-border: #9aa3ad;
+    --text-border-bottom: #8f98a3;
 
     --gray-signOut: #bbb;
     --gray-signOut-hover: #ddd;
