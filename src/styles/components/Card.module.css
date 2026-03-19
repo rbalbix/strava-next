@@ -76,7 +76,7 @@
 }
 
 .cardContainer main > :first-child {
-  color: var(--light-gray);
+  color: var(--gray-notes);
 }
 
 .cardContainer div p {
@@ -104,7 +104,7 @@
 }
 
 .athleteStatInfoContent {
-  padding: 1rem;
+  padding: 1.25rem;
 }
 
 .athleteStatInfoTitle {
@@ -114,6 +114,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.5rem;
 
   background-color: var(--background-card);
 }
