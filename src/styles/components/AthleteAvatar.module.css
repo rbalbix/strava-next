@@ -1,7 +1,7 @@
 .athleteInfoContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 10px;
 }
 
@@ -15,16 +15,16 @@
 }
 
 .athleteName {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   color: var(--athlete-name);
   font-weight: normal;
-  text-align: center;
+  text-align: left;
 }
 
 .athleteCity {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--gray-notes);
   font-weight: lighter;
-  text-align: center;
+  text-align: left;
   padding-bottom: 10px;
 }
