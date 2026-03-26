@@ -94,8 +94,9 @@
 }
 
 .iconMountainBike {
-  color: #2e7d32;
+  color: var(--mountain-bike-green);
   background-color: var(--background-card);
+  font-size: 3.6rem;
 }
 
 .iconRun {

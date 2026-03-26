@@ -1,5 +1,5 @@
-import { GiCycling } from 'react-icons/gi';
 import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
+import MountainBikeIcon from './MountainBikeIcon';
 
 export type ActivityVisualType = 'mountain-bike' | 'bike' | 'run';
 
@@ -25,11 +25,7 @@ export function renderActivityIcon(
   switch (visualType) {
     case 'mountain-bike':
       return (
-        <GiCycling
-          className={className}
-          color={color}
-          data-testid='icon-mountain-bike'
-        />
+        <MountainBikeIcon className={className} color={color} />
       );
     case 'bike':
       return (
