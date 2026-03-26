@@ -62,7 +62,7 @@
 
 .iconButton:hover,
 .iconButtonLink:hover {
-  background-color: rgba(var(--background-sidebar-rgb), 0.35);
+  background-color: transparent;
 }
 
 .spinnerLoading {
@@ -80,14 +80,14 @@
 .headerLoginIcon,
 .headerLogoutIcon,
 .headerInfoIcon {
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .sidebarIcon:hover,
 .headerLoginIcon:hover,
 .headerLogoutIcon:hover,
 .headerInfoIcon:hover {
-  transform: translateY(-1px);
+  transform: none;
 }
 
 .headerButtons {

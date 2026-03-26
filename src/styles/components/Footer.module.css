@@ -53,8 +53,12 @@
   background-color: var(--equipment-row-background);
 }
 
+.footerIcon {
+  font-size: 2.1rem;
+}
+
 .footerIcon:hover {
-  color: var(--footer-icon-hover);
+  color: var(--gray-notes);
 }
 
 .footerIconButton {
@@ -68,7 +72,7 @@
 }
 
 .footerIconButton:hover {
-  background-color: rgba(var(--background-sidebar-rgb), 0.35);
+  background-color: transparent;
 }
 
 .footerIconButton:focus-visible {
