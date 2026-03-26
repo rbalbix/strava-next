@@ -33,11 +33,11 @@ export default function CardDetailModal({
               <span>
                 {renderActivityIcon(
                   visualType,
-                  undefined,
+                  styles.detailIcon,
                   visualType === 'run'
                     ? 'var(--orange-strava)'
                     : visualType === 'mountain-bike'
-                      ? '#2e7d32'
+                      ? 'var(--mountain-bike-green)'
                       : 'var(--light-blue)',
                 )}
               </span>

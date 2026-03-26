@@ -17,7 +17,7 @@
 }
 
 .cardDetailModalContainer main span {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--dark-gray);
 
@@ -33,6 +33,10 @@
   font-weight: 600;
   color: var(--dark-gray);
   margin-right: 10px;
+}
+
+.detailIcon {
+  font-size: 2.8rem;
 }
 
 .closeButton {
