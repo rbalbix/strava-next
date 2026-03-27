@@ -8,8 +8,8 @@ import {
 } from './activity-type-visual';
 import { AuthContext } from '../contexts/AuthContext';
 import { Equipments } from '../services/equipment';
-import { GearStats } from '../services/gear';
-import { locale, secondsToHms } from '../services/utils';
+import type { GearStats } from '../services/gear';
+import { locale, secondsToHms } from '../utils/format';
 
 export default function Card({
   id,

@@ -1,11 +1,9 @@
 import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Equipment, Equipments } from '../services/equipment';
-import {
-  copyEventDetailsToClipboard,
-  locale,
-  secondsToHms,
-} from '../services/utils';
+import { Equipments } from '../services/equipment';
+import type { Equipment } from '../services/equipment';
+import { copyEventDetailsToClipboard } from '../utils/clipboard';
+import { locale, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
 

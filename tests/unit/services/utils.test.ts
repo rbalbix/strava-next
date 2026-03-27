@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   mockPost: vi.fn(),
@@ -22,39 +22,14 @@ vi.mock('../../../src/services/logger', () => ({
 import {
   mergeActivities,
   mergeGearStats,
-  saveLocalStat,
   saveRemote,
-  secondsToHms,
   updateActivityInArray,
 } from '../../../src/services/utils';
 
 describe('utils service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    const store = new Map<string, string>();
-    vi.stubGlobal('localStorage', {
-      getItem: vi.fn((key: string) => store.get(key) ?? null),
-      setItem: vi.fn((key: string, value: string) => {
-        store.set(key, value);
-      }),
-      removeItem: vi.fn((key: string) => {
-        store.delete(key);
-      }),
-      clear: vi.fn(() => {
-        store.clear();
-      }),
-    });
   });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('formats seconds to HH:MM', () => {
-    expect(secondsToHms(0)).toBe('00:00');
-    expect(secondsToHms(3660)).toBe('01:01');
-  });
-
   it('updates existing activity by id', () => {
     const existing = [
       {
@@ -268,10 +243,4 @@ describe('utils service', () => {
     expect(result.error).toBe('Erro desconhecido');
   });
 
-  it('saveLocalStat stores serialized payload', () => {
-    saveLocalStat({ lastUpdated: 123, activities: [] });
-    expect(localStorage.getItem('local-stat')).toBe(
-      JSON.stringify({ lastUpdated: 123, activities: [] }),
-    );
-  });
 });

@@ -3,9 +3,9 @@ import { useContext } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-import { ActivityTotal } from 'strava';
+import type { ActivityTotal } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import { locale, secondsToHms } from '../services/utils';
+import { locale, secondsToHms } from '../utils/format';
 import cardStyles from '../styles/components/Card.module.css';
 
 export default function AthleteStats() {

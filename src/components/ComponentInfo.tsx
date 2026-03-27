@@ -1,13 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 
-import { Equipment, Equipments } from '../services/equipment';
+import { Equipments } from '../services/equipment';
+import type { Equipment } from '../services/equipment';
 
 import { Divider } from '@mui/material';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { copyTextToClipboard } from '../services/utils';
+import { copyTextToClipboard } from '../utils/clipboard';
 import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/Footer.module.css';
 

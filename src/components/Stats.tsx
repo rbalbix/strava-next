@@ -1,9 +1,9 @@
 import { Divider } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { TbBrandStrava } from 'react-icons/tb';
-import { ActivityStats, DetailedAthlete } from 'strava';
+import type { ActivityStats, DetailedAthlete } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import { GearStats } from '../services/gear';
+import type { GearStats } from '../services/gear';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -20,7 +20,12 @@ interface DashboardResponse {
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
-function readCachedDashboard(): DashboardResponse | null {
+type CachedDashboard = {
+  data: DashboardResponse;
+  cacheTime: number;
+};
+
+function readCachedDashboard(): CachedDashboard | null {
   try {
     const cacheTimeRaw = sessionStorage.getItem('athleteCacheTime');
     if (!cacheTimeRaw) return null;
@@ -45,11 +50,14 @@ function readCachedDashboard(): DashboardResponse | null {
       hasActivitiesRaw === null ? true : hasActivitiesRaw === 'true';
 
     return {
-      athlete,
-      athleteStats,
-      hasGear,
-      hasActivities,
-      gearStats,
+      data: {
+        athlete,
+        athleteStats,
+        hasGear,
+        hasActivities,
+        gearStats,
+      },
+      cacheTime,
     };
   } catch (_) {
     return null;
@@ -80,11 +88,17 @@ export default function Stats() {
     const cachedData = readCachedDashboard();
     if (cachedData && isMounted) {
       hasFreshCache = true;
-      setAthleteInfo(cachedData.athlete);
-      setAthleteInfoStats(cachedData.athleteStats);
-      setHasGear(cachedData.hasGear);
-      setHasActivities(cachedData.hasActivities);
-      setGearStats(cachedData.gearStats || []);
+      setAthleteInfo(cachedData.data.athlete);
+      setAthleteInfoStats(cachedData.data.athleteStats);
+      setHasGear(cachedData.data.hasGear);
+      setHasActivities(cachedData.data.hasActivities);
+      setGearStats(cachedData.data.gearStats || []);
+    }
+
+    if (cachedData) {
+      return () => {
+        isMounted = false;
+      };
     }
 
     async function init() {

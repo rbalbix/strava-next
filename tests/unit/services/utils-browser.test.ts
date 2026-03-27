@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { copyEventDetailsToClipboard, copyTextToClipboard } from '../../../src/services/utils';
+import { copyEventDetailsToClipboard, copyTextToClipboard } from '../../../src/utils/clipboard';
 
 describe('utils browser helpers', () => {
   beforeEach(() => {

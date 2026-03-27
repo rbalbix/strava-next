@@ -178,7 +178,7 @@ describe('Stats component', () => {
     });
   });
 
-  it('does not sign out when request fails but fresh cache exists', async () => {
+  it('skips network request when fresh cache exists', async () => {
     sessionStorage.setItem('athlete', JSON.stringify({ id: 2 }));
     sessionStorage.setItem('athleteStats', JSON.stringify({}));
     sessionStorage.setItem('gearStats', JSON.stringify([]));
@@ -202,7 +202,8 @@ describe('Stats component', () => {
       await Promise.resolve();
     });
 
-    expect(setErrorInfo).toHaveBeenCalledTimes(1);
+    expect((globalThis.fetch as any)).not.toHaveBeenCalled();
+    expect(setErrorInfo).not.toHaveBeenCalled();
     expect(signOut).not.toHaveBeenCalled();
     expect(container.textContent).toContain('Aguarde.');
     act(() => {
@@ -363,6 +364,8 @@ describe('Stats component', () => {
       await Promise.resolve();
     });
 
+    expect((globalThis.fetch as any)).not.toHaveBeenCalled();
+    expect(setErrorInfo).not.toHaveBeenCalled();
     expect(signOut).not.toHaveBeenCalled();
     expect(container.textContent).toContain('Aguarde.');
     act(() => root.unmount());

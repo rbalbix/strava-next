@@ -1,4 +1,4 @@
-import { DetailedAthlete, SummaryGear } from 'strava';
+import type { DetailedAthlete, SummaryGear } from 'strava';
 import { Equipment } from './equipment';
 import { ActivitySportType } from './strava-sdk';
 
