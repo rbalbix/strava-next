@@ -173,6 +173,68 @@ describe('ModalContainer', () => {
     act(() => root.unmount());
   });
 
+  it('prevents Tab when no focusable elements exist', () => {
+    const { root } = mount(
+      <AuthContext.Provider value={ctx({ activeModal: 'info' })}>
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+
+    const event = new KeyboardEvent('keydown', { key: 'Tab' });
+    Object.defineProperty(event, 'preventDefault', {
+      value: vi.fn(),
+      writable: true,
+    });
+    act(() => {
+      document.dispatchEvent(event);
+    });
+    expect((event as unknown as { preventDefault: ReturnType<typeof vi.fn> }).preventDefault).toHaveBeenCalled();
+
+    act(() => root.unmount());
+  });
+
+  it('returns null for unknown modal type', () => {
+    const { container, root } = mount(
+      <AuthContext.Provider value={ctx({ activeModal: 'unknown' })}>
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+    expect(container.innerHTML).toBe('');
+    act(() => root.unmount());
+  });
+
+  it('restores focus when activeModal changes to null', () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    document.body.appendChild(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx({ activeModal: 'info' })}>
+          <ModalContainer />
+        </AuthContext.Provider>,
+      );
+    });
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx({ activeModal: null })}>
+          <ModalContainer />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(document.activeElement).toBe(trigger);
+
+    act(() => root.unmount());
+    container.remove();
+    trigger.remove();
+  });
+
   it('restores focus to the previously active element after close', () => {
     const closeModal = vi.fn();
     const trigger = document.createElement('button');

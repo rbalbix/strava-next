@@ -169,8 +169,40 @@ describe('misc components', () => {
       container.querySelector('meta[name="description"]')?.getAttribute('content'),
     ).toBe('D');
     expect(
+      container.querySelector('meta[name="viewport"]')?.getAttribute('content'),
+    ).toBe('width=device-width, initial-scale=1, viewport-fit=cover');
+    expect(
       container.querySelector('link[rel="canonical"]')?.getAttribute('href'),
     ).toContain('/faq');
+    expect(
+      container.querySelector('meta[property="og:title"]')?.getAttribute('content'),
+    ).toBe('T');
+    expect(
+      container
+        .querySelector('meta[property="og:description"]')
+        ?.getAttribute('content'),
+    ).toBe('D');
+    expect(
+      container.querySelector('meta[property="og:image"]')?.getAttribute('content'),
+    ).toContain('/images/tela-inicio-1.jpeg');
+    expect(
+      container
+        .querySelector('meta[property="og:image:alt"]')
+        ?.getAttribute('content'),
+    ).toBe('Prévia do GearLife');
+    expect(
+      container.querySelector('meta[name="twitter:card"]')?.getAttribute('content'),
+    ).toBe('summary_large_image');
+    expect(
+      container
+        .querySelector('meta[name="twitter:title"]')
+        ?.getAttribute('content'),
+    ).toBe('T');
+    expect(
+      container
+        .querySelector('meta[name="twitter:description"]')
+        ?.getAttribute('content'),
+    ).toBe('D');
     act(() => root.unmount());
   });
 

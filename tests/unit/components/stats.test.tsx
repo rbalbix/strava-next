@@ -281,6 +281,73 @@ describe('Stats component', () => {
     act(() => root.unmount());
   });
 
+  it('falls back to network when cache is missing required keys', async () => {
+    sessionStorage.setItem('athlete', JSON.stringify({ id: 2 }));
+    sessionStorage.removeItem('athleteStats');
+    sessionStorage.setItem('gearStats', JSON.stringify([]));
+    sessionStorage.setItem('athleteCacheTime', Date.now().toString());
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          athlete: { id: 3 },
+          athleteStats: {},
+          hasGear: true,
+          hasActivities: true,
+          gearStats: [],
+        }),
+      }),
+    );
+
+    const authValue = makeAuthContext();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect((globalThis.fetch as any)).toHaveBeenCalled();
+    act(() => root.unmount());
+  });
+
+  it('stores empty gearStats when API omits the field', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          athlete: { id: 1 },
+          athleteStats: {},
+          hasGear: true,
+          hasActivities: true,
+          gearStats: undefined,
+        }),
+      }),
+    );
+
+    const authValue = makeAuthContext();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(sessionStorage.getItem('gearStats')).toBe('[]');
+    act(() => root.unmount());
+  });
+
   it('ignores cache with invalid cache time value', async () => {
     sessionStorage.setItem('athleteCacheTime', 'NaN');
     vi.stubGlobal(
