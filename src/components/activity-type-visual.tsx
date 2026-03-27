@@ -32,6 +32,8 @@ export function renderActivityIcon(
         <MdDirectionsBike
           className={className}
           color={color}
+          aria-hidden='true'
+          focusable='false'
           data-testid='icon-bike'
         />
       );
@@ -40,6 +42,8 @@ export function renderActivityIcon(
         <MdDirectionsRun
           className={className}
           color={color}
+          aria-hidden='true'
+          focusable='false'
           data-testid='icon-run'
         />
       );

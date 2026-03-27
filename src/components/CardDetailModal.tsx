@@ -1,6 +1,6 @@
 import { MdClose } from 'react-icons/md';
-import { GearStats } from '../services/gear';
-import { locale, secondsToHms } from '../services/utils';
+import type { GearStats } from '../services/gear';
+import { locale, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardDetailModal.module.css';
 import CardItem from './CardItem';
 import StatCard from './StatCard';
@@ -52,7 +52,7 @@ export default function CardDetailModal({
                 className={styles.closeButton}
                 aria-label='Fechar detalhes'
               >
-                <MdClose />
+                <MdClose aria-hidden='true' focusable='false' />
               </button>
             </div>
           </div>

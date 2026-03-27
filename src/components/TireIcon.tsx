@@ -3,7 +3,14 @@ import { memo } from 'react';
 
 function TireIcon() {
   return (
-    <Image src='/tire.svg' width={200} height={200} alt='Ícone de pneu' priority />
+    <Image
+      src='/tire.svg'
+      width={200}
+      height={200}
+      alt=''
+      aria-hidden='true'
+      priority
+    />
   );
 }
 

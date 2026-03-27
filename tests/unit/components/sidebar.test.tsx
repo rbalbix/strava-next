@@ -38,6 +38,55 @@ function ctx(overrides: Record<string, unknown> = {}) {
 }
 
 describe('Sidebar component', () => {
+  it('focuses first focusable element and traps focus when open', () => {
+    vi.useFakeTimers();
+    const active = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    document.body.appendChild(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    const closeButton = container.querySelector(
+      'button[aria-label="Fechar menu lateral"]',
+    ) as HTMLButtonElement;
+    expect(document.activeElement).toBe(closeButton);
+
+    const focusables = Array.from(
+      container.querySelectorAll('a[href], button'),
+    ) as HTMLElement[];
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    last.focus();
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    });
+    expect(document.activeElement).toBe(first);
+
+    first.focus();
+    act(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }),
+      );
+    });
+    expect(document.activeElement).toBe(last);
+
+    act(() => root.unmount());
+    container.remove();
+    vi.useRealTimers();
+  });
+
   it('opens modal actions and closes sidebar', () => {
     const openModal = vi.fn();
     const active = vi.fn();
@@ -64,6 +113,12 @@ describe('Sidebar component', () => {
     ) as HTMLButtonElement;
     act(() => help.click());
     expect(openModal).toHaveBeenCalledWith('info');
+
+    const components = Array.from(container.querySelectorAll('button')).find((n) =>
+      n.textContent?.includes('Componentes'),
+    ) as HTMLButtonElement;
+    act(() => components.click());
+    expect(openModal).toHaveBeenCalledWith('equipments');
 
     act(() => root.unmount());
   });
@@ -116,7 +171,7 @@ describe('Sidebar component', () => {
       );
     });
 
-    const overlay = container.querySelector('[aria-hidden="true"]') as HTMLDivElement;
+    const overlay = container.querySelector('[role="presentation"]') as HTMLDivElement;
     act(() => {
       overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
@@ -135,5 +190,43 @@ describe('Sidebar component', () => {
     expect(active.mock.calls.length).toBe(countAfterOverlay);
 
     act(() => root.unmount());
+  });
+
+  it('prevents Tab when there are no focusable elements', () => {
+    vi.useFakeTimers();
+    const active = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    document.body.appendChild(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    const sidebar = container.querySelector('#sidebar-menu') as HTMLElement;
+    sidebar.querySelectorAll('button, a').forEach((el) => el.remove());
+
+    act(() => {
+      vi.runAllTimers();
+    });
+    expect(document.activeElement).toBe(sidebar);
+
+    const event = new KeyboardEvent('keydown', { key: 'Tab' });
+    Object.defineProperty(event, 'preventDefault', {
+      value: vi.fn(),
+      writable: true,
+    });
+    act(() => {
+      document.dispatchEvent(event);
+    });
+    expect((event as unknown as { preventDefault: ReturnType<typeof vi.fn> }).preventDefault).toHaveBeenCalled();
+
+    act(() => root.unmount());
+    container.remove();
+    vi.useRealTimers();
   });
 });

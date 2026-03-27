@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useCallback, useMemo, useState } from 'react';
-import { ActivityStats, DetailedAthlete } from 'strava';
-import { getLogger } from '../services/logger';
+import type { ActivityStats, DetailedAthlete } from 'strava';
 
 interface AuthContextData {
   codeReturned: string | null;
@@ -84,7 +83,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
       await fetch('/api/logout', { method: 'POST' });
     } catch (err) {
       // proceed even if server-side logout fails
-      getLogger().warn({ err }, 'Server logout failed');
+      console.warn('Server logout failed', err);
     }
 
     sessionStorage.removeItem('athlete');

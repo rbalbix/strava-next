@@ -13,10 +13,10 @@ import { Equipments } from '../../../src/services/equipment';
 import {
   copyEventDetailsToClipboard,
   copyTextToClipboard,
-} from '../../../src/services/utils';
+} from '../../../src/utils/clipboard';
 
 vi.mock('../../../src/components/InitialInfo', () => ({ default: () => <div>initial-info</div> }));
-vi.mock('../../../src/services/utils', async (importOriginal) => {
+vi.mock('../../../src/utils/clipboard', async (importOriginal) => {
   const mod = (await importOriginal()) as Record<string, unknown>;
   return {
     ...mod,

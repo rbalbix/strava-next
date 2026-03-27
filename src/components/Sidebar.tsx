@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 
 import {
   FaChartBar,
@@ -19,10 +19,22 @@ interface SidebarProps {
 
 export default function Sidebar({ active, isOpen }: SidebarProps) {
   const { athlete, openModal } = useContext(AuthContext);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
   const closeSidebar = useCallback(() => {
     active(false);
   }, [active]);
+
+  const getFocusableElements = useCallback(() => {
+    if (!sidebarRef.current) return [];
+    const elements = Array.from(
+      sidebarRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button, [tabindex]:not([tabindex="-1"])',
+      ),
+    );
+    return elements.filter((el) => !el.hasAttribute('disabled'));
+  }, []);
 
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
@@ -40,6 +52,61 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     };
   }, [isOpen, closeSidebar]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      if (lastActiveElementRef.current) {
+        lastActiveElementRef.current.focus();
+      }
+      return;
+    }
+
+    lastActiveElementRef.current = document.activeElement as HTMLElement | null;
+
+    const focusFirst = () => {
+      const focusable = getFocusableElements();
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      } else if (sidebarRef.current) {
+        sidebarRef.current.focus();
+      }
+    };
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusableElements();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (event.shiftKey) {
+        if (activeElement === first || !sidebarRef.current?.contains(activeElement)) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else if (activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const focusTimer = window.setTimeout(focusFirst, 0);
+    document.addEventListener('keydown', handleTab);
+
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.removeEventListener('keydown', handleTab);
+      if (lastActiveElementRef.current) {
+        lastActiveElementRef.current.focus();
+      }
+    };
+  }, [isOpen, getFocusableElements]);
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       closeSidebar();
@@ -53,12 +120,20 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           isOpen ? styles.sidebarOverlayVisible : ''
         }`}
         onClick={handleOverlayClick}
-        aria-hidden='true'
+        role='presentation'
+        aria-hidden={!isOpen}
       />
       <div
         className={`${styles.sidebarContainer} ${
           isOpen ? styles.sidebarOpen : ''
         }`}
+        id='sidebar-menu'
+        ref={sidebarRef}
+        role='dialog'
+        aria-modal='true'
+        aria-label='Menu lateral'
+        aria-hidden={!isOpen}
+        tabIndex={-1}
       >
         <button
           type='button'
@@ -66,7 +141,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           className={styles.closeButton}
           aria-label='Fechar menu lateral'
         >
-          <FaTimes className={styles.closeIcon} />
+          <FaTimes className={styles.closeIcon} aria-hidden='true' focusable='false' />
         </button>
 
         <div className={styles.sidebarHeader}>
@@ -77,7 +152,8 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           <div className={styles.sidebarItemContainer}>
             <FaHome
               className={styles.sidebarItemIcon}
-              aria-label='Ir para Meu Strava'
+              aria-hidden='true'
+              focusable='false'
             />
             <Link
               href={{
@@ -95,7 +171,8 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           <div className={styles.sidebarItemContainer}>
             <FaChartBar
               className={styles.sidebarItemIcon}
-              aria-label='Estatísticas'
+              aria-hidden='true'
+              focusable='false'
             />
             <button
               type='button'
@@ -112,7 +189,8 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           <div className={styles.sidebarItemContainer}>
             <FaMedapps
               className={styles.sidebarItemIcon}
-              aria-label='Componentes'
+              aria-hidden='true'
+              focusable='false'
             />
             <button
               type='button'
@@ -129,7 +207,8 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           <div className={styles.sidebarItemContainer}>
             <FaInfoCircle
               className={styles.sidebarItemIcon}
-              aria-label='Ajuda'
+              aria-hidden='true'
+              focusable='false'
             />
             <button
               type='button'

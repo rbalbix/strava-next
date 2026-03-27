@@ -3,9 +3,9 @@ import { useContext } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-import { ActivityTotal } from 'strava';
+import type { ActivityTotal } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import { locale, secondsToHms } from '../services/utils';
+import { locale, secondsToHms } from '../utils/format';
 import cardStyles from '../styles/components/Card.module.css';
 
 export default function AthleteStats() {
@@ -26,9 +26,9 @@ export default function AthleteStats() {
     <div className={cardStyles.cardContainer}>
       <header>
         {title === 'Ciclismo' ? (
-          <MdDirectionsBike color='var(--light-blue)' />
+          <MdDirectionsBike color='var(--light-blue)' aria-hidden='true' focusable='false' />
         ) : (
-          <MdDirectionsRun color='#fc5200' />
+          <MdDirectionsRun color='#fc5200' aria-hidden='true' focusable='false' />
         )}
       </header>
       <div>
@@ -45,7 +45,7 @@ export default function AthleteStats() {
 
         <p className={cardStyles.cardNewItem}>
           <span>
-            <FaArrowRight />
+            <FaArrowRight aria-hidden='true' focusable='false' />
           </span>
           <span>
             <strong>&nbsp;Últimas 4 semanas:</strong>
@@ -60,7 +60,7 @@ export default function AthleteStats() {
 
         <p className={cardStyles.cardNewItem}>
           <span>
-            <FaArrowRight />
+            <FaArrowRight aria-hidden='true' focusable='false' />
           </span>
           <span>
             <strong>&nbsp;Último ano:</strong>
@@ -78,7 +78,7 @@ export default function AthleteStats() {
 
         <p className={cardStyles.cardNewItem}>
           <span>
-            <FaArrowRight />
+            <FaArrowRight aria-hidden='true' focusable='false' />
           </span>
           <span>
             <strong>&nbsp;Totais:</strong>
@@ -105,7 +105,7 @@ export default function AthleteStats() {
             <div className={cardStyles.athleteStatInfoTitle}>
               <div>
                 <span className={cardStyles.athleteStatInfoTitleIcon}>
-                  <IoMdStats color='var(--stat-icon)' />
+                  <IoMdStats color='var(--stat-icon)' aria-hidden='true' focusable='false' />
                 </span>
                 <h2
                   id='modal-title-stats'
@@ -121,7 +121,7 @@ export default function AthleteStats() {
                   className={cardStyles.closeButton}
                   aria-label='Fechar estatísticas'
                 >
-                  <MdClose />
+                  <MdClose aria-hidden='true' focusable='false' />
                 </button>
               </div>
             </div>

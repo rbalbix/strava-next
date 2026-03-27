@@ -7,7 +7,8 @@ function VeloIcon() {
       src='/velo.gif'
       width={156}
       height={104}
-      alt='Ícone de bicicleta'
+      alt=''
+      aria-hidden='true'
       unoptimized
       priority
     />

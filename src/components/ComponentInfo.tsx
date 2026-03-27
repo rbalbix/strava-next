@@ -1,13 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 
-import { Equipment, Equipments } from '../services/equipment';
+import { Equipments } from '../services/equipment';
+import type { Equipment } from '../services/equipment';
 
 import { Divider } from '@mui/material';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { copyTextToClipboard } from '../services/utils';
+import { copyTextToClipboard } from '../utils/clipboard';
 import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/Footer.module.css';
 
@@ -31,7 +32,7 @@ export default function ComponentInfo() {
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
             <span className={cardStyles.athleteStatInfoTitleIcon}>
-              <FaMedapps color='var(--stat-icon)' />
+              <FaMedapps color='var(--stat-icon)' aria-hidden='true' focusable='false' />
             </span>
             <h2
               id='modal-title-equipments'
@@ -47,7 +48,7 @@ export default function ComponentInfo() {
               className={styles.closeButton}
               aria-label='Fechar componentes'
             >
-              <MdClose />
+              <MdClose aria-hidden='true' focusable='false' />
             </button>
           </div>
         </div>
