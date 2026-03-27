@@ -116,7 +116,7 @@ describe('Sidebar component', () => {
       );
     });
 
-    const overlay = container.querySelector('[aria-hidden="true"]') as HTMLDivElement;
+    const overlay = container.querySelector('[role="presentation"]') as HTMLDivElement;
     act(() => {
       overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });

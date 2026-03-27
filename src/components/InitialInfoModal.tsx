@@ -17,8 +17,9 @@ export default function InitialInfoModal() {
           <div>
             <span className={cardStyles.athleteStatInfoTitleIcon}>
               <FaInfoCircle
-                aria-label='Ícone de informações'
                 color='var(--stat-icon)'
+                aria-hidden='true'
+                focusable='false'
               />
             </span>
             <h2
@@ -35,7 +36,7 @@ export default function InitialInfoModal() {
               className={styles.closeButton}
               aria-label='Fechar informações'
             >
-              <MdClose />
+              <MdClose aria-hidden='true' focusable='false' />
             </button>
           </div>
         </div>

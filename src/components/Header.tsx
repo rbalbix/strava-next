@@ -18,6 +18,7 @@ export default function Header() {
 
   const [sidebar, setSidebar] = useState(false);
   const showSidebar = () => setSidebar(!sidebar);
+  const sidebarId = 'sidebar-menu';
 
   return (
     <header className={styles.headerContainer}>
@@ -30,7 +31,11 @@ export default function Header() {
               className={styles.iconButton}
               aria-label='Abrir informações'
             >
-              <FaInfoCircle className={styles.headerInfoIcon} />
+              <FaInfoCircle
+                className={styles.headerInfoIcon}
+                aria-hidden='true'
+                focusable='false'
+              />
             </button>
           </div>
           <div>
@@ -40,7 +45,11 @@ export default function Header() {
               className={styles.iconButtonLink}
               aria-label='Entrar com Strava'
             >
-              <IoLogInOutline className={styles.headerLoginIcon} />
+              <IoLogInOutline
+                className={styles.headerLoginIcon}
+                aria-hidden='true'
+                focusable='false'
+              />
             </Link>
           </div>
         </>
@@ -53,8 +62,11 @@ export default function Header() {
                 onClick={showSidebar}
                 className={styles.iconButton}
                 aria-label='Abrir menu lateral'
+                aria-expanded={sidebar}
+                aria-controls={sidebarId}
+                aria-haspopup='dialog'
               >
-                <FaBars className={styles.sidebarIcon} />
+                <FaBars className={styles.sidebarIcon} aria-hidden='true' focusable='false' />
               </button>
               <Sidebar active={setSidebar} isOpen={sidebar} />
             </div>
@@ -76,7 +88,11 @@ export default function Header() {
             }}
             aria-label='Sair da conta'
           >
-            <IoLogOutOutline className={styles.headerLogoutIcon} />
+            <IoLogOutOutline
+              className={styles.headerLogoutIcon}
+              aria-hidden='true'
+              focusable='false'
+            />
           </button>
         </div>
       )}

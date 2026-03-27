@@ -32,7 +32,7 @@ export default function ComponentInfo() {
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
             <span className={cardStyles.athleteStatInfoTitleIcon}>
-              <FaMedapps color='var(--stat-icon)' />
+              <FaMedapps color='var(--stat-icon)' aria-hidden='true' focusable='false' />
             </span>
             <h2
               id='modal-title-equipments'
@@ -48,7 +48,7 @@ export default function ComponentInfo() {
               className={styles.closeButton}
               aria-label='Fechar componentes'
             >
-              <MdClose />
+              <MdClose aria-hidden='true' focusable='false' />
             </button>
           </div>
         </div>

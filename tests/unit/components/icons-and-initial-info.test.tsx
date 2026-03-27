@@ -21,12 +21,12 @@ function mount(el: React.ReactElement) {
 }
 
 describe('icon and onboarding components', () => {
-  it('ChainIcon renders svg with custom class and aria label', () => {
+  it('ChainIcon renders svg with custom class and aria-hidden', () => {
     const { container, root } = mount(<ChainIcon className='chain' />);
     const svg = container.querySelector('svg');
     expect(svg).toBeTruthy();
     expect(svg?.getAttribute('class')).toBe('chain');
-    expect(svg?.getAttribute('aria-label')).toBe('Chain icon');
+    expect(svg?.getAttribute('aria-hidden')).toBe('true');
     act(() => root.unmount());
   });
 

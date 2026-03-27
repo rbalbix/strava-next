@@ -9,7 +9,8 @@ function DiskIcon() {
       src='/disk.svg'
       width={200}
       height={200}
-      alt='Ícone de disco'
+      alt=''
+      aria-hidden='true'
       priority
     />
   );

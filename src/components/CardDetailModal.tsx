@@ -52,7 +52,7 @@ export default function CardDetailModal({
                 className={styles.closeButton}
                 aria-label='Fechar detalhes'
               >
-                <MdClose />
+                <MdClose aria-hidden='true' focusable='false' />
               </button>
             </div>
           </div>

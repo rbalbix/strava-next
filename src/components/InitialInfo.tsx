@@ -37,7 +37,7 @@ export default function InitialInfo() {
         <ol>
           <li>
             Clique no ícone{' '}
-            <IoLogInOutline color='var(--light-blue)' size={22} /> localizado no
+            <IoLogInOutline color='var(--light-blue)' size={22} aria-hidden='true' focusable='false' /> localizado no
             canto superior direito da tela.
           </li>
           <li>
@@ -135,7 +135,7 @@ export default function InitialInfo() {
         <h3>Lista dos códigos dos componentes:</h3>
         <div>
           Esta lista pode ser aberta clicando no ícone{' '}
-          <FaMedapps aria-label='Ícone de lista de componentes' /> que fica no
+          <FaMedapps aria-hidden='true' focusable='false' /> que fica no
           final da lista de equipamentos.
         </div>
         <div className={styles.screen}>

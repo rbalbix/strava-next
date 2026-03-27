@@ -7,8 +7,8 @@ export default function ChainIcon({ className }: ChainIconProps) {
     <svg
       className={className}
       viewBox='0 0 128 36'
-      role='img'
-      aria-label='Chain icon'
+      role='presentation'
+      aria-hidden='true'
       xmlns='http://www.w3.org/2000/svg'
     >
       <g fill='currentColor'>

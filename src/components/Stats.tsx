@@ -145,7 +145,12 @@ export default function Stats() {
       <main>
         {!hasGear ? (
           <div className={styles.emptyState}>
-            <TbBrandStrava size={50} className={styles.iconBrandStrava} />
+            <TbBrandStrava
+              size={50}
+              className={styles.iconBrandStrava}
+              aria-hidden='true'
+              focusable='false'
+            />
             <span>Nenhum equipamento cadastrado no Strava</span>
             <span className={styles.emptyStateInstructionsText}>
               Vá em <code>Configurações &gt; Meu equipamento</code> e adicione
@@ -154,7 +159,12 @@ export default function Stats() {
           </div>
         ) : !hasActivities ? (
           <div className={styles.emptyState}>
-            <TbBrandStrava size={50} className={styles.iconBrandStrava} />
+            <TbBrandStrava
+              size={50}
+              className={styles.iconBrandStrava}
+              aria-hidden='true'
+              focusable='false'
+            />
             <span>
               Nenhuma atividade criada no Strava ou associada a um equipamento
             </span>
