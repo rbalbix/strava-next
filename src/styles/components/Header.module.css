@@ -1,18 +1,18 @@
 .headerContainer {
   display: flex;
-
   align-items: center;
   justify-content: space-between;
-
-  padding: 6px 5px 4px 5px;
-  /* border-bottom: 1px solid var(--light-gray); */
-
   position: fixed;
-  top: 0px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   max-width: 928px;
   z-index: 100;
+  min-height: calc(3.25rem + env(safe-area-inset-top, 0px));
+  padding: calc(env(safe-area-inset-top, 0px) + 6px) 5px 4px 5px;
   background-color: var(--background);
+  isolation: isolate;
 }
 
 .headerContainer::after {
@@ -140,6 +140,7 @@
 
 @media (max-width: 860px) {
   .headerContainer {
+    width: 87%;
     max-width: 87%;
   }
 
