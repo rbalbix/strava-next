@@ -1,5 +1,5 @@
 .statsContainer {
-  padding-top: 2px;
+  padding-top: calc(3.6rem + env(safe-area-inset-top));
 }
 
 .spinnerLoading {
