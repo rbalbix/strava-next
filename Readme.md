@@ -157,6 +157,30 @@ yarn dev
 
 O projeto estará disponível em `http://localhost:3000`
 
+### 🔹 Validando a Qualidade Localmente
+
+Para rodar o pipeline principal de qualidade localmente:
+
+```sh
+yarn validate
+```
+
+Esse comando executa, em sequência:
+
+- `yarn lint`
+- `yarn typecheck`
+- `yarn test`
+- `yarn build`
+
+Comandos úteis adicionais:
+
+- `yarn test:unit`
+- `yarn test:integration`
+- `yarn test:regression`
+- `yarn test:coverage`
+- `yarn test:e2e:smoke`
+- `yarn test:e2e:ui`
+
 ## 🛠️ Estrutura do Projeto
 
 ```plaintext
@@ -229,10 +253,22 @@ As métricas são persistidas no Redis para refletir contagem agregada entre ins
 7. Simular envio de email interno e validar `email_sent_total` (ou `email_failed_total` em caso de erro).
 8. Validar logs estruturados (`pino`) nos módulos de webhook, estatísticas, tokens e email.
 
+### Testes automatizados
+
+O projeto possui cobertura automatizada para:
+
+- testes unitários
+- testes de integração
+- testes de regressão
+- smoke tests e fluxos de UI via scripts dedicados
+
+O gate principal de CI valida `lint`, `typecheck`, `test` e `build`.
+
 ## ✅ Melhorias Futuras
 
 - [ ] Melhorar a interface para dispositivos móveis 📱
-- [ ] Implementar testes automatizados 🧪
+- [ ] Publicar um `.env.example` para acelerar o onboarding
+- [ ] Adicionar smoke tests obrigatórios na CI
 - [ ] Adicionar cache para reduzir chamadas à API 🚀
 
 ## 🤝 Contribuição
