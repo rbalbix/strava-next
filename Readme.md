@@ -118,7 +118,13 @@ yarn install
 
 ### 🔹 Configurando Variáveis de Ambiente
 
-Crie um arquivo `.env.local` na raiz do projeto e adicione as seguintes variáveis:
+Use o arquivo de exemplo como ponto de partida e depois ajuste os valores para o seu ambiente:
+
+```sh
+cp .env.example .env.local
+```
+
+O arquivo `.env.local` deve conter as seguintes variáveis:
 
 ```ini
 CLIENT_ID=SEU_CLIENT_ID
