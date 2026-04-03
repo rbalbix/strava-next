@@ -34,3 +34,6 @@ jobs:
 
       - name: Build
         run: yarn build
+
+      - name: Smoke test
+        run: yarn test:e2e:smoke:ci
