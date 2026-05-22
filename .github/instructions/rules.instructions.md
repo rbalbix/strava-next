@@ -68,8 +68,11 @@ Quick reference files
 - HTTP clients: `src/services/api.ts`
 - Redis: `src/services/redis.ts`
 
+MCPs installed (how to use)
+
+- GitHub MCP/Connector: use it to fetch PR/issue context (diffs, review threads, comments, CI status/logs) before changing code.
+- Tool discovery: if unsure which MCP action exists, search/discover tools first (e.g. `workflow logs`, `pr patch`, `issue comments`) and then call the most specific action.
+- Secrets: never paste GitHub Actions/Secrets into code, PR comments, or logs.
+
 If any section is ambiguous or you want concrete examples (webhook payloads, test snippets, or CI steps), specify which area to expand.
-
-```
-
-```
+````

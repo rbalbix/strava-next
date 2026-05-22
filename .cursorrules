@@ -103,10 +103,35 @@ Para testar alterações nos fluxos de dados sem precisar de túneis HTTPS ou co
 ## 📝 3. Estrutura do Repositório (Referências)
 
 Antes de fazer alterações em módulos complexos, estude os arquivos de referência:
-* **Fluxo OAuth e Cookies**: [authorize.tsx](file:///home/rbalbi/Documentos/vscode-workspace/strava-next/src/pages/api/authorize.tsx)
-* **Gestão e Locks de Token**: [strava-auth.ts](file:///home/rbalbi/Documentos/vscode-workspace/strava-next/src/services/strava-auth.ts)
-* **Cálculo de Desgaste e Estatísticas**: [statistics.ts](file:///home/rbalbi/Documentos/vscode-workspace/strava-next/src/services/statistics.ts)
-* **Recepção de Webhooks**: [webhook.ts](file:///home/rbalbi/Documentos/vscode-workspace/strava-next/src/pages/api/webhook.ts)
-* **Clientes e Configuração HTTP**: [api.ts](file:///home/rbalbi/Documentos/vscode-workspace/strava-next/src/services/api.ts)
+* **Fluxo OAuth e Cookies**: `src/pages/api/authorize.tsx`
+* **Gestão e Locks de Token**: `src/services/strava-auth.ts`
+* **Cálculo de Desgaste e Estatísticas**: `src/services/statistics.ts`
+* **Recepção de Webhooks**: `src/pages/api/webhook.ts`
+* **Clientes e Configuração HTTP**: `src/services/api.ts`
 
 *Ao propor melhorias arquiteturais ou novos endpoints externos, garanta que todos os testes passem executando `yarn test` localmente antes de prosseguir com PRs ou commits.*
+
+---
+
+## 🧩 4. MCPs Instalados (Como Usar)
+
+Estas regras definem quando e como usar os MCPs (Model Context Protocol) disponíveis no ambiente do agente.
+
+### 🐙 A. GitHub (MCP/Connector)
+Use o MCP do GitHub quando precisar de contexto **remoto** (PRs, issues, diffs, reviews, status de CI) em vez de “adivinhar” com base em memória.
+
+Regras:
+* **Prefira o MCP para PR/Issue**: Para ler descrições, comentários, patches, checks e threads de review, utilize o conector do GitHub ao invés de pedir para o usuário copiar/colar conteúdo.
+* **Mudanças em PRs**: Ao endereçar feedback de review, busque **threads não resolvidas** e comente/atualize de forma objetiva, evitando alterações não relacionadas.
+* **CI e logs**: Para falhas de workflow, obtenha logs pelo GitHub (runs/jobs) antes de alterar código; corrija a causa raiz com mudanças mínimas.
+* **Sem segredos**: Nunca copie tokens/segredos do GitHub Actions/Secrets para o repositório ou logs locais.
+
+Exemplos do que buscar via GitHub MCP:
+* Arquivos alterados e patch de um PR (para revisão e correção pontual).
+* Comentários inline de review (para responder exatamente onde foi pedido).
+* Status de checks e logs (para identificar o erro real e reproduzir localmente).
+
+### 🧰 B. Descoberta de Ferramentas MCP
+Quando não souber qual ferramenta MCP usar (ex.: qual ação existe para “listar issues”, “buscar PR”, “baixar artifact”), faça **descoberta de ferramentas** primeiro e só então execute a ação:
+* Pesquise ferramentas disponíveis (tool discovery) com termos como `github pr`, `issue comments`, `workflow logs`, `artifact`.
+* Se a ferramenta ideal existir, use-a; se não existir, caia para fluxo local (clone/arquivos) apenas quando fizer sentido.
