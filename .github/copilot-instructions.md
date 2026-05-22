@@ -123,3 +123,15 @@ Antes de fazer alterações em módulos complexos, estude os arquivos de referê
 - **Clientes e Configuração HTTP**: `src/services/api.ts`
 
 _Ao propor melhorias arquiteturais ou novos endpoints externos, garanta que todos os testes passem executando `yarn test` localmente antes de prosseguir com PRs ou commits._
+
+---
+
+## 🧩 4. MCPs Instalados (Como Usar)
+
+### 🐙 GitHub (MCP/Connector)
+- Use o MCP do GitHub para buscar contexto remoto (PRs, issues, diffs, reviews e status de CI) antes de propor mudanças.
+- Ao corrigir feedback de PR, priorize threads de review não resolvidas e aplique patches mínimos e focados.
+- Nunca copie segredos do GitHub (Actions/Secrets) para o código ou logs.
+
+### 🧰 Descoberta de Ferramentas
+- Se não souber qual ação do MCP usar, faça descoberta de ferramentas (ex.: `github pr`, `workflow logs`, `issue comments`) e só então execute a ação adequada.
