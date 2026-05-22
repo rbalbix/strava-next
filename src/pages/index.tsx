@@ -39,8 +39,33 @@ function HomeContent() {
           <div className={styles.homeText}>
             <ErroMsg />
             <h1>GearLife</h1>
-            <h2>Monitor your gear.</h2>
-            <h2>Ride smarter.</h2>
+            <h2 className={styles.tagline}>Monitor your gear. Ride smarter.</h2>
+            <p className={styles.subtitle}>
+              Conecte sua conta Strava para acompanhar seus equipamentos.
+            </p>
+
+            <div
+              className={styles.ctaRow}
+              role='group'
+              aria-label='Ações principais'
+            >
+              <Link
+                href='/api/oauth/start'
+                prefetch={false}
+                className={styles.ctaPrimary}
+              >
+                Entrar com Strava
+              </Link>
+              <Link href='/como-funciona' className={styles.ctaSecondary}>
+                Como funciona
+              </Link>
+            </div>
+
+            <ul className={styles.featureList} aria-label='Destaques'>
+              <li>Estatísticas por bike e componente</li>
+              <li>Atualização automática</li>
+              <li>Privacidade: leitura apenas do que precisa</li>
+            </ul>
           </div>
 
           <div className={styles.versionMark}>
