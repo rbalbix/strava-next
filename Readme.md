@@ -270,6 +270,62 @@ O projeto possui cobertura automatizada para:
 
 O gate principal de CI valida `lint`, `typecheck`, `test` e `build`.
 
+## 📱 PWA e Aplicativo Nativo com Capacitor
+
+O projeto já inclui a base para instalação como PWA e empacotamento com
+Capacitor para App Store e Google Play.
+
+### PWA
+
+A aplicação publica:
+
+- `public/manifest.webmanifest`: metadados de instalação, cores e ícones.
+- `public/sw.js`: service worker de produção para assets estáticos e fallback
+  offline.
+- `public/offline.html`: tela simples quando o usuário navega sem conexão.
+- `public/icons/*`: ícones 192px, 512px e maskable.
+
+O service worker é registrado apenas em produção para evitar cache agressivo no
+desenvolvimento local. Rotas `/api/*` não são cacheadas para preservar dados
+autenticados e evitar respostas desatualizadas do Strava.
+
+### Capacitor
+
+Como o GearLife usa SSR, API routes, OAuth server-side, Redis e webhooks, o app
+nativo deve carregar uma URL HTTPS de produção. Configure:
+
+```ini
+CAPACITOR_SERVER_URL=https://SEU_DOMINIO
+NEXT_PUBLIC_APP_URL=https://SEU_DOMINIO
+```
+
+O Capacitor lê `CAPACITOR_SERVER_URL` do ambiente, `.env.local` ou `.env`.
+
+Depois gere ou sincronize os projetos nativos:
+
+```sh
+yarn cap:add:android
+yarn cap:add:ios
+yarn cap:sync
+```
+
+Com os projetos criados:
+
+```sh
+yarn cap:open:android
+yarn cap:open:ios
+```
+
+Observações importantes:
+
+- Para builds de loja, não use `localhost` em `CAPACITOR_SERVER_URL`.
+- O redirect OAuth cadastrado no Strava precisa apontar para
+  `https://SEU_DOMINIO/api/authorize`.
+- Os segredos (`CLIENT_SECRET`, Redis, Resend e `INTERNAL_API_TOKEN`) continuam
+  somente no servidor.
+- Antes de submeter às lojas, revise política de privacidade, telas de
+  permissões, ícones/splash nativos e textos de coleta de dados.
+
 ## ✅ Melhorias Futuras
 
 - [ ] Melhorar a interface para dispositivos móveis 📱

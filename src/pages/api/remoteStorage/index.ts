@@ -1,13 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { RemoteStorageSetRequestSchema } from '../../../contracts/api';
 import { hasValidInternalApiKey } from '../../../services/internal-api-auth';
 import redis from '../../../services/redis';
-
-function isAllowedRemoteStorageKey(key: string): boolean {
-  const match = /^strava:(activities|statistics):(\d+)$/.exec(key);
-  if (!match) return false;
-  const athleteId = Number(match[2]);
-  return Number.isFinite(athleteId) && athleteId > 0;
-}
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,13 +14,24 @@ export default async function handler(
   switch (req.method) {
     case 'POST':
       try {
-        const { key, value } = req.body;
+        const parsed = RemoteStorageSetRequestSchema.safeParse(req.body);
 
-        if (typeof key !== 'string' || key.trim().length === 0) {
-          return res.status(400).json({ error: 'Invalid key' });
+        if (!parsed.success) {
+          const invalidKey = parsed.error.issues.some((issue) =>
+            issue.path.includes('key'),
+          );
+          if (invalidKey) {
+            const key = (req.body as { key?: unknown })?.key;
+            if (typeof key === 'string' && key.trim().length > 0) {
+              return res.status(403).json({ error: 'Forbidden key' });
+            }
+            return res.status(400).json({ error: 'Invalid key' });
+          }
+          return res.status(400).json({ error: 'Invalid data' });
         }
 
-        if (!isAllowedRemoteStorageKey(key)) {
+        const { key, value } = parsed.data;
+        if (!key) {
           return res.status(403).json({ error: 'Forbidden key' });
         }
 

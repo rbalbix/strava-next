@@ -1,21 +1,12 @@
 // pages/api/send-email.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Resend } from 'resend';
-import { z } from 'zod';
+import { SendEmailRequestSchema } from '../../contracts/api';
+import { getEmailServerEnv } from '../../server/env';
 import { hasValidInternalApiKey } from '../../services/internal-api-auth';
 import { getLogger } from '../../services/logger';
 
-// Inicializa o Resend com sua API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
 const MAX_EMAIL_RECIPIENTS = 5;
-
-const SendEmailSchema = z
-  .object({
-    to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
-    subject: z.string().min(1).max(200),
-    html: z.string().min(1).max(20000),
-  })
-  .strict();
 
 export default async function handler(
   req: NextApiRequest,
@@ -35,7 +26,7 @@ export default async function handler(
   }
 
   try {
-    const parsed = SendEmailSchema.safeParse(req.body);
+    const parsed = SendEmailRequestSchema.safeParse(req.body);
     if (!parsed.success) {
       log.warn({ issues: parsed.error.issues }, 'Invalid send-email payload');
       return res.status(400).json({
@@ -43,9 +34,9 @@ export default async function handler(
       });
     }
 
-    const resendFrom = process.env.RESEND_EMAIL_FROM;
-    if (!resendFrom) {
-      log.error('Missing RESEND_EMAIL_FROM env var');
+    const env = getEmailServerEnv();
+    if (!env.success) {
+      log.error({ issues: env.error.issues }, 'Missing Resend env vars');
       return res.status(400).json({
         error: 'Missing email sender configuration',
       });
@@ -70,8 +61,9 @@ export default async function handler(
     );
 
     // Envia o email usando o Resend
+    const resend = new Resend(env.data.RESEND_API_KEY);
     const { data, error } = await resend.emails.send({
-      from: resendFrom,
+      from: env.data.RESEND_EMAIL_FROM,
       to: recipients,
       subject: parsed.data.subject,
       html: parsed.data.html,

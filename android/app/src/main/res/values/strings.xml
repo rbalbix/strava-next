@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GearLife</string>
+    <string name="title_activity_main">GearLife</string>
+    <string name="package_name">com.rbalbi.gearlife</string>
+    <string name="custom_url_scheme">com.rbalbi.gearlife</string>
+</resources>
