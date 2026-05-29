@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import type { Logger } from 'pino';
-import { Strava } from 'strava';
 import { REDIS_KEYS } from '../../config';
+import { getEmailServerEnv, getStravaServerEnv } from '../../server/env';
+import { createStravaClient } from '../../server/strava-client';
 import {
   ActivityBase,
   fetchStravaActivity,
@@ -289,9 +290,9 @@ export default async function handler(
       const log = getLogger(req.headers['x-request-id'] as string);
       log.error({ err: error }, 'Erro ao processar webhook');
       try {
+        const emailEnv = getEmailServerEnv();
         const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
-        const resendFrom = process.env.RESEND_EMAIL_FROM;
-        if (!contactEmail || !resendFrom) {
+        if (!emailEnv.success || !contactEmail) {
           throw new Error('Missing email configuration');
         }
         await sendEmail({
@@ -301,7 +302,7 @@ export default async function handler(
             'Erro no Processamento do Webhook',
             error,
           ),
-          from: resendFrom,
+          from: emailEnv.data.RESEND_EMAIL_FROM,
         });
       } catch (emailError) {
         log.error({ err: emailError }, 'Erro ao enviar email de erro');
@@ -366,15 +367,14 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       REDIS_KEYS.activities(athleteId),
     );
 
-    if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+    if (!getStravaServerEnv().success) {
       throw new Error('Missing Strava API configuration');
     }
 
-    const strava = new Strava({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      refresh_token: refreshToken,
-    });
+    const strava = createStravaClient({ refreshToken });
+    if (!strava) {
+      throw new Error('Missing Strava API configuration');
+    }
 
     const hasStored =
       storedActivities &&
@@ -492,15 +492,14 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           log.warn({ athleteId }, 'Athlete update ignored: missing tokens');
           return;
         }
-        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+        if (!getStravaServerEnv().success) {
           throw new Error('Missing Strava API configuration');
         }
 
-        const strava = new Strava({
-          client_id: process.env.CLIENT_ID,
-          client_secret: process.env.CLIENT_SECRET,
-          refresh_token: tokens.refreshToken,
-        });
+        const strava = createStravaClient({ refreshToken: tokens.refreshToken });
+        if (!strava) {
+          throw new Error('Missing Strava API configuration');
+        }
 
         await updateStatistics(strava, athleteId);
         log.info({ athleteId }, 'Athlete update processed');

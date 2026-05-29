@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Strava } from 'strava';
+import type { DashboardResponse } from '../../contracts/api';
+import { getAuthenticatedAthleteId } from '../../server/auth';
+import { getStravaServerEnv } from '../../server/env';
+import { createStravaClient } from '../../server/strava-client';
 import { getAthlete, getAthleteStats } from '../../services/athlete';
 import { verifyIfHasAnyActivities } from '../../services/activity';
 import { verifyIfHasAnyGears } from '../../services/gear';
@@ -9,7 +12,7 @@ import { getAthleteAccessToken } from '../../services/strava-auth';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse,
+  res: NextApiResponse<DashboardResponse | { error: string }>,
 ) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -17,10 +20,8 @@ export default async function handler(
   }
 
   try {
-    const athleteIdRaw = req.cookies?.strava_athleteId;
-    const athleteId = Number(athleteIdRaw);
-
-    if (!athleteIdRaw || !Number.isFinite(athleteId) || athleteId <= 0) {
+    const athleteId = getAuthenticatedAthleteId(req);
+    if (!athleteId) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
@@ -28,22 +29,14 @@ export default async function handler(
     if (!tokens?.accessToken || !tokens?.refreshToken || !tokens?.expiresAt) {
       return res.status(401).json({ error: 'Missing auth tokens' });
     }
-    if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
+    if (!getStravaServerEnv().success) {
       return res.status(500).json({ error: 'Server auth config missing' });
     }
 
-    const strava = new Strava(
-      {
-        client_id: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
-        refresh_token: tokens.refreshToken,
-      },
-      {
-        access_token: tokens.accessToken,
-        expires_at: tokens.expiresAt,
-        refresh_token: tokens.refreshToken,
-      },
-    );
+    const strava = createStravaClient(tokens);
+    if (!strava) {
+      return res.status(500).json({ error: 'Server auth config missing' });
+    }
 
     const athlete = await getAthlete(strava);
     const athleteStats = await getAthleteStats(strava, athlete);

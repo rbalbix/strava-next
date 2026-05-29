@@ -13,13 +13,12 @@ try {
     throw new Error(`Expected page to contain GearLife heading, got: ${title}`);
   }
 
-  await page.click('text=Como funciona');
+  await page.getByRole('link', { name: 'Como funciona' }).first().click();
   await page.waitForURL('**/como-funciona', { timeout: 10000 });
 
-  const hasHowItWorks = await page.locator('text=Como funciona o GearLife').count();
-  if (hasHowItWorks === 0) {
-    throw new Error('Expected "Como funciona o GearLife" content after navigation.');
-  }
+  await page
+    .getByRole('heading', { name: /Como funciona o GearLife/i })
+    .waitFor({ state: 'visible', timeout: 10000 });
 
   console.log('E2E smoke passed.');
 } finally {

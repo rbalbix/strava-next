@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router';
 import { createContext, ReactNode, useCallback, useMemo, useState } from 'react';
 import type { ActivityStats, DetailedAthlete } from 'strava';
+import { apiClient } from '../lib/apiClient';
 
 interface AuthContextData {
   codeReturned: string | null;
@@ -80,7 +81,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const signOut = useCallback(async () => {
     // Invalidate server-side cookies (HttpOnly) via API
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await apiClient.logout();
     } catch (err) {
       // proceed even if server-side logout fails
       console.warn('Server logout failed', err);

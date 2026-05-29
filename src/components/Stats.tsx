@@ -1,22 +1,16 @@
 import { Divider } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { TbBrandStrava } from 'react-icons/tb';
-import type { ActivityStats, DetailedAthlete } from 'strava';
+import type { DetailedAthlete, ActivityStats } from 'strava';
+import { apiClient } from '../lib/apiClient';
 import { AuthContext } from '../contexts/AuthContext';
+import type { DashboardResponse } from '../contracts/api';
 import type { GearStats } from '../services/gear';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
 import VeloIcon from './VeloIcon';
-
-interface DashboardResponse {
-  athlete: DetailedAthlete;
-  athleteStats: ActivityStats;
-  hasGear: boolean;
-  hasActivities: boolean;
-  gearStats: GearStats[];
-}
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -103,12 +97,7 @@ export default function Stats() {
 
     async function init() {
       try {
-        const response = await fetch('/api/dashboard');
-        if (!response.ok) {
-          throw new Error(`Failed to load dashboard: HTTP ${response.status}`);
-        }
-
-        const data: DashboardResponse = await response.json();
+        const data = await apiClient.getDashboard();
         if (!isMounted) return;
 
         sessionStorage.setItem('athlete', JSON.stringify(data.athlete));

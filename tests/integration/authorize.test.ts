@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import handler from '../../src/pages/api/authorize';
 import { createMockRequest, createMockResponse } from '../helpers/next-api';
 
@@ -18,6 +18,12 @@ vi.mock('../../src/services/logger', () => ({
 }));
 
 describe('/api/authorize integration', () => {
+  beforeEach(() => {
+    process.env.CLIENT_ID = 'client-id';
+    process.env.CLIENT_SECRET = 'client-secret';
+    process.env.GRANT_TYPE = 'authorization_code';
+  });
+
   it('returns 400 when code is missing', async () => {
     const req = createMockRequest({
       method: 'GET',

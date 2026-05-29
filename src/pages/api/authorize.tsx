@@ -1,14 +1,12 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import {
+  clearHttpOnlyCookie,
+  getCookieValue,
+  serializeHttpOnlyCookie,
+} from '../../server/cookies';
+import { getStravaOAuthTokenEnv } from '../../server/env';
 import { apiStravaAuth, apiStravaOauthToken } from '../../services/api';
 import { getLogger } from '../../services/logger';
-
-function getCookieValue(cookieHeader: string, key: string): string | null {
-  const cookie = cookieHeader
-    .split(';')
-    .find((c) => c.trim().startsWith(`${key}=`));
-  if (!cookie) return null;
-  return cookie.split('=').slice(1).join('=');
-}
 
 export default async function Authorize(
   req: NextApiRequest,
@@ -24,36 +22,39 @@ export default async function Authorize(
       .json({ error: 'Code parameter is missing or invalid' });
   }
   if (!state || typeof state !== 'string' || !storedState || state !== storedState) {
-    const isProd = process.env.NODE_ENV === 'production';
-    const secureFlag = isProd ? 'Secure; ' : '';
     res.setHeader(
       'Set-Cookie',
-      `strava_oauth_state=; Path=/; Max-Age=0; HttpOnly; ${secureFlag}SameSite=Lax`,
+      clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
     );
     return res.status(400).json({ error: 'Invalid OAuth state' });
   }
 
   try {
     const log = getLogger(req.headers['x-request-id'] as string);
+    const env = getStravaOAuthTokenEnv();
+    if (!env.success) {
+      log.error({ issues: env.error.issues }, 'Missing Strava OAuth config');
+      return res.status(500).json({ error: 'Server auth config missing' });
+    }
+
     const response = await apiStravaOauthToken.post('', null, {
       params: {
-        client_id: process.env.CLIENT_ID,
-        client_secret: process.env.CLIENT_SECRET,
+        client_id: env.data.CLIENT_ID,
+        client_secret: env.data.CLIENT_SECRET,
         code,
-        grant_type: process.env.GRANT_TYPE,
+        grant_type: env.data.GRANT_TYPE,
       },
     });
 
     const { access_token, refresh_token, expires_at, athlete } = response.data;
 
-    const isProd = process.env.NODE_ENV === 'production';
-    const secureFlag = isProd ? 'Secure; ' : '';
-    const sameSite = isProd ? 'None' : 'Lax';
-
     res.setHeader('Set-Cookie', [
-      `strava_code=${code}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=${sameSite}`, // 5 minutos
-      `strava_athleteId=${athlete.id}; Path=/; Max-Age=300; HttpOnly; ${secureFlag}SameSite=${sameSite}`,
-      `strava_oauth_state=; Path=/; Max-Age=0; HttpOnly; ${secureFlag}SameSite=Lax`,
+      serializeHttpOnlyCookie('strava_code', code, { maxAge: 300, sameSite: 'Lax' }),
+      serializeHttpOnlyCookie('strava_athleteId', String(athlete.id), {
+        maxAge: 300,
+        sameSite: 'Lax',
+      }),
+      clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
     ]);
 
     await apiStravaAuth.post('/', {
