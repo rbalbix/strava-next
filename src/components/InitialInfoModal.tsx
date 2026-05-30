@@ -1,4 +1,5 @@
 import Divider from '@mui/material/Divider';
+import Link from 'next/link';
 import { useContext } from 'react';
 import { FaInfoCircle } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
