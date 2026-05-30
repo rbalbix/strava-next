@@ -15,7 +15,9 @@ import {
   copyTextToClipboard,
 } from '../../../src/utils/clipboard';
 
-vi.mock('../../../src/components/InitialInfo', () => ({ default: () => <div>initial-info</div> }));
+vi.mock('../../../src/components/InitialInfo', () => ({
+  default: () => <div>initial-info</div>,
+}));
 vi.mock('../../../src/utils/clipboard', async (importOriginal) => {
   const mod = (await importOriginal()) as Record<string, unknown>;
   return {
@@ -64,7 +66,7 @@ describe('modal child components', () => {
     const close = container.querySelector(
       'button[aria-label="Fechar informações"]',
     ) as HTMLElement;
-    act(() => close.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    act(() => close.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(closeModal).toHaveBeenCalledTimes(1);
     act(() => root.unmount());
   });
@@ -75,24 +77,26 @@ describe('modal child components', () => {
       <ToastProvider>
         <CardDetailModal
           onClose={onClose}
-          gearStat={{
-            id: 'g1',
-            name: 'Bike',
-            activityType: 'Ride',
-            count: 2,
-            distance: 10000,
-            movingTime: 3600,
-            equipments: [
-              {
-                id: Equipments.Chain.id,
-                show: Equipments.Chain.show,
-                caption: Equipments.Chain.caption,
-                date: '2026-01-01T00:00:00Z',
-                distance: 1000,
-                movingTime: 100,
-              },
-            ],
-          } as any}
+          gearStat={
+            {
+              id: 'g1',
+              name: 'Bike',
+              activityType: 'Ride',
+              count: 2,
+              distance: 10000,
+              movingTime: 3600,
+              equipments: [
+                {
+                  id: Equipments.Chain.id,
+                  show: Equipments.Chain.show,
+                  caption: Equipments.Chain.caption,
+                  date: '2026-01-01T00:00:00Z',
+                  distance: 1000,
+                  movingTime: 100,
+                },
+              ],
+            } as any
+          }
         />
       </ToastProvider>,
     );
@@ -105,7 +109,7 @@ describe('modal child components', () => {
     const close = container.querySelector(
       'button[aria-label="Fechar detalhes"]',
     ) as HTMLElement;
-    act(() => close.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    act(() => close.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(onClose).toHaveBeenCalledTimes(1);
     act(() => root.unmount());
   });
@@ -116,24 +120,26 @@ describe('modal child components', () => {
       <ToastProvider>
         <CardDetailModal
           onClose={onClose}
-          gearStat={{
-            id: 'g2',
-            name: 'Run',
-            activityType: 'Run',
-            count: 1,
-            distance: 5000,
-            movingTime: 1800,
-            equipments: [
-              {
-                id: Equipments.Chain.id,
-                show: Equipments.Chain.show,
-                caption: Equipments.Chain.caption,
-                date: '2026-01-01T00:00:00Z',
-                distance: 1000,
-                movingTime: 100,
-              },
-            ],
-          } as any}
+          gearStat={
+            {
+              id: 'g2',
+              name: 'Run',
+              activityType: 'Run',
+              count: 1,
+              distance: 5000,
+              movingTime: 1800,
+              equipments: [
+                {
+                  id: Equipments.Chain.id,
+                  show: Equipments.Chain.show,
+                  caption: Equipments.Chain.caption,
+                  date: '2026-01-01T00:00:00Z',
+                  distance: 1000,
+                  movingTime: 100,
+                },
+              ],
+            } as any
+          }
         />
       </ToastProvider>,
     );
@@ -156,24 +162,26 @@ describe('modal child components', () => {
       <ToastProvider>
         <CardDetailModal
           onClose={onClose}
-          gearStat={{
-            id: 'g3',
-            name: 'MTB',
-            activityType: 'MountainBikeRide',
-            count: 1,
-            distance: 7000,
-            movingTime: 2000,
-            equipments: [
-              {
-                id: Equipments.Chain.id,
-                show: Equipments.Chain.show,
-                caption: Equipments.Chain.caption,
-                date: '2026-01-01T00:00:00Z',
-                distance: 1000,
-                movingTime: 100,
-              },
-            ],
-          } as any}
+          gearStat={
+            {
+              id: 'g3',
+              name: 'MTB',
+              activityType: 'MountainBikeRide',
+              count: 1,
+              distance: 7000,
+              movingTime: 2000,
+              equipments: [
+                {
+                  id: Equipments.Chain.id,
+                  show: Equipments.Chain.show,
+                  caption: Equipments.Chain.caption,
+                  date: '2026-01-01T00:00:00Z',
+                  distance: 1000,
+                  movingTime: 100,
+                },
+              ],
+            } as any
+          }
         />
       </ToastProvider>,
     );
@@ -207,7 +215,7 @@ describe('modal child components', () => {
     const close = container.querySelector(
       'button[aria-label="Fechar componentes"]',
     ) as HTMLElement;
-    act(() => close.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    act(() => close.dispatchEvent(new MouseEvent('click', { bubbles: true })));
     expect(closeModal).toHaveBeenCalledTimes(1);
     act(() => root.unmount());
   });

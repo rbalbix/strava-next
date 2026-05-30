@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
 import ChainIcon from '../../../src/components/ChainIcon';
 import DiskIcon from '../../../src/components/DiskIcon';
+import HowItWorksContent from '../../../src/components/HowItWorksContent';
 import InitialInfo from '../../../src/components/InitialInfo';
 import TireIcon from '../../../src/components/TireIcon';
 import VeloIcon from '../../../src/components/VeloIcon';
@@ -32,15 +33,21 @@ describe('icon and onboarding components', () => {
 
   it('DiskIcon, TireIcon and VeloIcon render expected image sources', () => {
     const disk = mount(<DiskIcon />);
-    expect(disk.container.querySelector('img')?.getAttribute('src')).toBe('/disk.svg');
+    expect(disk.container.querySelector('img')?.getAttribute('src')).toBe(
+      '/disk.svg',
+    );
     act(() => disk.root.unmount());
 
     const tire = mount(<TireIcon />);
-    expect(tire.container.querySelector('img')?.getAttribute('src')).toBe('/tire.svg');
+    expect(tire.container.querySelector('img')?.getAttribute('src')).toBe(
+      '/tire.svg',
+    );
     act(() => tire.root.unmount());
 
     const velo = mount(<VeloIcon />);
-    expect(velo.container.querySelector('img')?.getAttribute('src')).toBe('/velo.gif');
+    expect(velo.container.querySelector('img')?.getAttribute('src')).toBe(
+      '/velo.gif',
+    );
     act(() => velo.root.unmount());
   });
 
@@ -48,8 +55,26 @@ describe('icon and onboarding components', () => {
     const { container, root } = mount(<InitialInfo />);
     expect(container.textContent).toContain('Como usar o aplicativo');
     expect(container.textContent).toContain('Passo 1: Acesso Inicial e Login');
-    expect(container.textContent).toContain('Passo 4: Lista de Códigos dos Componentes');
+    expect(container.textContent).toContain(
+      'Passo 4: Lista de Códigos dos Componentes',
+    );
     expect(container.querySelectorAll('img').length).toBeGreaterThanOrEqual(7);
+    act(() => root.unmount());
+  });
+
+  it('HowItWorksContent shows reference link when enabled', () => {
+    const { container, root } = mount(<HowItWorksContent showReferenceLink />);
+    expect(container.textContent).toContain(
+      'Leia o guia completo em Como funciona',
+    );
+    act(() => root.unmount());
+  });
+
+  it('HowItWorksContent does not show reference link by default', () => {
+    const { container, root } = mount(<HowItWorksContent />);
+    expect(container.textContent).not.toContain(
+      'Leia o guia completo em Como funciona',
+    );
     act(() => root.unmount());
   });
 });

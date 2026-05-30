@@ -40,7 +40,11 @@ describe('public pages', () => {
   it('renders como-funciona page', () => {
     const { container, root } = renderIntoContainer(<ComoFuncionaPage />);
     expect(container.textContent).toContain('Como funciona o GearLife');
-    expect(container.textContent).toContain('Processamento de atividades');
+    expect(container.textContent).toContain(
+      'O GearLife conecta sua conta Strava',
+    );
+    expect(container.textContent).toContain('Passo 1: Acesso Inicial e Login');
+    expect(container.querySelector('nav')?.textContent).toBe('nav');
     act(() => root.unmount());
   });
 
