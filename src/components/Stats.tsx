@@ -101,8 +101,14 @@ export default function Stats() {
         if (!isMounted) return;
 
         sessionStorage.setItem('athlete', JSON.stringify(data.athlete));
-        sessionStorage.setItem('athleteStats', JSON.stringify(data.athleteStats));
-        sessionStorage.setItem('gearStats', JSON.stringify(data.gearStats || []));
+        sessionStorage.setItem(
+          'athleteStats',
+          JSON.stringify(data.athleteStats),
+        );
+        sessionStorage.setItem(
+          'gearStats',
+          JSON.stringify(data.gearStats || []),
+        );
         sessionStorage.setItem('hasGear', String(data.hasGear));
         sessionStorage.setItem('hasActivities', String(data.hasActivities));
         sessionStorage.setItem('athleteCacheTime', Date.now().toString());
@@ -163,11 +169,18 @@ export default function Stats() {
           </div>
         ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <div>
-              <span>Aguarde.</span>
-              <span>Carregando suas estatísticas ...</span>
+            <div className={styles.loadingPanel}>
+              <div>
+                <span>Aguarde.</span>
+                <span>Carregando suas estatísticas ...</span>
+              </div>
+              <span>{randomIcon}</span>
             </div>
-            <span>{randomIcon}</span>
+            <div className={styles.skeletonList} aria-hidden='true'>
+              <div className={styles.skeletonCard} />
+              <div className={styles.skeletonCard} />
+              <div className={styles.skeletonCard} />
+            </div>
           </div>
         ) : (
           gearStats.map((gearStat) => {

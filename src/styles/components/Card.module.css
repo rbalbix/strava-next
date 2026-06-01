@@ -5,7 +5,7 @@
   box-shadow: 0 0 60px var(--card-box-shadow);
 
   padding: 1.2rem 1.2rem;
-  margin-top: 0.8rem;
+  margin-top: 0.4rem;
   margin-bottom: 0.8rem;
 
   cursor: pointer;
@@ -21,16 +21,22 @@
 }
 
 .closeButton {
-  background: transparent;
-  border: none;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
   color: inherit;
-  font-size: 1.35rem;
+  font-size: 1.45rem;
 }
 
 .closeButton:focus-visible {
-  outline: none;
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
 }
 
 .cardContainer:focus-visible {

@@ -28,6 +28,11 @@ export default function Card({
   const lubMovingTime = lub?.movingTime ?? 0;
 
   const handleCardClick = () => {
+    try {
+      // Notify sidebar (if open) to close before opening modal
+      window.dispatchEvent(new Event('gearlife:close-sidebar'));
+    } catch (_) {}
+
     openModal('card-detail', {
       id,
       name,
@@ -66,7 +71,7 @@ export default function Card({
           <div>
             {lubDistance !== 0 ? (
               <p>{`. lubrificada a: ${locale.format(',.2f')(
-                lubDistance / 1000
+                lubDistance / 1000,
               )} km  | ${secondsToHms(lubMovingTime)}h`}</p>
             ) : (
               <p>Bike lubrificada. &#x1F44F;</p>
