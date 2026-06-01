@@ -53,12 +53,29 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
   }, [isOpen, closeSidebar]);
 
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen) {
       if (lastActiveElementRef.current) {
         lastActiveElementRef.current.focus();
       }
       return;
     }
+
+    // Listen for global requests to close the sidebar (e.g., card clicks)
+    const onGlobalClose = () => {
+      closeSidebar();
+    };
+    window.addEventListener('gearlife:close-sidebar', onGlobalClose);
 
     lastActiveElementRef.current = document.activeElement as HTMLElement | null;
 
@@ -85,7 +102,10 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
       const activeElement = document.activeElement as HTMLElement | null;
 
       if (event.shiftKey) {
-        if (activeElement === first || !sidebarRef.current?.contains(activeElement)) {
+        if (
+          activeElement === first ||
+          !sidebarRef.current?.contains(activeElement)
+        ) {
           event.preventDefault();
           last.focus();
         }
@@ -104,6 +124,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
       if (lastActiveElementRef.current) {
         lastActiveElementRef.current.focus();
       }
+      window.removeEventListener('gearlife:close-sidebar', onGlobalClose);
     };
   }, [isOpen, getFocusableElements]);
 
@@ -141,7 +162,11 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
           className={styles.closeButton}
           aria-label='Fechar menu lateral'
         >
-          <FaTimes className={styles.closeIcon} aria-hidden='true' focusable='false' />
+          <FaTimes
+            className={styles.closeIcon}
+            aria-hidden='true'
+            focusable='false'
+          />
         </button>
 
         <div className={styles.sidebarHeader}>

@@ -31,7 +31,10 @@ function HomeContent() {
   const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'v0.2.0';
 
   return (
-    <main className={styles.homeSection} aria-live='polite'>
+    <main
+      className={codeReturned ? styles.statsSection : styles.homeSection}
+      aria-live='polite'
+    >
       {codeReturned ? (
         <Stats />
       ) : (
@@ -60,12 +63,6 @@ function HomeContent() {
                 Como funciona
               </Link>
             </div>
-
-            <ul className={styles.featureList} aria-label='Destaques'>
-              <li>Estatísticas por bike e componente</li>
-              <li>Atualização automática</li>
-              <li>Privacidade: leitura apenas do que precisa</li>
-            </ul>
           </div>
 
           <div className={styles.versionMark}>

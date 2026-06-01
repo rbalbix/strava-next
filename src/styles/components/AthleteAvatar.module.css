@@ -23,9 +23,9 @@
 }
 
 .athleteCity {
-  font-size: 1rem;
-  color: var(--gray-notes);
-  font-weight: lighter;
+  font-size: 1.1rem;
+  color: var(--athlete-name);
+  font-weight: 500;
   text-align: left;
   padding-bottom: 10px;
 }
