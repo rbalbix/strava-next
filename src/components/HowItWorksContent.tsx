@@ -53,7 +53,8 @@ export default function HowItWorksContent({
             aria-hidden='true'
             focusable='false'
           />{' '}
-          localizado no canto superior direito da tela.
+          localizado no canto superior direito da tela ou no botão "Entrar com
+          Strava".
         </li>
         <li>
           Você será redirecionado para a página de autenticação do Strava.
