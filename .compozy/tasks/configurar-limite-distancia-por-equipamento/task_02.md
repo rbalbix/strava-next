@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Criar serviço de persistência `thresholds` (Redis)
 type: backend
 complexity: medium
