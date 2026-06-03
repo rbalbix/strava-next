@@ -6,7 +6,7 @@
 | --- | -------------------------------------------------------------------------- | --------- | ---------- | ---------------------------------- |
 | 01  | Atualizar `REDIS_KEYS` com `equipmentThresholds`                           | completed | low        | —                                  |
 | 02  | Criar serviço de persistência `thresholds` (Redis)                         | completed | medium     | task_01                            |
-| 03  | Endpoint API `/api/app/equipment-thresholds` (GET/POST)                    | pending   | medium     | task_01, task_02                   |
+| 03  | Endpoint API `/api/app/equipment-thresholds` (GET/POST)                    | completed | medium     | task_01, task_02                   |
 | 04  | Incluir `equipmentThresholds` no payload de `/api/app/dashboard`           | pending   | medium     | task_02, task_03                   |
 | 05  | Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds | pending   | low        | task_04                            |
 | 06  | Carregar thresholds em `Stats.tsx` e acionar lógica de alerta              | pending   | medium     | task_05                            |

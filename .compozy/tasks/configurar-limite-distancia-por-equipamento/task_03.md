@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Endpoint API `/api/app/equipment-thresholds` (GET/POST)
 type: backend
 complexity: medium
