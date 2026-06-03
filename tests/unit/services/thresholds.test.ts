@@ -30,9 +30,10 @@ describe('thresholds service', () => {
   });
 
   it('returns stored thresholds when present', async () => {
-    const stored: import('../../../src/services/thresholds').EquipmentThresholds = {
-      bikeA: { chain: 120 },
-    };
+    const stored: import('../../../src/services/thresholds').EquipmentThresholds =
+      {
+        bikeA: { chain: 120 },
+      };
     mockGet.mockResolvedValue(stored);
 
     const result = await thresholds.getEquipmentThresholds(123);
@@ -59,9 +60,10 @@ describe('thresholds service', () => {
   });
 
   it('updates and returns existing thresholds for the same gear/equipment', async () => {
-    const stored: import('../../../src/services/thresholds').EquipmentThresholds = {
-      bikeA: { chain: 120 },
-    };
+    const stored: import('../../../src/services/thresholds').EquipmentThresholds =
+      {
+        bikeA: { chain: 120 },
+      };
     mockGet.mockResolvedValue(stored);
     mockSet.mockResolvedValue('OK');
 
