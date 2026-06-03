@@ -81,20 +81,21 @@
 }
 
 .closeButton {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.8rem;
-  min-width: 2.8rem;
   height: 2.8rem;
-  min-height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
-  padding: 0;
+  z-index: 1001;
 }
 
 .copyButton:focus-visible {

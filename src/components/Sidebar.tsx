@@ -18,7 +18,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ active, isOpen }: SidebarProps) {
-  const { athlete, openModal } = useContext(AuthContext);
+  const { openModal } = useContext(AuthContext);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 

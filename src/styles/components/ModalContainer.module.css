@@ -36,8 +36,8 @@
 
 .closeButton {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 1.2rem;
+  right: 1.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -46,9 +46,10 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 1.65rem;
   cursor: pointer;
-  color: var(--gray-notes);
+  color: inherit;
+  font-size: 1.45rem;
+  z-index: 1001;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;
