@@ -21,6 +21,9 @@
 }
 
 .closeButton {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -32,6 +35,7 @@
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
+  z-index: 1001;
 }
 
 .closeButton:focus-visible {

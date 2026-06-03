@@ -16,16 +16,18 @@
 }
 
 .athleteName {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   color: var(--athlete-name);
   font-weight: normal;
   text-align: left;
+  margin-top: 8px;
 }
 
 .athleteCity {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--athlete-name);
   font-weight: 500;
   text-align: left;
+  margin-top: 5px;
   padding-bottom: 10px;
 }
