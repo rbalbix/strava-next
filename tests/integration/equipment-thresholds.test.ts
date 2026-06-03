@@ -15,7 +15,8 @@ describe('API /api/app/equipment-thresholds', () => {
   let handler: typeof import('../../src/pages/api/app/equipment-thresholds').default;
 
   beforeEach(async () => {
-    ({ default: handler } = await import('../../src/pages/api/app/equipment-thresholds'));
+    ({ default: handler } =
+      await import('../../src/pages/api/app/equipment-thresholds'));
     vi.clearAllMocks();
   });
 
