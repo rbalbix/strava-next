@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 title: Incluir `equipmentThresholds` no payload de `/api/app/dashboard`
 type: backend
 complexity: medium
