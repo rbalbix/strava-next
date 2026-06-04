@@ -1,5 +1,11 @@
 import { useRouter } from 'next/router';
-import { createContext, ReactNode, useCallback, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import type { ActivityStats, DetailedAthlete } from 'strava';
 import { apiClient } from '../lib/apiClient';
 
@@ -70,9 +76,12 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     setAthlete(athlete);
   }, []);
 
-  const setAthleteInfoStats = useCallback((athleteStats: ActivityStats | null) => {
-    setAthleteStats(athleteStats);
-  }, []);
+  const setAthleteInfoStats = useCallback(
+    (athleteStats: ActivityStats | null) => {
+      setAthleteStats(athleteStats);
+    },
+    [],
+  );
 
   const setErrorInfo = useCallback((errorObj: unknown) => {
     setCodeError(errorObj);
@@ -90,6 +99,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     sessionStorage.removeItem('athlete');
     sessionStorage.removeItem('athleteStats');
     sessionStorage.removeItem('gearStats');
+    sessionStorage.removeItem('equipmentThresholds');
     sessionStorage.removeItem('hasGear');
     sessionStorage.removeItem('hasActivities');
     sessionStorage.removeItem('athleteCacheTime');
@@ -160,8 +170,6 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   );
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 }

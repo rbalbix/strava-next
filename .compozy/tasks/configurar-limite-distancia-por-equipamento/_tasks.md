@@ -9,7 +9,7 @@
 | 03  | Endpoint API `/api/app/equipment-thresholds` (GET/POST)                    | completed | medium     | task_01, task_02                   |
 | 04  | Incluir `equipmentThresholds` no payload de `/api/app/dashboard`           | completed | medium     | task_02, task_03                   |
 | 05  | Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds | completed | low        | task_04                            |
-| 06  | Carregar thresholds em `Stats.tsx` e acionar lógica de alerta              | pending   | medium     | task_05                            |
+| 06  | Carregar thresholds em `Stats.tsx` e acionar lógica de alerta              | completed | medium     | task_05                            |
 | 07  | Criar `ThresholdAlertModal` e integrar em `ModalContainer`                 | pending   | medium     | task_06                            |
 | 08  | Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem` | pending   | medium     | task_05, task_06                   |
 | 09  | Testes unitários e de integração para API e componentes                    | pending   | medium     | task_02, task_03, task_06, task_08 |
