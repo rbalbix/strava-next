@@ -23,7 +23,10 @@ describe('apiClient', () => {
 
     const result = await apiClient.getEquipmentThresholds();
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/app/equipment-thresholds', undefined);
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/app/equipment-thresholds',
+      undefined,
+    );
     expect(result).toEqual(thresholds);
   });
 

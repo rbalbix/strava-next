@@ -23,9 +23,9 @@ async function requestJson<TResponse>(
 const apiClient = {
   getDashboard: () => requestJson<DashboardResponse>('/api/app/dashboard'),
   getEquipmentThresholds: (): Promise<EquipmentThresholds> =>
-    requestJson<EquipmentThresholdsResponse>('/api/app/equipment-thresholds').then(
-      (response) => response.equipmentThresholds,
-    ),
+    requestJson<EquipmentThresholdsResponse>(
+      '/api/app/equipment-thresholds',
+    ).then((response) => response.equipmentThresholds),
   saveEquipmentThreshold: (
     payload: EquipmentThresholdsRequest,
   ): Promise<EquipmentThresholds> =>
