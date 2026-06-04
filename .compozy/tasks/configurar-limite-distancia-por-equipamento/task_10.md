@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Documentação e PR: atualizar README e registrar passos de deploy
 type: docs
 complexity: low
@@ -17,14 +17,16 @@ Atualizar documentação do repositório com instruções de uso da nova feature
 
 <requirements>
 1. Atualizar `Readme.md` ou `docs/` com seção "Limites de Distância por Equipamento" (pt-BR).
-2. Incluir chave Redis `strava:equipment-thresholds:<athleteId>` em `src/config/index.ts` e documentação de formato JSON.
-3. Adicionar checklist de QA e comandos para rodar testes localmente.
+2. Atualizar HowItWorksContent.tsx com instruções de uso da nova feature.
+3. Incluir chave Redis `strava:equipment-thresholds:<athleteId>` em `src/config/index.ts` e documentação de formato JSON.
+4. Adicionar checklist de QA e comandos para rodar testes localmente.
 </requirements>
 
 ## Subtasks
 
 - Atualizar `Readme.md` com a nova seção (pt-BR).
 - Criar o corpo do PR em `.compozy/tasks/.../pr_description.md` contendo resumo, arquivos e checklist.
+- Atualizar `HowItWorksContent.tsx` com instruções de uso da nova feature.
 
 ## Deliverables
 
