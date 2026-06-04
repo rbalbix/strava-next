@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Criar `ThresholdAlertModal` e integrar em `ModalContainer`
 type: frontend
 complexity: medium

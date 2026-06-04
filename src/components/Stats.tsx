@@ -24,7 +24,7 @@ type ThresholdAlertItem = {
   gearId: string;
   gearName: string;
   equipmentId: string;
-  equipmentCaption: string;
+  label: string;
   distanceKm: number;
   thresholdKm: number;
   state: 'normal' | 'warning' | 'overdue';
@@ -52,7 +52,7 @@ function buildThresholdAlertItems(
           gearId: gearStat.id,
           gearName: gearStat.name,
           equipmentId: equipment.id,
-          equipmentCaption: equipment.caption,
+          label: equipment.caption,
           distanceKm,
           thresholdKm: thresholdKm ?? 0,
           state,
@@ -71,7 +71,10 @@ function openThresholdAlert(
   );
 
   if (overdueItems.length > 0) {
-    openModal('threshold-alert', { items: overdueItems });
+    openModal('threshold-alert', {
+      items: overdueItems,
+      gearStats: dashboard.gearStats,
+    });
   }
 }
 
