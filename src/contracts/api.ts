@@ -56,7 +56,15 @@ type SuccessResponse = z.infer<typeof SuccessResponseSchema>;
 type SaveTokensRequest = z.infer<typeof SaveTokensRequestSchema>;
 type SendEmailRequest = z.infer<typeof SendEmailRequestSchema>;
 type RemoteStorageSetRequest = z.infer<typeof RemoteStorageSetRequestSchema>;
+type EquipmentThresholdsRequest = {
+  gearId: string;
+  equipmentId: string;
+  thresholdKm: number;
+};
 
+type EquipmentThresholdsResponse = {
+  equipmentThresholds: EquipmentThresholds;
+};
 type DashboardResponse = {
   athlete: DetailedAthlete;
   athleteStats: ActivityStats;
@@ -80,6 +88,8 @@ export {
 export type {
   ApiErrorResponse,
   DashboardResponse,
+  EquipmentThresholdsRequest,
+  EquipmentThresholdsResponse,
   LogoutResponse,
   RemoteStorageSetRequest,
   SaveTokensRequest,
