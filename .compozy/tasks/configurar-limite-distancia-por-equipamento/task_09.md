@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Testes unitários e de integração para API e componentes
 type: test
 complexity: medium

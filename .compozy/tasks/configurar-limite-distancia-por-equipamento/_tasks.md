@@ -12,5 +12,5 @@
 | 06  | Carregar thresholds em `Stats.tsx` e acionar lógica de alerta              | completed | medium     | task_05                            |
 | 07  | Criar `ThresholdAlertModal` e integrar em `ModalContainer`                 | completed | medium     | task_06                            |
 | 08  | Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem` | completed | medium     | task_05, task_06                   |
-| 09  | Testes unitários e de integração para API e componentes                    | pending   | medium     | task_02, task_03, task_06, task_08 |
+| 09  | Testes unitários e de integração para API e componentes                    | completed | medium     | task_02, task_03, task_06, task_08 |
 | 10  | Documentação e PR: atualizar README e registrar passos de deploy           | pending   | low        | task_01..task_09                   |
