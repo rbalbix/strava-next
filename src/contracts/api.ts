@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ActivityStats, DetailedAthlete } from 'strava';
 import type { GearStats } from '../services/gear';
 
+export type EquipmentThresholds = Record<string, Record<string, number>>;
+
 const ApiErrorResponseSchema = z
   .object({
     error: z.string(),
@@ -61,6 +63,7 @@ type DashboardResponse = {
   hasGear: boolean;
   hasActivities: boolean;
   gearStats: GearStats[];
+  equipmentThresholds?: EquipmentThresholds;
 };
 
 type LogoutResponse = SuccessResponse;

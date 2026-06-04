@@ -1,7 +1,7 @@
+export type { EquipmentThresholds } from '../contracts/api';
+import type { EquipmentThresholds } from '../contracts/api';
 import redis from './redis';
 import { REDIS_KEYS } from '../config/index';
-
-export type EquipmentThresholds = Record<string, Record<string, number>>;
 
 function validateThresholdKm(thresholdKm: number): void {
   if (typeof thresholdKm !== 'number' || Number.isNaN(thresholdKm)) {
