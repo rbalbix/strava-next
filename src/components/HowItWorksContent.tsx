@@ -217,7 +217,7 @@ export default function HowItWorksContent({
         </li>
         <li>
           Na seção de componentes, defina o valor do limite em km e clique em
-          "Salvar".
+          &quot;Salvar&quot;.
         </li>
         <li>
           O limite é persistido e a barra de progresso será exibida em cada
