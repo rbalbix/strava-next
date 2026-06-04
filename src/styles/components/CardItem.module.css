@@ -48,7 +48,9 @@
   float: left;
   text-align: center;
   line-height: 1rem;
-  font: 700 0.9rem 'JetBrains Mono', sans-serif;
+  font:
+    700 0.9rem 'JetBrains Mono',
+    sans-serif;
   color: var(--background);
 }
 
@@ -81,6 +83,35 @@
   margin-right: auto;
 }
 
+.progressContainer {
+  width: 90%;
+  margin: 0.5rem auto 0;
+}
+
+.progressBar {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.normal {
+  background: var(--light-blue);
+}
+
+.warning {
+  background: #f2b705;
+}
+
+.overdue {
+  background: #e05b5b;
+}
+
 .chipbadge {
   display: inline-flex;
   align-items: center;
@@ -88,7 +119,9 @@
   border-radius: 999px;
   border: 1px solid var(--event-border);
   background-color: var(--background-card);
-  font: 600 1rem var(--font-jetbrains), sans-serif;
+  font:
+    600 1rem var(--font-jetbrains),
+    sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

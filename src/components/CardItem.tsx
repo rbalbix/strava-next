@@ -7,12 +7,22 @@ import { locale, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
 
-type Props = { equipment: Equipment; distance: number; movingTime: number };
+import { computeThresholdState } from '../utils/thresholds';
+
+type Props = {
+  equipment: Equipment;
+  distance: number;
+  movingTime: number;
+  thresholdKm?: number;
+  children?: React.ReactNode;
+};
 
 export default function CardItem({
   equipment: e,
   distance,
   movingTime,
+  thresholdKm,
+  children,
 }: Props) {
   const { showToast } = useToast();
   if (!e.date) return null;
@@ -75,8 +85,34 @@ export default function CardItem({
             </div>
           </div>
 
+          {thresholdKm && thresholdKm > 0 && (
+            <div className={styles.progressContainer} aria-hidden>
+              <div className={styles.progressBar}>
+                <div
+                  className={`${styles.progressFill} ${
+                    styles[
+                      computeThresholdState(
+                        equipmentDistance / 1000,
+                        thresholdKm,
+                      )
+                    ]
+                  }`}
+                  style={{
+                    width: `${Math.min(
+                      (equipmentDistance / 1000 / thresholdKm) * 100,
+                      100,
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
           <div className={styles.clear}></div>
         </button>
+
+        {/** allow embedding editors or extra content alongside the item */}
+        {children}
       </li>
     );
   }

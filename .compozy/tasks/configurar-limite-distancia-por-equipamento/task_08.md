@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem`
 type: frontend
 complexity: medium
@@ -22,7 +22,7 @@ Adicionar UI para editar o limite de distância dentro do modal de detalhe do eq
    - normal: neutro (<=80%)
    - warning: amarelo (>80% e <100%)
    - overdue: vermelho (>=100%)
-4. Quando não há threshold, mostrar `—` ou `Sem limite definido`.
+4. Quando não há threshold, não mostrar nada.
 </requirements>
 
 ## Subtasks
