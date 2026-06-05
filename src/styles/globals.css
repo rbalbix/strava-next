@@ -10,8 +10,9 @@ html {
 
 :root {
   --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-jetbrains: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
+  --font-jetbrains:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
   --text-base: 1.6rem;
   --text-sm: 1.4rem;
   --text-xs: 1.2rem;
@@ -38,6 +39,8 @@ html {
   --light-gray-notes: #888;
   --gray-notes: #555;
   --dark-gray: #222;
+
+  --red: #ff4d4d;
 
   --event-border: #666;
   --date-badge-border: #666;
@@ -130,7 +133,9 @@ html {
 }
 
 body {
-  font: 400 var(--text-base) var(--font-inter), sans-serif;
+  font:
+    400 var(--text-base) var(--font-inter),
+    sans-serif;
   overflow-y: auto;
 }
 

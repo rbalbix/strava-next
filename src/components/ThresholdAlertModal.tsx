@@ -1,4 +1,5 @@
 import { MdClose } from 'react-icons/md';
+import { IoBuildOutline } from 'react-icons/io5';
 import { locale } from '../utils/format';
 import styles from '../styles/components/ThresholdAlertModal.module.css';
 
@@ -23,12 +24,31 @@ export default function ThresholdAlertModal({
   onClose,
   onViewEquipment,
 }: ThresholdAlertModalProps) {
+  // Agrupar itens pelo mesmo gearName
+  const groupedItems = items.reduce(
+    (acc, item) => {
+      if (!acc[item.gearName]) {
+        acc[item.gearName] = {
+          gearId: item.gearId,
+          gearName: item.gearName,
+          equipments: [],
+        };
+      }
+      acc[item.gearName].equipments.push(item);
+      return acc;
+    },
+    {} as Record<
+      string,
+      { gearId: string; gearName: string; equipments: ThresholdAlertItem[] }
+    >,
+  );
+
   return (
     <div className={styles.alertModalContainer}>
       <header className={styles.header}>
         <div>
           <h2 id='modal-title-threshold-alert' className={styles.title}>
-            Equipamentos ultrapassaram o limite
+            Equipamentos que atingiram o limite configurado
           </h2>
           <p id='modal-desc-threshold-alert' className={styles.description}>
             Revise o equipamento abaixo e ajuste o limite se necessário.
@@ -50,36 +70,45 @@ export default function ThresholdAlertModal({
         </div>
       ) : (
         <ul className={styles.list}>
-          {items.map((item) => (
-            <li
-              key={`${item.gearId}-${item.equipmentId}`}
-              className={styles.item}
-            >
-              <div className={styles.details}>
-                <strong>{item.gearName}</strong>
-                <span className={styles.equipmentLabel}>{item.label}</span>
-                <span className={styles.metrics}>
-                  {locale.format(',.2f')(item.distanceKm)} km /{' '}
-                  {locale.format(',.2f')(item.thresholdKm)} km
-                </span>
+          {Object.values(groupedItems).map((group) => (
+            <li key={group.gearId} className={styles.gearGroup}>
+              <strong className={styles.gearName}>{group.gearName}</strong>
+              <div className={styles.equipmentsList}>
+                {group.equipments.map((item, idx) => (
+                  <div
+                    key={`${item.gearId}-${item.equipmentId}`}
+                    className={styles.item}
+                    onClick={() => onViewEquipment(item.gearId)}
+                  >
+                    <div>
+                      <div className={styles.labelContainer}>
+                        <span className={styles.equipmentLabel}>
+                          {item.label}
+                        </span>
+                        <IoBuildOutline
+                          className={styles.icon}
+                          aria-hidden='true'
+                          focusable='false'
+                          size={18}
+                        />
+                      </div>
+
+                      <div>
+                        <span className={styles.metrics}>
+                          <span className={styles.limitConfigured}>
+                            {locale.format(',.2f')(item.distanceKm)} km
+                          </span>{' '}
+                          / {locale.format(',.2f')(item.thresholdKm)} km
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <button
-                type='button'
-                className={styles.viewButton}
-                onClick={() => onViewEquipment(item.gearId)}
-              >
-                Ver equipamento
-              </button>
             </li>
           ))}
         </ul>
       )}
-
-      <footer className={styles.footer}>
-        <button type='button' className={styles.closeAction} onClick={onClose}>
-          Fechar
-        </button>
-      </footer>
     </div>
   );
 }

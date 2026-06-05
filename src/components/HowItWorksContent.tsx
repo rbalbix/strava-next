@@ -203,13 +203,13 @@ export default function HowItWorksContent({
         />
       </div>
       <Divider className={styles.divider} style={{ margin: 'auto' }} />
-      <h2>Limites de Distância por Equipamento</h2>
+      <h3>Limites de Distância por Equipamento</h3>
       <div>
         Você pode definir um limite (em km) para cada componente do seu
         equipamento a partir da tela de detalhe do equipamento. Quando a
         distância acumulada do componente atingir o limite definido, o
-        aplicativo exibe um alerta visual e uma modal de resumo que lista os
-        itens que precisam de atenção.
+        aplicativo exibe um alerta logo após fazer login com o Strava com um
+        resumo que lista os itens que precisam de atenção.
       </div>
       <ol>
         <li>
