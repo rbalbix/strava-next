@@ -40,10 +40,8 @@
   border-radius: 10%;
   border: 1px solid var(--date-badge-border);
   padding: 1px 4px;
-
   margin-left: -48px;
   margin-right: 0.5rem;
-
   background: var(--light-blue);
   float: left;
   text-align: center;
@@ -124,8 +122,7 @@
     sans-serif;
 }
 
-/* CardItem.module.css */
-
+/* Editor Toggle Container */
 .editorToggleContainer {
   margin-top: 0.5rem;
   padding: 0 0.5rem 0.5rem 0.5rem;
@@ -155,13 +152,95 @@
   outline-offset: 2px;
 }
 
-/* Estilos para o editor (se não estiver no modal principal) */
-:global(.thresholdEditor) {
+/* Cancel Button */
+.cancelButton {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+.cancelButton:focus {
+  outline: 2px solid #dc3545;
+  outline-offset: 2px;
+}
+
+/* Estilos para o editor (usando classes locais) */
+.thresholdEditor {
   margin: 0.5rem;
   padding: 0.75rem;
   background-color: #f5f5f5;
   border-radius: 6px;
   animation: slideDown 0.2s ease-out;
+}
+
+.thresholdRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  align-items: center;
+}
+
+.thresholdRow input {
+  width: 10rem;
+  flex: none;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  height: 2rem;
+  line-height: normal;
+}
+
+.thresholdRow input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.thresholdRow button {
+  padding: 0.25rem 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.thresholdRow button:hover {
+  background-color: #45a049;
+}
+
+.thresholdRow button:focus {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
+
+/* Remove as setas do input number */
+.thresholdRow input::-webkit-outer-spin-button,
+.thresholdRow input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.thresholdRow input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 @keyframes slideDown {
@@ -173,45 +252,6 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-:global(.thresholdRow) {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-}
-
-:global(.thresholdRow input) {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-:global(.thresholdRow input:focus) {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-:global(.thresholdRow button) {
-  padding: 0.5rem 1rem;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-:global(.thresholdRow button:hover) {
-  background-color: #45a049;
-}
-
-:global(.thresholdRow button:focus) {
-  outline: 2px solid #4caf50;
-  outline-offset: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -232,10 +272,27 @@
   .timeago {
     font-size: 0.9rem !important;
   }
+
+  .thresholdRow input {
+    width: 8rem;
+    font-size: 0.85rem;
+  }
+
+  .thresholdRow button {
+    padding: 0.2rem 0.8rem;
+  }
 }
 
 @media (max-width: 398px) {
   .caption {
     font-size: 1.15rem;
+  }
+
+  .thresholdRow {
+    flex-wrap: wrap;
+  }
+
+  .thresholdRow input {
+    width: 100%;
   }
 }
