@@ -11,7 +11,6 @@ export interface HowItWorksContentProps {
 }
 
 export default function HowItWorksContent({
-  showReferenceLink = false,
   showTopHeading = true,
 }: HowItWorksContentProps) {
   const BLUR_DATA_URL =
@@ -138,9 +137,9 @@ export default function HowItWorksContent({
       <div className={styles.screen}>
         <Image
           src='/images/threshold-screen.png'
-          alt='Lista de Componentes'
-          width={324}
-          height={350}
+          alt='Lista de equipamentos com alerta de limite atingido'
+          width={203}
+          height={387}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -155,10 +154,41 @@ export default function HowItWorksContent({
           Na seção de componentes, defina o valor do limite em km e clique em
           &quot;Salvar&quot;.
         </li>
+        <div className={styles.screen}>
+          <Image
+            src='/images/threshold-editor.png'
+            alt='Edição do limite de distância para um componente'
+            width={203}
+            height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
+          />
+        </div>
         <li>
           O limite é persistido e a barra de progresso será exibida em cada
-          item.
+          item. A barra de progresso é calculada com base na distância acumulada
+          do componente em relação ao limite definido. Se a distância acumulada
+          atingir ou ultrapassar o limite, a barra de progresso ficará vermelha
+          para indicar que o componente precisa de atenção. Se a barra estiver
+          amarela significa que o componente está se aproximando do limite
+          definido e pode precisar de manutenção em breve. Se a barra de
+          progresso estiver azul, significa que o componente ainda está dentro
+          do limite definido e não requer manutenção imediata.
         </li>
+        <div className={styles.screen}>
+          <Image
+            src='/images/threshold-progress-bar.png'
+            alt='Barra de progresso indicando o status do componente em relação ao limite definido'
+            width={203}
+            height={387}
+            loading='lazy'
+            placeholder='blur'
+            blurDataURL={BLUR_DATA_URL}
+            sizes='(max-width: 480px) 90vw, 240px'
+          />
+        </div>
       </ol>
       <Divider className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 4: Lista de Códigos dos Componentes</h2>
