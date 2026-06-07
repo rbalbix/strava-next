@@ -85,7 +85,7 @@
 }
 
 .limitConfigured {
-  color: var(--red);
+  color: var(--threshold-overdue);
 }
 
 .emptyState {

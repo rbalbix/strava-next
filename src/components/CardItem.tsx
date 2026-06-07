@@ -15,6 +15,8 @@ type Props = {
   movingTime: number;
   thresholdKm?: number;
   children?: React.ReactNode;
+  onToggleEditor?: () => void;
+  isEditorVisible?: boolean;
 };
 
 export default function CardItem({
@@ -23,6 +25,8 @@ export default function CardItem({
   movingTime,
   thresholdKm,
   children,
+  onToggleEditor,
+  isEditorVisible = false,
 }: Props) {
   const { showToast } = useToast();
   if (!e.date) return null;
@@ -48,6 +52,15 @@ export default function CardItem({
     </li>
   );
 
+  const handleCardItemClick = () => {
+    copyEventDetailsToClipboard(e, distance, movingTime);
+    // showToast('Detalhes copiados', 'success');
+
+    if (onToggleEditor) {
+      onToggleEditor();
+    }
+  };
+
   if (e.id === Equipments.Lubrification.id && equipmentDistance === 0) {
     return renderEvent('Bike lubrificada.');
   }
@@ -62,11 +75,8 @@ export default function CardItem({
         <button
           type='button'
           className={styles.eventButton}
-          onClick={() => {
-            copyEventDetailsToClipboard(e, distance, movingTime);
-            showToast('Detalhes copiados', 'success');
-          }}
-          aria-label={`Copiar detalhes de ${e.caption}`}
+          onClick={handleCardItemClick}
+          aria-label={`${isEditorVisible ? 'Fechar editor e' : 'Abrir editor e'} copiar detalhes de ${e.caption}`}
         >
           <div className={styles.firstLine}>
             <div className={styles.dateAndCaption}>
@@ -75,6 +85,32 @@ export default function CardItem({
             </div>
             <div className={styles.timeago}>{timeAgo}</div>
           </div>
+
+          {/* Verifica se o valor é positivo */}
+          {thresholdKm !== undefined &&
+            thresholdKm !== null &&
+            thresholdKm > 0 && (
+              <div className={styles.progressContainer} aria-hidden>
+                <div className={styles.progressBar}>
+                  <div
+                    className={`${styles.progressFill} ${
+                      styles[
+                        computeThresholdState(
+                          equipmentDistance / 1000,
+                          thresholdKm,
+                        )
+                      ]
+                    }`}
+                    style={{
+                      width: `${Math.min(
+                        (equipmentDistance / 1000 / thresholdKm) * 100,
+                        100,
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
           <div className={styles.badges}>
             <div className={styles.chipbadge}>
@@ -85,33 +121,10 @@ export default function CardItem({
             </div>
           </div>
 
-          {thresholdKm && thresholdKm > 0 && (
-            <div className={styles.progressContainer} aria-hidden>
-              <div className={styles.progressBar}>
-                <div
-                  className={`${styles.progressFill} ${
-                    styles[
-                      computeThresholdState(
-                        equipmentDistance / 1000,
-                        thresholdKm,
-                      )
-                    ]
-                  }`}
-                  style={{
-                    width: `${Math.min(
-                      (equipmentDistance / 1000 / thresholdKm) * 100,
-                      100,
-                    )}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )}
-
           <div className={styles.clear}></div>
         </button>
 
-        {/** allow embedding editors or extra content alongside the item */}
+        {/** Editor (children) - só aparece quando isEditorVisible é true */}
         {children}
       </li>
     );

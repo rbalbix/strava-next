@@ -19,13 +19,24 @@ interface ThresholdAlertModalProps {
   onViewEquipment: (gearId: string) => void;
 }
 
-export default function ThresholdAlertModal({
-  items,
-  onClose,
-  onViewEquipment,
-}: ThresholdAlertModalProps) {
-  // Agrupar itens pelo mesmo gearName
-  const groupedItems = items.reduce(
+// Utilitários fora do componente para melhor performance
+const isValidThreshold = (value: number): boolean => {
+  return (
+    typeof value === 'number' &&
+    !isNaN(value) &&
+    isFinite(value) &&
+    value !== null &&
+    value !== undefined &&
+    value > 0
+  );
+};
+
+const isValidItem = (item: ThresholdAlertItem): boolean => {
+  return isValidThreshold(item.thresholdKm);
+};
+
+const groupItemsByGear = (items: ThresholdAlertItem[]) => {
+  return items.reduce(
     (acc, item) => {
       if (!acc[item.gearName]) {
         acc[item.gearName] = {
@@ -42,6 +53,27 @@ export default function ThresholdAlertModal({
       { gearId: string; gearName: string; equipments: ThresholdAlertItem[] }
     >,
   );
+};
+
+export default function ThresholdAlertModal({
+  items,
+  onClose,
+  onViewEquipment,
+}: ThresholdAlertModalProps) {
+  // Filtra itens válidos
+  const validItems = items.filter(isValidItem);
+
+  // Agrupa os itens válidos
+  const groupedItems = groupItemsByGear(validItems);
+
+  const hasValidItems = Object.keys(groupedItems).length > 0;
+
+  const handleKeyDown = (gearId: string) => (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onViewEquipment(gearId);
+    }
+  };
 
   return (
     <div className={styles.alertModalContainer}>
@@ -64,9 +96,9 @@ export default function ThresholdAlertModal({
         </button>
       </header>
 
-      {items.length === 0 ? (
+      {!hasValidItems ? (
         <div className={styles.emptyState}>
-          <p>Nenhum equipamento atrasado no momento.</p>
+          <p>Nenhum equipamento com limite configurado no momento.</p>
         </div>
       ) : (
         <ul className={styles.list}>
@@ -74,11 +106,15 @@ export default function ThresholdAlertModal({
             <li key={group.gearId} className={styles.gearGroup}>
               <strong className={styles.gearName}>{group.gearName}</strong>
               <div className={styles.equipmentsList}>
-                {group.equipments.map((item, idx) => (
+                {group.equipments.map((item) => (
                   <div
                     key={`${item.gearId}-${item.equipmentId}`}
                     className={styles.item}
                     onClick={() => onViewEquipment(item.gearId)}
+                    onKeyDown={handleKeyDown(item.gearId)}
+                    role='button'
+                    tabIndex={0}
+                    aria-label={`Ver detalhes de ${item.label} do equipamento ${item.gearName}`}
                   >
                     <div>
                       <div className={styles.labelContainer}>

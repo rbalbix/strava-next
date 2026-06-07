@@ -1,18 +1,18 @@
-import { MdClose } from 'react-icons/md';
 import { useEffect, useState } from 'react';
-import type { GearStats } from '../services/gear';
-import { locale, secondsToHms } from '../utils/format';
-import styles from '../styles/components/CardDetailModal.module.css';
-import CardItem from './CardItem';
-import StatCard from './StatCard';
-import { apiClient } from '../lib/apiClient';
+import { MdClose, MdOutlineSaveAlt } from 'react-icons/md';
 import { useToast } from '../contexts/ToastContext';
+import type { EquipmentThresholds } from '../contracts/api';
+import { apiClient } from '../lib/apiClient';
+import type { GearStats } from '../services/gear';
+import styles from '../styles/components/CardDetailModal.module.css';
+import { locale, secondsToHms } from '../utils/format';
 import {
   getActivityVisualType,
   isBikeActivityType,
   renderActivityIcon,
 } from './activity-type-visual';
-import type { EquipmentThresholds } from '../contracts/api';
+import CardItem from './CardItem';
+import StatCard from './StatCard';
 
 interface CardDetailModalProps {
   gearStat: GearStats;
@@ -31,6 +31,9 @@ export default function CardDetailModal({
 
   const [thresholds, setThresholds] = useState<EquipmentThresholds>({});
   const [inputs, setInputs] = useState<Record<string, string>>({});
+
+  // Estado para controlar qual equipamento está com o editor visível
+  const [visibleEditorId, setVisibleEditorId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -64,10 +67,23 @@ export default function CardDetailModal({
         JSON.stringify(updated || {}),
       );
       showToast('Limite salvo', 'success');
+
+      // Limpa o input e esconde o editor após salvar
+      setInputs((s) => ({ ...s, [equipmentId]: '' }));
+      setVisibleEditorId(null); // 👈 Esconde o editor após salvar
     } catch (err) {
       showToast('Falha ao salvar limite', 'error');
     }
   }
+
+  // Função para toggle do editor
+  const toggleEditor = (equipmentId: string) => {
+    if (visibleEditorId === equipmentId) {
+      setVisibleEditorId(null); // 👈 Se já está visível, esconde
+    } else {
+      setVisibleEditorId(equipmentId); // 👈 Mostra o editor para este equipamento
+    }
+  };
 
   return (
     <div className={styles.cardDetailModalContainer}>
@@ -102,11 +118,6 @@ export default function CardDetailModal({
             </div>
           </div>
           <section>
-            {/* <span>
-              {`[${count} | 
-              ${locale.format(',.2f')(distance / 1000)}km | 
-              ${secondsToHms(movingTime)}h]`}
-            </span> */}
             <div className={styles.statCardContainer}>
               <StatCard value={count} label='Atividades' icon='📊' />
               <StatCard
@@ -126,6 +137,8 @@ export default function CardDetailModal({
           {isBikeActivity &&
             equipments.map((e) => {
               const current = thresholds[gearStat.id]?.[e.id];
+              const isEditorVisible = visibleEditorId === e.id;
+
               return (
                 <CardItem
                   key={e.id}
@@ -133,32 +146,40 @@ export default function CardDetailModal({
                   distance={distance}
                   movingTime={movingTime}
                   thresholdKm={current}
+                  onToggleEditor={() => toggleEditor(e.id)} // 👈 Passa a função para o CardItem
+                  isEditorVisible={isEditorVisible} // 👈 Passa o estado de visibilidade
                 >
-                  <div className={styles.thresholdEditor}>
-                    <label>
-                      <div>Limite de revisão (km)</div>
-                      <div className={styles.thresholdRow}>
-                        <input
-                          type='number'
-                          min={0}
-                          value={inputs[e.id] ?? current ?? ''}
-                          onChange={(ev) =>
-                            setInputs((s) => ({
-                              ...s,
-                              [e.id]: ev.target.value,
-                            }))
-                          }
-                          placeholder='Sem limite definido'
-                        />
-                        <button
-                          type='button'
-                          onClick={() => saveThreshold(e.id)}
-                        >
-                          Salvar
-                        </button>
-                      </div>
-                    </label>
-                  </div>
+                  {/* Editor visível apenas quando isEditorVisible for true */}
+                  {isEditorVisible && (
+                    <div className={styles.thresholdEditor}>
+                      <label>
+                        <div className={styles.thresholdRow}>
+                          <input
+                            type='number'
+                            min={0}
+                            value={
+                              inputs[e.id] ??
+                              (current && current !== 0 ? current : '')
+                            } // 👈 Não mostra 0
+                            onChange={(ev) =>
+                              setInputs((s) => ({
+                                ...s,
+                                [e.id]: ev.target.value,
+                              }))
+                            }
+                            placeholder='Limite (km)'
+                            autoFocus // 👈 Foco automático ao abrir
+                          />
+                          <button
+                            type='button'
+                            onClick={() => saveThreshold(e.id)}
+                          >
+                            <MdOutlineSaveAlt size={20} />
+                          </button>
+                        </div>
+                      </label>
+                    </div>
+                  )}
                 </CardItem>
               );
             })}

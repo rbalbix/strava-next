@@ -40,7 +40,8 @@ html {
   --gray-notes: #555;
   --dark-gray: #222;
 
-  --red: #ff4d4d;
+  --threshold-warning: #f2b705;
+  --threshold-overdue: #e05b5b;
 
   --event-border: #666;
   --date-badge-border: #666;
@@ -56,6 +57,7 @@ html {
   --start-gradient-color: #ff5733;
   --end-gradient-color: #fdb927;
   --mountain-bike-green: #4fcf6b;
+  --mountain-bike-green-hover: #45a049;
   --toast-success-bg: #d8ebff;
   --toast-success-border: rgba(0, 122, 255, 0.35);
 
