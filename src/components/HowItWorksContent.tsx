@@ -137,9 +137,9 @@ export default function HowItWorksContent({
       <div className={styles.screen}>
         <Image
           src='/images/threshold-screen.png'
-          alt='Lista de Componentes'
-          width={324}
-          height={350}
+          alt='Lista de equipamentos com alerta de limite atingido'
+          width={203}
+          height={387}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
