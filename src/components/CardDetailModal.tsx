@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { MdClose, MdOutlineSaveAlt } from 'react-icons/md';
 import { useToast } from '../contexts/ToastContext';
 import type { EquipmentThresholds } from '../contracts/api';
@@ -31,10 +31,12 @@ export default function CardDetailModal({
 
   const [thresholds, setThresholds] = useState<EquipmentThresholds>({});
   const [inputs, setInputs] = useState<Record<string, string>>({});
-
-  // Estado para controlar qual equipamento está com o editor visível
   const [visibleEditorId, setVisibleEditorId] = useState<string | null>(null);
 
+  // Refs para os inputs
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Carrega thresholds do backend
   useEffect(() => {
     let mounted = true;
     apiClient
@@ -52,6 +54,27 @@ export default function CardDetailModal({
     };
   }, []);
 
+  // Sincroniza inputs com thresholds sempre que thresholds mudar
+  useEffect(() => {
+    const newInputs: Record<string, string> = {};
+
+    if (thresholds && gearStat.id) {
+      const gearThresholds = thresholds[gearStat.id];
+      if (gearThresholds) {
+        Object.entries(gearThresholds).forEach(([equipmentId, value]) => {
+          if (value && value > 0) {
+            newInputs[equipmentId] = value.toString();
+          }
+        });
+      }
+    }
+
+    setInputs((prev) => ({
+      ...newInputs,
+      ...prev,
+    }));
+  }, [thresholds, gearStat.id]);
+
   async function saveThreshold(equipmentId: string) {
     const raw = inputs[equipmentId];
     const value = raw === '' ? 0 : Number(raw);
@@ -66,22 +89,47 @@ export default function CardDetailModal({
         'equipmentThresholds',
         JSON.stringify(updated || {}),
       );
-      showToast('Limite salvo', 'success');
+      showToast(value > 0 ? 'Limite salvo' : 'Limite removido', 'success');
 
-      // Limpa o input e esconde o editor após salvar
-      setInputs((s) => ({ ...s, [equipmentId]: '' }));
-      setVisibleEditorId(null); // 👈 Esconde o editor após salvar
+      // Apenas esconde o editor, NÃO limpa o input
+      setVisibleEditorId(null);
     } catch (err) {
       showToast('Falha ao salvar limite', 'error');
     }
   }
 
   // Função para toggle do editor
-  const toggleEditor = (equipmentId: string) => {
+  const toggleEditor = (equipmentId: string, currentThreshold?: number) => {
     if (visibleEditorId === equipmentId) {
-      setVisibleEditorId(null); // 👈 Se já está visível, esconde
+      setVisibleEditorId(null);
     } else {
-      setVisibleEditorId(equipmentId); // 👈 Mostra o editor para este equipamento
+      setVisibleEditorId(equipmentId);
+
+      // Garante que o input tenha o valor atual
+      const currentValue =
+        currentThreshold && currentThreshold > 0
+          ? currentThreshold.toString()
+          : '';
+      setInputs((s) => ({
+        ...s,
+        [equipmentId]: currentValue,
+      }));
+
+      // Foca no input após abrir (delay para garantir renderização)
+      setTimeout(() => {
+        inputRefs.current[equipmentId]?.focus();
+      }, 50);
+    }
+  };
+
+  // Função para lidar com Enter no input
+  const handleInputKeyDown = (
+    equipmentId: string,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveThreshold(equipmentId);
     }
   };
 
@@ -146,33 +194,38 @@ export default function CardDetailModal({
                   distance={distance}
                   movingTime={movingTime}
                   thresholdKm={current}
-                  onToggleEditor={() => toggleEditor(e.id)} // 👈 Passa a função para o CardItem
-                  isEditorVisible={isEditorVisible} // 👈 Passa o estado de visibilidade
+                  onToggleEditor={() => toggleEditor(e.id, current)}
+                  isEditorVisible={isEditorVisible}
                 >
-                  {/* Editor visível apenas quando isEditorVisible for true */}
                   {isEditorVisible && (
                     <div className={styles.thresholdEditor}>
                       <label>
                         <div className={styles.thresholdRow}>
                           <input
+                            ref={(el) => {
+                              inputRefs.current[e.id] = el;
+                            }}
                             type='number'
                             min={0}
+                            step={100}
                             value={
                               inputs[e.id] ??
-                              (current && current !== 0 ? current : '')
-                            } // 👈 Não mostra 0
+                              (current && current > 0 ? current : '')
+                            }
                             onChange={(ev) =>
                               setInputs((s) => ({
                                 ...s,
                                 [e.id]: ev.target.value,
                               }))
                             }
+                            onKeyDown={(ev) => handleInputKeyDown(e.id, ev)}
                             placeholder='Limite (km)'
-                            autoFocus // 👈 Foco automático ao abrir
+                            autoFocus
                           />
                           <button
                             type='button'
                             onClick={() => saveThreshold(e.id)}
+                            aria-label='Salvar limite'
                           >
                             <MdOutlineSaveAlt size={20} />
                           </button>

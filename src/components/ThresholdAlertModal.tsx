@@ -68,13 +68,6 @@ export default function ThresholdAlertModal({
 
   const hasValidItems = Object.keys(groupedItems).length > 0;
 
-  const handleKeyDown = (gearId: string) => (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onViewEquipment(gearId);
-    }
-  };
-
   return (
     <div className={styles.alertModalContainer}>
       <header className={styles.header}>
@@ -111,7 +104,6 @@ export default function ThresholdAlertModal({
                     key={`${item.gearId}-${item.equipmentId}`}
                     className={styles.item}
                     onClick={() => onViewEquipment(item.gearId)}
-                    onKeyDown={handleKeyDown(item.gearId)}
                     role='button'
                     tabIndex={0}
                     aria-label={`Ver detalhes de ${item.label} do equipamento ${item.gearName}`}
