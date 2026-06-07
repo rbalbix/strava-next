@@ -170,11 +170,11 @@ export default function HowItWorksContent({
           item. A barra de progresso é calculada com base na distância acumulada
           do componente em relação ao limite definido. Se a distância acumulada
           atingir ou ultrapassar o limite, a barra de progresso ficará vermelha
-          para indicar que o componente precisa de atenção. Se a barra de
+          para indicar que o componente precisa de atenção. Se a barra estiver
+          amarela significa que o componente está se aproximando do limite
+          definido e pode precisar de manutenção em breve. Se a barra de
           progresso estiver azul, significa que o componente ainda está dentro
-          do limite definido e não requer manutenção imediata. E se a barra
-          estiver amarela significa que o componente está se aproximando do
-          limite definido e pode precisar de manutenção em breve.
+          do limite definido e não requer manutenção imediata.
         </li>
         <div className={styles.screen}>
           <Image
