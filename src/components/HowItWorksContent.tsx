@@ -203,6 +203,28 @@ export default function HowItWorksContent({
           sizes='(max-width: 480px) 90vw, 320px'
         />
       </div>
+      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <h3>Limites de Distância por Equipamento</h3>
+      <div>
+        Você pode definir um limite (em km) para cada componente do seu
+        equipamento a partir da tela de detalhe do equipamento. Quando a
+        distância acumulada do componente atingir o limite definido, o
+        aplicativo exibe um alerta logo após fazer login com o Strava com um
+        resumo que lista os itens que precisam de atenção.
+      </div>
+      <ol>
+        <li>
+          Acesse o detalhe do equipamento clicando no cartão correspondente.
+        </li>
+        <li>
+          Na seção de componentes, defina o valor do limite em km e clique em
+          &quot;Salvar&quot;.
+        </li>
+        <li>
+          O limite é persistido e a barra de progresso será exibida em cada
+          item.
+        </li>
+      </ol>
       {showReferenceLink ? (
         <>
           <Divider className={styles.divider} style={{ margin: 'auto' }} />

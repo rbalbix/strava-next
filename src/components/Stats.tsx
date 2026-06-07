@@ -4,8 +4,9 @@ import { TbBrandStrava } from 'react-icons/tb';
 import type { DetailedAthlete, ActivityStats } from 'strava';
 import { apiClient } from '../lib/apiClient';
 import { AuthContext } from '../contexts/AuthContext';
-import type { DashboardResponse } from '../contracts/api';
+import type { DashboardResponse, EquipmentThresholds } from '../contracts/api';
 import type { GearStats } from '../services/gear';
+import { computeThresholdState } from '../utils/thresholds';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -18,6 +19,64 @@ type CachedDashboard = {
   data: DashboardResponse;
   cacheTime: number;
 };
+
+type ThresholdAlertItem = {
+  gearId: string;
+  gearName: string;
+  equipmentId: string;
+  label: string;
+  distanceKm: number;
+  thresholdKm: number;
+  state: 'normal' | 'warning' | 'overdue';
+};
+
+function buildThresholdAlertItems(
+  dashboard: DashboardResponse,
+): ThresholdAlertItem[] {
+  const thresholds = dashboard.equipmentThresholds ?? {};
+
+  return dashboard.gearStats.flatMap((gearStat) => {
+    const gearThresholds = thresholds[gearStat.id] ?? {};
+
+    return gearStat.equipments
+      .map((equipment) => {
+        const thresholdKm = gearThresholds[equipment.id];
+        const distanceKm = (equipment.distance ?? 0) / 1000;
+        const state = computeThresholdState(distanceKm, thresholdKm);
+
+        if (state === 'no-threshold') {
+          return null;
+        }
+
+        return {
+          gearId: gearStat.id,
+          gearName: gearStat.name,
+          equipmentId: equipment.id,
+          label: equipment.caption,
+          distanceKm,
+          thresholdKm: thresholdKm ?? 0,
+          state,
+        };
+      })
+      .filter((item): item is ThresholdAlertItem => item !== null);
+  });
+}
+
+function openThresholdAlert(
+  dashboard: DashboardResponse,
+  openModal: (modalType: string, data?: unknown) => void,
+) {
+  const overdueItems = buildThresholdAlertItems(dashboard).filter(
+    (item) => item.state === 'overdue',
+  );
+
+  if (overdueItems.length > 0) {
+    openModal('threshold-alert', {
+      items: overdueItems,
+      gearStats: dashboard.gearStats,
+    });
+  }
+}
 
 function readCachedDashboard(): CachedDashboard | null {
   try {
@@ -39,6 +98,9 @@ function readCachedDashboard(): CachedDashboard | null {
     const athlete = JSON.parse(athleteRaw) as DetailedAthlete;
     const athleteStats = JSON.parse(athleteStatsRaw) as ActivityStats;
     const gearStats = JSON.parse(gearStatsRaw) as GearStats[];
+    const equipmentThresholds = JSON.parse(
+      sessionStorage.getItem('equipmentThresholds') ?? '{}',
+    ) as EquipmentThresholds;
     const hasGear = hasGearRaw === null ? true : hasGearRaw === 'true';
     const hasActivities =
       hasActivitiesRaw === null ? true : hasActivitiesRaw === 'true';
@@ -50,6 +112,7 @@ function readCachedDashboard(): CachedDashboard | null {
         hasGear,
         hasActivities,
         gearStats,
+        equipmentThresholds,
       },
       cacheTime,
     };
@@ -59,8 +122,13 @@ function readCachedDashboard(): CachedDashboard | null {
 }
 
 export default function Stats() {
-  const { setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut } =
-    useContext(AuthContext);
+  const {
+    setAthleteInfo,
+    setAthleteInfoStats,
+    setErrorInfo,
+    signOut,
+    openModal,
+  } = useContext(AuthContext);
 
   const [hasGear, setHasGear] = useState<boolean>(true);
   const [hasActivities, setHasActivities] = useState<boolean>(true);
@@ -87,6 +155,7 @@ export default function Stats() {
       setHasGear(cachedData.data.hasGear);
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
+      openThresholdAlert(cachedData.data, openModal);
     }
 
     if (cachedData) {
@@ -109,6 +178,10 @@ export default function Stats() {
           'gearStats',
           JSON.stringify(data.gearStats || []),
         );
+        sessionStorage.setItem(
+          'equipmentThresholds',
+          JSON.stringify(data.equipmentThresholds ?? {}),
+        );
         sessionStorage.setItem('hasGear', String(data.hasGear));
         sessionStorage.setItem('hasActivities', String(data.hasActivities));
         sessionStorage.setItem('athleteCacheTime', Date.now().toString());
@@ -118,6 +191,7 @@ export default function Stats() {
         setHasGear(data.hasGear);
         setHasActivities(data.hasActivities);
         setGearStats(data.gearStats || []);
+        openThresholdAlert(data, openModal);
       } catch (error) {
         if (isMounted) {
           setErrorInfo(error);

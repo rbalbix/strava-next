@@ -6,9 +6,11 @@ import AthleteStats from './AthleteStats';
 import CardDetailModal from './CardDetailModal';
 import ComponentInfo from './ComponentInfo';
 import InitialInfoModal from './InitialInfoModal';
+import ThresholdAlertModal from './ThresholdAlertModal';
 
 export default function ModalContainer() {
-  const { activeModal, modalData, closeModal } = useContext(AuthContext);
+  const { activeModal, modalData, closeModal, openModal } =
+    useContext(AuthContext);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -22,6 +24,8 @@ export default function ModalContainer() {
         return 'modal-title-info';
       case 'card-detail':
         return 'modal-title-card-detail';
+      case 'threshold-alert':
+        return 'modal-title-threshold-alert';
       default:
         return 'modal-title';
     }
@@ -33,6 +37,8 @@ export default function ModalContainer() {
         return 'modal-desc-equipments';
       case 'info':
         return 'modal-desc-info';
+      case 'threshold-alert':
+        return 'modal-desc-threshold-alert';
       default:
         return undefined;
     }
@@ -54,7 +60,8 @@ export default function ModalContainer() {
 
   useEffect(() => {
     if (activeModal) {
-      lastActiveElementRef.current = document.activeElement as HTMLElement | null;
+      lastActiveElementRef.current =
+        document.activeElement as HTMLElement | null;
 
       // Salva a posição atual do scroll
       const scrollY = window.scrollY;
@@ -181,9 +188,43 @@ export default function ModalContainer() {
       break;
     case 'card-detail':
       modalContent = (
-        <CardDetailModal gearStat={modalData as GearStats} onClose={closeModal} />
+        <CardDetailModal
+          gearStat={modalData as GearStats}
+          onClose={closeModal}
+        />
       );
       break;
+    case 'threshold-alert': {
+      const payload = modalData as {
+        items?: Array<{
+          gearId: string;
+          gearName: string;
+          equipmentId: string;
+          label: string;
+          distanceKm: number;
+          thresholdKm: number;
+          state: 'normal' | 'warning' | 'overdue';
+        }>;
+        gearStats?: GearStats[];
+      };
+
+      modalContent = (
+        <ThresholdAlertModal
+          items={payload.items ?? []}
+          onClose={closeModal}
+          onViewEquipment={(gearId) => {
+            const selectedGear = payload.gearStats?.find(
+              (gear) => gear.id === gearId,
+            );
+            closeModal();
+            if (selectedGear) {
+              openModal('card-detail', selectedGear);
+            }
+          }}
+        />
+      );
+      break;
+    }
     default:
       return null;
   }

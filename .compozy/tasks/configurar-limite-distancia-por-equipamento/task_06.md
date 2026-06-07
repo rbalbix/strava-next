@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 title: Carregar thresholds em `Stats.tsx` e acionar lógica de alerta
 type: frontend
 complexity: medium

@@ -259,6 +259,27 @@ As métricas são persistidas no Redis para refletir contagem agregada entre ins
 7. Simular envio de email interno e validar `email_sent_total` (ou `email_failed_total` em caso de erro).
 8. Validar logs estruturados (`pino`) nos módulos de webhook, estatísticas, tokens e email.
 
+## 🔔 Limites de Distância por Equipamento
+
+Esta funcionalidade permite que o usuário defina um limite de distância (em km) para cada componente do equipamento (por exemplo, `chain`, `tire`, `brake pads`). O aplicativo compara a distância acumulada do equipamento com o limite configurado e mostra indicadores visuais quando o limite é alcançado ou ultrapassado.
+
+- Chave Redis: `strava:equipment-thresholds:<athleteId>` — armazena JSON com o formato `{ [gearId]: { [equipmentId]: number } }` (limite em km).
+- Ao abrir o painel, se algum equipamento estiver `overdue` (>= 100% do limite), uma modal de alerta será exibida listando os itens afetados.
+- Cada `CardItem` exibe uma barra de progresso compacta quando houver limite configurado:
+  - `normal`: < 80%
+  - `warning`: 80–100%
+  - `overdue`: >= 100%
+
+Como testar localmente:
+
+```sh
+# rodar apenas os testes relacionados
+yarn vitest tests/unit/components/card-detail-modal.save.test.tsx tests/unit/components/card-item.progress.test.tsx
+
+# rodar todos os testes
+yarn vitest
+```
+
 ### Testes automatizados
 
 O projeto possui cobertura automatizada para:
@@ -378,18 +399,20 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 </a>
 
 <!-- TEST_STATUS_START -->
+
 ## Test Status
 
 Last update: 2026-03-04T15:01:07.807Z
 
-| Metric | Coverage |
-| --- | ---: |
-| Lines | 99.50% |
-| Statements | 99.50% |
-| Functions | 97.91% |
-| Branches | 94.67% |
+| Metric     | Coverage |
+| ---------- | -------: |
+| Lines      |   99.50% |
+| Statements |   99.50% |
+| Functions  |   97.91% |
+| Branches   |   94.67% |
 
 Run locally:
+
 - `yarn test:unit`
 - `yarn test:regression`
 - `yarn test:coverage`

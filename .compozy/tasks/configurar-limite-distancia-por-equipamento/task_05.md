@@ -1,5 +1,5 @@
 ---
-status: pending
+status: complete
 title: Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds
 type: frontend
 complexity: low

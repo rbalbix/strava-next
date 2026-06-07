@@ -27,8 +27,8 @@ interface HomeProps {
 }
 
 function HomeContent() {
-  const { codeReturned } = useContext(AuthContext);
-  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'v0.2.0';
+  const { codeReturned, openModal } = useContext(AuthContext);
+  const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || 'v0.3.0';
 
   return (
     <main
@@ -59,21 +59,20 @@ function HomeContent() {
               >
                 Entrar com Strava
               </Link>
-              <Link href='/como-funciona' className={styles.ctaSecondary}>
+              <button
+                type='button'
+                onClick={() => openModal('info')}
+                className={styles.ctaSecondary}
+                aria-label='Abrir informações'
+              >
                 Como funciona
-              </Link>
+              </button>
             </div>
           </div>
 
           <div className={styles.versionMark}>
             <ChainIcon className={styles.chainIcon} />
             <small className={styles.versionText}>{appVersion}</small>
-            <nav className={styles.marketingNav} aria-label='Conteúdo público'>
-              <Link href='/como-funciona'>Como funciona</Link>
-              <Link href='/faq'>FAQ</Link>
-              <Link href='/privacidade'>Privacidade</Link>
-              <Link href='/contato'>Contato</Link>
-            </nav>
           </div>
         </>
       )}

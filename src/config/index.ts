@@ -24,6 +24,8 @@ export const REDIS_KEYS = {
   auth: (athleteId: number) => `strava:auth:${athleteId}`,
   activities: (athleteId: number) => `strava:activities:${athleteId}`,
   statistics: (athleteId: number) => `strava:statistics:${athleteId}`,
+  equipmentThresholds: (athleteId: number) =>
+    `strava:equipment-thresholds:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
 };

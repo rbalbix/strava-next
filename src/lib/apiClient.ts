@@ -1,4 +1,10 @@
-import type { DashboardResponse, LogoutResponse } from '../contracts/api';
+import type {
+  DashboardResponse,
+  EquipmentThresholds,
+  EquipmentThresholdsRequest,
+  EquipmentThresholdsResponse,
+  LogoutResponse,
+} from '../contracts/api';
 
 async function requestJson<TResponse>(
   input: RequestInfo | URL,
@@ -16,6 +22,18 @@ async function requestJson<TResponse>(
 
 const apiClient = {
   getDashboard: () => requestJson<DashboardResponse>('/api/app/dashboard'),
+  getEquipmentThresholds: (): Promise<EquipmentThresholds> =>
+    requestJson<EquipmentThresholdsResponse>(
+      '/api/app/equipment-thresholds',
+    ).then((response) => response.equipmentThresholds),
+  saveEquipmentThreshold: (
+    payload: EquipmentThresholdsRequest,
+  ): Promise<EquipmentThresholds> =>
+    requestJson<EquipmentThresholdsResponse>('/api/app/equipment-thresholds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then((response) => response.equipmentThresholds),
   logout: () =>
     requestJson<LogoutResponse>('/api/app/logout', { method: 'POST' }),
 };

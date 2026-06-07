@@ -1,0 +1,496 @@
+.alertModalContainer {
+  padding: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 280px;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+  max-height: none;
+}
+
+.modalWrapper {
+  width: 90vw;
+  max-width: 600px;
+  margin: 0 auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-right: 2.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark-gray);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.description {
+  margin: 0.15rem 0 0;
+  color: var(--dark-gray);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.closeButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  color: inherit;
+  font-size: 1.25rem;
+  z-index: 1001;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
+}
+
+.list {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  max-height: 60vh;
+  overflow-y: auto;
+  /* Esconde a barra de rolagem mantendo a funcionalidade */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+/* Esconde a barra de rolagem no Chrome/Safari/Edge */
+.list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+
+/* Remove qualquer vestígio da scrollbar */
+.list::-webkit-scrollbar-track,
+.list::-webkit-scrollbar-thumb,
+.list::-webkit-scrollbar-thumb:hover {
+  display: none;
+}
+
+.gearGroup {
+  margin-bottom: 0.1rem;
+  list-style: none;
+}
+
+.gearName {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 1.5px solid #e0e0e0;
+  word-break: break-word;
+}
+
+.equipmentsList {
+  padding-left: 0.5rem;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  padding: 0.35rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  word-break: break-word;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.item:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.item:active {
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(0.99);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--light-blue);
+  outline-offset: 2px;
+}
+
+.labelContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.equipmentLabel {
+  display: block;
+  color: var(--dark-gray);
+  opacity: 0.8;
+  font-size: 1.1rem;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.icon {
+  color: var(--light-blue);
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.metrics {
+  color: var(--dark-gray);
+  font:
+    400 0.95rem 'JetBrains Mono',
+    monospace;
+  display: inline-block;
+  word-break: break-all;
+  margin-top: 0.1rem;
+}
+
+.limitConfigured {
+  color: var(--threshold-overdue);
+  font-weight: 600;
+}
+
+.emptyState {
+  padding: 1.5rem 1rem;
+  color: var(--dark-gray);
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* ==================== MEDIA QUERIES ==================== */
+
+/* Telas médias (tablets) */
+@media (max-width: 768px) {
+  .alertModalContainer {
+    padding: 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .description {
+    font-size: 0.95rem;
+  }
+
+  .gearName {
+    font-size: 1.2rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .equipmentLabel {
+    font-size: 1rem;
+  }
+
+  .metrics {
+    font-size: 0.9rem;
+  }
+
+  .closeButton {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.1rem;
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .item {
+    padding: 0.3rem;
+  }
+
+  .equipmentsList {
+    gap: 0.1rem;
+  }
+
+  .list {
+    gap: 0.2rem;
+    max-height: 55vh; /* Um pouco menor em tablets */
+  }
+}
+
+/* Telas pequenas (celulares) */
+@media (max-width: 580px) {
+  .alertModalContainer {
+    padding: 0.5rem;
+    min-width: auto;
+    gap: 0.35rem;
+  }
+
+  .modalWrapper {
+    width: 95vw;
+  }
+
+  .header {
+    padding-right: 2rem;
+    gap: 0.35rem;
+  }
+
+  .title {
+    font-size: 1.2rem;
+    line-height: 1.3;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    margin-top: 0.1rem;
+    line-height: 1.3;
+  }
+
+  .closeButton {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .gearName {
+    font-size: 1.1rem;
+    margin-bottom: 0.15rem;
+    padding-bottom: 0.1rem;
+  }
+
+  .equipmentsList {
+    padding-left: 0.25rem;
+    gap: 0.1rem;
+  }
+
+  .item {
+    padding: 0.25rem;
+    gap: 0.3rem;
+  }
+
+  .labelContainer {
+    gap: 0.25rem;
+  }
+
+  .equipmentLabel {
+    font-size: 0.95rem;
+  }
+
+  .icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .metrics {
+    font-size: 0.85rem;
+    margin-top: 0.05rem;
+  }
+
+  .emptyState {
+    padding: 1rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .list {
+    max-height: 50vh;
+    gap: 0.15rem;
+  }
+}
+
+/* Telas muito pequenas (celulares pequenos) */
+@media (max-width: 380px) {
+  .title {
+    font-size: 1rem;
+  }
+
+  .description {
+    font-size: 0.85rem;
+  }
+
+  .gearName {
+    font-size: 1rem;
+    margin-bottom: 0.1rem;
+  }
+
+  .equipmentLabel {
+    font-size: 0.9rem;
+  }
+
+  .metrics {
+    font-size: 0.8rem;
+  }
+
+  .item {
+    padding: 0.2rem;
+  }
+
+  .labelContainer {
+    gap: 0.2rem;
+  }
+
+  .list {
+    max-height: 45vh;
+  }
+}
+
+/* Telas com altura pequena */
+@media (max-height: 600px) {
+  .list {
+    max-height: 45vh;
+  }
+
+  .gearGroup {
+    margin-bottom: 0.05rem;
+  }
+
+  .item {
+    padding: 0.2rem;
+  }
+
+  .gearName {
+    margin-bottom: 0.1rem;
+  }
+
+  .emptyState {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Modo landscape (horizontal) */
+@media (max-width: 900px) and (orientation: landscape) {
+  .list {
+    max-height: 40vh;
+  }
+
+  .gearGroup {
+    margin-bottom: 0.05rem;
+  }
+
+  .item {
+    padding: 0.2rem;
+  }
+
+  .gearName {
+    margin-bottom: 0.1rem;
+    font-size: 1rem;
+  }
+
+  .equipmentLabel {
+    font-size: 0.9rem;
+  }
+
+  .metrics {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablet em modo landscape */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  .alertModalContainer {
+    max-width: 80vw;
+    margin: 0 auto;
+  }
+
+  .list {
+    max-height: 45vh;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .alertModalContainer {
+    min-width: 450px;
+    max-width: 650px;
+  }
+
+  .list {
+    max-height: 65vh;
+    gap: 0.2rem;
+  }
+
+  .item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .gearName {
+    font-size: 1.4rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .equipmentLabel {
+    font-size: 1.15rem;
+  }
+
+  .metrics {
+    font-size: 1rem;
+  }
+
+  .item {
+    padding: 0.3rem;
+  }
+}
+
+/* Touch devices improvements */
+@media (hover: none) and (pointer: coarse) {
+  .item {
+    padding: 0.4rem;
+  }
+
+  .closeButton {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .closeButton:active {
+    transform: scale(0.95);
+  }
+
+  .item:active {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .item,
+  .closeButton {
+    transition: none;
+  }
+
+  .item:active {
+    transform: none;
+  }
+
+  .closeButton:active {
+    transform: none;
+  }
+}

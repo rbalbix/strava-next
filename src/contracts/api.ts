@@ -2,6 +2,8 @@ import { z } from 'zod';
 import type { ActivityStats, DetailedAthlete } from 'strava';
 import type { GearStats } from '../services/gear';
 
+export type EquipmentThresholds = Record<string, Record<string, number>>;
+
 const ApiErrorResponseSchema = z
   .object({
     error: z.string(),
@@ -54,13 +56,22 @@ type SuccessResponse = z.infer<typeof SuccessResponseSchema>;
 type SaveTokensRequest = z.infer<typeof SaveTokensRequestSchema>;
 type SendEmailRequest = z.infer<typeof SendEmailRequestSchema>;
 type RemoteStorageSetRequest = z.infer<typeof RemoteStorageSetRequestSchema>;
+type EquipmentThresholdsRequest = {
+  gearId: string;
+  equipmentId: string;
+  thresholdKm: number;
+};
 
+type EquipmentThresholdsResponse = {
+  equipmentThresholds: EquipmentThresholds;
+};
 type DashboardResponse = {
   athlete: DetailedAthlete;
   athleteStats: ActivityStats;
   hasGear: boolean;
   hasActivities: boolean;
   gearStats: GearStats[];
+  equipmentThresholds?: EquipmentThresholds;
 };
 
 type LogoutResponse = SuccessResponse;
@@ -77,6 +88,8 @@ export {
 export type {
   ApiErrorResponse,
   DashboardResponse,
+  EquipmentThresholdsRequest,
+  EquipmentThresholdsResponse,
   LogoutResponse,
   RemoteStorageSetRequest,
   SaveTokensRequest,

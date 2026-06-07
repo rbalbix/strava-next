@@ -1,14 +1,18 @@
-import { MdClose } from 'react-icons/md';
+import { useEffect, useState, useRef } from 'react';
+import { MdClose, MdOutlineSaveAlt } from 'react-icons/md';
+import { useToast } from '../contexts/ToastContext';
+import type { EquipmentThresholds } from '../contracts/api';
+import { apiClient } from '../lib/apiClient';
 import type { GearStats } from '../services/gear';
-import { locale, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardDetailModal.module.css';
-import CardItem from './CardItem';
-import StatCard from './StatCard';
+import { locale, secondsToHms } from '../utils/format';
 import {
   getActivityVisualType,
   isBikeActivityType,
   renderActivityIcon,
 } from './activity-type-visual';
+import CardItem from './CardItem';
+import StatCard from './StatCard';
 
 interface CardDetailModalProps {
   gearStat: GearStats;
@@ -23,6 +27,111 @@ export default function CardDetailModal({
     gearStat;
   const visualType = getActivityVisualType(activityType);
   const isBikeActivity = isBikeActivityType(activityType);
+  const { showToast } = useToast();
+
+  const [thresholds, setThresholds] = useState<EquipmentThresholds>({});
+  const [inputs, setInputs] = useState<Record<string, string>>({});
+  const [visibleEditorId, setVisibleEditorId] = useState<string | null>(null);
+
+  // Refs para os inputs
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // Carrega thresholds do backend
+  useEffect(() => {
+    let mounted = true;
+    apiClient
+      .getEquipmentThresholds()
+      .then((res) => {
+        if (!mounted) return;
+        setThresholds(res || {});
+      })
+      .catch(() => {
+        // ignore
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Sincroniza inputs com thresholds sempre que thresholds mudar
+  useEffect(() => {
+    const newInputs: Record<string, string> = {};
+
+    if (thresholds && gearStat.id) {
+      const gearThresholds = thresholds[gearStat.id];
+      if (gearThresholds) {
+        Object.entries(gearThresholds).forEach(([equipmentId, value]) => {
+          if (value && value > 0) {
+            newInputs[equipmentId] = value.toString();
+          }
+        });
+      }
+    }
+
+    setInputs((prev) => ({
+      ...newInputs,
+      ...prev,
+    }));
+  }, [thresholds, gearStat.id]);
+
+  async function saveThreshold(equipmentId: string) {
+    const raw = inputs[equipmentId];
+    const value = raw === '' ? 0 : Number(raw);
+    try {
+      const updated = await apiClient.saveEquipmentThreshold({
+        gearId: gearStat.id,
+        equipmentId,
+        thresholdKm: value,
+      });
+      setThresholds(updated || {});
+      sessionStorage.setItem(
+        'equipmentThresholds',
+        JSON.stringify(updated || {}),
+      );
+      showToast(value > 0 ? 'Limite salvo' : 'Limite removido', 'success');
+
+      // Apenas esconde o editor, NÃO limpa o input
+      setVisibleEditorId(null);
+    } catch (err) {
+      showToast('Falha ao salvar limite', 'error');
+    }
+  }
+
+  // Função para toggle do editor
+  const toggleEditor = (equipmentId: string, currentThreshold?: number) => {
+    if (visibleEditorId === equipmentId) {
+      setVisibleEditorId(null);
+    } else {
+      setVisibleEditorId(equipmentId);
+
+      // Garante que o input tenha o valor atual
+      const currentValue =
+        currentThreshold && currentThreshold > 0
+          ? currentThreshold.toString()
+          : '';
+      setInputs((s) => ({
+        ...s,
+        [equipmentId]: currentValue,
+      }));
+
+      // Foca no input após abrir (delay para garantir renderização)
+      setTimeout(() => {
+        inputRefs.current[equipmentId]?.focus();
+      }, 50);
+    }
+  };
+
+  // Função para lidar com Enter no input
+  const handleInputKeyDown = (
+    equipmentId: string,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveThreshold(equipmentId);
+    }
+  };
 
   return (
     <div className={styles.cardDetailModalContainer}>
@@ -57,11 +166,6 @@ export default function CardDetailModal({
             </div>
           </div>
           <section>
-            {/* <span>
-              {`[${count} | 
-              ${locale.format(',.2f')(distance / 1000)}km | 
-              ${secondsToHms(movingTime)}h]`}
-            </span> */}
             <div className={styles.statCardContainer}>
               <StatCard value={count} label='Atividades' icon='📊' />
               <StatCard
@@ -79,14 +183,59 @@ export default function CardDetailModal({
         </header>
         <ul className={styles.timeline}>
           {isBikeActivity &&
-            equipments.map((e) => (
-              <CardItem
-                key={e.id}
-                equipment={e}
-                distance={distance}
-                movingTime={movingTime}
-              />
-            ))}
+            equipments.map((e) => {
+              const current = thresholds[gearStat.id]?.[e.id];
+              const isEditorVisible = visibleEditorId === e.id;
+
+              return (
+                <CardItem
+                  key={e.id}
+                  equipment={e}
+                  distance={distance}
+                  movingTime={movingTime}
+                  thresholdKm={current}
+                  onToggleEditor={() => toggleEditor(e.id, current)}
+                  isEditorVisible={isEditorVisible}
+                >
+                  {isEditorVisible && (
+                    <div className={styles.thresholdEditor}>
+                      <label>
+                        <div className={styles.thresholdRow}>
+                          <input
+                            ref={(el) => {
+                              inputRefs.current[e.id] = el;
+                            }}
+                            type='number'
+                            min={0}
+                            step={100}
+                            value={
+                              inputs[e.id] ??
+                              (current && current > 0 ? current : '')
+                            }
+                            onChange={(ev) =>
+                              setInputs((s) => ({
+                                ...s,
+                                [e.id]: ev.target.value,
+                              }))
+                            }
+                            onKeyDown={(ev) => handleInputKeyDown(e.id, ev)}
+                            placeholder='Limite (km)'
+                            autoFocus
+                          />
+                          <button
+                            type='button'
+                            onClick={() => saveThreshold(e.id)}
+                            aria-label='Salvar limite'
+                          >
+                            <MdOutlineSaveAlt size={20} />
+                          </button>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+                </CardItem>
+              );
+            })}
         </ul>
       </main>
     </div>

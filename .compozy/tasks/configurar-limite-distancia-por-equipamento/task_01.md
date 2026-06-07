@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Atualizar `REDIS_KEYS` com `equipmentThresholds`
 type: backend
 complexity: low

@@ -40,15 +40,15 @@
   border-radius: 10%;
   border: 1px solid var(--date-badge-border);
   padding: 1px 4px;
-
   margin-left: -48px;
   margin-right: 0.5rem;
-
   background: var(--light-blue);
   float: left;
   text-align: center;
   line-height: 1rem;
-  font: 700 0.9rem 'JetBrains Mono', sans-serif;
+  font:
+    700 0.9rem 'JetBrains Mono',
+    sans-serif;
   color: var(--background);
 }
 
@@ -81,6 +81,35 @@
   margin-right: auto;
 }
 
+.progressContainer {
+  width: 90%;
+  margin: 0.5rem auto 0;
+}
+
+.progressBar {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.normal {
+  background: var(--light-blue);
+}
+
+.warning {
+  background: var(--threshold-warning);
+}
+
+.overdue {
+  background: var(--threshold-overdue);
+}
+
 .chipbadge {
   display: inline-flex;
   align-items: center;
@@ -88,7 +117,141 @@
   border-radius: 999px;
   border: 1px solid var(--event-border);
   background-color: var(--background-card);
-  font: 600 1rem var(--font-jetbrains), sans-serif;
+  font:
+    600 1rem var(--font-jetbrains),
+    sans-serif;
+}
+
+/* Editor Toggle Container */
+.editorToggleContainer {
+  margin-top: 0.5rem;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.editThresholdButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.editThresholdButton:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+  color: #0056b3;
+}
+
+.editThresholdButton:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Cancel Button */
+.cancelButton {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #c82333;
+}
+
+.cancelButton:focus {
+  outline: 2px solid #dc3545;
+  outline-offset: 2px;
+}
+
+/* Estilos para o editor (usando classes locais) */
+.thresholdEditor {
+  margin: 0.5rem;
+  padding: 0.75rem;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.thresholdRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  align-items: center;
+}
+
+.thresholdRow input {
+  width: 10rem;
+  flex: none;
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  height: 2rem;
+  line-height: normal;
+}
+
+.thresholdRow input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.thresholdRow button {
+  padding: 0.25rem 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.thresholdRow button:hover {
+  background-color: #45a049;
+}
+
+.thresholdRow button:focus {
+  outline: 2px solid #4caf50;
+  outline-offset: 2px;
+}
+
+/* Remove as setas do input number */
+.thresholdRow input::-webkit-outer-spin-button,
+.thresholdRow input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+.thresholdRow input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -109,10 +272,27 @@
   .timeago {
     font-size: 0.9rem !important;
   }
+
+  .thresholdRow input {
+    width: 8rem;
+    font-size: 0.85rem;
+  }
+
+  .thresholdRow button {
+    padding: 0.2rem 0.8rem;
+  }
 }
 
 @media (max-width: 398px) {
   .caption {
     font-size: 1.15rem;
+  }
+
+  .thresholdRow {
+    flex-wrap: wrap;
+  }
+
+  .thresholdRow input {
+    width: 100%;
   }
 }

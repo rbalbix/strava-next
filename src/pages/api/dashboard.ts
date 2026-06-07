@@ -9,6 +9,7 @@ import { verifyIfHasAnyGears } from '../../services/gear';
 import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
+import { getEquipmentThresholds } from '../../services/thresholds';
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,15 +44,26 @@ export default async function handler(
     const hasGear = verifyIfHasAnyGears(athlete);
     const hasActivities = await verifyIfHasAnyActivities(strava, athlete);
     const gearStats =
-      hasGear && hasActivities ? await updateStatistics(strava, athlete.id) : [];
+      hasGear && hasActivities
+        ? await updateStatistics(strava, athlete.id)
+        : [];
 
-    return res.status(200).json({
+    const response: DashboardResponse = {
       athlete,
       athleteStats,
       hasGear,
       hasActivities,
       gearStats,
-    });
+    };
+
+    try {
+      const equipmentThresholds = await getEquipmentThresholds(athleteId);
+      response.equipmentThresholds = equipmentThresholds;
+    } catch (error) {
+      getLogger().error({ err: error }, 'Failed to load equipment thresholds');
+    }
+
+    return res.status(200).json(response);
   } catch (error) {
     getLogger().error({ err: error }, 'Dashboard endpoint failed');
     return res.status(500).json({ error: 'Internal server error' });

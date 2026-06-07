@@ -10,8 +10,9 @@ html {
 
 :root {
   --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-jetbrains: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
+  --font-jetbrains:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
   --text-base: 1.6rem;
   --text-sm: 1.4rem;
   --text-xs: 1.2rem;
@@ -39,6 +40,9 @@ html {
   --gray-notes: #555;
   --dark-gray: #222;
 
+  --threshold-warning: #f2b705;
+  --threshold-overdue: #e05b5b;
+
   --event-border: #666;
   --date-badge-border: #666;
   --text-border-bottom: #bbb;
@@ -53,6 +57,7 @@ html {
   --start-gradient-color: #ff5733;
   --end-gradient-color: #fdb927;
   --mountain-bike-green: #4fcf6b;
+  --mountain-bike-green-hover: #45a049;
   --toast-success-bg: #d8ebff;
   --toast-success-border: rgba(0, 122, 255, 0.35);
 
@@ -130,7 +135,9 @@ html {
 }
 
 body {
-  font: 400 var(--text-base) var(--font-inter), sans-serif;
+  font:
+    400 var(--text-base) var(--font-inter),
+    sans-serif;
   overflow-y: auto;
 }
 
