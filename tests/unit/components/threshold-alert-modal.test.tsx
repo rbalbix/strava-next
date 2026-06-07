@@ -35,13 +35,23 @@ describe('ThresholdAlertModal', () => {
       />,
     );
 
-    expect(container.textContent).toContain('Nenhum equipamento atrasado');
-    expect(container.textContent).toContain('Fechar');
+    expect(container.textContent).toContain(
+      'Equipamentos que atingiram o limite configurado',
+    );
+    expect(container.textContent).toContain(
+      'Nenhum equipamento com limite configurado no momento',
+    );
+
+    // Verifica se o botão de fechar existe
+    const closeButton = container.querySelector(
+      '[aria-label="Fechar alerta de limite"]',
+    );
+    expect(closeButton).not.toBeNull();
 
     act(() => root.unmount());
   });
 
-  it('renders one item and calls onViewEquipment when button is clicked', () => {
+  it('renders one item and calls onViewEquipment when clicked', () => {
     const onClose = vi.fn();
     const onViewEquipment = vi.fn();
     const items: AlertItem[] = [
@@ -67,18 +77,16 @@ describe('ThresholdAlertModal', () => {
     expect(container.textContent).toContain('Corrente');
     expect(container.textContent).toContain('2.200,00 km / 2.000,00 km');
 
-    const button = container.querySelector('button');
-    expect(button).not.toBeNull();
+    // Encontra e clica no item
+    const clickableDiv = container.querySelector('[role="button"]');
+    expect(clickableDiv).not.toBeNull();
 
-    const buttons = container.querySelectorAll('button');
-    const viewButton = Array.from(buttons).find(
-      (button) => button.textContent === 'Ver equipamento',
-    );
-    expect(viewButton).not.toBeNull();
     act(() =>
-      viewButton?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+      clickableDiv?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
     );
+
     expect(onViewEquipment).toHaveBeenCalledWith('gear-1');
+    expect(onViewEquipment).toHaveBeenCalledTimes(1);
 
     act(() => root.unmount());
   });
@@ -118,6 +126,98 @@ describe('ThresholdAlertModal', () => {
     expect(container.textContent).toContain('Bike B');
     expect(container.textContent).toContain('Pneu');
     expect(container.textContent).toContain('Corrente');
+
+    const clickableDivs = container.querySelectorAll('[role="button"]');
+    expect(clickableDivs.length).toBe(2);
+
+    act(() => root.unmount());
+  });
+
+  it('filters items with thresholdKm <= 0', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: 'gear-1',
+        gearName: 'Bike A',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        distanceKm: 2200,
+        thresholdKm: 2000,
+        state: 'overdue',
+      },
+      {
+        gearId: 'gear-2',
+        gearName: 'Bike B',
+        equipmentId: 'tire',
+        label: 'Pneu',
+        distanceKm: 1100,
+        thresholdKm: 0,
+        state: 'normal',
+      },
+      {
+        gearId: 'gear-3',
+        gearName: 'Bike C',
+        equipmentId: 'brake',
+        label: 'Freio',
+        distanceKm: 500,
+        thresholdKm: -1,
+        state: 'normal',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    expect(container.textContent).toContain('Bike A');
+    expect(container.textContent).toContain('Corrente');
+    expect(container.textContent).not.toContain('Bike B');
+    expect(container.textContent).not.toContain('Pneu');
+    expect(container.textContent).not.toContain('Bike C');
+    expect(container.textContent).not.toContain('Freio');
+
+    const clickableDivs = container.querySelectorAll('[role="button"]');
+    expect(clickableDivs.length).toBe(1);
+
+    act(() => root.unmount());
+  });
+
+  it('calls onClose when close button is clicked', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: 'gear-1',
+        gearName: 'Bike A',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        distanceKm: 2200,
+        thresholdKm: 2000,
+        state: 'overdue',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    const closeButton = container.querySelector(
+      '[aria-label="Fechar alerta de limite"]',
+    );
+    expect(closeButton).not.toBeNull();
+
+    act(() =>
+      closeButton?.dispatchEvent(new MouseEvent('click', { bubbles: true })),
+    );
+
+    expect(onClose).toHaveBeenCalledTimes(1);
 
     act(() => root.unmount());
   });
