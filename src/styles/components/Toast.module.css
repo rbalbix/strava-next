@@ -1,11 +1,14 @@
 .toastContainer {
   position: fixed;
-  right: 1rem;
+  left: 50%; /* ← Mudar de right para left */
   top: 1rem;
+  transform: translateX(-50%); /* ← Adicionar para centralizar */
   z-index: 3000;
   pointer-events: none;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  width: auto; /* ← Adicionar para garantir largura automática */
+  max-width: 90vw; /* ← Garantir que não ultrapasse a tela */
 }
 
 .toast {
@@ -20,6 +23,8 @@
   animation: toastIn 0.2s ease;
   max-width: min(320px, 90vw);
   font-weight: 600;
+  text-align: center; /* ← Adicionar para centralizar texto */
+  white-space: nowrap; /* ← Opcional: evita quebra de linha */
 }
 
 .info {
@@ -45,13 +50,18 @@
   }
 }
 
+/* Responsivo para mobile */
 @media (max-width: 480px) {
   .toastContainer {
-    right: 0.5rem;
-    left: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: 90vw;
   }
 
   .toast {
-    width: 100%;
+    width: auto;
+    white-space: normal; /* ← Permite quebra de linha em telas pequenas */
+    text-align: center;
   }
 }
