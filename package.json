@@ -55,6 +55,7 @@
     "react-window": "^1.8.11",
     "resend": "^6.0.3",
     "strava": "^3.1.0",
+    "swr": "^2.4.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {

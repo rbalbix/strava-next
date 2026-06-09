@@ -1,8 +1,7 @@
 import { Divider } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { TbBrandStrava } from 'react-icons/tb';
 import type { DetailedAthlete, ActivityStats } from 'strava';
-import { apiClient } from '../lib/apiClient';
 import { AuthContext } from '../contexts/AuthContext';
 import type { DashboardResponse, EquipmentThresholds } from '../contracts/api';
 import type { GearStats } from '../services/gear';
@@ -12,6 +11,7 @@ import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
 import VeloIcon from './VeloIcon';
+import { useAutoSync } from '../hooks/useAutoSync';
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -60,22 +60,6 @@ function buildThresholdAlertItems(
       })
       .filter((item): item is ThresholdAlertItem => item !== null);
   });
-}
-
-function openThresholdAlert(
-  dashboard: DashboardResponse,
-  openModal: (modalType: string, data?: unknown) => void,
-) {
-  const overdueItems = buildThresholdAlertItems(dashboard).filter(
-    (item) => item.state === 'overdue',
-  );
-
-  if (overdueItems.length > 0) {
-    openModal('threshold-alert', {
-      items: overdueItems,
-      gearStats: dashboard.gearStats,
-    });
-  }
 }
 
 function readCachedDashboard(): CachedDashboard | null {
@@ -128,17 +112,19 @@ export default function Stats() {
     setErrorInfo,
     signOut,
     openModal,
+    activeModal,
+    closeModal
   } = useContext(AuthContext);
 
   const [hasGear, setHasGear] = useState<boolean>(true);
   const [hasActivities, setHasActivities] = useState<boolean>(true);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
+  
+  const { dashboard, isError } = useAutoSync();
+  const alertedEquipmentIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    let isMounted = true;
-    let hasFreshCache = false;
-
     const icons = [
       <DiskIcon key='disk' />,
       <TireIcon key='tire' />,
@@ -148,66 +134,84 @@ export default function Stats() {
     setRandomIcon(icons[randomIndex]);
 
     const cachedData = readCachedDashboard();
-    if (cachedData && isMounted) {
-      hasFreshCache = true;
+    if (cachedData) {
       setAthleteInfo(cachedData.data.athlete);
       setAthleteInfoStats(cachedData.data.athleteStats);
       setHasGear(cachedData.data.hasGear);
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
-      openThresholdAlert(cachedData.data, openModal);
+      
+      // Initialize alerted set from initial overdue items (valid ones only)
+      const overdueItems = buildThresholdAlertItems(cachedData.data).filter(
+        (item) => item.state === 'overdue' && item.thresholdKm > 0,
+      );
+      overdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
     }
+  }, [setAthleteInfo, setAthleteInfoStats]);
 
-    if (cachedData) {
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    async function init() {
-      try {
-        const data = await apiClient.getDashboard();
-        if (!isMounted) return;
-
-        sessionStorage.setItem('athlete', JSON.stringify(data.athlete));
+  useEffect(() => {
+    if (dashboard) {
+        sessionStorage.setItem('athlete', JSON.stringify(dashboard.athlete));
         sessionStorage.setItem(
           'athleteStats',
-          JSON.stringify(data.athleteStats),
+          JSON.stringify(dashboard.athleteStats),
         );
         sessionStorage.setItem(
           'gearStats',
-          JSON.stringify(data.gearStats || []),
+          JSON.stringify(dashboard.gearStats || []),
         );
         sessionStorage.setItem(
           'equipmentThresholds',
-          JSON.stringify(data.equipmentThresholds ?? {}),
+          JSON.stringify(dashboard.equipmentThresholds ?? {}),
         );
-        sessionStorage.setItem('hasGear', String(data.hasGear));
-        sessionStorage.setItem('hasActivities', String(data.hasActivities));
+        sessionStorage.setItem('hasGear', String(dashboard.hasGear));
+        sessionStorage.setItem('hasActivities', String(dashboard.hasActivities));
         sessionStorage.setItem('athleteCacheTime', Date.now().toString());
 
-        setAthleteInfo(data.athlete);
-        setAthleteInfoStats(data.athleteStats);
-        setHasGear(data.hasGear);
-        setHasActivities(data.hasActivities);
-        setGearStats(data.gearStats || []);
-        openThresholdAlert(data, openModal);
-      } catch (error) {
-        if (isMounted) {
-          setErrorInfo(error);
-          if (!hasFreshCache) {
-            signOut();
-          }
+        setAthleteInfo(dashboard.athlete);
+        setAthleteInfoStats(dashboard.athleteStats);
+        setHasGear(dashboard.hasGear);
+        setHasActivities(dashboard.hasActivities);
+        setGearStats(dashboard.gearStats || []);
+        
+        // Trigger alert only for NEW overdue items
+        const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
+            (item) => item.state === 'overdue' && item.thresholdKm > 0,
+        );
+        
+        // If modal is open for threshold alerts and no overdue items remain, close it
+        if (activeModal === 'threshold-alert' && currentOverdueItems.length === 0) {
+            closeModal();
         }
-      }
+
+        const newOverdueItems = currentOverdueItems.filter(item => !alertedEquipmentIds.current.has(item.equipmentId));
+
+        if (newOverdueItems.length > 0) {
+            openModal('threshold-alert', {
+                items: currentOverdueItems, // Show all current overdue items
+                gearStats: dashboard.gearStats,
+            });
+            newOverdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
+        }
+
+        // Cleanup: remove items that are no longer overdue
+        const currentOverdueIds = new Set(currentOverdueItems.map(item => item.equipmentId));
+        alertedEquipmentIds.current.forEach(id => {
+            if (!currentOverdueIds.has(id)) {
+                alertedEquipmentIds.current.delete(id);
+            }
+        });
+
+    } else if (isError) {
+        setErrorInfo(isError);
+        // If it's a 401 (Unauthorized), sign out immediately, regardless of cache.
+        if (isError instanceof Error && isError.message.includes('401')) {
+            signOut();
+        } else if (!readCachedDashboard()) {
+            signOut();
+        }
     }
-
-    init();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut]);
+  }, [dashboard, isError, setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut, openModal, closeModal, activeModal]);
 
   return (
     <div className={styles.statsContainer}>

@@ -210,6 +210,7 @@ export default function ModalContainer() {
 
       modalContent = (
         <ThresholdAlertModal
+          key={JSON.stringify(payload.items)}
           items={payload.items ?? []}
           onClose={closeModal}
           onViewEquipment={(gearId) => {
