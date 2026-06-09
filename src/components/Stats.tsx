@@ -136,7 +136,7 @@ export default function Stats() {
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
   
   const { dashboard, isError } = useAutoSync();
-  const alertTriggeredRef = useRef(false);
+  const alertedEquipmentIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const icons = [
@@ -155,13 +155,13 @@ export default function Stats() {
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
       
-      // Trigger alert only once on initial mount if overdue
-      if (!alertTriggeredRef.current) {
-        openThresholdAlert(cachedData.data, openModal);
-        alertTriggeredRef.current = true;
-      }
+      // Initialize alerted set from initial overdue items
+      const overdueItems = buildThresholdAlertItems(cachedData.data).filter(
+        (item) => item.state === 'overdue',
+      );
+      overdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
     }
-  }, [setAthleteInfo, setAthleteInfoStats, openModal]);
+  }, [setAthleteInfo, setAthleteInfoStats]);
 
   useEffect(() => {
     if (dashboard) {
@@ -188,9 +188,25 @@ export default function Stats() {
         setHasActivities(dashboard.hasActivities);
         setGearStats(dashboard.gearStats || []);
         
-        // Trigger alert on every update
-        openThresholdAlert(dashboard, openModal);
-        alertTriggeredRef.current = true;
+        // Trigger alert only for NEW overdue items
+        const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
+            (item) => item.state === 'overdue',
+        );
+        const newOverdueItems = currentOverdueItems.filter(item => !alertedEquipmentIds.current.has(item.equipmentId));
+
+        if (newOverdueItems.length > 0) {
+            openThresholdAlert(dashboard, openModal);
+            currentOverdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
+        }
+
+        // Cleanup: remove items that are no longer overdue
+        const currentOverdueIds = new Set(currentOverdueItems.map(item => item.equipmentId));
+        alertedEquipmentIds.current.forEach(id => {
+            if (!currentOverdueIds.has(id)) {
+                alertedEquipmentIds.current.delete(id);
+            }
+        });
+
     } else if (isError) {
         setErrorInfo(isError);
         // If no cache, we should probably sign out on initial fetch error
