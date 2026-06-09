@@ -112,6 +112,8 @@ export default function Stats() {
     setErrorInfo,
     signOut,
     openModal,
+    activeModal,
+    closeModal
   } = useContext(AuthContext);
 
   const [hasGear, setHasGear] = useState<boolean>(true);
@@ -176,11 +178,17 @@ export default function Stats() {
         const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
             (item) => item.state === 'overdue' && item.thresholdKm > 0,
         );
+        
+        // If modal is open for threshold alerts and no overdue items remain, close it
+        if (activeModal === 'threshold-alert' && currentOverdueItems.length === 0) {
+            closeModal();
+        }
+
         const newOverdueItems = currentOverdueItems.filter(item => !alertedEquipmentIds.current.has(item.equipmentId));
 
         if (newOverdueItems.length > 0) {
             openModal('threshold-alert', {
-                items: newOverdueItems,
+                items: currentOverdueItems, // Show all current overdue items
                 gearStats: dashboard.gearStats,
             });
             newOverdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
@@ -203,7 +211,7 @@ export default function Stats() {
             signOut();
         }
     }
-  }, [dashboard, isError, setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut, openModal]);
+  }, [dashboard, isError, setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut, openModal, closeModal, activeModal]);
 
   return (
     <div className={styles.statsContainer}>
