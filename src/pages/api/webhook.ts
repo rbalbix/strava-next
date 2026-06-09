@@ -275,10 +275,14 @@ export default async function handler(
       // Process events
       switch (event.object_type) {
         case 'activity':
+          log.info({ event }, 'DEBUG_WEBHOOK_ACTIVITY: Starting handler');
           await handleActivityEvent(event, log);
+          log.info({ event }, 'DEBUG_WEBHOOK_ACTIVITY: Handler completed');
           break;
         case 'athlete':
+          log.info({ event }, 'DEBUG_WEBHOOK_ATHLETE: Starting handler');
           await handleAthleteEvent(event, log);
+          log.info({ event }, 'DEBUG_WEBHOOK_ATHLETE: Handler completed');
           break;
         default:
           log.error({ objectType: event.object_type }, 'Unhandled event type');
