@@ -182,4 +182,38 @@ describe('Stats component', () => {
       root.unmount();
     });
   });
+
+  it('signs out when dashboard returns 401 error even if cache exists', async () => {
+    sessionStorage.setItem('athlete', JSON.stringify({ id: 2 }));
+    sessionStorage.setItem('athleteStats', JSON.stringify({}));
+    sessionStorage.setItem('gearStats', JSON.stringify([]));
+    sessionStorage.setItem('athleteCacheTime', Date.now().toString());
+
+    const signOut = vi.fn();
+    const setErrorInfo = vi.fn();
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+        dashboard: undefined,
+        isLoading: false,
+        isError: new Error('Request failed: HTTP 401'),
+        mutate: vi.fn(),
+    });
+
+    const authValue = makeAuthContext({ signOut, setErrorInfo });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(setErrorInfo).toHaveBeenCalledTimes(1);
+    expect(signOut).toHaveBeenCalledTimes(1);
+    act(() => {
+      root.unmount();
+    });
+  });
 });

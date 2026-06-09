@@ -209,8 +209,10 @@ export default function Stats() {
 
     } else if (isError) {
         setErrorInfo(isError);
-        // If no cache, we should probably sign out on initial fetch error
-        if (!readCachedDashboard()) {
+        // If it's a 401 (Unauthorized), sign out immediately, regardless of cache.
+        if (isError instanceof Error && isError.message.includes('401')) {
+            signOut();
+        } else if (!readCachedDashboard()) {
             signOut();
         }
     }
