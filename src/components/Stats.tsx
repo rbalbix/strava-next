@@ -139,9 +139,9 @@ export default function Stats() {
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
       
-      // Initialize alerted set from initial overdue items
+      // Initialize alerted set from initial overdue items (valid ones only)
       const overdueItems = buildThresholdAlertItems(cachedData.data).filter(
-        (item) => item.state === 'overdue',
+        (item) => item.state === 'overdue' && item.thresholdKm > 0,
       );
       overdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
     }
@@ -174,7 +174,7 @@ export default function Stats() {
         
         // Trigger alert only for NEW overdue items
         const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
-            (item) => item.state === 'overdue',
+            (item) => item.state === 'overdue' && item.thresholdKm > 0,
         );
         const newOverdueItems = currentOverdueItems.filter(item => !alertedEquipmentIds.current.has(item.equipmentId));
 
