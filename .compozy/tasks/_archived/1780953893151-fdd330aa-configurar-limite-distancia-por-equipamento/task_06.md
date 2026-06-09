@@ -1,10 +1,12 @@
 ---
-status: complete
-title: Carregar thresholds em `Stats.tsx` e acionar lógica de alerta
+status: completed
+title: "Carregar thresholds em `Stats.tsx` e acionar lógica de alerta"
 type: frontend
 complexity: medium
 dependencies: [task_05]
 ---
+
+# Carregar thresholds em `Stats.tsx` e acionar lógica de alerta
 
 ## Overview
 

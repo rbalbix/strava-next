@@ -1,10 +1,12 @@
 ---
-status: complete
-title: Incluir `equipmentThresholds` no payload de `/api/app/dashboard`
+status: completed
+title: "Incluir `equipmentThresholds` no payload de `/api/app/dashboard`"
 type: backend
 complexity: medium
 dependencies: [task_02, task_03]
 ---
+
+# Incluir `equipmentThresholds` no payload de `/api/app/dashboard`
 
 ## Overview
 

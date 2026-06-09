@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Endpoint API `/api/app/equipment-thresholds` (GET/POST)
+title: "Endpoint API `/api/app/equipment-thresholds` (GET/POST)"
 type: backend
 complexity: medium
 dependencies: [task_01, task_02]
 ---
+
+# Endpoint API `/api/app/equipment-thresholds` (GET/POST)
 
 ## Overview
 

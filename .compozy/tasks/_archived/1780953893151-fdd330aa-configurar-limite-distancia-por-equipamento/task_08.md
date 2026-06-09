@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem`
+title: "Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem`"
 type: frontend
 complexity: medium
 dependencies: [task_05, task_06]
 ---
+
+# Editar/Salvar limite no `CardDetailModal` e exibir progresso em `CardItem`
 
 ## Overview
 

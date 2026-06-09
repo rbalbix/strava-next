@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Documentação e PR: atualizar README e registrar passos de deploy
+title: "Documentação e PR: atualizar README e registrar passos de deploy"
 type: docs
 complexity: low
-dependencies: [task_01..task_09]
+dependencies: [task_01, task_02, task_03, task_04, task_05, task_06, task_07, task_08, task_09]
 ---
+
+# Documentação e PR: atualizar README e registrar passos de deploy
 
 ## Overview
 
