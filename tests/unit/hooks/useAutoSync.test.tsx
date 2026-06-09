@@ -78,4 +78,35 @@ describe('useAutoSync', () => {
     const { result } = renderHook(() => useAutoSync(), { wrapper });
     expect(typeof result.current.mutate).toBe('function');
   });
+
+  it('pauses polling when page is hidden', async () => {
+    vi.useFakeTimers();
+    vi.mocked(apiClient.getDashboard).mockResolvedValue({ athlete: { id: 1 } } as any);
+
+    renderHook(() => useAutoSync(1000), { wrapper });
+
+    // Initial call
+    await vi.advanceTimersByTimeAsync(0);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    // Mock page visibility as hidden
+    Object.defineProperty(document, 'visibilityState', { value: 'hidden', writable: true });
+    Object.defineProperty(document, 'hidden', { value: true, writable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    // Advance time - should NOT call API
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    // Mock page visibility as visible
+    Object.defineProperty(document, 'visibilityState', { value: 'visible', writable: true });
+    Object.defineProperty(document, 'hidden', { value: false, writable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    // Advance time - should call API again
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
 });
