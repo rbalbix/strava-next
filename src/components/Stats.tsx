@@ -1,8 +1,7 @@
 import { Divider } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { TbBrandStrava } from 'react-icons/tb';
 import type { DetailedAthlete, ActivityStats } from 'strava';
-import { apiClient } from '../lib/apiClient';
 import { AuthContext } from '../contexts/AuthContext';
 import type { DashboardResponse, EquipmentThresholds } from '../contracts/api';
 import type { GearStats } from '../services/gear';
@@ -12,6 +11,7 @@ import Card from './Card';
 import DiskIcon from './DiskIcon';
 import TireIcon from './TireIcon';
 import VeloIcon from './VeloIcon';
+import { useAutoSync } from '../hooks/useAutoSync';
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
@@ -134,11 +134,11 @@ export default function Stats() {
   const [hasActivities, setHasActivities] = useState<boolean>(true);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
+  
+  const { dashboard, isError } = useAutoSync();
+  const alertTriggeredRef = useRef(false);
 
   useEffect(() => {
-    let isMounted = true;
-    let hasFreshCache = false;
-
     const icons = [
       <DiskIcon key='disk' />,
       <TireIcon key='tire' />,
@@ -148,66 +148,57 @@ export default function Stats() {
     setRandomIcon(icons[randomIndex]);
 
     const cachedData = readCachedDashboard();
-    if (cachedData && isMounted) {
-      hasFreshCache = true;
+    if (cachedData) {
       setAthleteInfo(cachedData.data.athlete);
       setAthleteInfoStats(cachedData.data.athleteStats);
       setHasGear(cachedData.data.hasGear);
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
-      openThresholdAlert(cachedData.data, openModal);
+      
+      // Trigger alert only once on initial mount if overdue
+      if (!alertTriggeredRef.current) {
+        openThresholdAlert(cachedData.data, openModal);
+        alertTriggeredRef.current = true;
+      }
     }
+  }, [setAthleteInfo, setAthleteInfoStats, openModal]);
 
-    if (cachedData) {
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    async function init() {
-      try {
-        const data = await apiClient.getDashboard();
-        if (!isMounted) return;
-
-        sessionStorage.setItem('athlete', JSON.stringify(data.athlete));
+  useEffect(() => {
+    if (dashboard) {
+        sessionStorage.setItem('athlete', JSON.stringify(dashboard.athlete));
         sessionStorage.setItem(
           'athleteStats',
-          JSON.stringify(data.athleteStats),
+          JSON.stringify(dashboard.athleteStats),
         );
         sessionStorage.setItem(
           'gearStats',
-          JSON.stringify(data.gearStats || []),
+          JSON.stringify(dashboard.gearStats || []),
         );
         sessionStorage.setItem(
           'equipmentThresholds',
-          JSON.stringify(data.equipmentThresholds ?? {}),
+          JSON.stringify(dashboard.equipmentThresholds ?? {}),
         );
-        sessionStorage.setItem('hasGear', String(data.hasGear));
-        sessionStorage.setItem('hasActivities', String(data.hasActivities));
+        sessionStorage.setItem('hasGear', String(dashboard.hasGear));
+        sessionStorage.setItem('hasActivities', String(dashboard.hasActivities));
         sessionStorage.setItem('athleteCacheTime', Date.now().toString());
 
-        setAthleteInfo(data.athlete);
-        setAthleteInfoStats(data.athleteStats);
-        setHasGear(data.hasGear);
-        setHasActivities(data.hasActivities);
-        setGearStats(data.gearStats || []);
-        openThresholdAlert(data, openModal);
-      } catch (error) {
-        if (isMounted) {
-          setErrorInfo(error);
-          if (!hasFreshCache) {
+        setAthleteInfo(dashboard.athlete);
+        setAthleteInfoStats(dashboard.athleteStats);
+        setHasGear(dashboard.hasGear);
+        setHasActivities(dashboard.hasActivities);
+        setGearStats(dashboard.gearStats || []);
+        
+        // Trigger alert on every update
+        openThresholdAlert(dashboard, openModal);
+        alertTriggeredRef.current = true;
+    } else if (isError) {
+        setErrorInfo(isError);
+        // If no cache, we should probably sign out on initial fetch error
+        if (!readCachedDashboard()) {
             signOut();
-          }
         }
-      }
     }
-
-    init();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut]);
+  }, [dashboard, isError, setAthleteInfo, setAthleteInfoStats, setErrorInfo, signOut, openModal]);
 
   return (
     <div className={styles.statsContainer}>
