@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Criar serviço de persistência `thresholds` (Redis)
+title: "Criar serviço de persistência `thresholds` (Redis)"
 type: backend
 complexity: medium
 dependencies: [task_01]
 ---
+
+# Criar serviço de persistência `thresholds` (Redis)
 
 ## Overview
 

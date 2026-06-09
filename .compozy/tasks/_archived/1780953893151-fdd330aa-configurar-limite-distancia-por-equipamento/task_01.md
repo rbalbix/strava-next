@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Atualizar `REDIS_KEYS` com `equipmentThresholds`
+title: "Atualizar `REDIS_KEYS` com `equipmentThresholds`"
 type: backend
 complexity: low
 dependencies: []
 ---
+
+# Atualizar `REDIS_KEYS` com `equipmentThresholds`
 
 ## Overview
 

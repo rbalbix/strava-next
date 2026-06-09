@@ -1,10 +1,12 @@
 ---
-status: complete
-title: Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds
+status: completed
+title: "Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds"
 type: frontend
 complexity: low
 dependencies: [task_04]
 ---
+
+# Atualizar `contracts/api.ts` e `lib/apiClient.ts` para suportar thresholds
 
 ## Overview
 

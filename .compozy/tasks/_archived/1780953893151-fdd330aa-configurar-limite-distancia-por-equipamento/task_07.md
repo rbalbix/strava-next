@@ -1,10 +1,12 @@
 ---
 status: completed
-title: Criar `ThresholdAlertModal` e integrar em `ModalContainer`
+title: "Criar `ThresholdAlertModal` e integrar em `ModalContainer`"
 type: frontend
 complexity: medium
 dependencies: [task_06]
 ---
+
+# Criar `ThresholdAlertModal` e integrar em `ModalContainer`
 
 ## Overview
 
