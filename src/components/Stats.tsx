@@ -62,22 +62,6 @@ function buildThresholdAlertItems(
   });
 }
 
-function openThresholdAlert(
-  dashboard: DashboardResponse,
-  openModal: (modalType: string, data?: unknown) => void,
-) {
-  const overdueItems = buildThresholdAlertItems(dashboard).filter(
-    (item) => item.state === 'overdue',
-  );
-
-  if (overdueItems.length > 0) {
-    openModal('threshold-alert', {
-      items: overdueItems,
-      gearStats: dashboard.gearStats,
-    });
-  }
-}
-
 function readCachedDashboard(): CachedDashboard | null {
   try {
     const cacheTimeRaw = sessionStorage.getItem('athleteCacheTime');
@@ -195,8 +179,11 @@ export default function Stats() {
         const newOverdueItems = currentOverdueItems.filter(item => !alertedEquipmentIds.current.has(item.equipmentId));
 
         if (newOverdueItems.length > 0) {
-            openThresholdAlert(dashboard, openModal);
-            currentOverdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
+            openModal('threshold-alert', {
+                items: newOverdueItems,
+                gearStats: dashboard.gearStats,
+            });
+            newOverdueItems.forEach(item => alertedEquipmentIds.current.add(item.equipmentId));
         }
 
         // Cleanup: remove items that are no longer overdue
