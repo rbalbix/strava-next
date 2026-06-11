@@ -6,6 +6,7 @@ export default class MyDocument extends Document {
       <Html lang='pt-BR'>
         <Head>
           <meta charSet='UTF-8' />
+          <meta name='viewport' content='width=device-width, initial-scale=1, viewport-fit=cover' />
           <meta name='application-name' content='GearLife' />
           <meta name='apple-mobile-web-app-capable' content='yes' />
           <meta name='apple-mobile-web-app-title' content='GearLife' />
