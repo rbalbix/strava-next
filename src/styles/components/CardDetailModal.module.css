@@ -99,8 +99,8 @@
   padding: 0.5rem 0.8rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 1.1rem;
-  height: 2.8rem;
+  font-size: 1.25rem;
+  height: 3.2rem;
   line-height: normal;
   transition: all 0.3s ease;
 }
@@ -133,7 +133,7 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  height: 2.8rem;
+  height: 3.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
