@@ -40,8 +40,9 @@ html {
   --gray-notes: #555;
   --dark-gray: #222;
 
-  --threshold-warning: #f2b705;
-  --threshold-overdue: #e05b5b;
+  --threshold-normal: #21ec21; /*#7e911d*/
+  --threshold-warning: #ffd042;
+  --threshold-overdue: #f51313 /*#ae002d #e05b5b*/;
 
   --event-border: #666;
   --date-badge-border: #666;

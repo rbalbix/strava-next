@@ -99,7 +99,7 @@
 }
 
 .normal {
-  background: var(--light-blue);
+  background: var(--threshold-normal);
 }
 
 .warning {
