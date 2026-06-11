@@ -85,13 +85,13 @@
 }
 
 .thresholdRow input {
-  width: 10rem;
+  width: 12rem;
   flex: none;
   padding: 0.25rem 0.8rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 0.85rem;
-  height: 2rem;
+  height: 2.5rem;
   line-height: normal;
   transition: all 0.2s ease;
 }
@@ -123,7 +123,7 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  height: 2rem;
+  height: 2.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
