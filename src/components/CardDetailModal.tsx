@@ -32,6 +32,7 @@ export default function CardDetailModal({
   const [thresholds, setThresholds] = useState<EquipmentThresholds>({});
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [visibleEditorId, setVisibleEditorId] = useState<string | null>(null);
+  const [exitingEditorId, setExitingEditorId] = useState<string | null>(null);
 
   // Refs para os inputs
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -91,18 +92,29 @@ export default function CardDetailModal({
       );
       showToast(value > 0 ? 'Limite salvo' : 'Limite removido', 'success');
 
-      // Apenas esconde o editor, NÃO limpa o input
-      setVisibleEditorId(null);
+      // Fecha com animação
+      closeEditor(equipmentId);
     } catch (err) {
       showToast('Falha ao salvar limite', 'error');
     }
   }
 
+  // Função para fechar com animação
+  const closeEditor = (equipmentId: string) => {
+    setExitingEditorId(equipmentId);
+    setTimeout(() => {
+      setVisibleEditorId(null);
+      setExitingEditorId(null);
+    }, 600); // Deve bater com o tempo do CSS (0.6s)
+  };
+
   // Função para toggle do editor
   const toggleEditor = (equipmentId: string, currentThreshold?: number) => {
     if (visibleEditorId === equipmentId) {
-      setVisibleEditorId(null);
+      closeEditor(equipmentId);
     } else {
+      // Se outro estava saindo, limpa imediatamente
+      setExitingEditorId(null);
       setVisibleEditorId(equipmentId);
 
       // Garante que o input tenha o valor atual
@@ -185,7 +197,8 @@ export default function CardDetailModal({
           {isBikeActivity &&
             equipments.map((e) => {
               const current = thresholds[gearStat.id]?.[e.id];
-              const isEditorVisible = visibleEditorId === e.id;
+              const isVisible = visibleEditorId === e.id;
+              const isExiting = exitingEditorId === e.id;
 
               return (
                 <CardItem
@@ -195,10 +208,12 @@ export default function CardDetailModal({
                   movingTime={movingTime}
                   thresholdKm={current}
                   onToggleEditor={() => toggleEditor(e.id, current)}
-                  isEditorVisible={isEditorVisible}
+                  isEditorVisible={isVisible}
                 >
-                  {isEditorVisible && (
-                    <div className={styles.thresholdEditor}>
+                  {(isVisible || isExiting) && (
+                    <div
+                      className={`${styles.thresholdEditor} ${isExiting ? styles.exiting : ''}`}
+                    >
                       <label>
                         <div className={styles.thresholdRow}>
                           <input
@@ -227,7 +242,7 @@ export default function CardDetailModal({
                             onClick={() => saveThreshold(e.id)}
                             aria-label='Salvar limite'
                           >
-                            <MdOutlineSaveAlt size={20} />
+                            <MdOutlineSaveAlt size={24} />
                           </button>
                         </div>
                       </label>
