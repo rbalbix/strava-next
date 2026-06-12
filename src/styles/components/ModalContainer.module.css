@@ -13,15 +13,15 @@
 }
 
 .modalContent {
-  background-color: var(--background-card);
-  border: 1px solid var(--dark-gray);
+  background-color: var(--gl-surface-card);
+  border: 1px solid var(--gl-border-subtle);
   border-radius: 12px;
 
   width: 30vw;
   max-height: 90%;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 30px var(--card-box-shadow);
+  box-shadow: var(--gl-shadow-card);
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;
 
@@ -56,7 +56,7 @@
 }
 
 .closeButton:hover {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
 }
 
 @keyframes fadeIn {

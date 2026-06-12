@@ -45,7 +45,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--light-gray-notes);
+  color: var(--gl-text-tertiary);
   font-size: 1rem;
 }
 
@@ -65,13 +65,13 @@
 .chainIcon {
   width: 3.4rem;
   height: auto;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
 }
 
 .versionText {
   font-size: 0.85rem;
   letter-spacing: 0.08em;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
 }
 
 .homeText h1 {
@@ -87,8 +87,8 @@
 
   background-image: linear-gradient(
     90deg,
-    var(--start-gradient-color),
-    var(--end-gradient-color)
+    var(--gl-brand-gradient-start),
+    var(--gl-brand-gradient-end)
   );
 }
 
@@ -105,8 +105,8 @@
 
   background-image: linear-gradient(
     90deg,
-    var(--start-gradient-color),
-    var(--end-gradient-color)
+    var(--gl-brand-gradient-start),
+    var(--gl-brand-gradient-end)
   );
 }
 
@@ -119,7 +119,7 @@
   margin: 0.4rem 0 0.8rem;
   max-width: 34rem;
   text-align: center;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
   font-size: 1.05rem;
   line-height: 1.55;
 }
@@ -150,11 +150,11 @@
 }
 
 .ctaPrimary {
-  color: #0b1020;
+  color: #ffffff;
   background-image: linear-gradient(
     90deg,
-    var(--start-gradient-color),
-    var(--end-gradient-color)
+    var(--gl-brand-gradient-start),
+    var(--gl-brand-gradient-end)
   );
   font-size: 1.5rem;
   margin-top: 5px;
@@ -166,20 +166,20 @@
 
 .ctaPrimary:focus-visible,
 .ctaSecondary:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
 .ctaSecondary {
-  color: var(--dark-gray);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: var(--gl-text-primary);
+  border: 1px solid var(--gl-border-subtle);
   background-color: rgba(255, 255, 255, 0.04);
   font-size: 1.4rem;
   margin-top: 5px;
 }
 
 .ctaSecondary:hover {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: var(--gl-brand-primary);
   background-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -196,8 +196,8 @@
 
 .featureList li {
   font-size: 0.95rem;
-  color: var(--gray-notes);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--gl-text-secondary);
+  border: 1px solid var(--gl-border-subtle);
   background-color: rgba(255, 255, 255, 0.03);
   padding: 0.45rem 0.75rem;
   border-radius: 999px;
@@ -217,19 +217,19 @@
 
 .marketingNav a {
   font-size: 0.9rem;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
   font-weight: 500;
   letter-spacing: 0.01em;
   opacity: 1;
 }
 
 .marketingNav a:hover {
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   text-decoration: underline;
 }
 
 .marketingNav a:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }

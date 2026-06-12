@@ -12,7 +12,7 @@
   min-height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
   box-sizing: border-box;
   z-index: 100;
-  background-color: var(--background);
+  background-color: var(--gl-surface-primary);
   isolation: isolate;
 }
 
@@ -23,7 +23,7 @@
   left: 0;
   width: 100vw;
   height: calc(var(--header-height) + env(safe-area-inset-top, 0px));
-  background-color: var(--background);
+  background-color: var(--gl-surface-primary);
   z-index: -1;
 }
 
@@ -38,8 +38,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    var(--light-gray-lines) 20%,
-    var(--light-gray-lines) 80%,
+    var(--gl-border-subtle) 20%,
+    var(--gl-border-subtle) 80%,
     transparent 100%
   );
   border-radius: 2px;
@@ -68,7 +68,7 @@
 
 .iconButton:focus-visible,
 .iconButtonLink:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .sidebarIcon {
-  color: var(--sidebar-icon);
+  color: var(--gl-text-primary);
   width: 2rem;
   height: 2rem;
   cursor: pointer;
@@ -115,29 +115,29 @@
 }
 
 .headerLoginIcon {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
   margin-right: 0.2rem;
   height: 2.5rem;
   width: 2.5rem;
 }
 
 .headerLoginIcon:hover {
-  color: var(--light-blue-hover);
+  color: var(--gl-brand-active);
 }
 
 .headerLogoutIcon {
-  color: var(--gray-signOut);
+  color: var(--gl-text-secondary);
   margin-right: 0.2rem;
   height: 2.5rem;
   width: 2.5rem;
 }
 
 .headerLogoutIcon:hover {
-  color: var(--gray-signOut-hover);
+  color: var(--gl-text-primary);
 }
 
 .headerInfoIcon:hover {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
 }
 
 .headerInfoIcon {
@@ -147,7 +147,7 @@
 
 .divider {
   width: 60%;
-  background-color: var(--light-gray);
+  background-color: var(--gl-border-subtle);
 }
 
 @media (max-width: 860px) {

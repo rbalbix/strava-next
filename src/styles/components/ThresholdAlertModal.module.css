@@ -28,14 +28,14 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   margin-bottom: 4px;
   line-height: 1.3;
 }
 
 .description {
   margin: 0.15rem 0 0;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   font-size: 1rem;
   line-height: 1.3;
 }
@@ -107,7 +107,7 @@
   font-weight: 600;
   margin-bottom: 0.2rem;
   padding-bottom: 0.15rem;
-  border-bottom: 1.5px solid #e0e0e0;
+  border-bottom: 1.5px solid var(--gl-border-subtle);
   word-break: break-word;
   max-width: 75%;
 }
@@ -132,16 +132,16 @@
 }
 
 .item:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--gl-surface-secondary);
 }
 
 .item:active {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--gl-surface-primary);
   transform: scale(0.99);
 }
 
 .item:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
@@ -154,7 +154,7 @@
 
 .equipmentLabel {
   display: block;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   opacity: 0.8;
   font-size: 1.1rem;
   font-weight: 500;
@@ -162,16 +162,16 @@
 }
 
 .icon {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
   flex-shrink: 0;
   width: 18px;
   height: 18px;
 }
 
 .metrics {
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   font:
-    400 0.95rem 'JetBrains Mono',
+    400 0.95rem var(--font-jetbrains),
     monospace;
   display: inline-block;
   word-break: break-all;
@@ -180,13 +180,13 @@
 }
 
 .limitConfigured {
-  color: var(--threshold-overdue);
+  color: var(--gl-status-overdue);
   font-weight: 600;
 }
 
 .emptyState {
   padding: 1.5rem 1rem;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   text-align: center;
   font-size: 1rem;
 }

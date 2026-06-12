@@ -1,5 +1,5 @@
 .sidebarContainer {
-  background-color: rgba(var(--background-sidebar-rgb), 0.62);
+  background-color: var(--gl-surface-secondary);
   position: fixed;
   height: 80vh;
   top: 2rem;
@@ -15,9 +15,8 @@
   transition:
     transform 0.35s ease,
     opacity 0.2s ease;
-  backdrop-filter: blur(2px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
+  border-right: 1px solid var(--gl-border-subtle);
+  box-shadow: var(--gl-shadow-card);
 
   display: flex;
   flex-direction: column;
@@ -67,12 +66,12 @@
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
 .closeIcon {
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
   width: 1.4rem;
   height: 1.4rem;
   transition: color 0.2s ease;
@@ -97,8 +96,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    var(--light-gray) 20%,
-    var(--light-gray) 80%,
+    var(--gl-border-subtle) 20%,
+    var(--gl-border-subtle) 80%,
     transparent 100%
   );
   border-radius: 2px;
@@ -108,7 +107,7 @@
   display: flex;
   align-items: center;
   padding: 1.2rem 1rem;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   margin: 0.2rem 0.6rem;
@@ -118,7 +117,7 @@
 
 .sidebarItemContainer:hover {
   padding-left: 0.15rem;
-  background-color: rgba(var(--background-sidebar-rgb), 0.4);
+  background-color: var(--gl-surface-primary);
   transform: none;
 }
 
@@ -133,7 +132,7 @@
 }
 
 .linkText:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -148,7 +147,7 @@
 }
 
 .sidebarAction:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 

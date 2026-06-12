@@ -17,8 +17,8 @@
 }
 
 .footerEquipmentTable thead {
-  background-color: var(--dark-gray);
-  color: var(--table-head-text);
+  background-color: var(--gl-text-primary);
+  color: var(--gl-text-on-brand);
 }
 
 .orientationRow {
@@ -33,24 +33,24 @@
 .copyHint {
   font-size: 0.85rem;
   text-align: center;
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
   margin-bottom: 12px;
   min-height: 1.2rem;
 }
 
 .footerEquipmentTable th {
-  border: 1px solid var(--light-gray-lines);
+  border: 1px solid var(--gl-border-subtle);
   padding: 8px;
 }
 
 .footerEquipmentTable td {
   font-size: 0.9rem;
-  border: 1px solid var(--light-gray-lines);
+  border: 1px solid var(--gl-border-subtle);
   padding: 4px;
 }
 
 .footerEquipmentTable tr:nth-child(even) {
-  background-color: var(--equipment-row-background);
+  background-color: var(--gl-surface-secondary);
 }
 
 .footerIcon {
@@ -58,7 +58,7 @@
 }
 
 .footerIcon:hover {
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
 }
 
 .footerIconButton {
@@ -76,7 +76,7 @@
 }
 
 .footerIconButton:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
@@ -99,7 +99,7 @@
 }
 
 .copyButton:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
@@ -130,8 +130,8 @@
   background: linear-gradient(
     to right,
     transparent 0%,
-    var(--light-gray) 20%,
-    var(--light-gray) 80%,
+    var(--gl-border-subtle) 20%,
+    var(--gl-border-subtle) 80%,
     transparent 100%
   );
   border-radius: 2px;

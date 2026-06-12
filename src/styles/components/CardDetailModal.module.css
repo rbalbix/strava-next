@@ -13,13 +13,13 @@
   font-size: 1rem;
 
   font-weight: 400;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
 }
 
 .cardDetailModalContainer main span {
   font-size: 1.6rem;
   font-weight: 600;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
 
   margin-right: 10px;
 }
@@ -31,7 +31,7 @@
 .modalTitle {
   font-size: 1.4rem;
   font-weight: 600;
-  color: var(--dark-gray);
+  color: var(--gl-text-primary);
   margin-right: 10px;
 }
 
@@ -88,12 +88,14 @@
   width: 12rem;
   flex: none;
   padding: 0.25rem 0.8rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--gl-border-subtle);
   border-radius: 4px;
   font-size: 0.85rem;
   height: 2.5rem;
   line-height: normal;
   transition: all 0.2s ease;
+  background-color: var(--gl-surface-card);
+  color: var(--gl-text-primary);
 }
 
 .thresholdRow input {
@@ -118,7 +120,7 @@
 
 .thresholdRow button {
   padding: 0.25rem 0.8rem;
-  background-color: var(--mountain-bike-green);
+  background-color: var(--gl-status-normal);
   color: white;
   border: none;
   border-radius: 4px;
@@ -130,7 +132,7 @@
 }
 
 .thresholdRow button:hover {
-  background-color: var(--mountain-bike-green-hover);
+  filter: brightness(1.1);
 }
 
 @keyframes slideDown {
