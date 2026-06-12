@@ -24,9 +24,7 @@ export function renderActivityIcon(
 ) {
   switch (visualType) {
     case 'mountain-bike':
-      return (
-        <MountainBikeIcon className={className} color={color} />
-      );
+      return <MountainBikeIcon className={className} color={color} />;
     case 'bike':
       return (
         <MdDirectionsBike

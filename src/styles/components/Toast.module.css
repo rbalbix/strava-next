@@ -16,10 +16,10 @@
   padding: 0.75rem 1rem;
   border-radius: 10px;
   font-size: 1.4rem;
-  color: #0c2440;
-  background: var(--dark-gray);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  border: 1px solid var(--toast-success-border);
+  color: var(--gl-text-primary);
+  background: var(--gl-surface-card);
+  box-shadow: var(--gl-shadow-card);
+  border: 1px solid var(--gl-border-subtle);
   animation: toastIn 0.2s ease;
   max-width: min(320px, 90vw);
   font-weight: 600;
@@ -28,15 +28,17 @@
 }
 
 .info {
-  background: #2f3542;
+  background: var(--gl-surface-secondary);
 }
 
 .success {
-  background: var(--toast-success-bg);
+  background: var(--gl-status-normal);
+  color: #ffffff;
 }
 
 .error {
-  background: #a8322a;
+  background: var(--gl-status-overdue);
+  color: #ffffff;
 }
 
 @keyframes toastIn {

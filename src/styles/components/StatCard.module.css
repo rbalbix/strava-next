@@ -6,10 +6,10 @@
   margin-top: 4px;
   margin-bottom: 4px;
   padding: 12px;
-  background-color: var(--background-card);
-  border: 1px solid var(--light-gray-lines);
+  background-color: var(--gl-surface-card);
+  border: 1px solid var(--gl-border-subtle);
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--gl-shadow-card);
 
   height: 100%;
 }
@@ -25,7 +25,7 @@
 
 .statLabel {
   font-size: 1.1rem;
-  color: var(--gray-signOut);
+  color: var(--gl-text-secondary);
   text-align: center;
 }
 

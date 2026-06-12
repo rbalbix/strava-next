@@ -13,15 +13,12 @@
 }
 
 .modalContent {
-  background-color: var(--background-card);
-  border: 1px solid var(--dark-gray);
   border-radius: 12px;
 
   width: 30vw;
   max-height: 90%;
   overflow-y: auto;
   position: relative;
-  box-shadow: 0 10px 30px var(--card-box-shadow);
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;
 
@@ -45,7 +42,7 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
@@ -56,7 +53,7 @@
 }
 
 .closeButton:hover {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
 }
 
 @keyframes fadeIn {

@@ -32,7 +32,11 @@ export default function ComponentInfo() {
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
             <span className={cardStyles.athleteStatInfoTitleIcon}>
-              <FaMedapps color='var(--stat-icon)' aria-hidden='true' focusable='false' />
+              <FaMedapps
+                color='var(--stat-icon)'
+                aria-hidden='true'
+                focusable='false'
+              />
             </span>
             <h2
               id='modal-title-equipments'
@@ -56,8 +60,8 @@ export default function ComponentInfo() {
       <section>
         <div className={styles.orientationRow} id='modal-desc-equipments'>
           Para controlar um componente do equipamento deve-se escrever seu
-          código no campo &apos;OBSERVAÇÕES PRIVADAS&apos; e incluir um * no título da
-          Atividade.
+          código no campo <strong>&apos;OBSERVAÇÕES PRIVADAS&apos;</strong> e
+          incluir um * no título da Atividade.
         </div>
         <div className={styles.copyHint}>Clique no código para copiar.</div>
         <table className={styles.footerEquipmentTable}>

@@ -146,8 +146,8 @@ export default function CardDetailModal({
                   visualType === 'run'
                     ? 'var(--orange-strava)'
                     : visualType === 'mountain-bike'
-                      ? 'var(--mountain-bike-green)'
-                      : 'var(--light-blue)',
+                      ? 'var(--gl-status-normal)'
+                      : 'var(--gl-brand-primary)',
                 )}
               </span>
               <h2 id='modal-title-card-detail' className={styles.modalTitle}>

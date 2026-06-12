@@ -1,11 +1,8 @@
 .cardContainer {
-  background-color: var(--background-card);
-  border: 1px solid var(--border-card);
+  /* Substituindo propriedades básicas por .glass-effect */
   border-radius: 8px;
-  box-shadow: 0 0 60px var(--card-box-shadow);
-
   padding: 1.2rem 1.2rem;
-  margin-top: 0.4rem;
+  margin-top: 0.8rem;
   margin-bottom: 0.8rem;
 
   cursor: pointer;
@@ -14,6 +11,8 @@
   font: inherit;
   appearance: none;
   color: inherit;
+
+  border: 1px solid var(--gl-text-secondary);
 }
 
 .cardContainer:last-child {
@@ -31,7 +30,7 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
@@ -39,25 +38,23 @@
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
 .cardContainer:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }
 
 .cardContainer header {
-  font-size: var(--text-lg);
+  font-size: var(--gl-text-lg);
   font-weight: 600;
   gap: 0.75rem;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background-color: var(--background-card);
 }
 
 .cardNewItem {
@@ -75,23 +72,17 @@
   font-size: 14px;
 }
 
-.cardContainer main {
-  background-color: var(--background-card);
-}
-
 .cardContainer main p {
-  font-size: var(--text-sm);
-
-  background-color: var(--background-card);
+  font-size: var(--gl-text-sm);
 }
 
 .cardContainer main > :first-child {
-  color: var(--gray-notes);
+  color: var(--gl-text-secondary);
 }
 
 .cardContainer div p {
   font-size: 1.1rem;
-  color: var(--light-gray-notes);
+  color: var(--gl-text-tertiary);
 }
 
 .cardContainer div p:first-child {
@@ -99,19 +90,17 @@
 }
 
 .iconBike {
-  color: var(--light-blue);
-  background-color: var(--background-card);
+  color: var(--gl-brand-primary);
 }
 
 .iconMountainBike {
-  color: var(--mountain-bike-green);
-  background-color: var(--background-card);
+  color: var(--gl-status-normal);
   font-size: 3.6rem;
 }
 
 .iconRun {
-  color: var(--orange-strava);
-  background-color: var(--background-card);
+  color: var(--gl-brand-primary);
+  background-color: var(--gl-surface-card);
 }
 
 .athleteStatInfoContent {
@@ -119,15 +108,13 @@
 }
 
 .athleteStatInfoTitle {
-  font-size: var(--title-sm);
+  font-size: var(--gl-title-sm);
   font-weight: 600;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-
-  background-color: var(--background-card);
 }
 
 .athleteStatInfoTitleIcon {

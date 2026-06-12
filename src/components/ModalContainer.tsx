@@ -233,7 +233,7 @@ export default function ModalContainer() {
   return (
     <div className={styles.modalOverlay} onClick={closeModal}>
       <div
-        className={styles.modalContent}
+        className={`${styles.modalContent} glass-effect`}
         onClick={(e) => e.stopPropagation()}
         role='dialog'
         aria-modal='true'

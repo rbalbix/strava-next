@@ -1,9 +1,9 @@
 .erroMsgContainer {
   width: 70%;
 
-  border: 1px solid var(--orange-strava);
+  border: 1px solid var(--gl-brand-primary);
   border-radius: 16px;
-  box-shadow: 0 0 60px var(--card-box-shadow);
+  box-shadow: var(--gl-shadow-card);
 
   margin-top: 1rem;
   margin-bottom: 0.5rem;
@@ -19,8 +19,8 @@
 
   background-image: linear-gradient(
     90deg,
-    var(--start-gradient-color),
-    var(--end-gradient-color)
+    var(--gl-brand-gradient-start),
+    var(--gl-brand-gradient-end)
   );
   padding: 0.5rem 1.5rem;
 }
@@ -28,7 +28,7 @@
 .erroMsgContainer header {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--errorContainer);
+  color: var(--gl-text-on-brand);
 
   display: flex;
   justify-content: space-between;
@@ -37,7 +37,7 @@
 
 .erroMsgContainer main p {
   font-size: 1.4rem;
-  color: var(--light-gray-notes);
+  color: var(--gl-text-tertiary);
 
   padding: 0.8rem 1.5rem;
 }

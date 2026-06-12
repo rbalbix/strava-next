@@ -9,8 +9,8 @@
 }
 
 .initialInfoContainer div {
-  font-size: var(--text-xs);
-  color: var(--dark-gray);
+  font-size: var(--gl-text-xs);
+  color: var(--gl-text-primary);
 }
 
 .screen {
@@ -21,57 +21,51 @@
 }
 
 .screen img {
-  border: 2px solid var(--border-card);
+  border: 2px solid var(--gl-border-card);
   border-radius: 4px;
-  box-shadow: 0 0 60px var(--card-box-shadow);
+  box-shadow: var(--gl-shadow-card);
 }
 
 .initialInfoContainer h1 {
-  font-size: var(--title-sm);
+  font-size: var(--gl-title-sm);
   font-weight: 600;
-  line-height: var(--line-tight);
+  line-height: var(--gl-line-tight);
 }
 
 .initialInfoContainer h1 > span {
-  font-size: var(--title-sm);
+  font-size: var(--gl-title-sm);
   font-weight: 600;
-  color: var(--orange-strava);
+  color: var(--gl-brand-primary);
 }
 
 .initialInfoContainer h2 {
-  font-size: var(--text-lg);
+  font-size: var(--gl-text-lg);
   font-weight: 600;
 
   margin-top: 0.5rem;
 }
 
 .initialInfoContainer h3 {
-  font-size: var(--text-sm);
+  font-size: var(--gl-text-sm);
 
   margin-top: 0.5rem;
 }
 
 .initialInfoContainer div > span {
-  font-size: var(--text-xs);
-  color: var(--end-gradient-color);
+  font-size: var(--gl-text-xs);
+  color: var(--gl-brand-gradient-end);
 }
 
 .initialInfoContainer ol {
-  font-size: var(--text-xs);
+  font-size: var(--gl-text-xs);
   list-style-type: decimal;
 
   margin-bottom: 0.5rem;
   padding-left: 2rem;
 }
 
-.initialInfoContainer ol li > span {
-  font-size: var(--text-xs);
-  color: var(--light-blue);
-  margin: 0;
-}
-
 .initialInfoContainer ul {
-  font-size: var(--text-xs);
+  font-size: var(--gl-text-xs);
   list-style-type: disc;
 
   margin-bottom: 0.5rem;
@@ -79,12 +73,24 @@
 }
 
 .initialInfoContainer ul li a {
-  color: var(--light-blue);
+  color: var(--gl-brand-primary);
 }
 
 .divider {
   width: 60%;
-  background-color: var(--light-gray);
+  background-color: var(--gl-border-subtle);
+}
+
+.statusOverdue {
+  color: var(--gl-status-overdue);
+}
+
+.statusWarning {
+  color: var(--gl-status-warning);
+}
+
+.statusNormal {
+  color: #12bb12;
 }
 
 @media (max-width: 430px) {

@@ -1,6 +1,6 @@
 .divider {
   width: 60%;
-  background-color: var(--light-gray);
+  background-color: var(--gl-border-subtle);
 }
 
 .closeButton {
@@ -14,7 +14,7 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
@@ -22,6 +22,6 @@
 }
 
 .closeButton:focus-visible {
-  outline: 2px solid var(--light-blue);
+  outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
 }

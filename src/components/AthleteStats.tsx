@@ -21,24 +21,32 @@ export default function AthleteStats() {
       recent: ActivityTotal;
       ytd: ActivityTotal;
       all: ActivityTotal;
-    }
+    },
   ) => (
     <div className={cardStyles.cardContainer}>
       <header>
         {title === 'Ciclismo' ? (
-          <MdDirectionsBike color='var(--light-blue)' aria-hidden='true' focusable='false' />
+          <MdDirectionsBike
+            color='var(--gl-brand-primary)'
+            aria-hidden='true'
+            focusable='false'
+          />
         ) : (
-          <MdDirectionsRun color='#fc5200' aria-hidden='true' focusable='false' />
+          <MdDirectionsRun
+            color='var(--gl-brand-primary)'
+            aria-hidden='true'
+            focusable='false'
+          />
         )}
       </header>
       <div>
         {title === 'Ciclismo' && (
           <>
             <p>{`Maior distância: ${locale.format(',.2f')(
-              (stats?.biggestDistance || 0) / 1000
+              (stats?.biggestDistance || 0) / 1000,
             )}km`}</p>
             <p>{`Maior escalada: ${locale.format(',.2f')(
-              stats?.biggestClimb || 0
+              stats?.biggestClimb || 0,
             )}m`}</p>
           </>
         )}
@@ -52,10 +60,10 @@ export default function AthleteStats() {
           </span>
         </p>
         <p>{`[${stats?.recent?.count || 0} atividades | ${locale.format(',.2f')(
-          (stats?.recent?.distance || 0) / 1000
+          (stats?.recent?.distance || 0) / 1000,
         )}km | ${secondsToHms(stats?.recent?.moving_time || 0)}h
               | ${locale.format(',.2f')(
-                stats?.recent?.elevation_gain || 0
+                stats?.recent?.elevation_gain || 0,
               )}m]`}</p>
 
         <p className={cardStyles.cardNewItem}>
@@ -67,13 +75,13 @@ export default function AthleteStats() {
           </span>
         </p>
         <p>{`[${stats?.ytd?.count || 0} atividades | ${locale.format(',.2f')(
-          (stats?.ytd?.distance || 0) / 1000
+          (stats?.ytd?.distance || 0) / 1000,
         )}km |  
               
               ${secondsToHms(stats?.ytd?.moving_time || 0)}h
               
               | ${locale.format(',.2f')(
-                stats?.ytd?.elevation_gain || 0
+                stats?.ytd?.elevation_gain || 0,
               )}m]`}</p>
 
         <p className={cardStyles.cardNewItem}>
@@ -85,13 +93,13 @@ export default function AthleteStats() {
           </span>
         </p>
         <p>{`[${stats?.all?.count || 0} atividades | ${locale.format(',.2f')(
-          (stats?.all?.distance || 0) / 1000
+          (stats?.all?.distance || 0) / 1000,
         )}km |  
               
               ${secondsToHms(stats?.all?.moving_time || 0)}h
               
               | ${locale.format(',.2f')(
-                stats?.all?.elevation_gain || 0
+                stats?.all?.elevation_gain || 0,
               )}m]`}</p>
       </div>
     </div>
@@ -105,7 +113,11 @@ export default function AthleteStats() {
             <div className={cardStyles.athleteStatInfoTitle}>
               <div>
                 <span className={cardStyles.athleteStatInfoTitleIcon}>
-                  <IoMdStats color='var(--stat-icon)' aria-hidden='true' focusable='false' />
+                  <IoMdStats
+                    color='var(--gl-brand-gradient-end)'
+                    aria-hidden='true'
+                    focusable='false'
+                  />
                 </span>
                 <h2
                   id='modal-title-stats'
