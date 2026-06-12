@@ -114,6 +114,12 @@
 
 @media (max-width: 550px) {
   .modalContent {
-    width: 85vw;
+    width: 90vw;
+  }
+}
+
+@media (max-width: 450px) {
+  .modalContent {
+    width: 88vw;
   }
 }

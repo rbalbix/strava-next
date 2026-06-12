@@ -245,8 +245,8 @@ export default function HowItWorksContent({
         <Image
           src='/images/tela-inicio-1.jpeg'
           alt='Ícone para tela início'
-          width={295}
-          height={109}
+          width={285}
+          height={90}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
