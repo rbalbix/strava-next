@@ -55,23 +55,6 @@ html {
 
   /* Elevation */
   --gl-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  
-  /* Legacy Compatibility (will be removed in Task 03) */
-  --background: var(--gl-surface-primary);
-  --background-card: var(--gl-surface-card);
-  --background-sidebar: var(--gl-surface-secondary);
-  --background-sidebar-item: #e5e7eb;
-  --background-sidebar-item-hover: #d6d9de;
-  --dark-gray: var(--gl-text-primary);
-  --gray-notes: var(--gl-text-secondary);
-  --light-gray: var(--gl-border-subtle);
-  --light-gray-lines: #c4c8cc;
-  --light-gray-notes: #888;
-  --orange-strava: var(--gl-brand-primary);
-  --threshold-normal: var(--gl-status-normal);
-  --threshold-warning: var(--gl-status-warning);
-  --threshold-overdue: var(--gl-status-overdue);
-  --table-head-text: var(--gl-text-on-brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -82,9 +65,9 @@ html {
   :root {
     /* Surface & Backgrounds - Dark (Premium) */
     --gl-surface-primary: #0f1115; /* Deep rich dark */
-    --gl-surface-secondary: #1a1d23;
-    --gl-surface-card: #1e2229;
-    --gl-surface-glass: rgba(30, 34, 41, 0.75);
+    --gl-surface-secondary: #1c2027; /* Levemente mais claro */
+    --gl-surface-card: #262c36; /* Mais claro para se destacar */
+    --gl-surface-glass: rgba(30, 34, 41, 0.6); /* Mais transparente */
 
     /* Text Colors - Dark */
     --gl-text-primary: #f0f0f0;
@@ -93,8 +76,8 @@ html {
     --gl-text-on-brand: #ffffff;
 
     /* Borders & Dividers - Dark */
-    --gl-border-subtle: #2d333d;
-    --gl-border-card: #373e4a;
+    --gl-border-subtle: #3a4250; /* Um pouco mais brilhante para bordas */
+    --gl-border-card: #454d5c;
 
     /* Elevation - Dark */
     --gl-shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
@@ -102,17 +85,6 @@ html {
     /* Status Overrides - Dark */
     --gl-status-warning: #ffca28;
     --gl-status-overdue: #ff6b6b;
-
-    /* Legacy Compatibility - Dark */
-    --background: var(--gl-surface-primary);
-    --background-card: var(--gl-surface-card);
-    --background-sidebar: var(--gl-surface-secondary);
-    --dark-gray: var(--gl-text-primary);
-    --gray-notes: var(--gl-text-secondary);
-    --orange-strava: var(--gl-brand-primary);
-    --threshold-normal: var(--gl-status-normal);
-    --threshold-warning: var(--gl-status-warning);
-    --threshold-overdue: var(--gl-status-overdue);
   }
 }
 
