@@ -13,15 +13,12 @@
 }
 
 .modalContent {
-  background-color: var(--gl-surface-card);
-  border: 1px solid var(--gl-border-subtle);
   border-radius: 12px;
 
   width: 30vw;
   max-height: 90%;
   overflow-y: auto;
   position: relative;
-  box-shadow: var(--gl-shadow-card);
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;
 

@@ -1,9 +1,6 @@
 .cardContainer {
-  background-color: var(--gl-surface-card);
-  border: 1px solid var(--gl-border-card);
+  /* Substituindo propriedades básicas por .glass-effect */
   border-radius: 8px;
-  box-shadow: var(--gl-shadow-card);
-
   padding: 1.2rem 1.2rem;
   margin-top: 0.4rem;
   margin-bottom: 0.8rem;

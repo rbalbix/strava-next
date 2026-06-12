@@ -16,7 +16,6 @@
     transform 0.35s ease,
     opacity 0.2s ease;
   border-right: 1px solid var(--gl-border-subtle);
-  box-shadow: var(--gl-shadow-card);
 
   display: flex;
   flex-direction: column;

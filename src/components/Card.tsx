@@ -47,7 +47,7 @@ export default function Card({
   return (
     <button
       type='button'
-      className={styles.cardContainer}
+      className={`${styles.cardContainer} glass-effect`}
       onClick={handleCardClick}
       aria-label={`Abrir detalhes de ${name}`}
     >

@@ -144,11 +144,11 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
         role='presentation'
         aria-hidden={!isOpen}
       />
-      <div
-        className={`${styles.sidebarContainer} ${
+      <aside
+        id='sidebar-menu'
+        className={`${styles.sidebarContainer} glass-effect ${
           isOpen ? styles.sidebarOpen : ''
         }`}
-        id='sidebar-menu'
         ref={sidebarRef}
         role='dialog'
         aria-modal='true'
@@ -247,7 +247,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
             </button>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 }
