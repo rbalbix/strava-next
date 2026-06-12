@@ -16,18 +16,6 @@ const TOKEN_PAIRS = [
   ['--gl-status-overdue', '--gl-surface-primary', 45],
 ];
 
-// Fallback para as variáveis atuais enquanto os novos tokens não são criados (Task 02)
-const LEGACY_MAPPING = {
-  '--gl-text-primary': '--dark-gray',
-  '--gl-text-secondary': '--gray-notes',
-  '--gl-text-on-brand': '--table-head-text',
-  '--gl-brand-primary': '--orange-strava',
-  '--gl-surface-primary': '--background',
-  '--gl-status-normal': '--threshold-normal',
-  '--gl-status-warning': '--threshold-warning',
-  '--gl-status-overdue': '--threshold-overdue',
-};
-
 export function parseCSSVariables(content, isDarkMode = false) {
   const variables = {};
   
@@ -114,11 +102,8 @@ async function validate() {
     const currentVars = theme === 'Light' ? lightVars : darkVars;
     
     for (const [textVar, bgVar, threshold] of TOKEN_PAIRS) {
-      const resolvedTextVar = currentVars[textVar] ? textVar : LEGACY_MAPPING[textVar];
-      const resolvedBgVar = currentVars[bgVar] ? bgVar : LEGACY_MAPPING[bgVar];
-      
-      const textColorRaw = resolveColor(resolvedTextVar, currentVars, lightVars);
-      const bgColorRaw = resolveColor(resolvedBgVar, currentVars, lightVars);
+      const textColorRaw = resolveColor(textVar, currentVars, lightVars);
+      const bgColorRaw = resolveColor(bgVar, currentVars, lightVars);
       
       if (!textColorRaw || !bgColorRaw) {
         console.warn(`[?] ${textVar} ou ${bgVar} não encontrados.`);

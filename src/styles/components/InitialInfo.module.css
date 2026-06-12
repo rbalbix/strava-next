@@ -64,12 +64,6 @@
   padding-left: 2rem;
 }
 
-.initialInfoContainer ol li > span {
-  font-size: var(--gl-text-xs);
-  color: var(--gl-brand-primary);
-  margin: 0;
-}
-
 .initialInfoContainer ul {
   font-size: var(--gl-text-xs);
   list-style-type: disc;
@@ -85,6 +79,18 @@
 .divider {
   width: 60%;
   background-color: var(--gl-border-subtle);
+}
+
+.statusOverdue {
+  color: var(--gl-status-overdue);
+}
+
+.statusWarning {
+  color: var(--gl-status-warning);
+}
+
+.statusNormal {
+  color: #12bb12;
 }
 
 @media (max-width: 430px) {

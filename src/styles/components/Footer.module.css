@@ -17,7 +17,7 @@
 }
 
 .footerEquipmentTable thead {
-  background-color: var(--gl-text-primary);
+  background-color: var(--gl-text-tertiary);
   color: var(--gl-text-on-brand);
 }
 
@@ -91,11 +91,15 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
   z-index: 1001;
+}
+
+.copyButton {
+  padding: 1.5px 4px;
 }
 
 .copyButton:focus-visible {

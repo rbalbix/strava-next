@@ -2,7 +2,7 @@
   /* Substituindo propriedades básicas por .glass-effect */
   border-radius: 8px;
   padding: 1.2rem 1.2rem;
-  margin-top: 0.4rem;
+  margin-top: 0.8rem;
   margin-bottom: 0.8rem;
 
   cursor: pointer;
@@ -11,6 +11,8 @@
   font: inherit;
   appearance: none;
   color: inherit;
+
+  border: 1px solid var(--gl-text-secondary);
 }
 
 .cardContainer:last-child {
@@ -28,7 +30,7 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;
@@ -53,8 +55,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  background-color: var(--gl-surface-card);
 }
 
 .cardNewItem {
@@ -72,14 +72,8 @@
   font-size: 14px;
 }
 
-.cardContainer main {
-  background-color: var(--gl-surface-card);
-}
-
 .cardContainer main p {
   font-size: var(--gl-text-sm);
-
-  background-color: var(--gl-surface-card);
 }
 
 .cardContainer main > :first-child {
@@ -97,12 +91,10 @@
 
 .iconBike {
   color: var(--gl-brand-primary);
-  background-color: var(--gl-surface-card);
 }
 
 .iconMountainBike {
   color: var(--gl-status-normal);
-  background-color: var(--gl-surface-card);
   font-size: 3.6rem;
 }
 
@@ -123,8 +115,6 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.5rem;
-
-  background-color: var(--gl-surface-card);
 }
 
 .athleteStatInfoTitleIcon {

@@ -14,7 +14,7 @@
   height: 2.8rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--gl-text-secondary);
   cursor: pointer;
   color: inherit;
   font-size: 1.45rem;

@@ -83,7 +83,7 @@
 
 .divider {
   width: 60%;
-  background-color: var(--gl-border-subtle);
+  background-color: var(--gl-text-primary);
 }
 
 .emptyState {

@@ -1,6 +1,5 @@
 import Divider from '@mui/material/Divider';
 import Image from 'next/image';
-import Link from 'next/link';
 import { FaMedapps } from 'react-icons/fa';
 import { IoLogInOutline } from 'react-icons/io5';
 import styles from '../styles/components/InitialInfo.module.css';
@@ -47,7 +46,7 @@ export default function HowItWorksContent({
         <li>
           Clique no ícone{' '}
           <IoLogInOutline
-            color='var(--light-blue)'
+            color='var(--gl-brand-primary)'
             size={22}
             aria-hidden='true'
             focusable='false'
@@ -170,12 +169,15 @@ export default function HowItWorksContent({
           O limite é persistido e a barra de progresso será exibida em cada
           item. A barra de progresso é calculada com base na distância acumulada
           do componente em relação ao limite definido. Se a distância acumulada
-          atingir ou ultrapassar o limite, a barra de progresso ficará vermelha
-          para indicar que o componente precisa de atenção. Se a barra estiver
-          amarela significa que o componente está se aproximando do limite
-          definido e pode precisar de manutenção em breve. Se a barra de
-          progresso estiver azul, significa que o componente ainda está dentro
-          do limite definido e não requer manutenção imediata.
+          atingir ou ultrapassar o limite, a barra de progresso ficará{' '}
+          <span className={styles.statusOverdue}>vermelha</span> para indicar
+          que o componente precisa de atenção. Se a barra estiver
+          <span className={styles.statusWarning}> amarela</span> significa que o
+          componente está se aproximando do limite definido e pode precisar de
+          manutenção em breve. Se a barra de progresso estiver{' '}
+          <span className={styles.statusNormal}>verde</span>, significa que o
+          componente ainda está dentro do limite definido e não requer
+          manutenção imediata.
         </li>
         <div className={styles.screen}>
           <Image
