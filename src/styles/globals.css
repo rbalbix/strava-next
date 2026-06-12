@@ -5,71 +5,73 @@
 }
 
 html {
-  background-color: var(--background);
+  background-color: var(--gl-surface-primary);
+  color: var(--gl-text-primary);
 }
 
 :root {
+  /* Typography */
   --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-jetbrains:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
-  --text-base: 1.6rem;
-  --text-sm: 1.4rem;
-  --text-xs: 1.2rem;
-  --text-lg: 1.9rem;
-  --title-lg: 2.4rem;
-  --title-md: 2rem;
-  --title-sm: 1.6rem;
-  --line-base: 1.6;
-  --line-tight: 1.25;
-  --background: #f8f9fa;
-  --background-card: #fff;
-  --background-sidebar: #f0f2f5;
-  --background-sidebar-rgb: 240, 242, 245;
+  
+  --gl-text-base: 1.6rem;
+  --gl-text-sm: 1.4rem;
+  --gl-text-xs: 1.2rem;
+  --gl-text-lg: 1.9rem;
+  --gl-title-lg: 2.4rem;
+  --gl-title-md: 2rem;
+  --gl-title-sm: 1.6rem;
+  --gl-line-base: 1.6;
+  --gl-line-tight: 1.25;
+
+  /* Surface & Backgrounds - Light (Professional) */
+  --gl-surface-primary: #fcfcfc; /* Off-white sophisticated */
+  --gl-surface-secondary: #f0f2f5;
+  --gl-surface-card: #ffffff;
+  --gl-surface-glass: rgba(255, 255, 255, 0.7);
+  
+  /* Brand - Strava Mate */
+  --gl-brand-primary: #e64a19; /* More sophisticated mate orange */
+  --gl-brand-active: #bf360c;
+  --gl-brand-gradient-start: #ff5722;
+  --gl-brand-gradient-end: #ffa000;
+
+  /* Text Colors - Light */
+  --gl-text-primary: #1a1a1a;
+  --gl-text-secondary: #4a4a4a;
+  --gl-text-tertiary: #717171;
+  --gl-text-on-brand: #ffffff;
+
+  /* Status (Semáforo) - High Urgency */
+  --gl-status-normal: #12bb12; /* Slightly more professional green */
+  --gl-status-warning: #a17100; /* Darker for better contrast on white */
+  --gl-status-overdue: #d32f2f;
+
+  /* Borders & Dividers */
+  --gl-border-subtle: #e0e0e0;
+  --gl-border-card: #ececec;
+
+  /* Elevation */
+  --gl-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  /* Legacy Compatibility (will be removed in Task 03) */
+  --background: var(--gl-surface-primary);
+  --background-card: var(--gl-surface-card);
+  --background-sidebar: var(--gl-surface-secondary);
   --background-sidebar-item: #e5e7eb;
   --background-sidebar-item-hover: #d6d9de;
-
-  --light-blue: #007aff;
-  --light-blue-hover: #005bb5;
-
-  --gray-signOut: #666;
-  --gray-signOut-hover: #444;
-  --light-gray: #d1d5db;
+  --dark-gray: var(--gl-text-primary);
+  --gray-notes: var(--gl-text-secondary);
+  --light-gray: var(--gl-border-subtle);
   --light-gray-lines: #c4c8cc;
   --light-gray-notes: #888;
-  --gray-notes: #555;
-  --dark-gray: #222;
-
-  --threshold-normal: #21ec21; /*#7e911d*/
-  --threshold-warning: #ffd042;
-  --threshold-overdue: #f51313 /*#ae002d #e05b5b*/;
-
-  --event-border: #666;
-  --date-badge-border: #666;
-  --text-border-bottom: #bbb;
-  --timeago: rgb(20, 140, 10);
-
-  --border-card: var(--light-gray);
-
-  --athlete-name: var(--gray-notes);
-  --sidebar-icon: var(--light-gray-notes);
-
-  --orange-strava: #fc5200;
-  --start-gradient-color: #ff5733;
-  --end-gradient-color: #fdb927;
-  --mountain-bike-green: #4fcf6b;
-  --mountain-bike-green-hover: #45a049;
-  --toast-success-bg: #d8ebff;
-  --toast-success-border: rgba(0, 122, 255, 0.35);
-
-  --card-box-shadow: rgba(0, 0, 0, 0.4);
-  --errorContainer: whitesmoke;
-
-  --stat-icon: #8257e5;
-
-  --table-head-text: #fff;
-  --equipment-row-background: var(--light-gray-lines);
-  --footer-icon-hover: var(--orange-strava);
+  --orange-strava: var(--gl-brand-primary);
+  --threshold-normal: var(--gl-status-normal);
+  --threshold-warning: var(--gl-status-warning);
+  --threshold-overdue: var(--gl-status-overdue);
+  --table-head-text: var(--gl-text-on-brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -78,36 +80,64 @@ html {
   }
 
   :root {
-    --background: #121212;
-    --border-card: #2e3238;
-    --background-card: #1e1e1e;
-    --background-sidebar: #2a2f3b;
-    --background-sidebar-rgb: 42, 47, 59;
-    --background-sidebar-item: #282c34;
-    --background-sidebar-item-hover: #343a40;
+    /* Surface & Backgrounds - Dark (Premium) */
+    --gl-surface-primary: #0f1115; /* Deep rich dark */
+    --gl-surface-secondary: #1a1d23;
+    --gl-surface-card: #1e2229;
+    --gl-surface-glass: rgba(30, 34, 41, 0.75);
 
-    --dark-gray: #f0f0f0;
-    --gray-notes: #d0d4da;
-    --light-gray-lines: #9aa3ad;
-    --light-gray-notes: #aab2bb;
-    --event-border: #9aa3ad;
-    --date-badge-border: #9aa3ad;
-    --text-border-bottom: #8f98a3;
+    /* Text Colors - Dark */
+    --gl-text-primary: #f0f0f0;
+    --gl-text-secondary: #b0b8c4;
+    --gl-text-tertiary: #8a94a3;
+    --gl-text-on-brand: #ffffff;
 
-    --gray-signOut: #bbb;
-    --gray-signOut-hover: #ddd;
+    /* Borders & Dividers - Dark */
+    --gl-border-subtle: #2d333d;
+    --gl-border-card: #373e4a;
 
-    --athlete-name: #ffffff;
-    --sidebar-icon: #ffffff;
+    /* Elevation - Dark */
+    --gl-shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 
-    --card-box-shadow: rgba(0, 0, 0, 0.2);
-    --errorContainer: var(--background-card);
+    /* Status Overrides - Dark */
+    --gl-status-warning: #ffca28;
+    --gl-status-overdue: #ff6b6b;
 
-    --timeago: rgb(140, 220, 80);
+    /* Legacy Compatibility - Dark */
+    --background: var(--gl-surface-primary);
+    --background-card: var(--gl-surface-card);
+    --background-sidebar: var(--gl-surface-secondary);
+    --dark-gray: var(--gl-text-primary);
+    --gray-notes: var(--gl-text-secondary);
+    --orange-strava: var(--gl-brand-primary);
+    --threshold-normal: var(--gl-status-normal);
+    --threshold-warning: var(--gl-status-warning);
+    --threshold-overdue: var(--gl-status-overdue);
+  }
+}
 
-    --table-head-text: var(--background-card);
-    --equipment-row-background: #262a30;
-    --footer-icon-hover: var(--end-gradient-color);
+/* Glassmorphism Utility Class */
+.glass-effect {
+  background: var(--gl-surface-glass);
+  border: 1px solid var(--gl-border-subtle);
+  box-shadow: var(--gl-shadow-card);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .glass-effect {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-effect {
+    /* Simulação de profundidade via gradiente sutil quando blur não é suportado */
+    background: linear-gradient(
+      135deg,
+      var(--gl-surface-glass),
+      var(--gl-surface-secondary)
+    );
   }
 }
 
@@ -137,9 +167,10 @@ html {
 
 body {
   font:
-    400 var(--text-base) var(--font-inter),
+    400 var(--gl-text-base) var(--font-inter),
     sans-serif;
   overflow-y: auto;
+  color: var(--gl-text-primary);
 }
 
 button {

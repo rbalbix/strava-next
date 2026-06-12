@@ -15,7 +15,7 @@ describe('validate-color-contrast script', () => {
   }
 }
       `;
-      const vars = parseCSSVariables(css, false);
+      const vars = parseCSSVariables(css, false) as Record<string, string>;
       expect(vars['--gl-bg']).toBe('#ffffff');
       expect(vars['--gl-text']).toBe('#000000');
     });
@@ -32,7 +32,7 @@ describe('validate-color-contrast script', () => {
   }
 }
       `;
-      const vars = parseCSSVariables(css, true);
+      const vars = parseCSSVariables(css, true) as Record<string, string>;
       expect(vars['--gl-bg']).toBe('#121212');
       expect(vars['--gl-text']).toBe('#f0f0f0');
     });
