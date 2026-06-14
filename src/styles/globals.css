@@ -15,7 +15,7 @@ html {
   --font-jetbrains:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
     'Courier New', monospace;
-  
+
   --gl-text-base: 1.6rem;
   --gl-text-sm: 1.4rem;
   --gl-text-xs: 1.2rem;
@@ -31,9 +31,9 @@ html {
   --gl-surface-secondary: #f0f2f5;
   --gl-surface-card: #ffffff;
   --gl-surface-glass: rgba(255, 255, 255, 0.7);
-  
+
   /* Brand - Strava Mate */
-  --gl-brand-primary: #e64a19; /* More sophisticated mate orange */
+  --gl-brand-primary: #e64a19;
   --gl-brand-active: #bf360c;
   --gl-brand-gradient-start: #ff5722;
   --gl-brand-gradient-end: #ffa000;
@@ -45,8 +45,8 @@ html {
   --gl-text-on-brand: #ffffff;
 
   /* Status (Semáforo) - High Urgency */
-  --gl-status-normal: #12bb12; /* Slightly more professional green */
-  --gl-status-warning: #a17100; /* Darker for better contrast on white */
+  --gl-status-normal: #0d8d0d;
+  --gl-status-warning: #fac037;
   --gl-status-overdue: #d32f2f;
 
   /* Borders & Dividers */
@@ -54,7 +54,10 @@ html {
   --gl-border-card: #ececec;
 
   /* Elevation */
-  --gl-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --gl-shadow-card:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  --icon-bike-road: #0f73c5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -80,11 +83,15 @@ html {
     --gl-border-card: #454d5c;
 
     /* Elevation - Dark */
-    --gl-shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    --gl-shadow-card:
+      0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
 
     /* Status Overrides - Dark */
+    --gl-status-normal: #12bb12;
     --gl-status-warning: #ffca28;
     --gl-status-overdue: #ff6b6b;
+
+    --icon-bike-road: #2196f3;
   }
 }
 

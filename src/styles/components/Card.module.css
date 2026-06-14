@@ -90,7 +90,8 @@
 }
 
 .iconBike {
-  color: var(--gl-brand-primary);
+  color: var(--icon-bike-road);
+  font-size: 2.5rem;
 }
 
 .iconMountainBike {
@@ -100,7 +101,7 @@
 
 .iconRun {
   color: var(--gl-brand-primary);
-  background-color: var(--gl-surface-card);
+  font-size: 2.5rem;
 }
 
 .athleteStatInfoContent {

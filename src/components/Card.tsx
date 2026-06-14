@@ -52,15 +52,17 @@ export default function Card({
       aria-label={`Abrir detalhes de ${name}`}
     >
       <header>
-        {name}
-        {renderActivityIcon(
-          visualType,
-          visualType === 'run'
-            ? styles.iconRun
-            : visualType === 'mountain-bike'
-              ? styles.iconMountainBike
-              : styles.iconBike,
-        )}
+        <div>{name}</div>
+        <div>
+          {renderActivityIcon(
+            visualType,
+            visualType === 'run'
+              ? styles.iconRun
+              : visualType === 'mountain-bike'
+                ? styles.iconMountainBike
+                : styles.iconBike,
+          )}
+        </div>
       </header>
       <main>
         <p>{`${count} atividades.`}</p>
