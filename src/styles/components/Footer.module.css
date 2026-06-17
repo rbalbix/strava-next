@@ -11,7 +11,7 @@
   border-collapse: collapse;
   margin: auto;
 
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   text-align: center;
   vertical-align: middle;
 }
@@ -22,7 +22,7 @@
 }
 
 .orientationRow {
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   text-align: center;
 
   margin: auto;
@@ -31,7 +31,7 @@
 }
 
 .copyHint {
-  font-size: 0.85rem;
+  font-size: 1rem;
   text-align: center;
   color: var(--gl-text-secondary);
   margin-bottom: 12px;
@@ -39,14 +39,13 @@
 }
 
 .footerEquipmentTable th {
-  border: 1px solid var(--gl-border-subtle);
   padding: 8px;
 }
 
 .footerEquipmentTable td {
-  font-size: 0.9rem;
-  border: 1px solid var(--gl-border-subtle);
-  padding: 4px;
+  font-size: 1.2rem;
+  border: 1px solid;
+  padding: 8px;
 }
 
 .footerEquipmentTable tr:nth-child(even) {
@@ -99,16 +98,13 @@
 }
 
 .copyButton {
-  padding: 1.5px 4px;
-}
-
-.copyButton:focus-visible {
-  outline: 2px solid var(--gl-brand-primary);
-  outline-offset: 2px;
+  font-size: 1.2rem;
+  background-color: transparent;
+  border: 0;
 }
 
 .footerContainer footer {
-  font-size: 0.9rem;
+  font-size: 1.5rem;
   text-align: center;
 
   width: 50vw;

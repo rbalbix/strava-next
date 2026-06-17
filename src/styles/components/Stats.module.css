@@ -1,6 +1,6 @@
 .statsContainer {
-  /* remove extra top space so first card sits just below the header */
   padding-top: 0;
+  margin-top: 8px;
 }
 
 /* ensure the very first card in the list has no top margin */

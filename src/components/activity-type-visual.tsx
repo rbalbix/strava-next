@@ -1,5 +1,5 @@
 import { MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
-import MountainBikeIcon from './MountainBikeIcon';
+import { PiBicycle } from 'react-icons/pi';
 
 export type ActivityVisualType = 'mountain-bike' | 'bike' | 'run';
 
@@ -24,7 +24,15 @@ export function renderActivityIcon(
 ) {
   switch (visualType) {
     case 'mountain-bike':
-      return <MountainBikeIcon className={className} color={color} />;
+      return (
+        <PiBicycle
+          className={className}
+          color={color}
+          aria-hidden='true'
+          focusable='false'
+          data-testid='icon-mountain-bike'
+        />
+      );
     case 'bike':
       return (
         <MdDirectionsBike
