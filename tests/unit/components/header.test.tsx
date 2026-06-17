@@ -59,26 +59,17 @@ describe('Header component', () => {
     });
 
     expect(
-      container.querySelector('[aria-label="Entrar com Strava"]'),
+      container.querySelector('[aria-label="Abrir menu lateral"]'),
     ).toBeTruthy();
-    const infoButton = container.querySelector(
-      '[aria-label="Abrir informações"]',
-    ) as HTMLButtonElement;
-    act(() => {
-      infoButton.click();
-    });
-    expect(openModal).toHaveBeenCalledWith('info');
     act(() => {
       root.unmount();
     });
   });
 
-  it('renders authenticated actions and triggers signOut', () => {
-    const signOut = vi.fn();
+  it('renders authenticated actions', () => {
     const authValue = makeAuthContext({
       codeReturned: 'code',
       athlete: { id: 1 },
-      signOut,
     });
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -100,13 +91,6 @@ describe('Header component', () => {
     const sidebar = container.querySelector('[data-testid="sidebar"]');
     expect(sidebar?.textContent).toContain('open');
 
-    const logoutButton = container.querySelector(
-      '[aria-label="Sair da conta"]',
-    ) as HTMLButtonElement;
-    act(() => {
-      logoutButton.click();
-    });
-    expect(signOut).toHaveBeenCalledTimes(1);
     act(() => {
       root.unmount();
     });

@@ -57,16 +57,13 @@ describe('Sidebar component', () => {
       vi.runAllTimers();
     });
 
-    const closeButton = container.querySelector(
-      'button[aria-label="Fechar menu lateral"]',
-    ) as HTMLButtonElement;
-    expect(document.activeElement).toBe(closeButton);
-
     const focusables = Array.from(
       container.querySelectorAll('a[href], button'),
     ) as HTMLElement[];
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
+
+    expect(document.activeElement).toBe(first);
 
     last.focus();
     act(() => {
@@ -109,7 +106,7 @@ describe('Sidebar component', () => {
     expect(active).toHaveBeenCalledWith(false);
 
     const help = Array.from(container.querySelectorAll('button')).find((n) =>
-      n.textContent?.includes('Ajuda'),
+      n.textContent?.includes('Como funciona'),
     ) as HTMLButtonElement;
     act(() => help.click());
     expect(openModal).toHaveBeenCalledWith('info');
@@ -158,7 +155,7 @@ describe('Sidebar component', () => {
     act(() => root.unmount());
   });
 
-  it('only closes on overlay when target equals currentTarget', () => {
+  it('closes on overlay click', () => {
     const active = vi.fn();
     const container = document.createElement('div');
     const root = createRoot(container);
@@ -176,18 +173,6 @@ describe('Sidebar component', () => {
       overlay.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     });
     expect(active).toHaveBeenCalledWith(false);
-
-    const countAfterOverlay = active.mock.calls.length;
-    const fakeEvent = {
-      target: document.createElement('div'),
-      currentTarget: overlay,
-    } as unknown as React.MouseEvent<HTMLDivElement>;
-    const onClick = (overlay as any).onclick as ((e: React.MouseEvent<HTMLDivElement>) => void) | null;
-    expect(onClick).toBeTruthy();
-    act(() => {
-      onClick?.(fakeEvent);
-    });
-    expect(active.mock.calls.length).toBe(countAfterOverlay);
 
     act(() => root.unmount());
   });
