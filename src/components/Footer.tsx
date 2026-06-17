@@ -17,7 +17,11 @@ export default function Footer() {
             className={styles.footerIconButton}
             aria-label='Abrir componentes'
           >
-            <FaMedapps className={styles.footerIcon} aria-hidden='true' focusable='false' />
+            <FaMedapps
+              className={styles.footerIcon}
+              aria-hidden='true'
+              focusable='false'
+            />
           </button>
         </div>
       )}

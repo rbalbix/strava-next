@@ -1,8 +1,7 @@
 import Divider from '@mui/material/Divider';
-import Link from 'next/link';
 import { useContext } from 'react';
-import { FaInfoCircle } from 'react-icons/fa';
 import { MdClose } from 'react-icons/md';
+import { TfiHelp } from 'react-icons/tfi';
 import { AuthContext } from '../contexts/AuthContext';
 import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/InitialInfoModal.module.css';
@@ -17,17 +16,13 @@ export default function InitialInfoModal() {
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
             <span className={cardStyles.athleteStatInfoTitleIcon}>
-              <FaInfoCircle
-                color='var(--stat-icon)'
-                aria-hidden='true'
-                focusable='false'
-              />
+              <TfiHelp aria-hidden='true' focusable='false' />
             </span>
             <h2
               id='modal-title-info'
               className={cardStyles.athleteStatInfoHeading}
             >
-              Informações
+              Como funciona
             </h2>
           </div>
           <div>

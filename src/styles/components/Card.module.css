@@ -91,17 +91,17 @@
 
 .iconBike {
   color: var(--icon-bike-road);
-  font-size: 2.5rem;
+  font-size: 2.8rem;
 }
 
 .iconMountainBike {
   color: var(--gl-status-normal);
-  font-size: 3.6rem;
+  font-size: 2.8rem;
 }
 
 .iconRun {
   color: var(--gl-brand-primary);
-  font-size: 2.5rem;
+  font-size: 2.8rem;
 }
 
 .athleteStatInfoContent {
@@ -109,17 +109,17 @@
 }
 
 .athleteStatInfoTitle {
-  font-size: var(--gl-title-sm);
   font-weight: 600;
+}
 
+.athleteStatInfoTitle > div {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
+
+  margin-bottom: 10px;
 }
 
 .athleteStatInfoTitleIcon {
-  margin-right: 5px;
+  margin-right: 10px;
 }
 
 .athleteStatInfoHeading {

@@ -7,6 +7,12 @@
 html {
   background-color: var(--gl-surface-primary);
   color: var(--gl-text-primary);
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 :root {
@@ -150,6 +156,13 @@ body {
     sans-serif;
   overflow-y: auto;
   color: var(--gl-text-primary);
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+  display: none;
 }
 
 button {

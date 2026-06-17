@@ -22,7 +22,6 @@
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;
 
-  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 
@@ -30,6 +29,8 @@
 }
 
 .modalContent::-webkit-scrollbar {
+  width: 0px; /* Largura zero */
+  height: 0px;
   display: none;
 }
 

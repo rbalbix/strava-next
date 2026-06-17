@@ -37,7 +37,7 @@ describe('home page', () => {
         />,
       );
     });
-    expect(container.textContent).toContain('GearLife');
+    expect(container.textContent).toContain('Monitor your gear');
     expect(container.textContent).toContain('Como funciona');
     act(() => root.unmount());
   });

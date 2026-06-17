@@ -2,10 +2,9 @@ import { GetServerSideProps } from 'next';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useContext } from 'react';
-import ChainIcon from '../components/ChainIcon';
 import ErroMsg from '../components/ErroMsg';
-import Footer from '../components/Footer';
 import Header from '../components/Header';
+import MainImage from '../components/MainImage';
 import SeoHead from '../components/SeoHead';
 import { AuthContext, AuthProvider } from '../contexts/AuthContext';
 import styles from '../styles/pages/Home.module.css';
@@ -41,7 +40,7 @@ function HomeContent() {
         <>
           <div className={styles.homeText}>
             <ErroMsg />
-            <h1>GearLife</h1>
+            <MainImage />
             <h2 className={styles.tagline}>Monitor your gear. Ride smarter.</h2>
             <p className={styles.subtitle}>
               Conecte sua conta Strava para acompanhar seus equipamentos.
@@ -71,7 +70,6 @@ function HomeContent() {
           </div>
 
           <div className={styles.versionMark}>
-            <ChainIcon className={styles.chainIcon} />
             <small className={styles.versionText}>{appVersion}</small>
           </div>
         </>
@@ -141,7 +139,7 @@ export default function Home(props: HomeProps) {
         <Header />
         <HomeContent />
 
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </AuthProvider>
   );

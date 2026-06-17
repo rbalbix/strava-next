@@ -1,14 +1,13 @@
 import { useCallback, useContext, useEffect, useRef } from 'react';
 
-import {
-  FaChartBar,
-  FaHome,
-  FaInfoCircle,
-  FaMedapps,
-  FaTimes,
-} from 'react-icons/fa';
+import { FaMedapps } from 'react-icons/fa';
+
+import { GoGraph } from 'react-icons/go';
+import { TbBrandStrava } from 'react-icons/tb';
+import { TfiHelp } from 'react-icons/tfi';
 
 import Link from 'next/link';
+import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Sidebar.module.css';
 import AthleteAvatar from './AthleteAvatar';
@@ -18,7 +17,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ active, isOpen }: SidebarProps) {
-  const { openModal } = useContext(AuthContext);
+  const { openModal, signOut, codeReturned } = useContext(AuthContext);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -128,126 +127,201 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     };
   }, [isOpen, getFocusableElements]);
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      closeSidebar();
-    }
+  const handleOverlayClick = () => {
+    closeSidebar();
   };
 
   return (
     <>
-      <div
-        className={`${styles.sidebarOverlay} ${
-          isOpen ? styles.sidebarOverlayVisible : ''
-        }`}
-        onClick={handleOverlayClick}
-        role='presentation'
-        aria-hidden={!isOpen}
-      />
-      <aside
-        id='sidebar-menu'
-        className={`${styles.sidebarContainer} glass-effect ${
-          isOpen ? styles.sidebarOpen : ''
-        }`}
-        ref={sidebarRef}
-        role='dialog'
-        aria-modal='true'
-        aria-label='Menu lateral'
-        aria-hidden={!isOpen}
-        tabIndex={-1}
-      >
-        <button
-          type='button'
-          onClick={closeSidebar}
-          className={styles.closeButton}
-          aria-label='Fechar menu lateral'
-        >
-          <FaTimes
-            className={styles.closeIcon}
-            aria-hidden='true'
-            focusable='false'
+      {!codeReturned ? (
+        <>
+          <div
+            className={`${styles.sidebarOverlay} ${
+              isOpen ? styles.sidebarOverlayVisible : ''
+            }`}
+            onClick={handleOverlayClick}
+            role='presentation'
+            aria-hidden={!isOpen}
           />
-        </button>
+          <aside
+            id='sidebar-menu'
+            className={`${styles.sidebarContainer} glass-effect ${
+              isOpen ? styles.sidebarOpen : ''
+            }`}
+            ref={sidebarRef}
+            role='dialog'
+            aria-modal='true'
+            aria-label='Menu lateral'
+            aria-hidden={!isOpen}
+            tabIndex={-1}
+          >
+            <div className={styles.sidebarHeader}>
+              <span className={styles.sidebarHeaderText}>GearLife</span>
+            </div>
 
-        <div className={styles.sidebarHeader}>
-          <AthleteAvatar />
-        </div>
+            <div className={styles.sidebarItemContainer}>
+              <div>
+                {' '}
+                <IoLogInOutline
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+              </div>
+              <Link
+                href='/api/oauth/start'
+                prefetch={false}
+                className={`${styles.linkText} ${styles.sidebarAction}`}
+                aria-label='Entrar com Strava'
+                onClick={() => {
+                  closeSidebar();
+                }}
+              >
+                Entrar com Strava
+              </Link>
+            </div>
 
-        <div>
-          <div className={styles.sidebarItemContainer}>
-            <FaHome
-              className={styles.sidebarItemIcon}
-              aria-hidden='true'
-              focusable='false'
-            />
-            <Link
-              href={{
-                pathname: `https://strava.com/dashboard`,
-              }}
-              passHref
-              target='_blank'
-              rel='noopener noreferrer'
-              className={styles.linkText}
-            >
-              Meu Strava
-            </Link>
-          </div>
+            <div className={styles.sidebarItemContainer}>
+              <TfiHelp
+                className={styles.sidebarItemIcon}
+                aria-hidden='true'
+                focusable='false'
+              />
+              <button
+                type='button'
+                className={`${styles.linkText} ${styles.sidebarAction}`}
+                onClick={() => {
+                  openModal('info');
+                  closeSidebar();
+                }}
+              >
+                Como funciona
+              </button>
+            </div>
+          </aside>
+        </>
+      ) : (
+        <>
+          <div
+            className={`${styles.sidebarOverlay} ${
+              isOpen ? styles.sidebarOverlayVisible : ''
+            }`}
+            onClick={handleOverlayClick}
+            role='presentation'
+            aria-hidden={!isOpen}
+          />
+          <aside
+            id='sidebar-menu'
+            className={`${styles.sidebarContainer} glass-effect ${
+              isOpen ? styles.sidebarOpen : ''
+            }`}
+            ref={sidebarRef}
+            role='dialog'
+            aria-modal='true'
+            aria-label='Menu lateral'
+            aria-hidden={!isOpen}
+            tabIndex={-1}
+          >
+            <div className={styles.sidebarHeader}>
+              <AthleteAvatar />
+            </div>
 
-          <div className={styles.sidebarItemContainer}>
-            <FaChartBar
-              className={styles.sidebarItemIcon}
-              aria-hidden='true'
-              focusable='false'
-            />
-            <button
-              type='button'
-              className={`${styles.linkText} ${styles.sidebarAction}`}
-              onClick={() => {
-                openModal('stats');
-                closeSidebar();
-              }}
-            >
-              Estatísticas
-            </button>
-          </div>
+            <div>
+              <div className={styles.sidebarItemContainer}>
+                <TbBrandStrava
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+                <Link
+                  href={{
+                    pathname: `https://strava.com/dashboard`,
+                  }}
+                  passHref
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className={styles.linkText}
+                >
+                  Meu Strava
+                </Link>
+              </div>
 
-          <div className={styles.sidebarItemContainer}>
-            <FaMedapps
-              className={styles.sidebarItemIcon}
-              aria-hidden='true'
-              focusable='false'
-            />
-            <button
-              type='button'
-              className={`${styles.linkText} ${styles.sidebarAction}`}
-              onClick={() => {
-                openModal('equipments');
-                closeSidebar();
-              }}
-            >
-              Componentes
-            </button>
-          </div>
+              <div className={styles.sidebarItemContainer}>
+                <GoGraph
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+                <button
+                  type='button'
+                  className={`${styles.linkText} ${styles.sidebarAction}`}
+                  onClick={() => {
+                    openModal('stats');
+                    closeSidebar();
+                  }}
+                >
+                  Estatísticas
+                </button>
+              </div>
 
-          <div className={styles.sidebarItemContainer}>
-            <FaInfoCircle
-              className={styles.sidebarItemIcon}
-              aria-hidden='true'
-              focusable='false'
-            />
-            <button
-              type='button'
-              className={`${styles.linkText} ${styles.sidebarAction}`}
-              onClick={() => {
-                openModal('info');
-                closeSidebar();
-              }}
-            >
-              Ajuda
-            </button>
-          </div>
-        </div>
-      </aside>
+              <div className={styles.sidebarItemContainer}>
+                <FaMedapps
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+                <button
+                  type='button'
+                  className={`${styles.linkText} ${styles.sidebarAction}`}
+                  onClick={() => {
+                    openModal('equipments');
+                    closeSidebar();
+                  }}
+                >
+                  Componentes
+                </button>
+              </div>
+
+              <div className={styles.sidebarItemContainer}>
+                <TfiHelp
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+                <button
+                  type='button'
+                  className={`${styles.linkText} ${styles.sidebarAction}`}
+                  onClick={() => {
+                    openModal('info');
+                    closeSidebar();
+                  }}
+                >
+                  Como funciona
+                </button>
+              </div>
+
+              <div className={styles.sidebarItemContainer}>
+                <IoLogOutOutline
+                  className={styles.sidebarItemIcon}
+                  aria-hidden='true'
+                  focusable='false'
+                />
+                <button
+                  type='button'
+                  className={`${styles.linkText} ${styles.sidebarAction}`}
+                  onClick={() => {
+                    signOut();
+                    closeSidebar();
+                  }}
+                  aria-label='Sair'
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          </aside>
+        </>
+      )}
     </>
   );
 }
