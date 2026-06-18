@@ -300,7 +300,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
                 </button>
               </div>
 
-              <div className={styles.sidebarItemContainer}>
+              {/* <div className={styles.sidebarItemContainer}>
                 <IoLogOutOutline
                   className={styles.sidebarItemIcon}
                   aria-hidden='true'
@@ -317,7 +317,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
                 >
                   Sair
                 </button>
-              </div>
+              </div> */}
             </div>
           </aside>
         </>
