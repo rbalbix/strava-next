@@ -26,7 +26,8 @@ async function waitForServer(url, timeoutMs) {
     try {
       const response = await fetch(url, { redirect: 'follow' });
       if (response.ok) return;
-      console.log(`Server responded with ${response.status}`);
+      const body = await response.text();
+      console.log(`Server responded with ${response.status}: ${body}`);
     } catch (err) {
       console.log(`Server not reachable: ${err.message}`);
     }
