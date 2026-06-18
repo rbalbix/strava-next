@@ -5,6 +5,9 @@ const baseAppURL =
 
 const baseStravaURL = 'https://www.strava.com';
 
+// Configurações de Sessão
+export const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 dias em segundos
+
 // Configurações base da aplicação
 export const APP_CONFIG = {
   // URL da aplicação

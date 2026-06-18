@@ -99,6 +99,16 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     athlete_id = Number.isFinite(parsed) ? parsed : null;
   }
 
+  // Redirect to start auth loop if cookies are missing or invalid
+  if (!code || !athlete_id) {
+    return {
+      redirect: {
+        destination: '/api/oauth/start',
+        permanent: false,
+      },
+    };
+  }
+
   // This page depends on auth cookies and must not be edge-cached.
   res.setHeader('Cache-Control', 'private, no-store');
 

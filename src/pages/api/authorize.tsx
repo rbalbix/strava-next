@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { SESSION_MAX_AGE } from '../../config';
 import {
   clearHttpOnlyCookie,
   getCookieValue,
@@ -49,9 +50,9 @@ export default async function Authorize(
     const { access_token, refresh_token, expires_at, athlete } = response.data;
 
     res.setHeader('Set-Cookie', [
-      serializeHttpOnlyCookie('strava_code', code, { maxAge: 300, sameSite: 'Lax' }),
+      serializeHttpOnlyCookie('strava_code', code, { maxAge: SESSION_MAX_AGE, sameSite: 'Lax' }),
       serializeHttpOnlyCookie('strava_athleteId', String(athlete.id), {
-        maxAge: 300,
+        maxAge: SESSION_MAX_AGE,
         sameSite: 'Lax',
       }),
       clearHttpOnlyCookie('strava_oauth_state', 'Lax'),

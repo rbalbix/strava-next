@@ -1,6 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import type { DashboardResponse } from '../../contracts/api';
-import { getAuthenticatedAthleteId } from '../../server/auth';
+import { withProtectedAPI } from '../../server/auth';
 import { getStravaServerEnv } from '../../server/env';
 import { createStravaClient } from '../../server/strava-client';
 import { getAthlete, getAthleteStats } from '../../services/athlete';
@@ -10,22 +10,19 @@ import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
 import { getEquipmentThresholds } from '../../services/thresholds';
+import type { AuthenticatedNextApiHandler } from '../../server/auth';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<DashboardResponse | { error: string }>,
-) {
+const handler: AuthenticatedNextApiHandler = async (
+  req,
+  res,
+  athleteId,
+) => {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const athleteId = getAuthenticatedAthleteId(req);
-    if (!athleteId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const tokens = await getAthleteAccessToken(athleteId);
     if (!tokens?.accessToken || !tokens?.refreshToken || !tokens?.expiresAt) {
       return res.status(401).json({ error: 'Missing auth tokens' });
@@ -68,4 +65,6 @@ export default async function handler(
     getLogger().error({ err: error }, 'Dashboard endpoint failed');
     return res.status(500).json({ error: 'Internal server error' });
   }
-}
+};
+
+export default withProtectedAPI(handler);

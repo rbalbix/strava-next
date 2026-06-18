@@ -42,7 +42,22 @@ describe('home page', () => {
     act(() => root.unmount());
   });
 
-  it('getServerSideProps reads cookies and sets no-store cache', async () => {
+  it('getServerSideProps redirects to auth start when cookies are missing', async () => {
+    const setHeader = vi.fn();
+    const result = await getServerSideProps({
+      req: {
+        headers: { cookie: '' },
+      },
+      res: { setHeader },
+    } as any);
+
+    expect((result as any).redirect).toEqual({
+      destination: '/api/oauth/start',
+      permanent: false,
+    });
+  });
+
+  it('getServerSideProps reads cookies and sets no-store cache when authenticated', async () => {
     const setHeader = vi.fn();
     const result = await getServerSideProps({
       req: {
