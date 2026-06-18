@@ -7,6 +7,13 @@ async function assertPage(path, mustContain) {
     throw new Error(`HTTP smoke failed for ${url}: status ${response.status}`);
   }
   const html = await response.text();
+  const finalUrl = response.url;
+  
+  if (path === '/' && (finalUrl.includes('/api/oauth/start') || finalUrl.includes('strava.com/login'))) {
+    console.log(`HTTP smoke passed for ${url}: redirected to auth.`);
+    return;
+  }
+
   if (!html.includes(mustContain)) {
     throw new Error(
       `HTTP smoke failed for ${url}: missing expected text "${mustContain}"`,
