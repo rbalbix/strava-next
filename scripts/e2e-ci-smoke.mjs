@@ -26,8 +26,9 @@ async function waitForServer(url, timeoutMs) {
     try {
       const response = await fetch(url, { redirect: 'follow' });
       if (response.ok) return;
-    } catch (_) {
-      // Server still starting up.
+      console.log(`Server responded with ${response.status}`);
+    } catch (err) {
+      console.log(`Server not reachable: ${err.message}`);
     }
 
     await delay(pollIntervalMs);
