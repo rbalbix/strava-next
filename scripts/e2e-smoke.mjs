@@ -8,19 +8,13 @@ const page = await browser.newPage();
 try {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
 
-  const title = await page.textContent('h1');
-  if (!title || !title.includes('GearLife')) {
-    throw new Error(`Expected page to contain GearLife heading, got: ${title}`);
+  // Now redirects to OAuth start or directly to Strava login
+  const url = page.url();
+  if (!url.includes('/api/oauth/start') && !url.includes('strava.com/login')) {
+    throw new Error(`Expected redirection to /api/oauth/start or strava.com/login, got: ${url}`);
   }
 
-  await page.getByRole('link', { name: 'Como funciona' }).first().click();
-  await page.waitForURL('**/como-funciona', { timeout: 10000 });
-
-  await page
-    .getByRole('heading', { name: /Como funciona o GearLife/i })
-    .waitFor({ state: 'visible', timeout: 10000 });
-
-  console.log('E2E smoke passed.');
+  console.log('E2E smoke passed: redirected to OAuth flow.');
 } finally {
   await browser.close();
 }
