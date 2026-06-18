@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 
 const port = process.env.PORT || '3000';
 const baseUrl = process.env.E2E_BASE_URL || `http://127.0.0.1:${port}`;
+const healthCheckUrl = `${baseUrl}/api/health`;
 const startupTimeoutMs = 60_000;
 const pollIntervalMs = 1_000;
 
@@ -26,8 +27,10 @@ async function waitForServer(url, timeoutMs) {
     try {
       const response = await fetch(url, { redirect: 'follow' });
       if (response.ok) return;
-    } catch (_) {
-      // Server still starting up.
+      const body = await response.text();
+      console.log(`Server responded with ${response.status}: ${body}`);
+    } catch (err) {
+      console.log(`Server not reachable: ${err.message}`);
     }
 
     await delay(pollIntervalMs);
@@ -40,6 +43,8 @@ const env = {
   ...process.env,
   PORT: port,
   E2E_BASE_URL: baseUrl,
+  CLIENT_ID: 'mock_id',
+  CLIENT_SECRET: 'mock_secret',
 };
 
 const server = spawn('yarn', ['start'], {
@@ -50,7 +55,7 @@ const server = spawn('yarn', ['start'], {
 let exitCode = 1;
 
 try {
-  await waitForServer(baseUrl, startupTimeoutMs);
+  await waitForServer(healthCheckUrl, startupTimeoutMs);
   exitCode = await run('node', ['scripts/e2e-smoke-runner.mjs'], env);
 } finally {
   server.kill('SIGTERM');

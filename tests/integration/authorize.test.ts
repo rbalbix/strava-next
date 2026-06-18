@@ -72,6 +72,11 @@ describe('/api/authorize integration', () => {
       expect.objectContaining({ athleteId: 999, accessToken: 'access' }),
     );
     expect(res.redirectedTo).toBe('/');
+
+    const cookies = res.headers['Set-Cookie'] as string[];
+    expect(cookies).toBeDefined();
+    expect(cookies.some((c) => c.includes('strava_code=abc') && c.includes('Max-Age=2592000'))).toBe(true);
+    expect(cookies.some((c) => c.includes('strava_athleteId=999') && c.includes('Max-Age=2592000'))).toBe(true);
   });
 
   it('redirects to /404 when downstream fails', async () => {

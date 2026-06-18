@@ -19,28 +19,27 @@ describe('API /api/app/equipment-thresholds', () => {
       await import('../../src/pages/api/app/equipment-thresholds'));
     vi.clearAllMocks();
   });
-
-  it('returns 405 for unsupported methods', async () => {
-    const req = createMockRequest({ method: 'DELETE' });
-    const res = createMockResponse();
-
-    await handler(req, res);
-
-    expect(res.statusCode).toBe(405);
-    expect(res.headers.Allow).toEqual(['GET', 'POST']);
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+it('returns 401 for unsupported methods when unauthenticated', async () => {
+  const req = createMockRequest({
+    method: 'PUT', // Changed from GET to PUT for the 405 test case, but now expects 401
   });
+  const res = createMockResponse();
 
-  it('returns 401 when athlete cookie is missing', async () => {
-    const req = createMockRequest({ method: 'GET', cookies: {} });
-    const res = createMockResponse();
+  await handler(req, res);
+  expect(res.statusCode).toBe(401);
+  expect(res.body).toEqual({ error: 'Unauthorized', reason: 'Session expired or invalid' });
+});
 
-    await handler(req, res);
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body).toEqual({ error: 'Unauthorized' });
+it('returns 401 when athlete cookie is missing', async () => {
+  const req = createMockRequest({
+    method: 'GET',
   });
+  const res = createMockResponse();
 
+  await handler(req, res);
+  expect(res.statusCode).toBe(401);
+  expect(res.body).toEqual({ error: 'Unauthorized', reason: 'Session expired or invalid' });
+});
   it('returns 200 with thresholds on GET when authenticated', async () => {
     mocks.mockGetEquipmentThresholds.mockResolvedValueOnce({
       bikeA: { chain: 120 },

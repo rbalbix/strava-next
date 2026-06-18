@@ -1,10 +1,11 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import { z } from 'zod';
-import { getAuthenticatedAthleteId } from '../../../server/auth';
+import { withProtectedAPI } from '../../../server/auth';
 import {
   getEquipmentThresholds,
   saveEquipmentThreshold,
 } from '../../../services/thresholds';
+import type { AuthenticatedNextApiHandler } from '../../../server/auth';
 
 const EquipmentThresholdsRequestSchema = z
   .object({
@@ -14,21 +15,14 @@ const EquipmentThresholdsRequestSchema = z
   })
   .strict();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<
-    | { equipmentThresholds: Record<string, Record<string, number>> }
-    | { error: string }
-  >,
-) {
+const handler: AuthenticatedNextApiHandler = async (
+  req,
+  res,
+  athleteId,
+) => {
   if (req.method !== 'GET' && req.method !== 'POST') {
     res.setHeader('Allow', ['GET', 'POST']);
     return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const athleteId = getAuthenticatedAthleteId(req);
-  if (!athleteId) {
-    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   if (req.method === 'GET') {
@@ -49,4 +43,6 @@ export default async function handler(
     thresholdKm,
   );
   return res.status(200).json({ equipmentThresholds });
-}
+};
+
+export default withProtectedAPI(handler);

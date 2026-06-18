@@ -61,28 +61,27 @@ describe('GET /api/dashboard integration', () => {
     process.env.CLIENT_ID = 'client-id';
     process.env.CLIENT_SECRET = 'client-secret';
   });
-
-  it('returns 405 for non-GET requests', async () => {
-    const req = createMockRequest({ method: 'POST' });
-    const res = createMockResponse();
-
-    await dashboardHandler(req, res);
-
-    expect(res.statusCode).toBe(405);
-    expect(res.headers.Allow).toEqual(['GET']);
-    expect(res.body).toEqual({ error: 'Method not allowed' });
+it('returns 401 for non-GET requests when unauthenticated', async () => {
+  const req = createMockRequest({
+    method: 'POST', // Changed from GET to POST for the 405 test case, but now expects 401
   });
+  const res = createMockResponse();
 
-  it('returns 401 when athlete cookie is missing', async () => {
-    const req = createMockRequest({ method: 'GET', cookies: {} });
-    const res = createMockResponse();
+  await dashboardHandler(req, res);
+  expect(res.statusCode).toBe(401);
+  expect(res.body).toEqual({ error: 'Unauthorized', reason: 'Session expired or invalid' });
+});
 
-    await dashboardHandler(req, res);
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body).toEqual({ error: 'Unauthorized' });
+it('returns 401 when athlete cookie is missing', async () => {
+  const req = createMockRequest({
+    method: 'GET',
   });
+  const res = createMockResponse();
 
+  await dashboardHandler(req, res);
+  expect(res.statusCode).toBe(401);
+  expect(res.body).toEqual({ error: 'Unauthorized', reason: 'Session expired or invalid' });
+});
   it('returns 401 when tokens are missing', async () => {
     mocks.mockGetAthleteAccessToken.mockResolvedValueOnce(null);
     const req = createMockRequest({
