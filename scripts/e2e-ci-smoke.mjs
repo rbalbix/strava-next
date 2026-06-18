@@ -41,6 +41,8 @@ const env = {
   ...process.env,
   PORT: port,
   E2E_BASE_URL: baseUrl,
+  CLIENT_ID: 'mock_id',
+  CLIENT_SECRET: 'mock_secret',
 };
 
 const server = spawn('yarn', ['start'], {
