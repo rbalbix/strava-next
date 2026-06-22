@@ -29,8 +29,11 @@ export default function HowItWorksContent({
         Strava.
       </div>
       <h2>Passo 1: Acesso Inicial e Login</h2>
-      <div>Ao abrir o aplicativo, você verá a seguinte tela inicial:</div>
-      <div className={styles.screen}>
+      <div>
+        Ao abrir o aplicativo, você verá uma tela para fazer login ou ele te
+        redirecionará para a tela de login do Strava.
+      </div>
+      {/* <div className={styles.screen}>
         <Image
           src='/images/login.png'
           alt='Tela inicial do aplicativo com botão de login via Strava'
@@ -41,9 +44,9 @@ export default function HowItWorksContent({
           blurDataURL={BLUR_DATA_URL}
           sizes='(max-width: 480px) 90vw, 240px'
         />
-      </div>
+      </div> */}
       <ol>
-        <li>
+        {/* <li>
           Clique no ícone{' '}
           <IoLogInOutline
             color='var(--gl-brand-primary)'
@@ -56,7 +59,7 @@ export default function HowItWorksContent({
         </li>
         <li>
           Você será redirecionado para a página de autenticação do Strava.
-        </li>
+        </li> */}
         <li>
           Insira suas credenciais do Strava e autorize a conexão com o
           aplicativo.
