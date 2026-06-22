@@ -19,6 +19,10 @@
   border: 1px solid var(--gl-text-tertiary);
 }
 
+.sidebarContainer:focus {
+  outline: none;
+}
+
 .sidebarHeaderText {
   display: flex;
   justify-content: center;
@@ -94,6 +98,10 @@
   color: var(--gl-text-primary);
 }
 
+.linkText:focus {
+  outline: none;
+}
+
 .linkText:focus-visible {
   outline: 2px solid var(--gl-brand-primary);
   outline-offset: 2px;
@@ -106,6 +114,10 @@
   padding: 0;
   font: inherit;
   cursor: pointer;
+}
+
+.sidebarAction:focus {
+  outline: none;
 }
 
 .sidebarAction:focus-visible {
