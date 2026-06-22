@@ -39,3 +39,7 @@ tsconfig.tsbuildinfo
 .vscode
 
 .codex
+
+.claude
+
+.agents
