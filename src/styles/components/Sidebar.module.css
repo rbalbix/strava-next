@@ -17,6 +17,18 @@
   flex-direction: column;
 
   border: 1px solid var(--gl-text-tertiary);
+  font-family:
+    'SF-Pro',
+    -apple-system,
+    BlinkMacSystemFont,
+    'SF Pro',
+    'SF Pro Display',
+    'SF Pro Text',
+    'Helvetica Neue',
+    Helvetica,
+    Arial,
+    sans-serif;
+  font-weight: 300;
 }
 
 .sidebarContainer:focus {
@@ -81,7 +93,7 @@
 
 .sidebarItemContainer {
   display: flex;
-  padding: 0.3rem 0.5rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.5rem;
   cursor: pointer;
   margin: 0.2rem 0.6rem;
   border-radius: 8px;
@@ -96,6 +108,7 @@
 .linkText {
   font-size: 1.4rem !important;
   color: var(--gl-text-primary);
+  letter-spacing: 0.4px;
 }
 
 .linkText:focus {
@@ -112,7 +125,6 @@
   background: transparent;
   border: none;
   padding: 0;
-  font: inherit;
   cursor: pointer;
 }
 
