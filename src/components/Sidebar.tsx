@@ -79,10 +79,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
     lastActiveElementRef.current = document.activeElement as HTMLElement | null;
 
     const focusFirst = () => {
-      const focusable = getFocusableElements();
-      if (focusable.length > 0) {
-        focusable[0].focus();
-      } else if (sidebarRef.current) {
+      if (sidebarRef.current) {
         sidebarRef.current.focus();
       }
     };
@@ -100,17 +97,20 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
       const last = focusable[focusable.length - 1];
       const activeElement = document.activeElement as HTMLElement | null;
 
+      const isFocusOutsideOrOnContainer =
+        activeElement === sidebarRef.current ||
+        !sidebarRef.current?.contains(activeElement);
+
       if (event.shiftKey) {
-        if (
-          activeElement === first ||
-          !sidebarRef.current?.contains(activeElement)
-        ) {
+        if (activeElement === first || isFocusOutsideOrOnContainer) {
           event.preventDefault();
           last.focus();
         }
-      } else if (activeElement === last) {
-        event.preventDefault();
-        first.focus();
+      } else {
+        if (activeElement === last || isFocusOutsideOrOnContainer) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
 

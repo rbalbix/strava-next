@@ -62,7 +62,13 @@ describe('Sidebar component', () => {
     ) as HTMLElement[];
     const first = focusables[0];
     const last = focusables[focusables.length - 1];
+    const sidebar = container.querySelector('#sidebar-menu') as HTMLElement;
 
+    expect(document.activeElement).toBe(sidebar);
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    });
     expect(document.activeElement).toBe(first);
 
     last.focus();
