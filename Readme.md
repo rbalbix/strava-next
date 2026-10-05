@@ -259,13 +259,13 @@ As métricas são persistidas no Redis para refletir contagem agregada entre ins
 7. Simular envio de email interno e validar `email_sent_total` (ou `email_failed_total` em caso de erro).
 8. Validar logs estruturados (`pino`) nos módulos de webhook, estatísticas, tokens e email.
 
-## 🔔 Limites de Distância por Equipamento
+## 🔔 Limites por Equipamento (km ou horas de pedalagem)
 
-Esta funcionalidade permite que o usuário defina um limite de distância (em km) para cada componente do equipamento (por exemplo, `chain`, `tire`, `brake pads`). O aplicativo compara a distância acumulada do equipamento com o limite configurado e mostra indicadores visuais quando o limite é alcançado ou ultrapassado.
+Esta funcionalidade permite que o usuário defina um limite por componente do equipamento (por exemplo, `chain`, `tire`, `brake pads`), em quilômetros ou em horas de pedalagem. A unidade é escolhida no editor do limite, sem sugestão nem conversão automática. O aplicativo compara o consumo acumulado do equipamento na unidade escolhida com o limite configurado e mostra indicadores visuais quando o limite é alcançado ou ultrapassado.
 
-- Chave Redis: `strava:equipment-thresholds:<athleteId>` — armazena JSON com o formato `{ [gearId]: { [equipmentId]: number } }` (limite em km).
+- Chave Redis: `strava:equipment-thresholds:<athleteId>` — armazena JSON com o formato `{ [gearId]: { [equipmentId]: { value: number, unit: 'km' | 'h' } } }`. Registros antigos gravados como número puro são normalizados na leitura para `{ value, unit: 'km' }`; o armazenamento só é reescrito no formato novo quando o usuário salva o limite novamente.
 - Ao abrir o painel, se algum equipamento estiver `overdue` (>= 100% do limite), uma modal de alerta será exibida listando os itens afetados.
-- Cada `CardItem` exibe uma barra de progresso compacta quando houver limite configurado:
+- Cada `CardItem` exibe uma barra de progresso compacta quando houver limite configurado, avaliada na unidade do limite: `km` usa a distância acumulada e `h` usa o tempo de pedalagem (`moving time`) acumulado desde a última manutenção.
   - `normal`: < 80%
   - `warning`: 80–100%
   - `overdue`: >= 100%
@@ -273,8 +273,18 @@ Esta funcionalidade permite que o usuário defina um limite de distância (em km
 Como testar localmente:
 
 ```sh
-# rodar apenas os testes relacionados
-yarn vitest tests/unit/components/card-detail-modal.save.test.tsx tests/unit/components/card-item.progress.test.tsx
+# rodar apenas os testes relacionados com a feature
+yarn vitest \
+  tests/unit/utils/thresholds.test.ts \
+  tests/unit/services/thresholds.test.ts \
+  tests/integration/equipment-thresholds.test.ts \
+  tests/regression/threshold-unit-flows.test.tsx \
+  tests/unit/components/threshold-alert-modal.test.tsx \
+  tests/unit/components/card-detail-modal.save.test.tsx \
+  tests/unit/components/card-item.progress.test.tsx \
+  tests/unit/components/stats.test.tsx \
+  tests/unit/components/modal-related.test.tsx \
+  tests/unit/lib/apiClient.test.ts
 
 # rodar todos os testes
 yarn vitest
@@ -289,7 +299,7 @@ O projeto possui cobertura automatizada para:
 - testes de regressão
 - smoke tests e fluxos de UI via scripts dedicados
 
-O gate principal de CI valida `lint`, `typecheck`, `test` e `build`.
+O gate principal de CI valida `lint`, `lint:colors`, `typecheck`, `test`, `build` e o smoke test (`yarn test:e2e:smoke:ci`).
 
 ## 📱 PWA e Aplicativo Nativo com Capacitor
 
@@ -399,20 +409,18 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 </a>
 
 <!-- TEST_STATUS_START -->
-
 ## Test Status
 
-Last update: 2026-03-04T15:01:07.807Z
+Last update: 2026-10-05T17:23:08.657Z
 
-| Metric     | Coverage |
-| ---------- | -------: |
-| Lines      |   99.50% |
-| Statements |   99.50% |
-| Functions  |   97.91% |
-| Branches   |   94.67% |
+| Metric | Coverage |
+| --- | ---: |
+| Lines | 99.68% |
+| Statements | 99.68% |
+| Functions | 100.00% |
+| Branches | 94.27% |
 
 Run locally:
-
 - `yarn test:unit`
 - `yarn test:regression`
 - `yarn test:coverage`

@@ -12,6 +12,7 @@ const EquipmentThresholdsRequestSchema = z
     gearId: z.string().trim().min(1),
     equipmentId: z.string().trim().min(1),
     thresholdKm: z.number().min(0),
+    unit: z.enum(['km', 'h']).default('km'),
   })
   .strict();
 
@@ -35,12 +36,12 @@ const handler: AuthenticatedNextApiHandler = async (
     return res.status(400).json({ error: 'Invalid payload' });
   }
 
-  const { gearId, equipmentId, thresholdKm } = parseResult.data;
+  const { gearId, equipmentId, thresholdKm, unit } = parseResult.data;
   const equipmentThresholds = await saveEquipmentThreshold(
     athleteId,
     gearId,
     equipmentId,
-    thresholdKm,
+    { value: thresholdKm, unit },
   );
   return res.status(200).json({ equipmentThresholds });
 };

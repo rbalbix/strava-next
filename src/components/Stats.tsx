@@ -3,9 +3,16 @@ import { useContext, useEffect, useState, useRef } from 'react';
 import { TbBrandStrava } from 'react-icons/tb';
 import type { DetailedAthlete, ActivityStats } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import type { DashboardResponse, EquipmentThresholds } from '../contracts/api';
+import type {
+  DashboardResponse,
+  EquipmentThresholds,
+  ThresholdUnit,
+} from '../contracts/api';
 import type { GearStats } from '../services/gear';
-import { computeThresholdState } from '../utils/thresholds';
+import {
+  computeThresholdState,
+  resolveCurrentConsumption,
+} from '../utils/thresholds';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -25,8 +32,9 @@ type ThresholdAlertItem = {
   gearName: string;
   equipmentId: string;
   label: string;
-  distanceKm: number;
-  thresholdKm: number;
+  current: number;
+  limit: number;
+  unit: ThresholdUnit;
   state: 'normal' | 'warning' | 'overdue';
 };
 
@@ -40,9 +48,14 @@ function buildThresholdAlertItems(
 
     return gearStat.equipments
       .map((equipment) => {
-        const thresholdKm = gearThresholds[equipment.id];
-        const distanceKm = (equipment.distance ?? 0) / 1000;
-        const state = computeThresholdState(distanceKm, thresholdKm);
+        const entry = gearThresholds[equipment.id];
+
+        if (!entry) {
+          return null;
+        }
+
+        const current = resolveCurrentConsumption(entry, equipment);
+        const state = computeThresholdState(current, entry.value);
 
         if (state === 'no-threshold') {
           return null;
@@ -53,14 +66,20 @@ function buildThresholdAlertItems(
           gearName: gearStat.name,
           equipmentId: equipment.id,
           label: equipment.caption,
-          distanceKm,
-          thresholdKm: thresholdKm ?? 0,
+          current,
+          limit: entry.value,
+          unit: entry.unit,
           state,
         };
       })
       .filter((item): item is ThresholdAlertItem => item !== null);
   });
 }
+
+// Identidade de um alerta de limite: o equipmentId (ex.: 'chain') existe em
+// TODO gear — a deduplicação precisa do par, senão a segunda bike nunca alerta.
+const thresholdAlertKey = (item: { gearId: string; equipmentId: string }) =>
+  `${item.gearId}:${item.equipmentId}`;
 
 function readCachedDashboard(): CachedDashboard | null {
   try {
@@ -143,10 +162,10 @@ export default function Stats() {
 
       // Initialize alerted set from initial overdue items (valid ones only)
       const overdueItems = buildThresholdAlertItems(cachedData.data).filter(
-        (item) => item.state === 'overdue' && item.thresholdKm > 0,
+        (item) => item.state === 'overdue' && item.limit > 0,
       );
       overdueItems.forEach((item) =>
-        alertedEquipmentIds.current.add(item.equipmentId),
+        alertedEquipmentIds.current.add(thresholdAlertKey(item)),
       );
     }
   }, [setAthleteInfo, setAthleteInfoStats]);
@@ -178,7 +197,7 @@ export default function Stats() {
 
       // Trigger alert only for NEW overdue items
       const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
-        (item) => item.state === 'overdue' && item.thresholdKm > 0,
+        (item) => item.state === 'overdue' && item.limit > 0,
       );
 
       // If modal is open for threshold alerts and no overdue items remain, close it
@@ -190,7 +209,7 @@ export default function Stats() {
       }
 
       const newOverdueItems = currentOverdueItems.filter(
-        (item) => !alertedEquipmentIds.current.has(item.equipmentId),
+        (item) => !alertedEquipmentIds.current.has(thresholdAlertKey(item)),
       );
 
       if (newOverdueItems.length > 0) {
@@ -199,13 +218,13 @@ export default function Stats() {
           gearStats: dashboard.gearStats,
         });
         newOverdueItems.forEach((item) =>
-          alertedEquipmentIds.current.add(item.equipmentId),
+          alertedEquipmentIds.current.add(thresholdAlertKey(item)),
         );
       }
 
       // Cleanup: remove items that are no longer overdue
       const currentOverdueIds = new Set(
-        currentOverdueItems.map((item) => item.equipmentId),
+        currentOverdueItems.map((item) => thresholdAlertKey(item)),
       );
       alertedEquipmentIds.current.forEach((id) => {
         if (!currentOverdueIds.has(id)) {

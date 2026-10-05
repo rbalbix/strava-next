@@ -1,15 +1,49 @@
 export type { EquipmentThresholds } from '../contracts/api';
-import type { EquipmentThresholds } from '../contracts/api';
+import type { EquipmentThresholds, ThresholdEntry } from '../contracts/api';
 import redis from './redis';
 import { REDIS_KEYS } from '../config/index';
 
-function validateThresholdKm(thresholdKm: number): void {
-  if (typeof thresholdKm !== 'number' || Number.isNaN(thresholdKm)) {
+/**
+ * Formato cru persistido no Redis: registros antigos são números puros
+ * (unidade implícita em km) e registros novos são o par valor+unidade.
+ * A conversão acontece exclusivamente na fronteira de leitura deste módulo.
+ */
+type StoredEquipmentThresholds = Record<
+  string,
+  Record<string, number | ThresholdEntry>
+>;
+
+function normalizeThresholds(
+  stored: StoredEquipmentThresholds | null,
+): EquipmentThresholds {
+  const normalized: EquipmentThresholds = {};
+
+  for (const [gearId, equipments] of Object.entries(stored ?? {})) {
+    normalized[gearId] = {};
+
+    for (const [equipmentId, value] of Object.entries(equipments)) {
+      normalized[gearId][equipmentId] =
+        typeof value === 'number' ? { value, unit: 'km' } : value;
+    }
+  }
+
+  return normalized;
+}
+
+function validateThresholdEntry(entry: ThresholdEntry): void {
+  const value = entry?.value;
+  const unit = entry?.unit;
+
+  if (typeof value !== 'number' || Number.isNaN(value)) {
     throw new Error('thresholdKm must be a number');
   }
 
-  if (thresholdKm < 0) {
+  if (value < 0) {
     throw new Error('thresholdKm must be greater than or equal to 0');
+  }
+
+  if (unit !== 'km' && unit !== 'h') {
+    throw new Error('unit must be km or h');
   }
 }
 
@@ -21,16 +55,16 @@ export async function getEquipmentThresholds(
   }
 
   const key = REDIS_KEYS.equipmentThresholds(athleteId);
-  const stored = await redis.get<EquipmentThresholds>(key);
+  const stored = await redis.get<StoredEquipmentThresholds>(key);
 
-  return stored ?? {};
+  return normalizeThresholds(stored);
 }
 
 export async function saveEquipmentThreshold(
   athleteId: number,
   gearId: string,
   equipmentId: string,
-  thresholdKm: number,
+  entry: ThresholdEntry,
 ): Promise<EquipmentThresholds> {
   if (!Number.isFinite(athleteId) || athleteId <= 0) {
     throw new Error('athleteId must be a positive number');
@@ -44,11 +78,11 @@ export async function saveEquipmentThreshold(
     throw new Error('equipmentId is required');
   }
 
-  validateThresholdKm(thresholdKm);
+  validateThresholdEntry(entry);
 
   const key = REDIS_KEYS.equipmentThresholds(athleteId);
-  const current = (await redis.get<EquipmentThresholds>(key)) ?? {};
-  const updated: EquipmentThresholds = { ...current };
+  const stored = (await redis.get<StoredEquipmentThresholds>(key)) ?? {};
+  const updated: StoredEquipmentThresholds = { ...stored };
 
   if (!updated[gearId]) {
     updated[gearId] = {};
@@ -56,9 +90,9 @@ export async function saveEquipmentThreshold(
 
   updated[gearId] = {
     ...updated[gearId],
-    [equipmentId]: thresholdKm,
+    [equipmentId]: entry,
   };
 
   await redis.set(key, updated);
-  return updated;
+  return normalizeThresholds(updated);
 }

@@ -10,8 +10,9 @@ type AlertItem = {
   gearName: string;
   equipmentId: string;
   label: string;
-  distanceKm: number;
-  thresholdKm: number;
+  current: number;
+  limit: number;
+  unit: 'km' | 'h';
   state: 'normal' | 'warning' | 'overdue';
 };
 
@@ -60,8 +61,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike A',
         equipmentId: 'chain',
         label: 'Corrente',
-        distanceKm: 2200,
-        thresholdKm: 2000,
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
         state: 'overdue',
       },
     ];
@@ -91,6 +93,78 @@ describe('ThresholdAlertModal', () => {
     act(() => root.unmount());
   });
 
+  it('activates the row with Enter and Space keys', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: 'gear-1',
+        gearName: 'Bike A',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
+        state: 'overdue',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    const row = container.querySelector('[role="button"]') as HTMLElement;
+    expect(row).not.toBeNull();
+
+    act(() => {
+      row.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+    });
+    expect(onViewEquipment).toHaveBeenCalledWith('gear-1');
+
+    act(() => {
+      row.dispatchEvent(
+        new KeyboardEvent('keydown', { key: ' ', bubbles: true }),
+      );
+    });
+    expect(onViewEquipment).toHaveBeenCalledTimes(2);
+
+    act(() => root.unmount());
+  });
+
+  it('renders current and limit with hours suffix and one decimal place', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: 'gear-1',
+        gearName: 'Bike A',
+        equipmentId: 'suspension',
+        label: 'Suspensão:',
+        current: 48,
+        limit: 50,
+        unit: 'h',
+        state: 'overdue',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    expect(container.textContent).toContain('48,0 h / 50,0 h');
+    expect(container.textContent).not.toContain('km');
+
+    act(() => root.unmount());
+  });
+
   it('renders multiple items', () => {
     const onClose = vi.fn();
     const onViewEquipment = vi.fn();
@@ -100,8 +174,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike A',
         equipmentId: 'chain',
         label: 'Corrente',
-        distanceKm: 2200,
-        thresholdKm: 2000,
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
         state: 'overdue',
       },
       {
@@ -109,8 +184,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike B',
         equipmentId: 'tire',
         label: 'Pneu',
-        distanceKm: 1100,
-        thresholdKm: 1000,
+        current: 1100,
+        limit: 1000,
+        unit: 'km',
         state: 'overdue',
       },
     ];
@@ -133,6 +209,96 @@ describe('ThresholdAlertModal', () => {
     act(() => root.unmount());
   });
 
+  it('keeps two gears with the same name in separate groups', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: 'gear-1',
+        gearName: 'Bike',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
+        state: 'overdue',
+      },
+      {
+        gearId: 'gear-2',
+        gearName: 'Bike',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        current: 1000,
+        limit: 500,
+        unit: 'km',
+        state: 'overdue',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    // Um <li> de grupo por gear — homônimas não colapsam num grupo só.
+    expect(container.querySelectorAll('li')).toHaveLength(2);
+
+    const rows = container.querySelectorAll('[role="button"]');
+    expect(rows).toHaveLength(2);
+    act(() => {
+      rows[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(onViewEquipment).toHaveBeenCalledWith('gear-2');
+
+    act(() => root.unmount());
+  });
+
+  it('preserva a ordem de inserção dos grupos com ids numéricos', () => {
+    const onClose = vi.fn();
+    const onViewEquipment = vi.fn();
+    const items: AlertItem[] = [
+      {
+        gearId: '999',
+        gearName: 'Bike Z',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
+        state: 'overdue',
+      },
+      {
+        gearId: '111',
+        gearName: 'Bike A',
+        equipmentId: 'chain',
+        label: 'Corrente',
+        current: 3000,
+        limit: 2000,
+        unit: 'km',
+        state: 'overdue',
+      },
+    ];
+    const { container, root } = mount(
+      <ThresholdAlertModal
+        items={items}
+        onClose={onClose}
+        onViewEquipment={onViewEquipment}
+      />,
+    );
+
+    // Com acumulador objeto-literal, '999'/'111' enumerariam como
+    // ['111', '999'] (chaves inteiras em JS); a ordem de inserção
+    // (ordem do dashboard) deve ser preservada.
+    const groups = container.querySelectorAll('li');
+    expect(groups).toHaveLength(2);
+    expect(groups[0].textContent).toContain('Bike Z');
+    expect(groups[1].textContent).toContain('Bike A');
+
+    act(() => root.unmount());
+  });
+
   it('filters items with thresholdKm <= 0', () => {
     const onClose = vi.fn();
     const onViewEquipment = vi.fn();
@@ -142,8 +308,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike A',
         equipmentId: 'chain',
         label: 'Corrente',
-        distanceKm: 2200,
-        thresholdKm: 2000,
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
         state: 'overdue',
       },
       {
@@ -151,8 +318,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike B',
         equipmentId: 'tire',
         label: 'Pneu',
-        distanceKm: 1100,
-        thresholdKm: 0,
+        current: 1100,
+        limit: 0,
+        unit: 'km',
         state: 'normal',
       },
       {
@@ -160,8 +328,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike C',
         equipmentId: 'brake',
         label: 'Freio',
-        distanceKm: 500,
-        thresholdKm: -1,
+        current: 500,
+        limit: -1,
+        unit: 'km',
         state: 'normal',
       },
     ];
@@ -195,8 +364,9 @@ describe('ThresholdAlertModal', () => {
         gearName: 'Bike A',
         equipmentId: 'chain',
         label: 'Corrente',
-        distanceKm: 2200,
-        thresholdKm: 2000,
+        current: 2200,
+        limit: 2000,
+        unit: 'km',
         state: 'overdue',
       },
     ];

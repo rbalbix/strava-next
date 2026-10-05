@@ -2,7 +2,10 @@ import { z } from 'zod';
 import type { ActivityStats, DetailedAthlete } from 'strava';
 import type { GearStats } from '../services/gear';
 
-export type EquipmentThresholds = Record<string, Record<string, number>>;
+export type EquipmentThresholds = Record<
+  string,
+  Record<string, ThresholdEntry>
+>;
 
 const ApiErrorResponseSchema = z
   .object({
@@ -56,10 +59,18 @@ type SuccessResponse = z.infer<typeof SuccessResponseSchema>;
 type SaveTokensRequest = z.infer<typeof SaveTokensRequestSchema>;
 type SendEmailRequest = z.infer<typeof SendEmailRequestSchema>;
 type RemoteStorageSetRequest = z.infer<typeof RemoteStorageSetRequestSchema>;
+type ThresholdUnit = 'km' | 'h';
+
+type ThresholdEntry = {
+  value: number;
+  unit: ThresholdUnit;
+};
+
 type EquipmentThresholdsRequest = {
   gearId: string;
   equipmentId: string;
   thresholdKm: number;
+  unit?: ThresholdUnit;
 };
 
 type EquipmentThresholdsResponse = {
@@ -95,4 +106,6 @@ export type {
   SaveTokensRequest,
   SendEmailRequest,
   SuccessResponse,
+  ThresholdEntry,
+  ThresholdUnit,
 };

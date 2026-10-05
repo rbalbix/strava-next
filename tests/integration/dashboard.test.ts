@@ -150,7 +150,7 @@ it('returns 401 when athlete cookie is missing', async () => {
     mocks.mockVerifyIfHasAnyActivities.mockResolvedValueOnce(true);
     mocks.mockUpdateStatistics.mockResolvedValueOnce(gearStats);
     mocks.mockGetEquipmentThresholds.mockResolvedValueOnce({
-      bike1: { chain: 250 },
+      bike1: { chain: { value: 250, unit: 'km' } },
     });
 
     const req = createMockRequest({
@@ -168,7 +168,7 @@ it('returns 401 when athlete cookie is missing', async () => {
       hasGear: true,
       hasActivities: true,
       gearStats,
-      equipmentThresholds: { bike1: { chain: 250 } },
+      equipmentThresholds: { bike1: { chain: { value: 250, unit: 'km' } } },
     });
   });
 

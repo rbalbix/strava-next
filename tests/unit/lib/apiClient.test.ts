@@ -15,7 +15,9 @@ describe('apiClient', () => {
   });
 
   it('fetches equipment thresholds from the threshold endpoint', async () => {
-    const thresholds: EquipmentThresholds = { bikeA: { chain: 250 } };
+    const thresholds: EquipmentThresholds = {
+      bikeA: { chain: { value: 250, unit: 'km' } },
+    };
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({ equipmentThresholds: thresholds }),
@@ -36,7 +38,9 @@ describe('apiClient', () => {
       equipmentId: 'chain',
       thresholdKm: 250,
     };
-    const thresholds: EquipmentThresholds = { bikeA: { chain: 250 } };
+    const thresholds: EquipmentThresholds = {
+      bikeA: { chain: { value: 250, unit: 'km' } },
+    };
     fetchMock.mockResolvedValue({
       ok: true,
       json: vi.fn().mockResolvedValue({ equipmentThresholds: thresholds }),
@@ -58,5 +62,32 @@ describe('apiClient', () => {
     await expect(apiClient.getEquipmentThresholds()).rejects.toThrow(
       'Request failed: HTTP 500',
     );
+  });
+
+  it('posts threshold payload with unit and serializes it in the JSON body', async () => {
+    const payload: EquipmentThresholdsRequest = {
+      gearId: 'bikeA',
+      equipmentId: 'suspension',
+      thresholdKm: 50,
+      unit: 'h',
+    };
+    const thresholds: EquipmentThresholds = {
+      bikeA: { suspension: { value: 50, unit: 'h' } },
+    };
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: vi.fn().mockResolvedValue({ equipmentThresholds: thresholds }),
+    });
+
+    const result = await apiClient.saveEquipmentThreshold(payload);
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body))).toEqual({
+      gearId: 'bikeA',
+      equipmentId: 'suspension',
+      thresholdKm: 50,
+      unit: 'h',
+    });
+    expect(result).toEqual(thresholds);
   });
 });

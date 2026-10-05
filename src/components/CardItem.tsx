@@ -6,14 +6,19 @@ import { copyEventDetailsToClipboard } from '../utils/clipboard';
 import { locale, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
+import type { ThresholdEntry } from '../contracts/api';
 
-import { computeThresholdState } from '../utils/thresholds';
+import {
+  computeThresholdState,
+  formatThresholdValue,
+  resolveCurrentConsumption,
+} from '../utils/thresholds';
 
 type Props = {
   equipment: Equipment;
   distance: number;
   movingTime: number;
-  thresholdKm?: number;
+  threshold?: ThresholdEntry;
   children?: React.ReactNode;
   onToggleEditor?: () => void;
   isEditorVisible?: boolean;
@@ -23,7 +28,7 @@ export default function CardItem({
   equipment: e,
   distance,
   movingTime,
-  thresholdKm,
+  threshold,
   children,
   onToggleEditor,
   isEditorVisible = false,
@@ -69,7 +74,17 @@ export default function CardItem({
     return renderEvent('Bike limpinha.');
   }
 
-  if (equipmentDistance !== 0) {
+  const consumption = threshold
+    ? resolveCurrentConsumption(threshold, e)
+    : 0;
+  const thresholdLabel = threshold
+    ? `${formatThresholdValue(consumption, threshold.unit)} / ${formatThresholdValue(
+        threshold.value,
+        threshold.unit,
+      )}`
+    : '';
+
+  if (equipmentDistance !== 0 || equipmentMovingTime !== 0) {
     return (
       <li className={styles.event}>
         <button
@@ -86,24 +101,28 @@ export default function CardItem({
             <div className={styles.timeago}>{timeAgo}</div>
           </div>
 
-          {/* Verifica se o valor é positivo */}
-          {thresholdKm !== undefined &&
-            thresholdKm !== null &&
-            thresholdKm > 0 && (
-              <div className={styles.progressContainer} aria-hidden>
-                <div className={styles.progressBar}>
+          {/* Barra do limite, medida na unidade do próprio limite */}
+          {threshold !== undefined &&
+            threshold !== null &&
+            threshold.value > 0 && (
+              <div className={styles.progressContainer}>
+                <div
+                  className={styles.progressBar}
+                  role='progressbar'
+                  aria-valuemin={0}
+                  aria-valuemax={threshold.value}
+                  aria-valuenow={Math.min(consumption, threshold.value)}
+                  aria-valuetext={thresholdLabel}
+                >
                   <div
                     className={`${styles.progressFill} ${
                       styles[
-                        computeThresholdState(
-                          equipmentDistance / 1000,
-                          thresholdKm,
-                        )
+                        computeThresholdState(consumption, threshold.value)
                       ]
                     }`}
                     style={{
                       width: `${Math.min(
-                        (equipmentDistance / 1000 / thresholdKm) * 100,
+                        (consumption / threshold.value) * 100,
                         100,
                       )}%`,
                     }}

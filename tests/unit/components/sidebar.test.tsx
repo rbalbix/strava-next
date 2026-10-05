@@ -183,6 +183,65 @@ describe('Sidebar component', () => {
     act(() => root.unmount());
   });
 
+  it('renderiza o menu deslogado com acesso ao Strava e à ajuda', () => {
+    const active = vi.fn();
+    const openModal = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    document.body.appendChild(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx({ codeReturned: null, openModal })}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    const entrar = container.querySelector(
+      'a[href="/api/oauth/start"]',
+    ) as HTMLAnchorElement;
+    expect(entrar).not.toBeNull();
+    expect(entrar.textContent).toContain('Entrar com Strava');
+    act(() => {
+      entrar.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(active).toHaveBeenCalledWith(false);
+
+    const help = Array.from(container.querySelectorAll('button')).find((n) =>
+      n.textContent?.includes('Como funciona'),
+    ) as HTMLButtonElement;
+    act(() => help.click());
+    expect(openModal).toHaveBeenCalledWith('info');
+    expect(active).toHaveBeenCalledWith(false);
+
+    act(() => root.unmount());
+    container.remove();
+  });
+
+  it('fecha quando recebe o evento global gearlife:close-sidebar', () => {
+    const active = vi.fn();
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    document.body.appendChild(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={ctx()}>
+          <Sidebar active={active} isOpen={true} />
+        </AuthContext.Provider>,
+      );
+    });
+
+    act(() => {
+      window.dispatchEvent(new Event('gearlife:close-sidebar'));
+    });
+    expect(active).toHaveBeenCalledWith(false);
+
+    act(() => root.unmount());
+    container.remove();
+  });
+
   it('prevents Tab when there are no focusable elements', () => {
     vi.useFakeTimers();
     const active = vi.fn();
