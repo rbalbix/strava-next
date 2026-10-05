@@ -89,6 +89,8 @@
 .progressBar {
   background: rgba(0, 0, 0, 0.06);
   border-radius: 8px;
+  /* Altura original: o aumento para 16px (task 08) existiu só para o rótulo
+     interno, removido após inspeção visual (2026-10-05). */
   height: 8px;
   overflow: hidden;
 }

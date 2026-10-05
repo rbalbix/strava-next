@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
+import type { ThresholdUnit } from '../contracts/api';
 import { GearStats } from '../services/gear';
 import styles from '../styles/components/ModalContainer.module.css';
 import AthleteStats from './AthleteStats';
@@ -201,8 +202,9 @@ export default function ModalContainer() {
           gearName: string;
           equipmentId: string;
           label: string;
-          distanceKm: number;
-          thresholdKm: number;
+          current: number;
+          limit: number;
+          unit: ThresholdUnit;
           state: 'normal' | 'warning' | 'overdue';
         }>;
         gearStats?: GearStats[];

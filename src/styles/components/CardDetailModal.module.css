@@ -84,8 +84,11 @@
 }
 
 .thresholdRow input {
-  width: 12rem;
-  flex: none;
+  /* Sem largura fixa: o campo ocupa o espaço que sobra entre o seletor de
+     unidade e o botão de salvar, sem acrescentar altura à linha. */
+  width: auto;
+  flex: 1 1 8rem;
+  min-width: 0;
   padding: 0.25rem 0.8rem;
   border: 1px solid var(--gl-border-subtle);
   border-radius: 4px;
@@ -134,6 +137,42 @@
   filter: brightness(1.1);
 }
 
+/* Seletor km|h (task 07 renderiza o DOM; aqui só o visual). A especificidade
+   de `.thresholdRow .unitSelector button` vence o estilo do botão de salvar. */
+.unitSelector {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--gl-border-subtle);
+  border-radius: 4px;
+}
+
+.thresholdRow .unitSelector button {
+  background-color: transparent;
+  color: var(--gl-text-secondary);
+  border: none;
+  border-radius: 0;
+  height: 2.1rem;
+  min-width: 2.6rem;
+  padding: 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Segmento ativo: par já validado pelo gate de contraste
+   (--gl-text-on-brand sobre --gl-brand-primary). */
+.thresholdRow .unitSelector button[aria-checked='true'] {
+  background-color: var(--gl-brand-primary);
+  color: var(--gl-text-on-brand);
+}
+
+/* Anel de foco visível; offset negativo porque o contêiner recorta. */
+.thresholdRow .unitSelector button:focus-visible {
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: -2px;
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -160,5 +199,32 @@
 @media (max-width: 338px) {
   .statCardContainer {
     gap: 2px;
+  }
+}
+
+/* Linha de edição em tela estreita: espelha os breakpoints que existiam apenas
+   no bloco legado de CardItem.module.css (o JSX usa este arquivo). */
+@media (max-width: 768px) {
+  .thresholdRow input {
+    flex: 1 1 6rem;
+    /* Teto de largura: sem ele o flex-grow mantém o campo do mesmo tamanho
+       do que está acima do breakpoint (8rem era o valor do bloco legado). */
+    max-width: 8rem;
+    font-size: 0.85rem;
+  }
+
+  .thresholdRow button {
+    padding: 0.2rem 0.8rem;
+  }
+}
+
+@media (max-width: 398px) {
+  .thresholdRow {
+    flex-wrap: wrap;
+  }
+
+  .thresholdRow input {
+    flex: 1 1 100%;
+    max-width: none;
   }
 }

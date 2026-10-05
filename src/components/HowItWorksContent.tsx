@@ -128,13 +128,18 @@ export default function HowItWorksContent({
         <li>Tempo total: Tempo de uso desde a última manutenção.</li>
       </ul>
       <Divider className={styles.divider} style={{ margin: 'auto' }} />
-      <h3>Limites de Distância por Equipamento</h3>
+      <h3>Limites por Equipamento: km ou horas de pedalagem</h3>
       <div>
-        Você pode definir um limite (em km) para cada componente do seu
-        equipamento a partir da tela de detalhe do equipamento. Quando a
-        distância acumulada do componente atingir o limite definido, o
-        aplicativo exibe um alerta logo após fazer login com o Strava com um
-        resumo que lista os itens que precisam de atenção.
+        Você pode definir um limite para cada componente do seu equipamento a
+        partir da tela de detalhe do equipamento, em quilômetros ou em horas de
+        pedalagem. A unidade é escolhida pelo próprio atleta no momento em que
+        o limite é editado, no seletor ao lado do campo de valor — o GearLife
+        não converte o valor de uma unidade para a outra. Em horas, o limite
+        conta o tempo de pedalagem acumulado desde a última manutenção do
+        componente; em quilômetros, a distância acumulada no mesmo período.
+        Quando o consumo do componente atingir o limite definido, o aplicativo
+        exibe um alerta logo após fazer login com o Strava com um resumo que
+        lista os itens que precisam de atenção.
       </div>
       <div className={styles.screen}>
         <Image
@@ -153,8 +158,11 @@ export default function HowItWorksContent({
           Acesse o detalhe do equipamento clicando no cartão correspondente.
         </li>
         <li>
-          Na seção de componentes, defina o valor do limite em km e clique em
-          &quot;Salvar&quot;.
+          Na seção de componentes, escolha a unidade no seletor (km ou h),
+          informe o valor e clique em &quot;Salvar&quot;. As setas do campo
+          avançam de 100 em 100 km e de hora em hora; qualquer valor na unidade
+          escolhida também pode ser digitado. Trocar a unidade mantém o que
+          estiver digitado no campo, que passa a valer na unidade escolhida.
         </li>
         <div className={styles.screen}>
           <Image
@@ -170,9 +178,12 @@ export default function HowItWorksContent({
         </div>
         <li>
           O limite é persistido e a barra de progresso será exibida em cada
-          item. A barra de progresso é calculada com base na distância acumulada
-          do componente em relação ao limite definido. Se a distância acumulada
-          atingir ou ultrapassar o limite, a barra de progresso ficará{' '}
+          item, medindo o consumo na unidade escolhida: a distância acumulada
+          do componente quando o limite é em km, ou o tempo de pedalagem
+          acumulado desde a última manutenção quando o limite é em horas. A
+          barra é calculada com base nesse consumo em relação ao limite
+          definido. Se o consumo atingir ou ultrapassar o limite, a barra de
+          progresso ficará{' '}
           <span className={styles.statusOverdue}>vermelha</span> para indicar
           que o componente precisa de atenção. Se a barra estiver
           <span className={styles.statusWarning}> amarela</span> significa que o

@@ -257,4 +257,60 @@ describe('ModalContainer', () => {
 
     document.body.removeChild(trigger);
   });
+
+  it('renderiza o alerta de limite e navega para o equipamento', () => {
+    const closeModal = vi.fn();
+    const openModal = vi.fn();
+    const item = {
+      gearId: 'bike-1',
+      gearName: 'Bike One',
+      equipmentId: 'chain',
+      label: 'corrente:',
+      current: 300,
+      limit: 200,
+      unit: 'km',
+      state: 'overdue',
+    };
+    const gear = { id: 'bike-1', name: 'Bike One' };
+
+    const { container, root } = mount(
+      <AuthContext.Provider
+        value={ctx({
+          activeModal: 'threshold-alert',
+          modalData: { items: [item], gearStats: [gear] },
+          closeModal,
+          openModal,
+        })}
+      >
+        <ModalContainer />
+      </AuthContext.Provider>,
+    );
+
+    const dialog = container.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog.getAttribute('aria-labelledby')).toBe(
+      'modal-title-threshold-alert',
+    );
+    expect(dialog.getAttribute('aria-describedby')).toBe(
+      'modal-desc-threshold-alert',
+    );
+    expect(container.textContent).toContain(
+      'Equipamentos que atingiram o limite configurado',
+    );
+    expect(container.textContent).toContain('corrente:');
+    expect(container.textContent).toContain('300,00 km / 200,00 km');
+
+    const view = container.querySelector(
+      '[aria-label^="Ver detalhes de"]',
+    ) as HTMLElement;
+    act(() => {
+      view.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(closeModal).toHaveBeenCalledTimes(1);
+    expect(openModal).toHaveBeenCalledWith(
+      'card-detail',
+      expect.objectContaining({ id: 'bike-1' }),
+    );
+
+    act(() => root.unmount());
+  });
 });

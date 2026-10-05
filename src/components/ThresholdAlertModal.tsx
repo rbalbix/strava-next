@@ -1,6 +1,7 @@
 import { MdClose } from 'react-icons/md';
 import { IoBuildOutline } from 'react-icons/io5';
-import { locale } from '../utils/format';
+import type { ThresholdUnit } from '../contracts/api';
+import { formatThresholdValue } from '../utils/thresholds';
 import styles from '../styles/components/ThresholdAlertModal.module.css';
 
 type ThresholdAlertItem = {
@@ -8,8 +9,9 @@ type ThresholdAlertItem = {
   gearName: string;
   equipmentId: string;
   label: string;
-  distanceKm: number;
-  thresholdKm: number;
+  current: number;
+  limit: number;
+  unit: ThresholdUnit;
   state: 'normal' | 'warning' | 'overdue';
 };
 
@@ -32,27 +34,32 @@ const isValidThreshold = (value: number): boolean => {
 };
 
 const isValidItem = (item: ThresholdAlertItem): boolean => {
-  return isValidThreshold(item.thresholdKm);
+  return isValidThreshold(item.limit);
 };
 
 const groupItemsByGear = (items: ThresholdAlertItem[]) => {
-  return items.reduce(
-    (acc, item) => {
-      if (!acc[item.gearName]) {
-        acc[item.gearName] = {
-          gearId: item.gearId,
-          gearName: item.gearName,
-          equipments: [],
-        };
-      }
-      acc[item.gearName].equipments.push(item);
-      return acc;
-    },
-    {} as Record<
-      string,
-      { gearId: string; gearName: string; equipments: ThresholdAlertItem[] }
-    >,
-  );
+  // Map (e não objeto literal): preserva a ordem de inserção dos grupos.
+  // Em objeto, ids numéricos da Strava enumeram primeiro em ordem crescente
+  // (chaves inteiras em JS), reordenando os grupos contra a ordem do dashboard.
+  const groups = new Map<
+    string,
+    { gearId: string; gearName: string; equipments: ThresholdAlertItem[] }
+  >();
+
+  items.forEach((item) => {
+    const group = groups.get(item.gearId);
+    if (group) {
+      group.equipments.push(item);
+    } else {
+      groups.set(item.gearId, {
+        gearId: item.gearId,
+        gearName: item.gearName,
+        equipments: [item],
+      });
+    }
+  });
+
+  return groups;
 };
 
 export default function ThresholdAlertModal({
@@ -66,7 +73,7 @@ export default function ThresholdAlertModal({
   // Agrupa os itens válidos
   const groupedItems = groupItemsByGear(validItems);
 
-  const hasValidItems = Object.keys(groupedItems).length > 0;
+  const hasValidItems = groupedItems.size > 0;
 
   return (
     <div className={styles.alertModalContainer}>
@@ -95,7 +102,7 @@ export default function ThresholdAlertModal({
         </div>
       ) : (
         <ul className={styles.list}>
-          {Object.values(groupedItems).map((group) => (
+          {Array.from(groupedItems.values()).map((group) => (
             <li key={group.gearId} className={styles.gearGroup}>
               <strong className={styles.gearName}>{group.gearName}</strong>
               <div className={styles.equipmentsList}>
@@ -106,6 +113,14 @@ export default function ThresholdAlertModal({
                     onClick={() => onViewEquipment(item.gearId)}
                     role='button'
                     tabIndex={0}
+                    onKeyDown={(ev) => {
+                      // role='button' num div precisa da ativação por
+                      // teclado (Enter/Espaço) — WCAG 2.1.1.
+                      if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        onViewEquipment(item.gearId);
+                      }
+                    }}
                     aria-label={`Ver detalhes de ${item.label} do equipamento ${item.gearName}`}
                   >
                     <div>
@@ -124,9 +139,9 @@ export default function ThresholdAlertModal({
                       <div>
                         <span className={styles.metrics}>
                           <span className={styles.limitConfigured}>
-                            {locale.format(',.2f')(item.distanceKm)} km
+                            {formatThresholdValue(item.current, item.unit)}
                           </span>{' '}
-                          / {locale.format(',.2f')(item.thresholdKm)} km
+                          / {formatThresholdValue(item.limit, item.unit)}
                         </span>
                       </div>
                     </div>
