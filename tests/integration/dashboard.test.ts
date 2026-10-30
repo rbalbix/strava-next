@@ -1,24 +1,39 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRequest, createMockResponse } from '../helpers/next-api';
+import { StravaSessionNotFoundError } from '../../src/services/strava-auth';
 
-const mocks = vi.hoisted(() => ({
-  mockGetAthleteAccessToken: vi.fn(),
-  mockGetAthlete: vi.fn(),
-  mockGetAthleteStats: vi.fn(),
-  mockVerifyIfHasAnyActivities: vi.fn(),
-  mockVerifyIfHasAnyGears: vi.fn(),
-  mockUpdateStatistics: vi.fn(),
-  mockGetEquipmentThresholds: vi.fn(),
-  mockLoggerError: vi.fn(),
-}));
+const mocks = vi.hoisted(() => {
+  // O módulo real de strava-auth importa o cliente Redis; só o
+  // `getAthleteAccessToken` é substituído aqui. A guarda
+  // `isStravaSessionNotFoundError` precisa ser a verdadeira, senão o teste
+  // estaria validando uma reimplementação dele própria.
+  process.env.UPSTASH_REDIS_REST_URL = 'https://example.upstash.io';
+  process.env.UPSTASH_REDIS_REST_TOKEN = 'test-token';
+
+  return {
+    mockGetAthleteAccessToken: vi.fn(),
+    mockGetAthlete: vi.fn(),
+    mockGetAthleteStats: vi.fn(),
+    mockVerifyIfHasAnyActivities: vi.fn(),
+    mockVerifyIfHasAnyGears: vi.fn(),
+    mockUpdateStatistics: vi.fn(),
+    mockGetEquipmentThresholds: vi.fn(),
+    mockLoggerError: vi.fn(),
+  };
+});
 
 vi.mock('strava', () => ({
   Strava: vi.fn().mockImplementation(() => ({})),
 }));
 
-vi.mock('../../src/services/strava-auth', () => ({
-  getAthleteAccessToken: mocks.mockGetAthleteAccessToken,
-}));
+vi.mock('../../src/services/strava-auth', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../../src/services/strava-auth')>();
+  return {
+    ...actual,
+    getAthleteAccessToken: mocks.mockGetAthleteAccessToken,
+  };
+});
 
 vi.mock('../../src/services/athlete', () => ({
   getAthlete: mocks.mockGetAthlete,
@@ -95,6 +110,33 @@ it('returns 401 when athlete cookie is missing', async () => {
     expect(mocks.mockGetAthleteAccessToken).toHaveBeenCalledWith(123);
     expect(res.statusCode).toBe(401);
     expect(res.body).toEqual({ error: 'Missing auth tokens' });
+  });
+
+  it('returns 401 when the session no longer exists in Redis', async () => {
+    // Reprodução do caso real: o cookie ainda diz que há sessão, mas o
+    // registro do atleta sumiu do Redis (expirado, apagado ou acesso
+    // revogado). Isto NÃO é falha do servidor: é falta de autenticação, e o
+    // cliente só sabe encerrar a sessão em 401. Antes virava 500 e o usuário
+    // ficava preso num painel de erro com retries que nunca resolviam.
+    mocks.mockGetAthleteAccessToken.mockRejectedValueOnce(
+      new StravaSessionNotFoundError(123),
+    );
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { strava_athleteId: '123' },
+    });
+    const res = createMockResponse();
+
+    await dashboardHandler(req, res);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toEqual({
+      error: 'Unauthorized',
+      reason: 'Session expired or invalid',
+    });
+    // Condição esperada, não erro de servidor: não deve logar ERROR.
+    expect(mocks.mockLoggerError).not.toHaveBeenCalled();
   });
 
   it('returns 200 with dashboard payload when athlete has gear and activities', async () => {

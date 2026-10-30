@@ -102,29 +102,64 @@ describe('misc components', () => {
     act(() => root.unmount());
   });
 
-  it('ErroMsg renders only for status 429', () => {
-    const c1 = mount(
-      <ToastProvider>
-        <AuthContext.Provider value={ctx({ codeError: { status: 500 } })}>
-          <ErroMsg />
-        </AuthContext.Provider>
-      </ToastProvider>,
-    );
-    expect(c1.container.innerHTML).toBe('');
-    act(() => c1.root.unmount());
+  it('ErroMsg renders a specific message per status', () => {
+    const renderError = (codeError: unknown) =>
+      mount(
+        <ToastProvider>
+          <AuthContext.Provider value={ctx({ codeError })}>
+            <ErroMsg />
+          </AuthContext.Provider>
+        </ToastProvider>,
+      );
 
-    const c2 = mount(
-      <ToastProvider>
-        <AuthContext.Provider value={ctx({ codeError: { status: 429 } })}>
-          <ErroMsg />
-        </AuthContext.Provider>
-      </ToastProvider>,
+    const limited = renderError({ status: 429 });
+    expect(limited.container.textContent).toContain('Limite excedido');
+    act(() => limited.root.unmount());
+
+    const expired = renderError({ status: 401 });
+    // 401 não é um painel: o fluxo de sessão recupera automaticamente ou
+    // volta para a landing, sem a mensagem confusa de "Sessão expirada".
+    expect(expired.container.innerHTML).toBe('');
+    act(() => expired.root.unmount());
+
+    const failed = renderError({ status: 500 });
+    expect(failed.container.textContent).toContain(
+      'Não conseguimos atualizar seus dados',
     );
-    expect(c2.container.textContent).toContain('Limite excedido');
-    act(() => c2.root.unmount());
+    act(() => failed.root.unmount());
   });
 
-  it('ErroMsg returns null for non-object errors', () => {
+  it('ErroMsg renders nothing without an error and retries on demand', () => {
+    const none = mount(
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ codeError: null })}>
+          <ErroMsg />
+        </AuthContext.Provider>
+      </ToastProvider>,
+    );
+    expect(none.container.innerHTML).toBe('');
+    act(() => none.root.unmount());
+
+    const onRetry = vi.fn();
+    const withRetry = mount(
+      <ToastProvider>
+        <AuthContext.Provider value={ctx({ codeError: null })}>
+          <ErroMsg
+            error={new Error('Request failed: HTTP 503')}
+            onRetry={onRetry}
+          />
+        </AuthContext.Provider>
+      </ToastProvider>,
+    );
+    expect(withRetry.container.textContent).toContain('Tentar novamente');
+    act(() =>
+      (withRetry.container.querySelector('button') as HTMLButtonElement).click(),
+    );
+    expect(onRetry).toHaveBeenCalledTimes(1);
+    act(() => withRetry.root.unmount());
+  });
+
+  it('ErroMsg falls back to the generic message when there is no status', () => {
     const c = mount(
       <ToastProvider>
         <AuthContext.Provider value={ctx({ codeError: '429' })}>
@@ -132,7 +167,9 @@ describe('misc components', () => {
         </AuthContext.Provider>
       </ToastProvider>,
     );
-    expect(c.container.innerHTML).toBe('');
+    expect(c.container.textContent).toContain(
+      'Não conseguimos atualizar seus dados',
+    );
     act(() => c.root.unmount());
   });
 

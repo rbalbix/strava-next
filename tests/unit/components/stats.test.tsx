@@ -5,7 +5,12 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import Stats from '../../../src/components/Stats';
 import { AuthContext } from '../../../src/contexts/AuthContext';
+import { ApiError } from '../../../src/lib/apiClient';
 import * as useAutoSyncModule from '../../../src/hooks/useAutoSync';
+
+vi.mock('next/link', () => ({
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
 
 vi.mock('../../../src/components/Card', () => ({
   default: ({ name }: { name: string }) => <div>Card: {name}</div>,
@@ -207,13 +212,18 @@ describe('Stats component', () => {
     });
   });
 
-  it('signs out when dashboard returns error and there is no cache', async () => {
+  it('keeps the session and shows the error panel on a transient failure', async () => {
+    // Antes, qualquer erro sem cache no sessionStorage chamava signOut() — que
+    // limpa cookies e cache, redireciona ao Strava, que reemite o token
+    // silenciosamente e devolve o usuário logado. Com erro persistente (ex.:
+    // rate limit) isso se repetia indefinidamente. Agora só o 401 encerra a
+    // sessão; os demais erros mostram o painel com retry.
     const signOut = vi.fn();
     const setErrorInfo = vi.fn();
     vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
         dashboard: undefined,
         isLoading: false,
-        isError: new Error('boom'),
+        isError: new ApiError(429),
         mutate: vi.fn(),
     });
 
@@ -230,24 +240,92 @@ describe('Stats component', () => {
     });
 
     expect(setErrorInfo).toHaveBeenCalledTimes(1);
-    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(signOut).not.toHaveBeenCalled();
+    // Um 429 mantém o painel e oferece retry; não encerra cookies nem inicia
+    // uma navegação ao Strava.
+    expect(container.textContent).toContain('Limite excedido');
+    expect(
+      container.querySelector('button')?.textContent,
+    ).toBe('Tentar novamente');
     act(() => {
       root.unmount();
     });
   });
 
-  it('signs out when dashboard returns 401 error even if cache exists', async () => {
+  it('renders a retryable panel for 5xx errors without signing out', async () => {
+    const signOut = vi.fn();
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+        dashboard: undefined,
+        isLoading: false,
+        isError: new ApiError(500),
+        mutate: vi.fn(),
+    });
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={makeAuthContext({ signOut })}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(signOut).not.toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      'Não conseguimos atualizar seus dados',
+    );
+    act(() => {
+      root.unmount();
+    });
+  });
+
+  it('keeps cached data on screen and surfaces the error banner', async () => {
+    // Um 429 que chega depois da primeira leitura bem-sucedida não podia
+    // mais esconder o conteúdo — mas também não gerava mensagem alguma (A3).
+    const signOut = vi.fn();
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: makeDashboardFixture({
+        distance: 1000,
+        movingTime: 1000,
+        threshold: { value: 250, unit: 'km' },
+      }),
+      isLoading: false,
+      isError: new ApiError(429),
+      mutate: vi.fn(),
+    });
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await renderStats(root, makeAuthContext({ signOut }));
+
+    expect(container.textContent).toContain('Limite excedido');
+    expect(container.textContent).toContain('Card: Bike One');
+    expect(signOut).not.toHaveBeenCalled();
+    act(() => {
+      root.unmount();
+    });
+  });
+
+  // Sem teste para o botão "Atualizar": ele foi removido a pedido do
+  // proprietário (§8.6) e não havia valor em vigiar a ausência de UI.
+
+  it('returns directly to the landing on a first load without a server session', async () => {
+    // Cookie antigo/órfão, com cache de uma abertura anterior. Cache não prova
+    // que a sessão esteja viva nesta execução: tentar OAuth sozinho aqui
+    // surpreende um visitante e pode virar loop. O AuthContext limpa os
+    // cookies e mostra a landing.
     sessionStorage.setItem('athlete', JSON.stringify({ id: 2 }));
     sessionStorage.setItem('athleteStats', JSON.stringify({}));
     sessionStorage.setItem('gearStats', JSON.stringify([]));
     sessionStorage.setItem('athleteCacheTime', Date.now().toString());
-
     const signOut = vi.fn();
     const setErrorInfo = vi.fn();
     vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
         dashboard: undefined,
         isLoading: false,
-        isError: new Error('Request failed: HTTP 401'),
+        isError: new ApiError(401),
         mutate: vi.fn(),
     });
 
@@ -263,12 +341,56 @@ describe('Stats component', () => {
       await Promise.resolve();
     });
 
-    expect(setErrorInfo).toHaveBeenCalledTimes(1);
+    expect(setErrorInfo).not.toHaveBeenCalled();
     expect(signOut).toHaveBeenCalledTimes(1);
     act(() => {
       root.unmount();
     });
   });
+
+  it('returns to the landing when a session is revoked after the dashboard loaded', async () => {
+    const signOut = vi.fn();
+    const authValue = makeAuthContext({ signOut });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    // Primeiro render: há uma sessão que efetivamente funcionou.
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: makeDashboardFixture({
+        distance: 1000,
+        movingTime: 1000,
+        threshold: { value: 250, unit: 'km' },
+      }),
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+    await renderStats(root, authValue);
+
+    // Depois a chave some do Redis e a API devolve 401. Mesmo com painel já
+    // aberto, não se pode abrir o login do Strava automaticamente: se o
+    // usuário tiver feito logout no Strava, ele seria levado a uma tela que
+    // não pediu. A única saída automática é a landing limpa.
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: undefined,
+      isLoading: false,
+      isError: new ApiError(401),
+      mutate: vi.fn(),
+    });
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(container.textContent).not.toContain('Sessão expirada');
+    act(() => root.unmount());
+  });
+
 
   it('opens the alert when the limit in hours is overdue', async () => {
     const openModal = vi.fn();

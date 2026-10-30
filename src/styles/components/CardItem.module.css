@@ -124,6 +124,22 @@
     sans-serif;
 }
 
+/* Componente cuja manutenção foi registrada mas ainda não acumulou uso.
+   Diferente dos badges de km/h por usar a cor da marca na borda, para que a
+   condição não dependa apenas da leitura dos números zerados. */
+.chipRegistered {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--gl-brand-primary);
+  background-color: var(--gl-surface-card);
+  color: var(--gl-text-primary);
+  font:
+    600 1rem var(--font-jetbrains),
+    sans-serif;
+}
+
 /* Editor Toggle Container */
 .editorToggleContainer {
   margin-top: 0.5rem;

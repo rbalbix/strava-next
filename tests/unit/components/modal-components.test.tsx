@@ -220,7 +220,7 @@ describe('modal child components', () => {
     act(() => root.unmount());
   });
 
-  it('CardItem covers null, zero-distance and click-to-copy branches', () => {
+  it('CardItem covers null, freshly-registered and click-to-copy branches', () => {
     const noDate = mount(
       <ToastProvider>
         <CardItem
@@ -287,7 +287,18 @@ describe('modal child components', () => {
         />
       </ToastProvider>,
     );
-    expect(zeroDistanceOther.container.innerHTML).toBe('');
+    // Componente recém-registrado: antes a linha sumia da tela, sem confirmação
+    // de que a marcação foi aceita e sem como definir o limite. Agora ela
+    // permanece, sinaliza o estado e mantém o editor acessível.
+    expect(zeroDistanceOther.container.textContent).toContain('Registrado');
+    expect(zeroDistanceOther.container.textContent).toContain(
+      Equipments.Chain.caption,
+    );
+    expect(
+      zeroDistanceOther.container
+        .querySelector('button')
+        ?.getAttribute('aria-label'),
+    ).toContain('recém-registrado');
     act(() => zeroDistanceOther.root.unmount());
 
     const normal = mount(

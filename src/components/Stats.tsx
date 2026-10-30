@@ -9,6 +9,7 @@ import type {
   ThresholdUnit,
 } from '../contracts/api';
 import type { GearStats } from '../services/gear';
+import { getHttpStatus } from '../lib/apiClient';
 import {
   computeThresholdState,
   resolveCurrentConsumption,
@@ -16,6 +17,7 @@ import {
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
+import ErroMsg from './ErroMsg';
 import TireIcon from './TireIcon';
 import VeloIcon from './VeloIcon';
 import { useAutoSync } from '../hooks/useAutoSync';
@@ -140,7 +142,7 @@ export default function Stats() {
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
 
-  const { dashboard, isError } = useAutoSync();
+  const { dashboard, isError, mutate } = useAutoSync();
   const alertedEquipmentIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -171,6 +173,20 @@ export default function Stats() {
   }, [setAthleteInfo, setAthleteInfoStats]);
 
   useEffect(() => {
+    const isUnauthorized = getHttpStatus(isError) === 401;
+
+    // Trata 401 antes de `dashboard`: o SWR mantém o último valor em cache,
+    // então uma sessão revogada durante o uso chega como dashboard + erro.
+    // Não há recuperação OAuth automática: se a sessão do Strava também tiver
+    // acabado, o redirect de topo mostraria a tela de login do Strava sem uma
+    // ação do usuário. O app não tem uma API silenciosa para saber isso antes
+    // de redirecionar. Assim, 401 sempre limpa cookies e pousa na landing;
+    // entrar no Strava é uma ação explícita no CTA da landing.
+    if (isUnauthorized) {
+      signOut();
+      return;
+    }
+
     if (dashboard) {
       sessionStorage.setItem('athlete', JSON.stringify(dashboard.athlete));
       sessionStorage.setItem(
@@ -233,12 +249,17 @@ export default function Stats() {
       });
     } else if (isError) {
       setErrorInfo(isError);
-      // If it's a 401 (Unauthorized), sign out immediately, regardless of cache.
-      if (isError instanceof Error && isError.message.includes('401')) {
-        signOut();
-      } else if (!readCachedDashboard()) {
-        signOut();
-      }
+      // Apenas uma sessão realmente inválida aciona a recuperação. Qualquer
+      // outra falha (timeout, 500, rede instável, 429) mantém a sessão e
+      // mostra o painel de erro com retry.
+      //
+      // Antes, qualquer erro sem cache no sessionStorage chamava signOut() —
+      // que limpa cookies e cache e voltava para a home, que redirecionava ao
+      // Strava. Com erro persistente (ex.: rate limit) isso se repetia
+      // indefinidamente e destruía o próprio cache que permitiria a
+      // recuperação elegante. Hoje o 401 significa exatamente "não há sessão
+      // no servidor", então tentar o OAuth é uma recuperação real — mas
+      // limitada a uma tentativa, justamente para não reabrir aquele loop.
     }
   }, [
     dashboard,
@@ -255,6 +276,16 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
+        {/* Falha com dados em cache: o conteúdo continua na tela e o aviso
+            aparece acima dele. Antes um 429 que chegava depois da primeira
+            leitura bem-sucedida não gerava mensagem alguma — o caso exato do
+            A3. */}
+        {isError && dashboard && getHttpStatus(isError) !== 401 && (
+          <div className={styles.errorBanner}>
+            <ErroMsg error={isError} onRetry={() => mutate()} />
+          </div>
+        )}
+
         {!hasGear ? (
           <div className={styles.emptyState}>
             <TbBrandStrava
@@ -283,6 +314,10 @@ export default function Stats() {
             <span className={styles.emptyStateInstructionsText}>
               Crie uma atividade ou associe a atividade ao seu equipamento
             </span>
+          </div>
+        ) : isError && !dashboard && getHttpStatus(isError) !== 401 ? (
+          <div className={styles.errorState}>
+            <ErroMsg error={isError} onRetry={() => mutate()} />
           </div>
         ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>

@@ -208,8 +208,10 @@ describe('Sidebar component', () => {
     });
     expect(active).toHaveBeenCalledWith(false);
 
+    // No menu deslogado o item de ajuda se chama "Ajuda" (o nome "Como
+    // funciona" ficou só no menu de quem tem sessão).
     const help = Array.from(container.querySelectorAll('button')).find((n) =>
-      n.textContent?.includes('Como funciona'),
+      n.textContent?.includes('Ajuda'),
     ) as HTMLButtonElement;
     act(() => help.click());
     expect(openModal).toHaveBeenCalledWith('info');

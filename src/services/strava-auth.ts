@@ -70,6 +70,33 @@ function deserializeAuthData(raw: unknown): StravaAuthData | null {
   }
 }
 
+/**
+ * A sessão do atleta não existe mais no Redis.
+ *
+ * **Isto não é um erro do servidor** — é a ausência de sessão: o registro foi
+ * expirado, apagado ou o atleta revogou o acesso. O código anterior lançava um
+ * `Error` genérico, e os endpoints protegidos respondiam 500 para tudo; o
+ * cliente, por sua vez, só desloga em 401 (D5). O resultado era um usuário
+ * preso num painel de erro genérico, tentando de novo algo que nunca vai
+ * funcionar, quando o correto é voltar para a landing e pedir para entrar.
+ *
+ * Distinguir os dois casos é o que permite responder 401 — que é o que a
+ * resposta já deveria ser.
+ */
+export class StravaSessionNotFoundError extends Error {
+  readonly athleteId: number;
+
+  constructor(athleteId: number) {
+    super(`Sessão não encontrada para o atleta ${athleteId}`);
+    this.name = 'StravaSessionNotFoundError';
+    this.athleteId = athleteId;
+  }
+}
+
+export function isStravaSessionNotFoundError(error: unknown): boolean {
+  return error instanceof StravaSessionNotFoundError;
+}
+
 export async function getAthleteAccessToken(
   athleteId: number,
 ): Promise<StravaTokens | null> {
@@ -80,8 +107,11 @@ export async function getAthleteAccessToken(
     const athleteData = deserializeAuthData(athleteRaw);
 
     if (!athleteData) {
-      log.error({ athleteId }, 'Athlete não encontrado no Redis');
-      throw new Error(`Athlete ${athleteId} não encontrado`);
+      log.warn(
+        { athleteId },
+        'Sessão ausente no Redis — atleta precisa autenticar novamente',
+      );
+      throw new StravaSessionNotFoundError(athleteId);
     }
 
     const { refreshToken, expiresAt, athleteInfo, accessToken } = athleteData;
@@ -217,6 +247,12 @@ export async function getAthleteAccessToken(
       }
     }
   } catch (error) {
+    // A ausência de sessão não pode ser embrulhada: quem chama precisa
+    // continuar conseguindo identificá-la para responder 401 em vez de 500.
+    if (error instanceof StravaSessionNotFoundError) {
+      throw error;
+    }
+
     log.error(
       { err: error, athleteId },
       'Erro crítico ao obter token para athlete',

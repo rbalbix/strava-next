@@ -79,6 +79,56 @@ describe('useAutoSync', () => {
     expect(typeof result.current.mutate).toBe('function');
   });
 
+  it('caps automatic retries after a failure instead of retrying forever', async () => {
+    // Sem teto, uma falha persistente (ex.: rate limit do Strava) mantém uma
+    // fila de retries que nunca termina — e cada retry é um `/api/app/dashboard`
+    // que consome ≥3 chamadas da API do Strava.
+    vi.useFakeTimers();
+    vi.mocked(apiClient.getDashboard).mockRejectedValue(new Error('429'));
+
+    // Intervalo de polling longo para isolar o comportamento de retry.
+    renderHook(() => useAutoSync(600_000), { wrapper });
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    // 15 minutos de tempo virtual, bem além do pior caso do backoff.
+    for (let i = 0; i < 30; i += 1) {
+      await vi.advanceTimersByTimeAsync(30_000);
+    }
+
+    const calls = vi.mocked(apiClient.getDashboard).mock.calls.length;
+    // 1 tentativa inicial + no máximo 5 retries (ERROR_RETRY_COUNT).
+    expect(calls).toBeLessThanOrEqual(6);
+    // ...mas houve retry de verdade antes de parar.
+    expect(calls).toBeGreaterThanOrEqual(2);
+
+    vi.useRealTimers();
+  });
+
+  it('recovers automatically from a transient failure', async () => {
+    vi.useFakeTimers();
+    vi.mocked(apiClient.getDashboard)
+      .mockRejectedValueOnce(new Error('Request failed: HTTP 500'))
+      .mockResolvedValue({ athlete: { id: 1 } } as any);
+
+    const { result } = renderHook(() => useAutoSync(600_000), { wrapper });
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+    expect(result.current.isError).toBeDefined();
+
+    // Primeiro retry do SWR: jitter de 0,5–1,5× sobre errorRetryInterval
+    // (5000ms) → entre 5s e 10s. 15s cobre o pior caso.
+    await vi.advanceTimersByTimeAsync(15_000);
+
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(2);
+    expect(result.current.isError).toBeUndefined();
+    expect(result.current.dashboard).toEqual({ athlete: { id: 1 } });
+
+    vi.useRealTimers();
+  });
+
   it('pauses polling when page is hidden', async () => {
     vi.useFakeTimers();
     vi.mocked(apiClient.getDashboard).mockResolvedValue({ athlete: { id: 1 } } as any);

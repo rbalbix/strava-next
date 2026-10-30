@@ -25,7 +25,7 @@
   padding: 0.5rem 1.5rem;
 }
 
-.erroMsgContainer header {
+.erroTitle {
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--gl-text-on-brand);
@@ -35,11 +35,54 @@
   align-items: center;
 }
 
-.erroMsgContainer main p {
+.erroBody {
   font-size: 1.4rem;
   color: var(--gl-text-tertiary);
 
-  padding: 0.8rem 1.5rem;
+  padding: 0.8rem 1.5rem 0;
+}
+
+.erroActions {
+  display: flex;
+  justify-content: center;
+
+  padding: 0 1.5rem 1rem;
+}
+
+.retryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 2.8rem;
+  padding: 0 1.1rem;
+
+  border: 0;
+  border-radius: 999px;
+
+  background-image: linear-gradient(
+    90deg,
+    var(--gl-brand-gradient-start),
+    var(--gl-brand-gradient-end)
+  );
+  color: var(--gl-text-on-brand);
+  font-family: inherit;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition: filter 120ms ease;
+}
+
+.retryButton:hover {
+  filter: brightness(0.98);
+}
+
+.retryButton:focus-visible {
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: 2px;
 }
 
 @keyframes dropIn {

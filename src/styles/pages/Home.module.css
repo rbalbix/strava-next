@@ -49,28 +49,9 @@
   font-size: 1rem;
 }
 
-.versionMark {
-  position: sticky;
-  bottom: 0.8rem;
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-  opacity: 0.7;
-  pointer-events: auto;
-  padding: 0.5rem 0;
-}
-
 .chainIcon {
   width: 3.4rem;
   height: auto;
-  color: var(--gl-text-secondary);
-}
-
-.versionText {
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
   color: var(--gl-text-secondary);
 }
 
@@ -113,6 +94,14 @@
 .tagline {
   margin-top: 0.3rem;
   max-width: 28rem;
+}
+
+/* h1 da landing: fica logo abaixo do logotipo. Tamanho e gradiente vêm de
+   `.homeText h1`. É o único h1 da home — antes não havia nenhum, o que
+   tornava a navegação por títulos (leitores de tela) impossível e deixava o
+   E2E procurando um seletor inexistente. */
+.brandTitle {
+  margin: 0;
 }
 
 .subtitle {
@@ -207,33 +196,6 @@
   margin-top: 0.5rem;
 }
 
-.marketingNav {
-  margin-top: 0.25rem;
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.marketingNav a {
-  font-size: 0.9rem;
-  color: var(--gl-text-secondary);
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  opacity: 1;
-}
-
-.marketingNav a:hover {
-  color: var(--gl-text-primary);
-  text-decoration: underline;
-}
-
-.marketingNav a:focus-visible {
-  outline: 2px solid var(--gl-brand-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 @media (max-width: 660px) {
   .homeText h1 {
     letter-spacing: -0.2rem;
@@ -247,28 +209,14 @@
     font-size: 1rem;
   }
 
-  .versionMark {
-    bottom: 0.5rem;
-    opacity: 0.65;
-  }
-
   .chainIcon {
     width: 3rem;
-  }
-
-  .marketingNav {
-    margin-top: 0.2rem;
-    gap: 0.5rem;
   }
 }
 
 @media (max-width: 500px) {
   .ctaRow {
     gap: 0.75rem;
-  }
-
-  .marketingNav a {
-    font-size: 0.85rem;
   }
 }
 

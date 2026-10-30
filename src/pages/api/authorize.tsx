@@ -71,6 +71,25 @@ export default async function Authorize(
     const log = getLogger(req.headers['x-request-id'] as string);
     log.error({ err: error }, 'Authorize route failed');
 
-    res.redirect(`/404`);
+    // A troca pode falhar depois de as cookies de sessão terem sido emitidas
+    // (por exemplo, se /api/save-tokens falhar). Sem limpá-las, `/` renderiza
+    // o painel, recebe 401 e precisa de outro round-trip só para finalmente
+    // chegar à landing. A falha de login deve terminar diretamente na landing
+    // pública, sem estado parcial nem mensagem de sessão expirada.
+    res.setHeader('Set-Cookie', [
+      clearHttpOnlyCookie('strava_code', 'Lax'),
+      clearHttpOnlyCookie('strava_athleteId', 'Lax'),
+      clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
+    ]);
+
+    // A falha na troca do code levava o usuário a /404 — um beco sem saída
+    // depois de clicar em "Entrar". O destino correto é a landing: sem sessão
+    // e sem mensagem, com o CTA de login à vista.
+    //
+    // Isto só é seguro desde que `/` deixou de redirecionar para o OAuth
+    // (§8.1, A1). Antes, voltar para `/` reabria o loop de reautenticação:
+    // `/` mandava para /api/oauth/start, que falhava de novo, e assim por
+    // diante. Hoje a landing é um destino terminal.
+    res.redirect('/');
   }
 }

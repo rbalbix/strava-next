@@ -27,10 +27,17 @@ export default function FaqPage() {
           eventos do webhook do Strava.
         </p>
 
-        <h2>Posso desconectar minha conta?</h2>
+        <h2>Como desconecto minha conta?</h2>
         <p>
-          Sim. Você pode sair da sessão no app e revogar permissões direto no
-          painel de aplicações conectadas do Strava.
+          Revogando o acesso ao GearLife no painel de aplicações conectadas do
+          Strava. O GearLife não oferece um botão de sair dentro do aplicativo:
+          enquanto a autorização existir no Strava, a sessão permanece ativa no
+          dispositivo por até 30 dias.
+        </p>
+        <p>
+          Depois de revogar no Strava, a próxima atualização de dados encerra a
+          sessão automaticamente. Em um dispositivo compartilhado, limpar os
+          dados do site remove a sessão imediatamente.
         </p>
 
         <h2>Quais dados são usados?</h2>
