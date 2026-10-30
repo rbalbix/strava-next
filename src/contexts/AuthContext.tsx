@@ -104,13 +104,25 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     sessionStorage.removeItem('hasActivities');
     sessionStorage.removeItem('athleteCacheTime');
 
-    // Clear non-HttpOnly cookies (best-effort)
-    document.cookie = 'strava_code=; Path=/; Max-Age=0';
-    document.cookie = 'strava_athleteId=; Path=/; Max-Age=0';
+    // Os cookies de sessão (strava_code, strava_athleteId) são HttpOnly e,
+    // portanto, invisíveis para o JavaScript — limpar via document.cookie não
+    // tem efeito algum. A remoção acontece no POST /api/app/logout, chamado
+    // acima. As linhas que faziam isso aqui foram removidas por serem
+    // enganosas: sugeriam uma capacidade que não existe.
 
     setCodeReturned(null);
     setAthlete(null);
     setAthleteStats(null);
+    // A landing é renderizada no mesmo AuthProvider e o ModalContainer fica
+    // montado acima do conteúdo. Sem limpar este estado, qualquer detalhe de
+    // card/modal aberto atravessa o logout e fica por cima da landing.
+    setActiveModal(null);
+    setModalData(null);
+    // Sem isto, o erro que motivou o signOut sobrevivia à navegação e era
+    // renderizado pela landing via `<ErroMsg />` — um usuário que simplesmente
+    // voltou a entrar via "Sessão expirada / Sua sessão com o Strava expirou
+    // ou foi revogada", frase que não faz sentido para quem nunca saiu.
+    setCodeError(null);
 
     // Navigate to home; use replace to avoid back-button returning logged-in state
     router.replace('/');

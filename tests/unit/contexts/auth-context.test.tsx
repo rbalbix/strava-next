@@ -71,6 +71,16 @@ describe('AuthContext', () => {
       'none',
     );
 
+    // Reabre um modal e então perde a sessão. A landing usa o mesmo
+    // AuthProvider/ModalContainer, logo limpar só o código/cookies deixava o
+    // diálogo aberto por cima da página pública.
+    await act(async () => {
+      (buttons[0] as HTMLButtonElement).click();
+    });
+    expect(container.querySelector('[data-testid="active-modal"]')?.textContent).toBe(
+      'info',
+    );
+
     sessionStorage.setItem('athlete', '{}');
     await act(async () => {
       await (buttons[3] as HTMLButtonElement).click();
@@ -78,6 +88,9 @@ describe('AuthContext', () => {
 
     expect(replace).toHaveBeenCalledWith('/');
     expect(container.querySelector('[data-testid="code"]')?.textContent).toBe('null');
+    expect(container.querySelector('[data-testid="active-modal"]')?.textContent).toBe(
+      'none',
+    );
     act(() => root.unmount());
   });
 

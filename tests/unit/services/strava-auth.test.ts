@@ -231,28 +231,39 @@ describe('strava-auth service', () => {
     setTimeoutSpy.mockRestore();
   });
 
-  it('throws when athlete auth is missing in redis', async () => {
-    const { getAthleteAccessToken } = await loadStravaAuthModule({
+  it('lança StravaSessionNotFoundError quando a sessão não existe no Redis', async () => {
+    const mod = await loadStravaAuthModule({
       redisGet: vi.fn().mockResolvedValue(null),
     });
 
-    await expect(getAthleteAccessToken(123)).rejects.toThrow(
-      'Erro ao obter token para athlete 123',
+    // Sem sessão é 401, não 500. Para isso ser possível, o erro precisa
+    // sobreviver ao catch interno sem ser embrulhado num Error genérico.
+    await expect(mod.getAthleteAccessToken(123)).rejects.toThrow(
+      mod.StravaSessionNotFoundError,
     );
+    await expect(mod.getAthleteAccessToken(123)).rejects.toMatchObject({
+      name: 'StravaSessionNotFoundError',
+      athleteId: 123,
+    });
+    expect(
+      mod.isStravaSessionNotFoundError(
+        new mod.StravaSessionNotFoundError(123),
+      ),
+    ).toBe(true);
+    expect(mod.isStravaSessionNotFoundError(new Error('qualquer'))).toBe(false);
   });
 
-  it('throws when athlete auth payload is invalid json', async () => {
-    const { getAthleteAccessToken } = await loadStravaAuthModule({
+  it('trata payload corrompido como sessão inexistente', async () => {
+    // Registro ilegível é tão inutilizável quanto registro ausente: não há
+    // como renovar o token, então o atleta precisa autenticar de novo.
+    const invalidJson = await loadStravaAuthModule({
       redisGet: vi.fn().mockResolvedValue('{invalid-json'),
     });
-
-    await expect(getAthleteAccessToken(123)).rejects.toThrow(
-      'Erro ao obter token para athlete 123',
+    await expect(invalidJson.getAthleteAccessToken(123)).rejects.toThrow(
+      invalidJson.StravaSessionNotFoundError,
     );
-  });
 
-  it('throws when athlete auth payload has invalid shape', async () => {
-    const { getAthleteAccessToken } = await loadStravaAuthModule({
+    const invalidShape = await loadStravaAuthModule({
       redisGet: vi.fn().mockResolvedValue(
         JSON.stringify({
           refreshToken: 'refresh',
@@ -261,10 +272,36 @@ describe('strava-auth service', () => {
         }),
       ),
     });
-
-    await expect(getAthleteAccessToken(123)).rejects.toThrow(
-      'Erro ao obter token para athlete 123',
+    await expect(invalidShape.getAthleteAccessToken(123)).rejects.toThrow(
+      invalidShape.StravaSessionNotFoundError,
     );
+  });
+
+  it('mantém erro de refresh como genérico (não vira 401)', async () => {
+    // Contraparte do teste anterior: só a ausência de sessão vira 401. Uma
+    // falha de renovação de token é outro problema e continua 500.
+    // Erro 4xx do Strava é não-retentável, então não há backoff no teste.
+    const mod = await loadStravaAuthModule({
+      redisGet: vi.fn().mockResolvedValue(
+        JSON.stringify({
+          refreshToken: 'refresh',
+          accessToken: 'access',
+          expiresAt: 0,
+        }),
+      ),
+      isAxiosError: () => true,
+      oauthPost: vi
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('bad request'), {
+          response: { status: 400 },
+        })),
+    });
+
+    const error = await mod.getAthleteAccessToken(123).catch((e) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(mod.isStravaSessionNotFoundError(error)).toBe(false);
+    expect(error.message).toContain('Erro ao obter token para athlete 123');
   });
 
   it('accepts cached auth payload with explicit lastUpdated', async () => {

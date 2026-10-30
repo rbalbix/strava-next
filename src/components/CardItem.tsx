@@ -84,70 +84,79 @@ export default function CardItem({
       )}`
     : '';
 
-  if (equipmentDistance !== 0 || equipmentMovingTime !== 0) {
-    return (
-      <li className={styles.event}>
-        <button
-          type='button'
-          className={styles.eventButton}
-          onClick={handleCardItemClick}
-          aria-label={`${isEditorVisible ? 'Fechar editor e' : 'Abrir editor e'} copiar detalhes de ${e.caption}`}
-        >
-          <div className={styles.firstLine}>
-            <div className={styles.dateAndCaption}>
-              <div className={styles.bol}>{formattedDate}</div>
-              <div className={styles.caption}>{e.caption}</div>
-            </div>
-            <div className={styles.timeago}>{timeAgo}</div>
-          </div>
+  // Um componente recém-registrado tem data de manutenção mas ainda nenhum
+  // km/h acumulado. Antes, a linha desaparecia da tela nesse caso: o usuário
+  // via a marcação "sumir" logo após registrá-la (sem confirmação de que
+  // funcionou) e ficava impossibilitado de definir o limite daquela peça até
+  // a próxima pedalada. Agora a linha permanece, sinaliza o estado e mantém o
+  // editor de limite acessível.
+  const hasUsage = equipmentDistance !== 0 || equipmentMovingTime !== 0;
 
-          {/* Barra do limite, medida na unidade do próprio limite */}
-          {threshold !== undefined &&
-            threshold !== null &&
-            threshold.value > 0 && (
-              <div className={styles.progressContainer}>
+  return (
+    <li className={styles.event}>
+      <button
+        type='button'
+        className={styles.eventButton}
+        onClick={handleCardItemClick}
+        aria-label={`${isEditorVisible ? 'Fechar editor e' : 'Abrir editor e'} copiar detalhes de ${e.caption}${
+          hasUsage ? '' : ' — recém-registrado, defina o limite'
+        }`}
+      >
+        <div className={styles.firstLine}>
+          <div className={styles.dateAndCaption}>
+            <div className={styles.bol}>{formattedDate}</div>
+            <div className={styles.caption}>{e.caption}</div>
+          </div>
+          <div className={styles.timeago}>{timeAgo}</div>
+        </div>
+
+        {/* Barra do limite, medida na unidade do próprio limite */}
+        {threshold !== undefined &&
+          threshold !== null &&
+          threshold.value > 0 && (
+            <div className={styles.progressContainer}>
+              <div
+                className={styles.progressBar}
+                role='progressbar'
+                aria-valuemin={0}
+                aria-valuemax={threshold.value}
+                aria-valuenow={Math.min(consumption, threshold.value)}
+                aria-valuetext={thresholdLabel}
+              >
                 <div
-                  className={styles.progressBar}
-                  role='progressbar'
-                  aria-valuemin={0}
-                  aria-valuemax={threshold.value}
-                  aria-valuenow={Math.min(consumption, threshold.value)}
-                  aria-valuetext={thresholdLabel}
-                >
-                  <div
-                    className={`${styles.progressFill} ${
-                      styles[
-                        computeThresholdState(consumption, threshold.value)
-                      ]
-                    }`}
-                    style={{
-                      width: `${Math.min(
-                        (consumption / threshold.value) * 100,
-                        100,
-                      )}%`,
-                    }}
-                  />
-                </div>
+                  className={`${styles.progressFill} ${
+                    styles[
+                      computeThresholdState(consumption, threshold.value)
+                    ]
+                  }`}
+                  style={{
+                    width: `${Math.min(
+                      (consumption / threshold.value) * 100,
+                      100,
+                    )}%`,
+                  }}
+                />
               </div>
-            )}
+            </div>
+          )}
 
-          <div className={styles.badges}>
-            <div className={styles.chipbadge}>
-              {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
-            </div>
-            <div className={styles.chipbadge}>
-              {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
-            </div>
+        <div className={styles.badges}>
+          {!hasUsage && (
+            <span className={styles.chipRegistered}>Registrado</span>
+          )}
+          <div className={styles.chipbadge}>
+            {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
           </div>
+          <div className={styles.chipbadge}>
+            {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}
+          </div>
+        </div>
 
-          <div className={styles.clear}></div>
-        </button>
+        <div className={styles.clear}></div>
+      </button>
 
-        {/** Editor (children) - só aparece quando isEditorVisible é true */}
-        {children}
-      </li>
-    );
-  }
-
-  return null;
+      {/** Editor (children) - só aparece quando isEditorVisible é true */}
+      {children}
+    </li>
+  );
 }

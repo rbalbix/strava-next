@@ -99,6 +99,24 @@
   text-align: center;
 }
 
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 2rem 0;
+}
+
+/* Variante do aviso de erro usada quando já há dados em cache: o conteúdo
+   permanece e o aviso entra acima dele. */
+.errorBanner {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding-bottom: 0.5rem;
+}
+
 .iconBrandStrava {
   color: var(--gl-brand-primary);
 }

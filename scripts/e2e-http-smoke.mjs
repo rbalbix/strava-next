@@ -4,11 +4,9 @@ async function assertPage(path, mustContain) {
   const url = `${baseUrl}${path}`;
   const response = await fetch(url, { redirect: 'follow' });
   if (!response.ok) {
-    // Treat 400 or redirects to auth as success for the root path
-    if (path === '/' && (response.status === 400 || response.url.includes('/api/oauth/start') || response.url.includes('strava.com/login'))) {
-      console.log(`HTTP smoke passed for ${url}: handled auth redirect/status.`);
-      return;
-    }
+    // A home pública não pode mais redirecionar para o OAuth: esse redirect era
+    // o defeito A1 do plano de usabilidade (visitante nunca via a landing).
+    // Aceitá-lo aqui faria o smoke passar justamente quando o bug volta.
     throw new Error(`HTTP smoke failed for ${url}: status ${response.status}`);
   }
   const html = await response.text();
@@ -19,7 +17,10 @@ async function assertPage(path, mustContain) {
   }
 }
 
-await assertPage('/', 'GearLife');
+// A landing renderiza a tagline; antes o smoke vigiava "GearLife", que também
+// aparecia no <title> e no cabeçalho do menu lateral — uma asserção que
+// passaria mesmo sem o corpo da landing.
+await assertPage('/', 'Pedale. A gente cuida da manutenção.');
 await assertPage('/como-funciona', 'Como funciona o GearLife');
 await assertPage('/faq', 'Perguntas frequentes');
 await assertPage('/privacidade', 'Privacidade');

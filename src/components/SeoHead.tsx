@@ -4,12 +4,26 @@ interface SeoHeadProps {
   title: string;
   description: string;
   path?: string;
+  /**
+   * Emite `<meta name="robots" content="noindex">`.
+   *
+   * Usado na URL `/` quando ela está servindo o painel autenticado: a mesma
+   * URL é landing para visitante e dashboard para quem tem sessão, e só a
+   * primeira pode ser indexada. O crawler do Strava/Google não tem cookies,
+   * então sempre recebe a versão indexável.
+   */
+  noindex?: boolean;
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://gearlife.vercel.app';
 const OG_IMAGE_PATH = '/images/tela-inicio-1.jpeg';
 
-export default function SeoHead({ title, description, path = '/' }: SeoHeadProps) {
+export default function SeoHead({
+  title,
+  description,
+  path = '/',
+  noindex = false,
+}: SeoHeadProps) {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const canonicalUrl = `${APP_URL}${normalizedPath}`;
   const imageUrl = `${APP_URL}${OG_IMAGE_PATH}`;
@@ -18,6 +32,7 @@ export default function SeoHead({ title, description, path = '/' }: SeoHeadProps
     <Head>
       <title>{title}</title>
       <meta name='description' content={description} />
+      {noindex && <meta name='robots' content='noindex' />}
       <meta
         name='viewport'
         content='width=device-width, initial-scale=1, viewport-fit=cover'

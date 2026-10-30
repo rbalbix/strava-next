@@ -17,7 +17,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ active, isOpen }: SidebarProps) {
-  const { openModal, signOut, codeReturned } = useContext(AuthContext);
+  const { openModal, codeReturned } = useContext(AuthContext);
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
@@ -195,7 +195,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
                   closeSidebar();
                 }}
               >
-                Como funciona
+                Ajuda
               </button>
             </div>
           </aside>

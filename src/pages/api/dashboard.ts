@@ -1,6 +1,6 @@
 import type { NextApiResponse } from 'next';
 import type { DashboardResponse } from '../../contracts/api';
-import { withProtectedAPI } from '../../server/auth';
+import { withProtectedAPI, respondIfSessionMissing } from '../../server/auth';
 import { getStravaServerEnv } from '../../server/env';
 import { createStravaClient } from '../../server/strava-client';
 import { getAthlete, getAthleteStats } from '../../services/athlete';
@@ -62,6 +62,13 @@ const handler: AuthenticatedNextApiHandler = async (
 
     return res.status(200).json(response);
   } catch (error) {
+    // Sem sessão no Redis ≠ erro do servidor: responde 401 para que o cliente
+    // encerre a sessão e volte para a landing. Antes, tudo virava 500 e o
+    // usuário ficava preso num painel de erro genérico para sempre.
+    if (respondIfSessionMissing(res, error)) {
+      return;
+    }
+
     getLogger().error({ err: error }, 'Dashboard endpoint failed');
     return res.status(500).json({ error: 'Internal server error' });
   }
