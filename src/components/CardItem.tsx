@@ -74,9 +74,7 @@ export default function CardItem({
     return renderEvent('Bike limpinha.');
   }
 
-  const consumption = threshold
-    ? resolveCurrentConsumption(threshold, e)
-    : 0;
+  const consumption = threshold ? resolveCurrentConsumption(threshold, e) : 0;
   const thresholdLabel = threshold
     ? `${formatThresholdValue(consumption, threshold.unit)} / ${formatThresholdValue(
         threshold.value,
@@ -125,9 +123,7 @@ export default function CardItem({
               >
                 <div
                   className={`${styles.progressFill} ${
-                    styles[
-                      computeThresholdState(consumption, threshold.value)
-                    ]
+                    styles[computeThresholdState(consumption, threshold.value)]
                   }`}
                   style={{
                     width: `${Math.min(
@@ -141,9 +137,9 @@ export default function CardItem({
           )}
 
         <div className={styles.badges}>
-          {!hasUsage && (
+          {/* {!hasUsage && (
             <span className={styles.chipRegistered}>Registrado</span>
-          )}
+          )} */}
           <div className={styles.chipbadge}>
             {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
           </div>
