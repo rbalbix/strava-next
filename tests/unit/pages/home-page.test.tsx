@@ -35,7 +35,6 @@ describe('home page', () => {
         <Home
           code={null}
           oauth_state='state'
-          athlete_id={null}
         />,
       );
     });
@@ -54,7 +53,7 @@ describe('home page', () => {
     const root = createRoot(container);
     act(() => {
       root.render(
-        <Home code={null} oauth_state='state' athlete_id={null} />,
+        <Home code={null} oauth_state='state' />,
       );
     });
 
@@ -88,7 +87,6 @@ describe('home page', () => {
     // para o Strava — o visitante nunca via o produto.
     expect((result as any).redirect).toBeUndefined();
     expect((result as any).props.code).toBeNull();
-    expect((result as any).props.athlete_id).toBeNull();
     // Mesmo sem sessão a página não pode ser cacheada: a mesma URL serve o
     // painel de quem tem cookie, e uma landing em cache voltaria a ser servida
     // para o usuário recém-logado.
@@ -100,7 +98,27 @@ describe('home page', () => {
   // para resolver um caso raro — e faria este teste (e o E2E) depender de um
   // Redis real só para renderizar o painel. O 401 de /api/app/dashboard é o
   // que encerra a sessão; ver §8.6.
-  it('getServerSideProps reads cookies and sets no-store cache when authenticated', async () => {
+  it('getServerSideProps renders the panel for gl_session without I/O', async () => {
+    const setHeader = vi.fn();
+    const result = await getServerSideProps({
+      req: {
+        // D6/PR 2: a sessão nova é o token opaco `gl_session`. Só a presença
+        // importa — o token em si não pode vazar para as props (o cookie é
+        // HttpOnly), por isso `code` recebe a sentinela, não o valor.
+        headers: { cookie: 'gl_session=deadbeef' },
+      },
+      res: { setHeader },
+    } as any);
+
+    expect(setHeader).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
+    expect((result as any).props.code).toBe('session');
+    // Sem round-trip de I/O: só cookies são lidos.
+    expect(setHeader).toHaveBeenCalledTimes(1);
+  });
+
+  it('getServerSideProps keeps accepting the legacy session pair (migration)', async () => {
+    // Janela de migração do PR 2 (§2.D.10): quem ainda tem o par antigo
+    // continua logado até reautenticar e receber um `gl_session`.
     const setHeader = vi.fn();
     const result = await getServerSideProps({
       req: {
@@ -110,8 +128,7 @@ describe('home page', () => {
     } as any);
 
     expect(setHeader).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
-    expect((result as any).props.code).toBe('abc');
-    expect((result as any).props.athlete_id).toBe(123);
+    expect((result as any).props.code).toBe('session');
     // Sem round-trip de I/O: só cookies são lidos.
     expect(setHeader).toHaveBeenCalledTimes(1);
   });
@@ -127,6 +144,5 @@ describe('home page', () => {
     } as any);
 
     expect((result as any).props.code).toBeNull();
-    expect((result as any).props.athlete_id).toBeNull();
   });
 });

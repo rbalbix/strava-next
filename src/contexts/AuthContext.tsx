@@ -38,7 +38,6 @@ interface AuthProviderProps {
   approval_prompt?: string;
   scope?: string;
   oauth_state: string;
-  athlete_id: number | null;
   athlete?: DetailedAthlete;
   athleteStats?: ActivityStats;
   codeError?: unknown;
@@ -104,11 +103,12 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     sessionStorage.removeItem('hasActivities');
     sessionStorage.removeItem('athleteCacheTime');
 
-    // Os cookies de sessão (strava_code, strava_athleteId) são HttpOnly e,
-    // portanto, invisíveis para o JavaScript — limpar via document.cookie não
-    // tem efeito algum. A remoção acontece no POST /api/app/logout, chamado
-    // acima. As linhas que faziam isso aqui foram removidas por serem
-    // enganosas: sugeriam uma capacidade que não existe.
+    // O cookie de sessão (`gl_session`; e, na janela de migração do PR 2, o
+    // par legado `strava_code`/`strava_athleteId`) é HttpOnly e, portanto,
+    // invisível para o JavaScript — limpar via document.cookie não tem efeito
+    // algum. A remoção acontece no POST /api/app/logout, chamado acima, que
+    // também revoga a sessão no Redis. As linhas que faziam isso aqui foram
+    // removidas por serem enganosas: sugeriam uma capacidade que não existe.
 
     setCodeReturned(null);
     setAthlete(null);

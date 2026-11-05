@@ -512,16 +512,16 @@ O segmento "bike maintenance tracker" amadureceu: ao menos **11 produtos diretos
 
 ### Fase A — consertar o funil (≈ 4–6 dias)
 
-> **Estado (2026-10-28): PR 1 concluído.** Itens **D1, D5, D6 (PR 1), D7 e D8** implementados, testados e revisados; registro detalhado em §8. **D6 (PR 2 — sessão real) segue pendente**, e D3/D4/D9 permanecem fora desta leva.
+> **Estado (2026-11-05): Fase A concluída, com três itens adiados por decisão.** Itens **D1, D5, D6 (PR 1 + PR 2), D7 e D8** implementados, testados e revisados — PR 1 em §8, PR 2 (sessão real, `gl_session`) em §8.12. **D3, D4 e D9 são os próximos passos desta fase, mas não serão feitos agora** (decisão do proprietário de 2026-11-05, registrada em §8.4): permanecem sem implementação, com o escopo original intacto.
 
 Itens: **D1, D3, D4, D5, D6, D7, D8, D9**.
 
 - **D6 (landing) vira dois PRs**, conforme o detalhamento §2.D.9:
   - **PR 1 — Landing acessível (~1 dia):** `index.tsx` para de redirecionar incondicionalmente; tagline em PT-BR; CTA "Como funciona" → `/como-funciona`; criar `src/pages/404.tsx`; remover o `document.cookie` no-op de `AuthContext.tsx:108-109`. ✅
-  - **PR 2 — Sessão real (1–2 dias):** substituir `strava_code` (code de OAuth de uso único) por `gl_session` opaco validado no Redis; apagar a chave no logout; padronizar `SameSite=Lax`. Migração: aceitar o cookie antigo por 30 dias. ⏳
+  - **PR 2 — Sessão real (1–2 dias):** substituir `strava_code` (code de OAuth de uso único) por `gl_session` opaco validado no Redis; apagar a chave no logout; padronizar `SameSite=Lax`. Migração: aceitar o cookie antigo por 30 dias. ✅ (executado em 2026-11-04 — registro em §8.12)
   - **⚠️ Inconsistência interna desta seção (corrigida em §8.1):** a linha do PR 1 dizia "ler `gl_session`" e "remover o uso do `strava_code` como sinal de sessão", mas `gl_session` só passa a existir no PR 2. Aplicado literalmente, o PR 1 deslogaria a base inteira. Mantido `strava_code` como sinal de sessão até o PR 2.
 - **D5 contém a restrição que quebra o loop (§2.D.2):** `signOut()` só em 401 confirmado, nunca em timeout/500/429. É pré-requisito para qualquer avanço no D7. ✅
-- Critério de aceite: usuário consegue ver a landing, entrar por clique explícito, ver confirmação ao registrar manutenção, **não sofre round-trip de reautenticação quando o dashboard falha**, vê erro com retry, e a barra mostra número. — parcialmente coberto; ver §8.4 para o que ficou pendente do item D1.
+- Critério de aceite: usuário consegue ver a landing, entrar por clique explícito, ver confirmação ao registrar manutenção, **não sofre round-trip de reautenticação quando o dashboard falha**, vê erro com retry, e a barra mostra número (D3). — parcialmente coberto; ver §8.4 para o que ficou pendente do item D1 e para o adiamento de D3/D4/D9.
 - **D7 é decisão de produto, não tarefa de código** — o app não tem logout e não há botão para descomentar. Duas opções: construir logout real (requer o PR 2 de sessão) ou remover a promessa do `faq.tsx:30-34`. Pode ficar fora da Fase A, desde que o FAQ deixe de mentir. ✅ (caminho 2)
 - Testes: `tests/unit/pages/home-page.test.tsx` (landing como caso padrão), asserção de **ausência de round-trip** quando o dashboard falha, `tests/unit/components/misc-components.test.tsx` (429 com `status` real), `scripts/e2e-ui.mjs:28` (seletor real + `<h1>` novo na landing), novos testes para `CardItem` com contador zerado e `clipboard` com data do evento.
 - Gate: `yarn validate` + `yarn lint:colors` verdes.
@@ -627,8 +627,9 @@ Tornar `/` uma página pública cria dois efeitos colaterais que não estavam no
 
 | Item | Por que ficou de fora | Quando volta |
 |---|---|---|
-| **D6 / PR 2 — sessão real (`gl_session`)** | Escopo explícito desta leva era o PR 1. É a mudança de maior risco do roadmap (afeta autenticação de toda a base). | Imediatamente após, com a migração prevista em §2.D.10 |
-| **D1 — toast "✓ `chain` registrado"** | A confirmação prevista pelo toast depende de um canal do webhook do Strava para o cliente que não existe. A alternativa client-side seria heurística ("data de manutenção hoje + contador zerado"), que dispara a cada abertura enquanto a peça não for usada de novo — um toast errado é pior que nenhum toast. **A metade funcional do A4 está entregue**: a linha persiste, com chip "Registrado" e editor acessível, que é o defeito real descrito no achado. | No PR 2 de sessão, com canal de notificação |
+| **D6 / PR 2 — sessão real (`gl_session`)** | Escopo explícito desta leva era o PR 1. É a mudança de maior risco do roadmap (afeta autenticação de toda a base). | ✅ concluído em 2026-11-04 (§8.12). Só a remoção do fallback legado fica para o release seguinte (§2.D.10) |
+| **D3, D4 e D9 — resto da Fase A** | **Decisão do proprietário (2026-11-05):** são os próximos passos naturais depois do PR 2 — **D3** número na barra de progresso (B4), **D4** toast na cópia + data correta do evento (B5) e **D9** skeleton com `rgba(var(--hex))` inválido + timeout no loading infinito (B2) —, mas **não serão feitos agora**. Nada foi implementado nestes itens; o escopo original do §4/Tier 1 segue íntegro e pronto para retomada. | Quando a Fase A for retomada — sem data marcada |
+| **D1 — toast "✓ `chain` registrado"** | A confirmação prevista pelo toast depende de um canal do webhook do Strava para o cliente que não existe. A alternativa client-side seria heurística ("data de manutenção hoje + contador zerado"), que dispara a cada abertura enquanto a peça não for usada de novo — um toast errado é pior que nenhum toast. **A metade funcional do A4 está entregue**: a linha persiste, com chip "Registrado" e editor acessível, que é o defeito real descrito no achado. | O PR 2 foi concluído **sem** canal de notificação (fora de escopo, §8.12.4) — continua adiado, junto com o `?intent=login` |
 | **D8 — indicador passivo "Atualizando…"** | Exporia o `isValidating` do SWR, repercutindo em 16 mocks de teste para um feedback visual que, a cada 60s, seria ruído. O feedback foi concentrado no botão manual ("Atualizando…" no clique). | Se o intervalo voltar a subir |
 | **§2.D.9 — `?intent=login`** | O único consumidor especificado é "redirect de retorno para a landing com toast de sucesso" — e o toast é a penda acima. Sem consumidor, o parâmetro seria código morto. Hoje `authorize.tsx:69` já redireciona para o painel, que é o destino correto em todos os cenários (não existe logout). | Junto com o toast do PR 2 |
 | **§2.D.9 — `noindex` nas rotas autenticadas** | Feito: `SeoHead` ganhou a propriedade `noindex`, usada em `/` quando `props.code` indica sessão. O `robots.txt.ts` já trazia `Allow: /` e o sitemap já indexava a landing, então nenhum deles precisou mudar. | ✅ concluído |
@@ -747,7 +748,7 @@ O ajuste do 401 não saiu de um plano; saiu de quatro testes manuais do propriet
 | 3 | Logout no Strava + chave apagada levava à tela de login do Strava | **Remoção** do `sessionRecovery`: 401 → `signOut()` → landing, sempre | Resolveu o redirect, mas a modal aberta atravessava o logout |
 | 4 | Modal de detalhe do card continuava aberta sobre a landing | `signOut()` limpa `activeModal`/`modalData` (§8.9) | — |
 
-**Regra final vigente:** qualquer `401` de `/api/app/dashboard` limpa os cookies locais, zera o estado transitório (modal, erro) e pousa na landing limpa. **Não existe OAuth automático.** A ida ao Strava só acontece por clique explícito em "Entrar com Strava".
+**Regra final vigente:** qualquer `401` de `/api/app/dashboard` limpa os cookies locais, zera o estado transitório (modal, erro) e pousa na landing limpa (estendida no §8.13 ao `401` de `/api/app/equipment-thresholds`). **Não existe OAuth automático.** A ida ao Strava só acontece por clique explícito em "Entrar com Strava".
 
 | Situação | Comportamento |
 |---|---|
@@ -773,3 +774,78 @@ Após a entrega, o proprietário ajustou a landing e o menu deslogado diretament
 **Efeito nos testes — nada do comportamento anterior foi perdido, só o que a UI não mostra mais:** `home-page.test.tsx` deixou de exigir o `<h1>` único e os links de páginas públicas na landing, passando a vigiar tagline + CTA de login + botão de modal; `sidebar.test.tsx` procura "Ajuda" no menu deslogado; o `e2e-ui` entra nas páginas públicas por URL direta (a landing não as linka mais) e volta à landing pela tagline; o `e2e-smoke`/`e2e-http-smoke` passaram a asserir a tagline em vez de "GearLife" — que também aparecia no `<title>` e no cabeçalho do menu, e por isso passaria mesmo sem o corpo da landing.
 
 **Pendência de acessibilidade registrada (decisão do proprietário, não corrigida de ofício):** a landing ficou sem nenhum `<h1>`, o que reabre o problema do A1 para navegação por títulos. Se quiser restaurar sem trazer de volta o nome da marca em corpo grande, a saída é promover a tagline a `<h1>` (o CSS `.homeText h1` pode receber o tamanho atual do `h2`). O CSS `.brandTitle` e o import de `PublicPageNav` em `index.tsx` ficaram órfãos enquanto o comentário existir — removidos no dia em que a decisão for considerada final.
+
+---
+
+### 8.12 D6 / PR 2 — sessão real (`gl_session`)
+
+> Executado em 2026-11-04. Fecha a causa raiz do §2.D.8: o app deixou de tratar um **code de OAuth de uso único** (`strava_code`) como sessão e passa a ter um token opaco apontando para um registro no Redis, com revogação server-side.
+
+#### 8.12.1 O que mudou
+
+| Arquivo | Mudança |
+|---|---|
+| `src/server/session.ts` **(novo)** | `createStravaSession` (token `randomBytes(32)` → registro `strava:session:<sha256(token)>` → athleteId, TTL 30d), `resolveStravaSession` (`null` = sessão acabou; **lançar** = Redis fora do ar), `revokeStravaSession` |
+| `src/server/cookies.ts` | `SESSION_COOKIE = 'gl_session'`; padrão `SameSite` de `Strict` → **`Lax`** em gravar e limpar (fecha a inconsistência do §2.D.9: gravar era Lax, limpar era Strict — e Strict quebraria o retorno cross-site do OAuth) |
+| `src/server/auth.ts` | `getAuthenticatedAthleteId` passa a assíncrono: `gl_session` → registro no Redis (**autoritativo**, ignora `strava_athleteId` legado); sem `gl_session` → fallback do par legado (migração); `withProtectedAPI` responde **500** se o Redis falhar, **401** só quando a sessão não existe |
+| `src/pages/api/authorize.tsx` | Deixa de gravar `strava_code`/`strava_athleteId`; ordem nova: trocar code → salvar tokens → **criar sessão** → emitir cookies → redirect. Cookie `gl_session` (HttpOnly, Lax, 30d) + limpeza do par legado + limpeza do estado OAuth |
+| `src/pages/api/logout.ts` | **Revoga a chave no Redis** (melhor esforço — indisponibilidade nunca faz o logout falhar) e limpa os 4 cookies: `gl_session`, `strava_code`, `strava_athleteId`, `strava_oauth_state` |
+| `src/pages/index.tsx` | GSSP lê a **presença** de `gl_session` (ou do par legado) — sem I/O, mantendo a decisão do §8.6; `code` vira a sentinela `'session'`; **`athlete_id` removido das props** |
+| `src/contexts/AuthContext.tsx` | Prop `athlete_id` removida (era lida por ninguém — resíduo da confiança em cookie do cliente) |
+| `src/config/index.ts` | `REDIS_KEYS.session(hash)` |
+
+#### 8.12.2 Decisões tomadas na implementação
+
+1. **§2.D.9 pedia "validar `gl_session` no Redis no `getServerSideProps`"; o §8.6 proibiu I/O ali.** Prevaleceu o §8.6 (é mais novo e tem teste vigiando `setHeader` chamado 1×): o GSSP lê só a presença, e a validação acontece na primeira chamada de dados. Um `gl_session` expirado renderiza o shell do painel, recebe 401 e volta para a landing — o fluxo já testado do §8.6.
+2. **`code` virou sentinela `'session'`.** O valor do token não pode aparecer nas props (o cookie é HttpOnly; expor no HTML tornaria lê-lo pelo JS). O cliente só usa `code` como booleano.
+3. **`athlete_id` saiu das props.** Era declarado e nunca lido; manterlo passando um cookie do cliente contradiz o objetivo do PR 2. A identidade passa a ser resolvida no servidor, a cada chamada, pelo registro da sessão.
+4. **Ordem do `authorize` invertida** (antes: cookies → save → redirect). As cookies só são emitidas quando a sessão está completa; o `catch` limpa apenas o estado OAuth — e **não** toca nos cookies de sessão, porque um login que falha não pode encerrar uma sessão que o usuário já tinha.
+5. **Falha de Redis ≠ fim de sessão, agora nos dois lados.** Se `resolveStravaSession` lançar, `withProtectedAPI` responde 500 (cliente mostra retry, mantém a sessão) e nunca 401 (que deslogaria por indisponibilidade) — o princípio do §8.6 aplicado à sessão nova. O 401 continua exclusivo de "registro não existe".
+6. **`gl_session` é autoritativo.** Se o cookie novo existir, o legado é ignorado; o par antigo só é lido quando **não** há `gl_session`.
+7. **Logout com revogação em melhor esforço.** Se o Redis não responder, os cookies são limpos mesmo assim (a sessão local acaba; a chave expira em 30 dias) — um logout nunca falha por indisponibilidade. A falha da revogação é registrada em `warn` no log do `/api/logout` (§8.12.4): sem esse log, uma chave órfã seria indistinguível de uma sessão ativa na contagem pós-deploy.
+
+#### 8.12.3 Migração (§2.D.10)
+
+- **Durante a janela (~30 dias):** `withProtectedAPI` e o GSSP aceitam o par `strava_code` + `strava_athleteId` quando não há `gl_session` — a base existente não é deslogada no deploy.
+- **Login novo substitui o legado:** o `authorize` emite `gl_session` **e limpa** o par antigo, para que o fallback não sobreviva ao lado da sessão nova (senão voltaria a valer quando o `gl_session` expirasse, estendendo a migração indefinidamente).
+- **Remoção no release seguinte:** apagar o ramo legado de `server/auth.ts` + `index.tsx` + os `clearHttpOnlyCookie` de `strava_code`/`strava_athleteId` em `authorize`/`logout` + os testes de legado. Depois disso, quem não reautenticou na janela cai na landing e entra de novo (Strava com `approval_prompt=auto` é silencioso).
+
+#### 8.12.4 Verificação
+
+| Etapa | Resultado |
+|---|---|
+| `yarn validate` (lint + lint:colors + typecheck + test + build) | verde — **58 arquivos / 385 testes** (+1 arquivo, +16 testes sobre §8.10: serviço de sessão, `gl_session` no middleware/rotas, logout com revogação, GSSP com `gl_session` e com o par legado) |
+| `yarn test:e2e:ui` | verde — o contexto de **429 agora usa o par legado** (prova que usuário antigo não é deslogado por erro transitório) e o de **401 usa só `gl_session`** (prova o encerramento da sessão nova, com `/api/app/logout` obrigatório e round-trip proibido) |
+| `yarn test:e2e:smoke` (playwright) e `:http` | verdes |
+| `yarn test:e2e:smoke:ci` | verde (o script deixa um `next-server` órfão ao final — comportamento pré-existente do wrapper, não introduzido aqui) |
+| **Verificação manual contra servidor de produção + Redis real** | **9/9**: sessão criada no Redis renderiza o painel (sem tagline da landing); sem cookie vê a landing; `/api/app/dashboard` responde **401** (não 500) para sessão sem tokens; logout responde 200, limpa o cookie **e apaga a chave no Redis**; com a chave apagada, o **mesmo cookie** cai em 401 (revogação comprovada); par legado ainda renderiza o painel (migração) |
+
+**Pós-deploy — janela de observabilidade (~30 dias, mesma da migração do §8.12.3):**
+
+| Sinal | Esperado / ação |
+|---|---|
+| Contagem de `strava:session:*` vs atletas ativos | Acompanha a base que se logou nos últimos 30 dias (1 chave por login ativo). Uma chave órfã de revogação falhada é reconhecível pelo `warn` "Falha ao revogar a sessão no Redis" emitido pelo `/api/logout` — o logout não falhou; a chave expira sozinha em 30 dias |
+| Taxa de `401` em `/api/app/dashboard` | Estabiliza logo após o deploy e permanece estável. Crescimento contínuo indica invalidação em massa de sessões (registro sumindo antes do tempo) e deve ser investigado **antes** de remover o fallback legado (§8.12.3) |
+
+**Fora do escopo desta leva (registrado, não omissão):** a remoção do fallback legado (release seguinte, §8.12.3); o `?intent=login` e o toast do §8.4 continuam adiados junto com o D1.
+
+---
+
+### 8.13 401 nos limites do card — a modal sem limites virava landing
+
+> Relato do proprietário em 2026-11-05, em testes manuais pós-PR 2, com a sessão revogada manualmente no Redis: clicar num card abria a modal de detalhe, que pedia `GET /api/app/equipment-thresholds` — respondia **401** — e o `catch` da carga engolia o erro (`// ignore`): o modal renderizava **sem nenhum limite**, como se os dados não existissem. O usuário só saía dali quando o próximo auto-sync do `GET /api/app/dashboard` caía em 401 e o fluxo do §8.10 ligava o `signOut`.
+
+**Correção — a regra final do §8.10 estendida a todos os endpoints protegidos da modal:**
+
+| Caminho | Antes | Depois |
+|---|---|---|
+| Carga de `getEquipmentThresholds` | `catch(() => ignore)` em qualquer erro | `401` → `signOut()` (estado zerado, modal fechada, landing); falha transitória continua não deslogando (§8.10) |
+| `saveEquipmentThreshold` | qualquer erro → toast "Falha ao salvar limite" | `401` → `signOut()` **sem** toast (o usuário não errou nada); demais erros mantêm o toast |
+
+- **`endSessionOnUnauthorized` (em `CardDetailModal.tsx`)** é a função única dos dois caminhos: `getHttpStatus(error) !== 401` → segue o tratamento atual do erro; `401` → `signOut()`, com um `ref` garantindo **uma única** chamada mesmo com carga e salvamento falhando em paralelo (ou o efeito rodando em dobro no StrictMode do desenvolvimento).
+- **Por que no componente e não central (decisão registrada, alternativas descartadas):** a correção espelha o padrão do próprio app — o 401 do dashboard já é tratado em `Stats.tsx:175`. Um handler global em `requestJson` registrado pelo `AuthProvider` duplicaria o `signOut` com o fluxo do dashboard e mexeria num módulo compartilhado; idempotência dentro do `AuthContext.signOut` mexeria em comportamento compartilhado com risco nos testes de outros fluxos. `POST /api/app/logout` é idempotente (§8.12.2), então até um eventual par de chamadas (modal + dashboard) é inofensivo.
+- **Falso-positivo coberto:** erro de rede/5xx na carga não desloga — o modal abre sem limites e a próxima abertura tenta de novo.
+
+**Regra vigente atualizada:** qualquer `401` de endpoint protegido do painel — `/api/app/dashboard` **ou** `/api/app/equipment-thresholds` — encerra a sessão no cliente: cookies locais limpos, modal/erro zerados, landing limpa. Falhas transitórias (rede, 5xx) e `429` continuam não deslogando.
+
+**Verificação:** `yarn validate` verde (lint + lint:colors + typecheck + test + build); suíte em **58 arquivos / 389 testes** (+4 sobre o §8.12, nada removido) — os testes novos cobrem: carga com 401 → `signOut`; carga com erro que não é 401 → modal segue aberto sem deslogar; salvamento com 401 → `signOut` sem toast de falha; 401 de carga e salvamento emendados → `signOut` uma única vez (o `ref`). `yarn test:report` regenerou o Test Status do README (05/11): Lines/Statements **99.69%**, Functions **100.00%**, Branches **94.43%**. E2E não reexecutados: nenhum fluxo deles monta a modal de card (só o modal informativo da landing), então o código alterado não é exercitado ali — registrado para não passar por omissão.

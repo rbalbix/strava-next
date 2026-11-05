@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   apiStravaOauthTokenPost: vi.fn(),
   apiStravaAuthPost: vi.fn(),
   loggerError: vi.fn(),
+  redisSetex: vi.fn(),
 }));
 
 vi.mock('../../src/services/api', () => ({
@@ -15,6 +16,15 @@ vi.mock('../../src/services/api', () => ({
 
 vi.mock('../../src/services/logger', () => ({
   getLogger: () => ({ error: mocks.loggerError }),
+}));
+
+// A sessão nova (D6/PR 2) grava o registro no Redis antes de emitir o cookie.
+vi.mock('../../src/services/redis', () => ({
+  default: {
+    get: vi.fn(),
+    setex: (...args: unknown[]) => mocks.redisSetex(...args),
+    del: vi.fn(),
+  },
 }));
 
 describe('/api/authorize integration', () => {
@@ -60,6 +70,7 @@ describe('/api/authorize integration', () => {
         athlete: { id: 999 },
       },
     });
+    mocks.redisSetex.mockResolvedValueOnce('OK');
     const req = createMockRequest({
       method: 'GET',
       query: { code: 'abc', state: 'good' },
@@ -74,10 +85,38 @@ describe('/api/authorize integration', () => {
     );
     expect(res.redirectedTo).toBe('/');
 
+    // D6/PR 2: a sessão é um registro no Redis apontado por um token opaco —
+    // o `strava_code` (code de OAuth de uso único) deixou de ser a "sessão".
+    expect(mocks.redisSetex).toHaveBeenCalledWith(
+      expect.stringMatching(/^strava:session:[0-9a-f]{64}$/),
+      30 * 24 * 60 * 60,
+      '999',
+    );
+
     const cookies = res.headers['Set-Cookie'] as string[];
     expect(cookies).toBeDefined();
-    expect(cookies.some((c) => c.includes('strava_code=abc') && c.includes('Max-Age=2592000'))).toBe(true);
-    expect(cookies.some((c) => c.includes('strava_athleteId=999') && c.includes('Max-Age=2592000'))).toBe(true);
+    const sessionCookie = cookies.find((c) => c.startsWith('gl_session='));
+    expect(sessionCookie).toBeTruthy();
+    expect(sessionCookie).toContain('Max-Age=2592000');
+    expect(sessionCookie).toContain('HttpOnly');
+    expect(sessionCookie).toContain('SameSite=Lax');
+
+    // Os legados só aparecem limpos — nenhum valor antigo é reemitido.
+    expect(
+      cookies.some(
+        (c) => c.startsWith('strava_code=') && c.includes('Max-Age=0'),
+      ),
+    ).toBe(true);
+    expect(
+      cookies.some(
+        (c) => c.startsWith('strava_athleteId=') && c.includes('Max-Age=0'),
+      ),
+    ).toBe(true);
+    expect(
+      cookies.some(
+        (c) => c.startsWith('strava_oauth_state=') && c.includes('Max-Age=0'),
+      ),
+    ).toBe(true);
   });
 
   it('redirects to the landing when downstream fails', async () => {
@@ -97,18 +136,22 @@ describe('/api/authorize integration', () => {
     await handler(req, res);
     expect(res.redirectedTo).toBe('/');
     expect(mocks.loggerError).toHaveBeenCalled();
-    // Limpa qualquer cookie emitida antes da falha (caso o save no Redis seja
-    // o ponto que falhou), para a landing ser renderizada direto.
+    // Nada foi emitido antes de a sessão estar pronta: só o estado OAuth,
+    // já consumido, é limpo. `gl_session` não existe neste ponto — e os
+    // cookies legados do usuário são preservados, porque um login que falha
+    // não pode encerrar uma sessão que ele já tinha.
     const cookies = res.headers['Set-Cookie'] as string[];
-    expect(cookies).toHaveLength(3);
-    expect(cookies.every((cookie) => cookie.includes('Max-Age=0'))).toBe(true);
+    expect(cookies).toHaveLength(1);
+    expect(cookies[0]).toContain('strava_oauth_state=');
+    expect(cookies[0]).toContain('Max-Age=0');
+    expect(mocks.redisSetex).not.toHaveBeenCalled();
   });
 
-  it('clears cookies emitted before saving tokens fails', async () => {
-    // Exercita a ordem problemática: /api/authorize emite as cookies antes
-    // de pedir ao serviço interno para persistir refresh/access token. Sem o
-    // cleanup do catch, a home abriria um painel que inevitavelmente recebe
-    // 401, em vez de chegar direto à landing.
+  it('does not emit the session cookie when saving tokens fails', async () => {
+    // A ordem nova emite as cookies somente depois de a sessão estar completa
+    // (save + registro no Redis). Se o save falhar, não há `gl_session` para
+    // limpar — e a falha não pode apagar os cookies legados de um usuário que
+    // já tinha sessão.
     mocks.apiStravaOauthTokenPost.mockResolvedValueOnce({
       data: {
         access_token: 'access',
@@ -129,8 +172,10 @@ describe('/api/authorize integration', () => {
 
     expect(res.redirectedTo).toBe('/');
     const cookies = res.headers['Set-Cookie'] as string[];
-    expect(cookies).toHaveLength(3);
-    expect(cookies.every((cookie) => cookie.includes('Max-Age=0'))).toBe(true);
-    expect(cookies.some((cookie) => cookie.includes('strava_code=abc'))).toBe(false);
+    expect(cookies).toHaveLength(1);
+    expect(cookies[0]).toContain('strava_oauth_state=');
+    expect(cookies[0]).toContain('Max-Age=0');
+    // A sessão só é criada depois do save: nem chega a tocar no Redis.
+    expect(mocks.redisSetex).not.toHaveBeenCalled();
   });
 });

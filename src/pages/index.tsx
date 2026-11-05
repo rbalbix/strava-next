@@ -7,6 +7,7 @@ import MainImage from '../components/MainImage';
 import PublicPageNav from '../components/PublicPageNav';
 import SeoHead from '../components/SeoHead';
 import { AuthContext, AuthProvider } from '../contexts/AuthContext';
+import { getCookieValue, SESSION_COOKIE } from '../server/cookies';
 import styles from '../styles/pages/Home.module.css';
 
 const Stats = dynamic(() => import('../components/Stats'), {
@@ -22,7 +23,6 @@ interface HomeProps {
   approval_prompt?: string;
   scope?: string;
   oauth_state: string;
-  athlete_id: number | null;
 }
 
 function HomeContent() {
@@ -90,26 +90,20 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const { req, res } = context;
   const cookies = req.headers.cookie || '';
 
-  let code = null;
-  const codeCookie = cookies
-    .split(';')
-    .find((c) => c.trim().startsWith('strava_code='));
-  if (codeCookie) {
-    code = codeCookie.split('=')[1];
-  }
+  // D6/PR 2: a sessão nova é o cookie opaco `gl_session` — o token é só um
+  // ponteiro para o registro `strava:session:*` no Redis. O par legado
+  // (strava_code + strava_athleteId) continua valendo como sinal de sessão
+  // durante a janela de migração (§2.D.10); par incompleto não conta.
+  const sessionToken = getCookieValue(cookies, SESSION_COOKIE);
+  const legacyCode = getCookieValue(cookies, 'strava_code');
+  const legacyAthleteId = getCookieValue(cookies, 'strava_athleteId');
 
-  let athlete_id: number | null = null;
-  const athleteIdCookie = cookies
-    .split(';')
-    .find((c) => c.trim().startsWith('strava_athleteId='));
-  if (athleteIdCookie) {
-    const parsed = Number(athleteIdCookie.split('=')[1]);
-    athlete_id = Number.isFinite(parsed) ? parsed : null;
-  }
-
-  // A sessão é validada na primeira chamada de dados, não aqui.
+  // A sessão é validada na primeira chamada de dados, não aqui — e, por isso,
+  // só a **presença** do cookie é lida. Um `gl_session` expirado renderiza o
+  // shell do painel, que recebe 401 na primeira chamada e volta para a
+  // landing (`respondIfSessionMissing`, §8.6).
   //
-  // Seria possível consultar o Redis neste ponto (`strava:auth:<athleteId>`) e
+  // Seria possível consultar o Redis neste ponto (`strava:session:<hash>`) e
   // pousar direto na landing quando a sessão tivesse ido embora. Não foi
   // feito, de propósito: o `/` autenticado pagaria 20–80 ms de bloqueio de
   // first-paint em **toda** visita para resolver um caso raro (registro
@@ -121,7 +115,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // (`respondIfSessionMissing`, §8.6), e o cliente encerra a sessão e volta
   // para a landing. São ~300 ms uma única vez — e, como os cookies são limpos
   // nesse processo, a visita seguinte já cai direto na landing.
-  const isAuthenticated = Boolean(code && athlete_id);
+  const isAuthenticated = Boolean(
+    sessionToken || (legacyCode && legacyAthleteId),
+  );
 
   // Sem sessão, renderiza a landing. Antes, qualquer visitante era redirecionado
   // para /api/oauth/start e dali para o Strava — o valor do produto, o aviso de
@@ -146,17 +142,19 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
-      // Sessão parcial (ex.: só o athleteId) não pode renderizar o painel —
-      // os dois valores são anulados juntos, para não reaproveitar um cookie
-      // órfão na próxima visita.
-      code: isAuthenticated ? code : null,
+      // Sentinela, não o valor do cookie: o cliente só usa `code` como sinal
+      // de "tem sessão" (booleano). O token em si não pode aparecer aqui — o
+      // cookie é HttpOnly e expor o valor no HTML tornaria lê-lo pelo JS.
+      // O antigo `strava_code` (code de OAuth de uso único) nunca mais passa
+      // por esta props, e `athlete_id` saiu de vez: a identidade é resolvida
+      // no servidor, a cada chamada de dados, pelo registro da sessão.
+      code: isAuthenticated ? 'session' : null,
       client_id: '',
       grant_type: '',
       response_type: '',
       approval_prompt: '',
       scope: '',
       oauth_state: '',
-      athlete_id: isAuthenticated ? athlete_id : null,
     },
   };
 };
@@ -171,7 +169,6 @@ export default function Home(props: HomeProps) {
       approval_prompt={props.approval_prompt}
       scope={props.scope}
       oauth_state={props.oauth_state}
-      athlete_id={props.athlete_id}
     >
       <ModalContainer />
       <div className={styles.container}>

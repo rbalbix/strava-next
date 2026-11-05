@@ -1,14 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRequest, createMockResponse } from '../helpers/next-api';
+import { SESSION_COOKIE } from '../../src/server/cookies';
 
 const mocks = vi.hoisted(() => ({
   mockGetEquipmentThresholds: vi.fn(),
   mockSaveEquipmentThreshold: vi.fn(),
+  mockRedisGet: vi.fn(),
 }));
 
 vi.mock('../../src/services/thresholds', () => ({
   getEquipmentThresholds: mocks.mockGetEquipmentThresholds,
   saveEquipmentThreshold: mocks.mockSaveEquipmentThreshold,
+}));
+
+// A sessão nova (D6/PR 2) resolve o athleteId no Redis via `gl_session`.
+vi.mock('../../src/services/redis', () => ({
+  default: {
+    get: (...args: unknown[]) => mocks.mockRedisGet(...args),
+    setex: vi.fn(),
+    del: vi.fn(),
+  },
 }));
 
 describe('API /api/app/equipment-thresholds', () => {
@@ -79,6 +90,26 @@ it('returns 401 when athlete cookie is missing', async () => {
     expect(res.body).toEqual({
       equipmentThresholds: { bikeA: { chain: { value: 120, unit: 'km' } } },
     });
+  });
+
+  it('returns 200 on GET with a gl_session resolved from Redis (D6/PR 2)', async () => {
+    // A identidade vem do registro da sessão, não do cookie do cliente.
+    mocks.mockRedisGet.mockResolvedValueOnce(777);
+    mocks.mockGetEquipmentThresholds.mockResolvedValueOnce({});
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
+    });
+    const res = createMockResponse();
+
+    await handler(req, res);
+
+    expect(mocks.mockRedisGet).toHaveBeenCalledWith(
+      expect.stringMatching(/^strava:session:[0-9a-f]{64}$/),
+    );
+    expect(mocks.mockGetEquipmentThresholds).toHaveBeenCalledWith(777);
+    expect(res.statusCode).toBe(200);
   });
 
   it('returns 200 and defaults to kilometres when the unit is absent', async () => {

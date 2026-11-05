@@ -4,8 +4,10 @@ import {
   clearHttpOnlyCookie,
   getCookieValue,
   serializeHttpOnlyCookie,
+  SESSION_COOKIE,
 } from '../../server/cookies';
 import { getStravaOAuthTokenEnv } from '../../server/env';
+import { createStravaSession } from '../../server/session';
 import { apiStravaAuth, apiStravaOauthToken } from '../../services/api';
 import { getLogger } from '../../services/logger';
 
@@ -49,15 +51,9 @@ export default async function Authorize(
 
     const { access_token, refresh_token, expires_at, athlete } = response.data;
 
-    res.setHeader('Set-Cookie', [
-      serializeHttpOnlyCookie('strava_code', code, { maxAge: SESSION_MAX_AGE, sameSite: 'Lax' }),
-      serializeHttpOnlyCookie('strava_athleteId', String(athlete.id), {
-        maxAge: SESSION_MAX_AGE,
-        sameSite: 'Lax',
-      }),
-      clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
-    ]);
-
+    // Primeiro tudo o que pode falhar; as cookies só saem quando a sessão
+    // está pronta. (Antes iam antes do save, e o catch precisava limpá-las
+    // para a landing não abrir um painel que receberia 401.)
     await apiStravaAuth.post('/', {
       athleteId: athlete.id,
       refreshToken: refresh_token,
@@ -66,19 +62,36 @@ export default async function Authorize(
       athleteInfo: athlete,
     });
 
+    // D6/PR 2: a sessão é um registro no Redis, e o cookie carrega apenas o
+    // token opaco que o aponta (§2.D.8 — o `strava_code`, code de troca de
+    // uso único, deixou de servir de "sessão").
+    const sessionToken = await createStravaSession(athlete.id);
+
+    res.setHeader('Set-Cookie', [
+      serializeHttpOnlyCookie(SESSION_COOKIE, sessionToken, {
+        maxAge: SESSION_MAX_AGE,
+        sameSite: 'Lax',
+      }),
+      // Migração: um login novo substitui o par legado pelo `gl_session`. Sem
+      // esta limpeza, o par antigo sobreviveria ao lado da sessão nova e
+      // voltaria a valer como fallback quando o `gl_session` expirasse —
+      // prolongando a janela de migração além do previsto (§2.D.10).
+      clearHttpOnlyCookie('strava_code', 'Lax'),
+      clearHttpOnlyCookie('strava_athleteId', 'Lax'),
+      clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
+    ]);
+
     res.redirect('/');
   } catch (error) {
     const log = getLogger(req.headers['x-request-id'] as string);
     log.error({ err: error }, 'Authorize route failed');
 
-    // A troca pode falhar depois de as cookies de sessão terem sido emitidas
-    // (por exemplo, se /api/save-tokens falhar). Sem limpá-las, `/` renderiza
-    // o painel, recebe 401 e precisa de outro round-trip só para finalmente
-    // chegar à landing. A falha de login deve terminar diretamente na landing
-    // pública, sem estado parcial nem mensagem de sessão expirada.
+    // Como as cookies só são emitidas depois de a sessão estar completa,
+    // não há estado parcial a limpar — exceto o estado OAuth, que já foi
+    // consumido. Importante NÃO limpar `gl_session`/cookies legados aqui:
+    // um login que falha não pode encerrar uma sessão que o usuário já
+    // tinha (re-login, conexão caindo no meio da troca de code).
     res.setHeader('Set-Cookie', [
-      clearHttpOnlyCookie('strava_code', 'Lax'),
-      clearHttpOnlyCookie('strava_athleteId', 'Lax'),
       clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
     ]);
 

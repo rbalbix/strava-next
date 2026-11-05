@@ -121,9 +121,12 @@ try {
   // ---------------------------------------------------------------------
   const errorContext = await browser.newContext({ serviceWorkers: 'block' });
 
-  // Cookie de sessão opaco. Só importa que `getServerSideProps` o enxergue e
-  // renderize o painel — o valor em si é irrelevante, porque a chamada que o
-  // valida é justamente a que vai falhar.
+  // Cookie de sessão da **migração** (D6/PR 2): o par legado
+  // strava_code + strava_athleteId continua valendo como sessão durante a
+  // janela de transição (§2.D.10) — testá-lo aqui prova que um usuário
+  // antigo não é deslogado por um erro transitório. Só importa que
+  // `getServerSideProps` o enxergue e renderize o painel — a chamada que o
+  // validaria é justamente a que vai falhar (interceptada com 429).
   await errorContext.addCookies([
     { name: 'strava_code', value: 'e2e-opaque-session', url: baseUrl },
     { name: 'strava_athleteId', value: '4242', url: baseUrl },
@@ -193,9 +196,13 @@ try {
     serviceWorkers: 'block',
   });
 
+  // Sessão nova (D6/PR 2): só o `gl_session` — sem os cookies legados. O
+  // registro `strava:session:<hash>` não existe (não foi criado), então o
+  // caminho real é: shell renderiza → chamada de dados → 401 → logout →
+  // landing. O valor do token é irrelevante para o teste; o que importa é o
+  // servidor tratá-lo como sessão inexistente.
   await expiredContext.addCookies([
-    { name: 'strava_code', value: 'e2e-opaque-session', url: baseUrl },
-    { name: 'strava_athleteId', value: '4242', url: baseUrl },
+    { name: 'gl_session', value: 'e2e-opaque-session', url: baseUrl },
   ]);
 
   await expiredContext.route('**/api/app/dashboard', (route) =>
