@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { getLogger } from '../services/logger';
 import { isStravaSessionNotFoundError } from '../services/strava-auth';
+import { SESSION_COOKIE } from './cookies';
+import { resolveStravaSession } from './session';
 
 export type AuthenticatedNextApiHandler = (
   req: NextApiRequest,
@@ -7,7 +10,34 @@ export type AuthenticatedNextApiHandler = (
   athleteId: number
 ) => void | Promise<void>;
 
-function getAuthenticatedAthleteId(req: NextApiRequest): number | null {
+/**
+ * Resolve o atleta autenticado da requisição.
+ *
+ * **Sessão real (`gl_session`)**: o token do cookie só vale se o registro
+ * `strava:session:<hash>` existir no Redis — a identidade vem do servidor,
+ * não de um cookie enviado pelo cliente (D6/PR 2).
+ *
+ * **Legado (janela de migração)**: na ausência do cookie novo, o par
+ * `strava_athleteId` (+ `strava_code`) continua sendo aceito como sessão,
+ * exatamente como antes. É o que impede deslogar a base existente no deploy;
+ * a remoção deste ramo é o "release seguinte" previsto em §2.D.10.
+ *
+ * `gl_session` presente sem registro → `null`: sessão encerrada (expirada,
+ * apagada ou revogada), e o responde 401 é o caminho correto.
+ *
+ * Pode **lançar** quando o Redis não responde — isso é falha de infra, não
+ * fim de sessão, e `withProtectedAPI` responde 500 (retry) em vez de 401
+ * (logout), seguindo o princípio do §8.6: uma indisponibilidade não pode
+ * deslogar ninguém.
+ */
+async function getAuthenticatedAthleteId(
+  req: NextApiRequest,
+): Promise<number | null> {
+  const sessionToken = req.cookies?.[SESSION_COOKIE];
+  if (sessionToken) {
+    return resolveStravaSession(sessionToken);
+  }
+
   const athleteIdRaw = req.cookies?.strava_athleteId;
   const athleteId = Number(athleteIdRaw);
 
@@ -20,10 +50,24 @@ function getAuthenticatedAthleteId(req: NextApiRequest): number | null {
 
 export function withProtectedAPI(handler: AuthenticatedNextApiHandler) {
   return async (req: NextApiRequest, res: NextApiResponse) => {
-    const athleteId = getAuthenticatedAthleteId(req);
+    let athleteId: number | null;
+    try {
+      athleteId = await getAuthenticatedAthleteId(req);
+    } catch (error) {
+      // O Redis não respondeu: não dá para afirmar que a sessão acabou.
+      // Responder 401 aqui deslogaria o usuário por falha de infra — o
+      // mesmo erro do §8.6, agora do lado da sessão nova. 500 + retry é o
+      // comportamento D5 (falha transitória mantém a sessão).
+      getLogger().error({ err: error }, 'Falha ao consultar a sessão');
+      return res
+        .status(500)
+        .json({ error: 'Internal server error' });
+    }
 
     if (!athleteId) {
-      return res.status(401).json({ error: 'Unauthorized', reason: 'Session expired or invalid' });
+      return res
+        .status(401)
+        .json({ error: 'Unauthorized', reason: 'Session expired or invalid' });
     }
 
     return handler(req, res, athleteId);

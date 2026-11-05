@@ -31,6 +31,10 @@ export const REDIS_KEYS = {
     `strava:equipment-thresholds:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
+  // Sessão do aplicativo (D6/PR 2 do plano de usabilidade): recebe o **hash**
+  // do token opaco do cookie `gl_session` e devolve o athleteId. O token em
+  // claro nunca vira nome de chave. Ver src/server/session.ts.
+  session: (hashedToken: string) => `strava:session:${hashedToken}`,
 };
 
 // URLs completas da nossa API

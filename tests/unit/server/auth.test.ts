@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   respondIfSessionMissing,
   withProtectedAPI,
 } from '../../../src/server/auth';
+import { SESSION_COOKIE } from '../../../src/server/cookies';
 import { StravaSessionNotFoundError } from '../../../src/services/strava-auth';
 import { createMockRequest, createMockResponse } from '../../helpers/next-api';
 
@@ -14,8 +15,25 @@ vi.mock('@upstash/redis', () => ({
   },
 }));
 
+// A sessão nova resolve o athleteId no Redis; o registro é simulado aqui.
+// O logger também é substituído para que o caso de 500 não imprima erro real.
+vi.mock('../../../src/services/redis', () => ({
+  default: { get: vi.fn(), setex: vi.fn(), del: vi.fn() },
+}));
+vi.mock('../../../src/services/logger', () => ({
+  getLogger: () => ({ error: vi.fn(), warn: vi.fn(), info: vi.fn(), debug: vi.fn() }),
+}));
+
+import redis from '../../../src/services/redis';
+
+const mockedRedis = vi.mocked(redis);
+
 describe('withProtectedAPI middleware', () => {
-  it('returns 401 Unauthorized if strava_athleteId cookie is missing', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns 401 Unauthorized if no session cookie is present', async () => {
     const req = createMockRequest({
       method: 'GET',
       cookies: {},
@@ -36,6 +54,8 @@ describe('withProtectedAPI middleware', () => {
   });
 
   it('forwards the request to the underlying handler if strava_athleteId cookie is present', async () => {
+    // Legado da migração do PR 2: sem `gl_session`, o par antigo continua
+    // valendo — é o que impede deslogar a base existente no deploy.
     const req = createMockRequest({
       method: 'GET',
       cookies: { strava_athleteId: '55555' },
@@ -48,6 +68,70 @@ describe('withProtectedAPI middleware', () => {
     await wrapped(req, res);
 
     expect(handler).toHaveBeenCalledWith(req, res, 55555);
+  });
+
+  it('resolve o athleteId pelo registro da sessão quando há gl_session', async () => {
+    // D6/PR 2: a identidade vem do Redis, não do cookie enviado pelo cliente.
+    mockedRedis.get.mockResolvedValueOnce('999');
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { [SESSION_COOKIE]: 'token-opaco', strava_athleteId: '1' },
+    });
+    const res = createMockResponse();
+
+    const handler = vi.fn();
+    const wrapped = withProtectedAPI(handler);
+
+    await wrapped(req, res);
+
+    // O `gl_session` é autoritativo: o athleteId legado é ignorado.
+    expect(mockedRedis.get).toHaveBeenCalledTimes(1);
+    expect(handler).toHaveBeenCalledWith(req, res, 999);
+  });
+
+  it('responde 401 quando o gl_session não tem registro (sessão revogada)', async () => {
+    mockedRedis.get.mockResolvedValueOnce(null);
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { [SESSION_COOKIE]: 'token-expirado' },
+    });
+    const res = createMockResponse();
+
+    const handler = vi.fn();
+    const wrapped = withProtectedAPI(handler);
+
+    await wrapped(req, res);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toEqual({
+      error: 'Unauthorized',
+      reason: 'Session expired or invalid',
+    });
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('responde 500 — nunca 401 — quando o Redis não responde', async () => {
+    // Falha de infra não pode deslogar ninguém (§8.6): 401 limparia os
+    // cookies do usuário por indisponibilidade do Redis. 500 mantém a sessão
+    // e o cliente mostra o painel de erro com retry (D5).
+    mockedRedis.get.mockRejectedValueOnce(new Error('upstash fora do ar'));
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
+    });
+    const res = createMockResponse();
+
+    const handler = vi.fn();
+    const wrapped = withProtectedAPI(handler);
+
+    await wrapped(req, res);
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ error: 'Internal server error' });
+    expect(handler).not.toHaveBeenCalled();
   });
 });
 

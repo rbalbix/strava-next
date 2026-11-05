@@ -220,11 +220,12 @@ describe('Stats component', () => {
     // sessão; os demais erros mostram o painel com retry.
     const signOut = vi.fn();
     const setErrorInfo = vi.fn();
+    const mutate = vi.fn();
     vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
         dashboard: undefined,
         isLoading: false,
         isError: new ApiError(429),
-        mutate: vi.fn(),
+        mutate,
     });
 
     const authValue = makeAuthContext({ signOut, setErrorInfo });
@@ -247,6 +248,12 @@ describe('Stats component', () => {
     expect(
       container.querySelector('button')?.textContent,
     ).toBe('Tentar novamente');
+    // O retry refaz a chamada de dados — é a saída do painel para o usuário,
+    // e o callback precisa estar vivo e coberto.
+    act(() => {
+      container.querySelector('button')?.click();
+    });
+    expect(mutate).toHaveBeenCalledTimes(1);
     act(() => {
       root.unmount();
     });
@@ -285,6 +292,7 @@ describe('Stats component', () => {
     // Um 429 que chega depois da primeira leitura bem-sucedida não podia
     // mais esconder o conteúdo — mas também não gerava mensagem alguma (A3).
     const signOut = vi.fn();
+    const mutate = vi.fn();
     vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
       dashboard: makeDashboardFixture({
         distance: 1000,
@@ -293,7 +301,7 @@ describe('Stats component', () => {
       }),
       isLoading: false,
       isError: new ApiError(429),
-      mutate: vi.fn(),
+      mutate,
     });
 
     const container = document.createElement('div');
@@ -303,6 +311,17 @@ describe('Stats component', () => {
     expect(container.textContent).toContain('Limite excedido');
     expect(container.textContent).toContain('Card: Bike One');
     expect(signOut).not.toHaveBeenCalled();
+    // O retry do banner (ramo "falha com dados em cache") também refaz a
+    // chamada — há outros botões na tela com cards renderizados, então o
+    // botão é procurado pelo texto.
+    const retry = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Tentar novamente',
+    );
+    expect(retry).toBeTruthy();
+    act(() => {
+      retry?.click();
+    });
+    expect(mutate).toHaveBeenCalledTimes(1);
     act(() => {
       root.unmount();
     });

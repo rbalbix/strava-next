@@ -1,12 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { MdClose, MdOutlineSaveAlt } from 'react-icons/md';
+import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import type {
   EquipmentThresholds,
   ThresholdEntry,
   ThresholdUnit,
 } from '../contracts/api';
-import { apiClient } from '../lib/apiClient';
+import { apiClient, getHttpStatus } from '../lib/apiClient';
 import type { GearStats } from '../services/gear';
 import styles from '../styles/components/CardDetailModal.module.css';
 import { locale, secondsToHms } from '../utils/format';
@@ -45,6 +46,28 @@ export default function CardDetailModal({
   // Refs para os segmentos do seletor de unidade (foco após a seta do teclado)
   const unitRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
+  const { signOut } = useContext(AuthContext);
+
+  // 401 = a sessão acabou (§8.13 do plano): o mesmo caminho do 401 do
+  // dashboard (§8.10) — `signOut` limpa o estado transitório, zera a modal e
+  // pousa na landing. Um modal aberto sem limites seria uma tela quebrada
+  // (pareceria dado sumido, não sessão revogada); a única saída para "sessão
+  // encerrada" é a landing, nunca um cache vazio. O `ref` garante uma única
+  // chamada mesmo com a carga e o salvamento falhando em paralelo (ou o
+  // efeito rodando em dobro no StrictMode do desenvolvimento).
+  const sessionEndedRef = useRef(false);
+  const endSessionOnUnauthorized = useCallback(
+    (error: unknown): boolean => {
+      if (getHttpStatus(error) !== 401) return false;
+      if (!sessionEndedRef.current) {
+        sessionEndedRef.current = true;
+        signOut();
+      }
+      return true;
+    },
+    [signOut],
+  );
+
   // Carrega thresholds do backend
   useEffect(() => {
     let mounted = true;
@@ -54,14 +77,17 @@ export default function CardDetailModal({
         if (!mounted) return;
         setThresholds(res || {});
       })
-      .catch(() => {
-        // ignore
+      .catch((err) => {
+        // 401 encerra a sessão (§8.13); as demais falhas transitórias
+        // continuam silenciosas — o modal abre sem limites e a próxima
+        // abertura tenta de novo (§8.10: falha transitória não desloga).
+        endSessionOnUnauthorized(err);
       });
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [endSessionOnUnauthorized]);
 
   // Sincroniza inputs com thresholds sempre que thresholds mudar
   useEffect(() => {
@@ -105,7 +131,12 @@ export default function CardDetailModal({
       // Apenas esconde o editor, NÃO limpa o input
       setVisibleEditorId(null);
     } catch (err) {
-      showToast('Falha ao salvar limite', 'error');
+      // 401 na gravação é a mesma sessão encerrada (§8.13): em vez do toast
+      // de falha — que sugeriria um problema do usuário — a landing. Os
+      // demais erros (rede, 5xx) mantêm o toast com retry manual.
+      if (!endSessionOnUnauthorized(err)) {
+        showToast('Falha ao salvar limite', 'error');
+      }
     }
   }
 

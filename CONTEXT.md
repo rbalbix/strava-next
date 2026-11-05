@@ -263,6 +263,14 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 - `getAthleteAccessToken()` lê `strava:auth`, verifica `expiresAt` e — se expirado — tenta `refreshStravaToken()` com lock `strava:lock:refresh:<athleteId>`.
 - Refresh usa retry/backoff e tem fallback caso outro processo trave (ver `src/services/strava-auth.ts`).
 
+### Sessão do Aplicativo (`gl_session`)
+
+- O login (`/api/authorize`) gera um token opaco (`randomBytes(32)`) gravado no Redis como `strava:session:<sha256(token)>` → athleteId (TTL 30 dias) e o envia no cookie HttpOnly `gl_session`. Ver `src/server/session.ts`.
+- O cookie sozinho não autentica: `withProtectedAPI` resolve o athleteId **pelo registro no Redis**; `gl_session` sem registro → 401 (sessão encerrada). Falha do Redis → 500, nunca 401 — indisponibilidade não desloga ninguém (§8.6 do plano de usabilidade).
+- No cliente, `401` de qualquer endpoint protegido do painel — `/api/app/dashboard` **ou** `/api/app/equipment-thresholds` — encerra a sessão: `signOut()` limpa o estado transitório (modal, erro) e pousa na landing (§8.10/§8.13 do plano). Falhas transitórias e `429` não deslogam.
+- `/api/logout` apaga a chave no Redis (revogação em qualquer dispositivo) além de limpar os cookies.
+- **Migração (até ~30 dias após o deploy do PR 2):** na ausência de `gl_session`, o par legado `strava_code` + `strava_athleteId` ainda é aceito como sessão; um login novo emite `gl_session` e limpa o par antigo. Remoção do fallback no release seguinte.
+
 ### Métricas (Prometheus-like)
 
 - Métricas principais: `webhook_events_total`, `webhook_validation_failed_total`, `token_refresh_attempts_total`, `token_refresh_success_total`, `token_refresh_failure_total`, `activity_processed_total`, `activity_failed_total`, `email_sent_total`, `email_failed_total`.

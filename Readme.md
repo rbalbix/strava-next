@@ -252,7 +252,7 @@ As métricas são persistidas no Redis para refletir contagem agregada entre ins
    Opcional: `WEBHOOK_ALLOWED_IPS` para restringir origem por IP/CIDR.
 2. Subir aplicação e validar build:
    `yarn build`.
-3. Disparar fluxo de login OAuth e confirmar retorno sem erro.
+3. Disparar fluxo de login OAuth e confirmar retorno sem erro — o cookie HttpOnly `gl_session` deve ser emitido e a chave `strava:session:<sha256(token)>` criada no Redis com TTL de 30 dias (sessão real, D6/PR 2). Um logout em seguida deve apagar a chave e limpar os cookies.
 4. Consultar `/api/metrics` e verificar se os contadores retornam em texto Prometheus.
 5. Enviar webhook válido e verificar incremento em `webhook_events_total`.
 6. Enviar payload inválido e verificar incremento em `webhook_validation_failed_total`.
@@ -411,14 +411,14 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 <!-- TEST_STATUS_START -->
 ## Test Status
 
-Last update: 2026-10-05T17:23:08.657Z
+Last update: 2026-11-05T14:49:19.302Z
 
 | Metric | Coverage |
 | --- | ---: |
-| Lines | 99.68% |
-| Statements | 99.68% |
+| Lines | 99.69% |
+| Statements | 99.69% |
 | Functions | 100.00% |
-| Branches | 94.27% |
+| Branches | 94.54% |
 
 Run locally:
 - `yarn test:unit`

@@ -49,7 +49,7 @@ describe('AuthContext', () => {
         <AuthProvider
           codeReturned='code'
           oauth_state='state'
-          athlete_id={1}
+
         >
           <Consumer />
         </AuthProvider>,
@@ -104,7 +104,7 @@ describe('AuthContext', () => {
         <AuthProvider
           codeReturned='code'
           oauth_state='state'
-          athlete_id={1}
+
         >
           <Consumer />
         </AuthProvider>,
@@ -151,7 +151,7 @@ describe('AuthContext', () => {
         <AuthProvider
           codeReturned='code'
           oauth_state='state'
-          athlete_id={1}
+
         >
           <Consumer />
         </AuthProvider>,

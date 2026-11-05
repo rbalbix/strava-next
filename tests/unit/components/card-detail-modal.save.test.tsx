@@ -5,21 +5,30 @@ import { createRoot } from 'react-dom/client';
 import { fireEvent } from '@testing-library/dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const { showToastMock } = vi.hoisted(() => ({ showToastMock: vi.fn() }));
+const { showToastMock, signOutMock } = vi.hoisted(() => ({
+  showToastMock: vi.fn(),
+  signOutMock: vi.fn(),
+}));
 
 // Mock do clipboard
 vi.mock('../../../src/utils/clipboard', () => ({
   copyEventDetailsToClipboard: vi.fn(),
 }));
 
-vi.mock('../../../src/lib/apiClient', () => ({
-  apiClient: {
-    getEquipmentThresholds: vi.fn().mockResolvedValue({}),
-    saveEquipmentThreshold: vi
-      .fn()
-      .mockResolvedValue({ 'gear-1': { chain: { value: 100, unit: 'km' } } }),
-  },
-}));
+// Mantém os utilitários reais do módulo (ApiError/getHttpStatus) — o
+// componente decide o caminho do 401 por eles — e só substitui o cliente.
+vi.mock('../../../src/lib/apiClient', async (importOriginal) => {
+  const mod = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...mod,
+    apiClient: {
+      getEquipmentThresholds: vi.fn().mockResolvedValue({}),
+      saveEquipmentThreshold: vi
+        .fn()
+        .mockResolvedValue({ 'gear-1': { chain: { value: 100, unit: 'km' } } }),
+    },
+  };
+});
 
 vi.mock('../../../src/contexts/ToastContext', () => ({
   useToast: () => ({
@@ -31,7 +40,8 @@ vi.mock('../../../src/contexts/ToastContext', () => ({
 }));
 
 import CardDetailModal from '../../../src/components/CardDetailModal';
-import { apiClient } from '../../../src/lib/apiClient';
+import { AuthContext } from '../../../src/contexts/AuthContext';
+import { apiClient, ApiError } from '../../../src/lib/apiClient';
 
 const gearStat = {
   id: 'gear-1',
@@ -56,8 +66,15 @@ type SavedThresholds = Record<
   Record<string, { value: number; unit: 'km' | 'h' }>
 >;
 
-async function mountModal(thresholds: SavedThresholds = {}) {
-  (apiClient.getEquipmentThresholds as any).mockResolvedValue(thresholds);
+async function mountModal(
+  thresholds: SavedThresholds = {},
+  loadError?: unknown,
+) {
+  if (loadError !== undefined) {
+    (apiClient.getEquipmentThresholds as any).mockRejectedValue(loadError);
+  } else {
+    (apiClient.getEquipmentThresholds as any).mockResolvedValue(thresholds);
+  }
 
   // Anexa ao document: sem isso o jsdom ignora .focus() e o rastreio de foco
   // não é exercitável nos testes.
@@ -66,7 +83,11 @@ async function mountModal(thresholds: SavedThresholds = {}) {
   const root = createRoot(container);
 
   await act(async () => {
-    root.render(<CardDetailModal gearStat={gearStat} onClose={() => {}} />);
+    root.render(
+      <AuthContext.Provider value={{ signOut: signOutMock } as any}>
+        <CardDetailModal gearStat={gearStat} onClose={() => {}} />
+      </AuthContext.Provider>,
+    );
   });
   // Flush das promises mockadas (GET do editor) sem espera de relógio.
   await act(async () => {});
@@ -482,6 +503,72 @@ describe('CardDetailModal save threshold', () => {
     expect(km.getAttribute('aria-checked')).toBe('true');
     expect(findRadio(container, 'h').getAttribute('aria-checked')).toBe('false');
     expect(getValueInput(container).value).toBe('');
+
+    unmount(root, container);
+  });
+});
+
+// §8.13: a sessão revogada não pode sobreviver dentro da modal como um
+// "modal sem limites" —401 de qualquer chamada protegida daqui é o mesmo
+// fim de sessão do dashboard (signOut → landing).
+describe('CardDetailModal — 401 da sessão encerra a sessão (§8.13)', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    vi.clearAllMocks();
+    showToastMock.mockClear();
+    (apiClient.getEquipmentThresholds as any).mockResolvedValue({});
+    (apiClient.saveEquipmentThreshold as any).mockResolvedValue({
+      'gear-1': { chain: { value: 100, unit: 'km' } },
+    });
+  });
+
+  it('carga de limites com 401 chama signOut em vez de renderizar o modal sem limites', async () => {
+    const { container, root } = await mountModal({}, new ApiError(401));
+
+    expect(signOutMock).toHaveBeenCalledTimes(1);
+
+    unmount(root, container);
+  });
+
+  it('carga com falha que não é 401 mantém o modal aberto e não desloga', async () => {
+    const { container, root } = await mountModal({}, new Error('boom'));
+
+    expect(signOutMock).not.toHaveBeenCalled();
+    expect(container.textContent).toContain('Bike A');
+
+    unmount(root, container);
+  });
+
+  it('salvamento com 401 chama signOut sem o toast de falha', async () => {
+    const { container, root } = await mountModal({});
+    (apiClient.saveEquipmentThreshold as any).mockRejectedValue(
+      new ApiError(401),
+    );
+
+    openEditor(container);
+    setValue(getValueInput(container), '100');
+    await clickAndFlush(findButton(container, 'Salvar limite'));
+
+    expect(signOutMock).toHaveBeenCalledTimes(1);
+    expect(showToastMock).not.toHaveBeenCalledWith(
+      'Falha ao salvar limite',
+      'error',
+    );
+
+    unmount(root, container);
+  });
+
+  it('carga e salvamento com 401 emendados encerram a sessão uma única vez', async () => {
+    const { container, root } = await mountModal({}, new ApiError(401));
+    (apiClient.saveEquipmentThreshold as any).mockRejectedValue(
+      new ApiError(401),
+    );
+
+    openEditor(container);
+    setValue(getValueInput(container), '100');
+    await clickAndFlush(findButton(container, 'Salvar limite'));
+
+    expect(signOutMock).toHaveBeenCalledTimes(1);
 
     unmount(root, container);
   });
