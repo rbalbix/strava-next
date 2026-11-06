@@ -103,6 +103,7 @@ async function renderStats(
 describe('Stats component', () => {
   beforeEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.restoreAllMocks();
   });
 
@@ -695,6 +696,85 @@ describe('Stats component', () => {
     await renderStats(root, makeAuthContext());
 
     expect(container.textContent).toContain('Card: Bike One');
+
+    act(() => {
+      root.unmount();
+    });
+  });
+
+  it('one-shot: primeira carga sem manutenções abre o passo a passo uma única vez', async () => {
+    const makeEmptyDashboard = () =>
+      ({
+        athlete: { id: 1 } as any,
+        athleteStats: {} as any,
+        hasGear: true,
+        hasActivities: true,
+        gearStats: [
+          {
+            id: 'bike-1',
+            name: 'Bike One',
+            activityType: 'Ride',
+            count: 1,
+            distance: 1000,
+            movingTime: 100,
+            equipments: [],
+          },
+        ],
+        equipmentThresholds: {},
+      }) as any;
+
+    const openModal = vi.fn();
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: makeEmptyDashboard(),
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+
+    const authValue = makeAuthContext({ openModal });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await renderStats(root, authValue);
+
+    expect(openModal).toHaveBeenCalledTimes(1);
+    expect(openModal).toHaveBeenCalledWith('info');
+    expect(localStorage.getItem('gl_onboardingShown')).toBe('1');
+
+    // Poll seguinte (60s) chega com dados novos — a flag impede reabrir.
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: makeEmptyDashboard(),
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+    await renderStats(root, authValue);
+
+    expect(openModal).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      root.unmount();
+    });
+  });
+
+  it('one-shot: dashboard com manutenções registradas não abre o passo a passo', async () => {
+    const openModal = vi.fn();
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: makeDashboardFixture({
+        distance: 1000,
+        threshold: { value: 200, unit: 'km' },
+      }),
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+
+    const authValue = makeAuthContext({ openModal });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await renderStats(root, authValue);
+
+    expect(openModal).not.toHaveBeenCalled();
+    expect(localStorage.getItem('gl_onboardingShown')).toBeNull();
 
     act(() => {
       root.unmount();

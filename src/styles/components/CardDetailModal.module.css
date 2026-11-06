@@ -184,6 +184,47 @@
   }
 }
 
+/* Estado vazio do timeline: bike sem nenhum componente registrado
+   (design D2). Mensagem + atalho para o passo a passo. */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.emptyState p {
+  font-size: 1.4rem;
+  line-height: 1.5;
+  color: var(--gl-text-primary);
+  margin: 0;
+}
+
+/* Par já validado pelo gate de contraste
+   (--gl-text-on-brand sobre --gl-brand-primary). */
+.emptyState button {
+  padding: 0.5rem 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  background-color: var(--gl-brand-primary);
+  color: var(--gl-text-on-brand);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 2.75rem; /* 44px — alvo de toque mínimo (diretriz de acessibilidade) */
+}
+
+.emptyState button:hover {
+  filter: brightness(1.1);
+}
+
+.emptyState button:focus-visible {
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: 2px;
+}
+
 @media (max-width: 768px) {
   .cardDetailModalContainer main span {
     font-size: 1.6rem;
