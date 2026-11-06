@@ -211,6 +211,23 @@ export default function Stats() {
       setHasActivities(dashboard.hasActivities);
       setGearStats(dashboard.gearStats || []);
 
+      // Onboarding one-shot (design D2): a primeira carga com zero
+      // manutenções registradas ensina a mecânica central sem depender do
+      // menu lateral. A flag é gravada ANTES de abrir — protege contra o
+      // duplo efeito do StrictMode e contra o poll de 60s reabrir a modal.
+      // O cache de sessionStorage não conta: só dados frescos disparam.
+      const totalRegisteredEvents = dashboard.gearStats.reduce(
+        (sum, gear) => sum + gear.equipments.length,
+        0,
+      );
+      if (
+        totalRegisteredEvents === 0 &&
+        !localStorage.getItem('gl_onboardingShown')
+      ) {
+        localStorage.setItem('gl_onboardingShown', '1');
+        openModal('info');
+      }
+
       // Trigger alert only for NEW overdue items
       const currentOverdueItems = buildThresholdAlertItems(dashboard).filter(
         (item) => item.state === 'overdue' && item.limit > 0,

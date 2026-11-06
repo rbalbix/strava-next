@@ -465,7 +465,7 @@ O segmento "bike maintenance tracker" amadureceu: ao menos **11 produtos diretos
 | # | Funcionalidade | Detalhe de implementação | Resolve | Esforço |
 |---|---|---|---|---|
 | **D1** | **Confirmação de manutenção registrada** | Toast "✓ `chain` registrado — contador zerado" quando o webhook aceitar a marcação + **manter a linha do componente** no modal com contador zerado e botão "Definir limite" (`CardItem.tsx:87,152` deixa de retornar `null` quando `lastMaintenance` existe mesmo com 0). | A4 | ~0,5 dia |
-| **D2** | **Empty state + onboarding one-shot** | Flag `firstRun` no localStorage → abre o passo a passo **uma única vez**. `CardDetailModal` vazio ganha "Você ainda não registrou manutenção nesta bike → [Copiar código] [Ver como funciona]". | B1 | ~1 dia |
+| **D2** | **Empty state + onboarding one-shot** ✅ *(2026-11-06, §8.14)* | Flag `gl_onboardingShown` no localStorage → abre o passo a passo **uma única vez** na primeira carga do painel sem manutenções registradas. `CardDetailModal` vazio ganha "Você ainda não registrou manutenção para nenhum componente da sua bike → [Ver como funciona]" (o botão "Copiar código" do texto original ficou fora por decisão do proprietário — ver §8.14). | B1 | ~1 dia |
 | **D3** | **Número na barra de progresso** | Restaurar rótulo "5,0 h / 10,0 h" (ou rótulo externo) + texto "faltam ~120 km" abaixo da barra. Mantém `aria-valuetext`. | B4 | ~0,5 dia |
 | **D4** | **Toast na cópia + data correta** | Descomentar feedback (`CardItem.tsx:62`) e usar a data do evento em `src/utils/clipboard.ts:41`. | B5 | ~1 hora |
 | **D5** | **Página de erro com retry em vez de round-trip de reautenticação** | `apiClient` expõe `status`; `ErroMsg` torna-se alcançável com "Não conseguimos atualizar seus dados. [Tentar novamente]"; **`signOut()` só em 401 confirmado — nunca em timeout/500/429**. Esta é a restrição que quebra o loop de §2.D.2 (item 3, confirmado). | A2, A3 | ~1 dia |
@@ -527,6 +527,8 @@ Itens: **D1, D3, D4, D5, D6, D7, D8, D9**.
 - Gate: `yarn validate` + `yarn lint:colors` verdes.
 
 ### Fase B — ativação (≈ 4–5 dias)
+
+> **Estado (2026-11-06): D2 concluído** (§8.14). **D13, D14, D15 e D16 permanecem pendentes**, com o escopo original do §4 intacto.
 
 Itens: **D2, D13, D14, D15, D16**.
 
@@ -592,7 +594,7 @@ Itens: **D12** (registro em 1 toque) e, em seguida, **D19, D20**.
 | **A1** Primeira visita = redirect automático | D6 / PR 1 | `getServerSideProps` renderiza a landing quando não há sessão; `<h1>GearLife</h1>` único; tagline e subtítulo em PT-BR; CTA "Como funciona" → `/como-funciona`; reutiliza `PublicPageNav` na landing; `src/pages/404.tsx` criado; `document.cookie` no-op removido do `AuthContext` | `src/pages/index.tsx`, `src/pages/404.tsx`, `src/contexts/AuthContext.tsx`, `src/styles/pages/Home.module.css` |
 | **A2** Erro transitório desloga em silêncio | D5 | `ApiError` + `getHttpStatus()` no `apiClient`; `Stats` chama `signOut()` **somente** quando o status é `401` | `src/lib/apiClient.ts`, `src/components/Stats.tsx` |
 | **A3** Erros e 429 sem mensagem | D5 + D8 | `ErroMsg` reescrito (props `error`/`onRetry`; ramos 429/401/genérico), agora alcançável: painel completo sem dados em cache, banner acima do conteúdo quando os dados existem; backoff limitado e polling conservador (§8.2) | `src/components/ErroMsg.tsx`, `src/components/Stats.tsx`, `src/hooks/useAutoSync.ts` |
-| **A4** Componente recém-registrado some da tela | D1 | A linha deixou de retornar `null` quando há data de manutenção mesmo com contador zerado; ganha chip "Registrado" e mantém o editor de limite acessível | `src/components/CardItem.tsx`, `src/styles/components/CardItem.module.css` |
+| **A4** Componente recém-registrado some da tela | D1 | A linha deixou de retornar `null` quando há data de manutenção mesmo com contador zerado e mantém o editor de limite acessível. O chip "Registrado" criado nesta leva foi **removido pelo proprietário** (commit `bb2125a`, 2026-11-04): a sinalização visual hoje é o chip de distância (`0,00km`) e o `aria-label` "recém-registrado, defina o limite". | `src/components/CardItem.tsx`, `src/styles/components/CardItem.module.css` |
 | **A5** Sem logout na UI | D7 | `faq.tsx` deixou de prometer um botão de sair e passa a explicar a revogação no painel do Strava | `src/pages/faq.tsx` |
 
 ### 8.2 Correção de rumo no D8 — a proposta original não funcionava
@@ -627,9 +629,9 @@ Tornar `/` uma página pública cria dois efeitos colaterais que não estavam no
 
 | Item | Por que ficou de fora | Quando volta |
 |---|---|---|
-| **D6 / PR 2 — sessão real (`gl_session`)** | Escopo explícito desta leva era o PR 1. É a mudança de maior risco do roadmap (afeta autenticação de toda a base). | ✅ concluído em 2026-11-04 (§8.12). Só a remoção do fallback legado fica para o release seguinte (§2.D.10) |
+| **D6 / PR 2 — sessão real (`gl_session`)** | Escopo explícito desta leva era o PR 1. É a mudança de maior risco do roadmap (afeta autenticação de toda a base). | ✅ concluído em 2026-11-04 (§8.12). Só a remoção do fallback legado fica para o release seguinte (§2.D.10) — janela de ~30 dias do deploy, ou seja, **~2026-12-04**; pré-condição: checklist de observabilidade do §8.12.4 verde (contagem de `strava:session:*` estável e taxa de `401` estável) |
 | **D3, D4 e D9 — resto da Fase A** | **Decisão do proprietário (2026-11-05):** são os próximos passos naturais depois do PR 2 — **D3** número na barra de progresso (B4), **D4** toast na cópia + data correta do evento (B5) e **D9** skeleton com `rgba(var(--hex))` inválido + timeout no loading infinito (B2) —, mas **não serão feitos agora**. Nada foi implementado nestes itens; o escopo original do §4/Tier 1 segue íntegro e pronto para retomada. | Quando a Fase A for retomada — sem data marcada |
-| **D1 — toast "✓ `chain` registrado"** | A confirmação prevista pelo toast depende de um canal do webhook do Strava para o cliente que não existe. A alternativa client-side seria heurística ("data de manutenção hoje + contador zerado"), que dispara a cada abertura enquanto a peça não for usada de novo — um toast errado é pior que nenhum toast. **A metade funcional do A4 está entregue**: a linha persiste, com chip "Registrado" e editor acessível, que é o defeito real descrito no achado. | O PR 2 foi concluído **sem** canal de notificação (fora de escopo, §8.12.4) — continua adiado, junto com o `?intent=login` |
+| **D1 — toast "✓ `chain` registrado"** | A confirmação prevista pelo toast depende de um canal do webhook do Strava para o cliente que não existe. A alternativa client-side seria heurística ("data de manutenção hoje + contador zerado"), que dispara a cada abertura enquanto a peça não for usada de novo — um toast errado é pior que nenhum toast. **A metade funcional do A4 está entregue**: a linha persiste com editor acessível (o defeito real do achado); o chip "Registrado" foi removido pelo proprietário em 2026-11-04 (commit `bb2125a`). | O PR 2 foi concluído **sem** canal de notificação (fora de escopo, §8.12.4) — continua adiado, junto com o `?intent=login` |
 | **D8 — indicador passivo "Atualizando…"** | Exporia o `isValidating` do SWR, repercutindo em 16 mocks de teste para um feedback visual que, a cada 60s, seria ruído. O feedback foi concentrado no botão manual ("Atualizando…" no clique). | Se o intervalo voltar a subir |
 | **§2.D.9 — `?intent=login`** | O único consumidor especificado é "redirect de retorno para a landing com toast de sucesso" — e o toast é a penda acima. Sem consumidor, o parâmetro seria código morto. Hoje `authorize.tsx:69` já redireciona para o painel, que é o destino correto em todos os cenários (não existe logout). | Junto com o toast do PR 2 |
 | **§2.D.9 — `noindex` nas rotas autenticadas** | Feito: `SeoHead` ganhou a propriedade `noindex`, usada em `/` quando `props.code` indica sessão. O `robots.txt.ts` já trazia `Allow: /` e o sitemap já indexava a landing, então nenhum deles precisou mudar. | ✅ concluído |
@@ -808,7 +810,7 @@ Após a entrega, o proprietário ajustou a landing e o menu deslogado diretament
 
 - **Durante a janela (~30 dias):** `withProtectedAPI` e o GSSP aceitam o par `strava_code` + `strava_athleteId` quando não há `gl_session` — a base existente não é deslogada no deploy.
 - **Login novo substitui o legado:** o `authorize` emite `gl_session` **e limpa** o par antigo, para que o fallback não sobreviva ao lado da sessão nova (senão voltaria a valer quando o `gl_session` expirasse, estendendo a migração indefinidamente).
-- **Remoção no release seguinte:** apagar o ramo legado de `server/auth.ts` + `index.tsx` + os `clearHttpOnlyCookie` de `strava_code`/`strava_athleteId` em `authorize`/`logout` + os testes de legado. Depois disso, quem não reautenticou na janela cai na landing e entra de novo (Strava com `approval_prompt=auto` é silencioso).
+- **Remoção no release seguinte (~2026-12-04 — janela de 30 dias do deploy de 2026-11-04; antes, conferir a checklist de observabilidade do §8.12.4):** apagar o ramo legado de `server/auth.ts` + `index.tsx` + os `clearHttpOnlyCookie` de `strava_code`/`strava_athleteId` em `authorize`/`logout` + os testes de legado. Depois disso, quem não reautenticou na janela cai na landing e entra de novo (Strava com `approval_prompt=auto` é silencioso).
 
 #### 8.12.4 Verificação
 
@@ -849,3 +851,20 @@ Após a entrega, o proprietário ajustou a landing e o menu deslogado diretament
 **Regra vigente atualizada:** qualquer `401` de endpoint protegido do painel — `/api/app/dashboard` **ou** `/api/app/equipment-thresholds` — encerra a sessão no cliente: cookies locais limpos, modal/erro zerados, landing limpa. Falhas transitórias (rede, 5xx) e `429` continuam não deslogando.
 
 **Verificação:** `yarn validate` verde (lint + lint:colors + typecheck + test + build); suíte em **58 arquivos / 389 testes** (+4 sobre o §8.12, nada removido) — os testes novos cobrem: carga com 401 → `signOut`; carga com erro que não é 401 → modal segue aberto sem deslogar; salvamento com 401 → `signOut` sem toast de falha; 401 de carga e salvamento emendados → `signOut` uma única vez (o `ref`). `yarn test:report` regenerou o Test Status do README (05/11): Lines/Statements **99.69%**, Functions **100.00%**, Branches **94.43%**. E2E não reexecutados: nenhum fluxo deles monta a modal de card (só o modal informativo da landing), então o código alterado não é exercitado ali — registrado para não passar por omissão.
+
+---
+
+### 8.14 D2 — empty state + onboarding one-shot
+
+> Executado em 2026-11-06 (branch `feat/d2-empty-state-onboarding`). Design: `docs/superpowers/specs/2026-11-06-d2-empty-state-onboarding-design.md`; plano: `docs/superpowers/plans/2026-11-06-d2-empty-state-onboarding-plan.md`.
+
+| Parte | Implementação | Arquivos |
+|---|---|---|
+| Empty state | Bike com **zero** componentes registrados mostra "Você ainda não registrou manutenção para nenhum componente da sua bike" + botão "Ver como funciona" → `openModal('info')` (a mesma modal do "Ajuda" do sidebar). Tênis/não-bike e bikes com eventos mantêm o comportamento anterior. O botão "Copiar código" do D2 original ficou fora por decisão do proprietário. | `src/components/CardDetailModal.tsx`, `src/styles/components/CardDetailModal.module.css` |
+| One-shot | Na primeira carga do dashboard com zero eventos registrados, grava `gl_onboardingShown` no `localStorage` **antes** de abrir o modal "Como funciona". A flag impede reabertura no poll de 60s e no StrictMode. Só dados **frescos** disparam — o cache de `sessionStorage` não conta. | `src/components/Stats.tsx` |
+
+**Decisão registrada:** o gatilho é a carga do painel, não a abertura do modal vazio — disparar na abertura trocaria a modal da bike pela explicação no mesmo clique. Disparar sempre no primeiro login foi descartado por ser intrusivo na base existente (que já sabe a mecânica). Conflito com `threshold-alert` é impossível: overdue implica eventos registrados, então as condições são mutuamente exclusivas.
+
+**Verificação:** `yarn validate` verde (lint + lint:colors + typecheck + test + build) — suíte em **59 arquivos / 394 testes** (+1 arquivo, +5 testes: 3 de empty state, 2 do one-shot). `test:e2e:ui`, `test:e2e:smoke` e `test:e2e:smoke:http` verdes **contra build de produção** (diferente do §8.13, os E2E exercitam o caminho de carga do dashboard alterado — reexecutados por isso).
+
+**Manutenção feita junto (prometida no design):** §8.1 e §8.4 atualizados sobre a remoção do chip "Registrado" (commit `bb2125a`); remoção do fallback legado ancorada em **~2026-12-04** com pré-checagem da checklist do §8.12.4 (§8.4 e §8.12.3).

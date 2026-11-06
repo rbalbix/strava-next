@@ -46,7 +46,7 @@ export default function CardDetailModal({
   // Refs para os segmentos do seletor de unidade (foco após a seta do teclado)
   const unitRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const { signOut } = useContext(AuthContext);
+  const { signOut, openModal } = useContext(AuthContext);
 
   // 401 = a sessão acabou (§8.13 do plano): o mesmo caminho do 401 do
   // dashboard (§8.10) — `signOut` limpa o estado transitório, zera a modal e
@@ -249,96 +249,108 @@ export default function CardDetailModal({
             </div>
           </section>
         </header>
-        <ul className={styles.timeline}>
-          {isBikeActivity &&
-            equipments.map((e) => {
-              const current = thresholds[gearStat.id]?.[e.id];
-              const currentValue = current?.value;
-              const isEditorVisible = visibleEditorId === e.id;
-              const activeUnit = unitInputs[e.id] ?? current?.unit ?? 'km';
+        {isBikeActivity && equipments.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>
+              Você ainda não registrou manutenção para nenhum componente da
+              sua bike
+            </p>
+            <button type='button' onClick={() => openModal('info')}>
+              Ver como funciona
+            </button>
+          </div>
+        ) : (
+          <ul className={styles.timeline}>
+            {isBikeActivity &&
+              equipments.map((e) => {
+                const current = thresholds[gearStat.id]?.[e.id];
+                const currentValue = current?.value;
+                const isEditorVisible = visibleEditorId === e.id;
+                const activeUnit = unitInputs[e.id] ?? current?.unit ?? 'km';
 
-              return (
-                <CardItem
-                  key={e.id}
-                  equipment={e}
-                  distance={distance}
-                  movingTime={movingTime}
-                  threshold={current}
-                  onToggleEditor={() => toggleEditor(e.id, current)}
-                  isEditorVisible={isEditorVisible}
-                >
-                  {isEditorVisible && (
-                    <div className={styles.thresholdEditor}>
-                      <label>
-                        <div className={styles.thresholdRow}>
-                          <input
-                            ref={(el) => {
-                              inputRefs.current[e.id] = el;
-                            }}
-                            type='number'
-                            aria-label={`Limite de ${e.caption}`}
-                            min={0}
-                            step={activeUnit === 'h' ? 1 : 100}
-                            value={
-                              inputs[e.id] ??
-                              (currentValue && currentValue > 0
-                                ? currentValue
-                                : '')
-                            }
-                            onChange={(ev) =>
-                              setInputs((s) => ({
-                                ...s,
-                                [e.id]: ev.target.value,
-                              }))
-                            }
-                            onKeyDown={(ev) => handleInputKeyDown(e.id, ev)}
-                            placeholder='Limite'
-                            autoFocus
-                          />
-                          {/* Padrão de grupos de opções deste app (primeiro do
-                              tipo): contêiner `role="radiogroup"`, segmentos
-                              `role="radio"` com `aria-checked`, tabindex móvel
-                              (só o ativo entra no Tab) e setas que alternam o
-                              segmento e levam o foco junto. */}
-                          <div
-                            className={styles.unitSelector}
-                            role='radiogroup'
-                            aria-label='Unidade do limite'
-                          >
-                            {(['km', 'h'] as ThresholdUnit[]).map((unit) => (
-                              <button
-                                key={unit}
-                                type='button'
-                                role='radio'
-                                aria-checked={activeUnit === unit}
-                                tabIndex={activeUnit === unit ? 0 : -1}
-                                ref={(el) => {
-                                  unitRefs.current[`${e.id}:${unit}`] = el;
-                                }}
-                                onClick={() => handleUnitChange(e.id, unit)}
-                                onKeyDown={(ev) =>
-                                  handleUnitKeyDown(e.id, activeUnit, ev)
-                                }
-                              >
-                                {unit}
-                              </button>
-                            ))}
+                return (
+                  <CardItem
+                    key={e.id}
+                    equipment={e}
+                    distance={distance}
+                    movingTime={movingTime}
+                    threshold={current}
+                    onToggleEditor={() => toggleEditor(e.id, current)}
+                    isEditorVisible={isEditorVisible}
+                  >
+                    {isEditorVisible && (
+                      <div className={styles.thresholdEditor}>
+                        <label>
+                          <div className={styles.thresholdRow}>
+                            <input
+                              ref={(el) => {
+                                inputRefs.current[e.id] = el;
+                              }}
+                              type='number'
+                              aria-label={`Limite de ${e.caption}`}
+                              min={0}
+                              step={activeUnit === 'h' ? 1 : 100}
+                              value={
+                                inputs[e.id] ??
+                                (currentValue && currentValue > 0
+                                  ? currentValue
+                                  : '')
+                              }
+                              onChange={(ev) =>
+                                setInputs((s) => ({
+                                  ...s,
+                                  [e.id]: ev.target.value,
+                                }))
+                              }
+                              onKeyDown={(ev) => handleInputKeyDown(e.id, ev)}
+                              placeholder='Limite'
+                              autoFocus
+                            />
+                            {/* Padrão de grupos de opções deste app (primeiro do
+                                tipo): contêiner `role="radiogroup"`, segmentos
+                                `role="radio"` com `aria-checked`, tabindex móvel
+                                (só o ativo entra no Tab) e setas que alternam o
+                                segmento e levam o foco junto. */}
+                            <div
+                              className={styles.unitSelector}
+                              role='radiogroup'
+                              aria-label='Unidade do limite'
+                            >
+                              {(['km', 'h'] as ThresholdUnit[]).map((unit) => (
+                                <button
+                                  key={unit}
+                                  type='button'
+                                  role='radio'
+                                  aria-checked={activeUnit === unit}
+                                  tabIndex={activeUnit === unit ? 0 : -1}
+                                  ref={(el) => {
+                                    unitRefs.current[`${e.id}:${unit}`] = el;
+                                  }}
+                                  onClick={() => handleUnitChange(e.id, unit)}
+                                  onKeyDown={(ev) =>
+                                    handleUnitKeyDown(e.id, activeUnit, ev)
+                                  }
+                                >
+                                  {unit}
+                                </button>
+                              ))}
+                            </div>
+                            <button
+                              type='button'
+                              onClick={() => saveThreshold(e.id)}
+                              aria-label='Salvar limite'
+                            >
+                              <MdOutlineSaveAlt size={20} />
+                            </button>
                           </div>
-                          <button
-                            type='button'
-                            onClick={() => saveThreshold(e.id)}
-                            aria-label='Salvar limite'
-                          >
-                            <MdOutlineSaveAlt size={20} />
-                          </button>
-                        </div>
-                      </label>
-                    </div>
-                  )}
-                </CardItem>
-              );
-            })}
-        </ul>
+                        </label>
+                      </div>
+                    )}
+                  </CardItem>
+                );
+              })}
+          </ul>
+        )}
       </main>
     </div>
   );
