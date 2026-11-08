@@ -137,6 +137,25 @@
   filter: brightness(1.1);
 }
 
+/* Estado "salvando" do D16: aria-disabled (não o disabled nativo) mantém o
+   foco no caminho de falha — o guard em saveThreshold é quem bloqueia a
+   nova requisição. O cursor sem hover evita o brightness do estado normal. */
+.thresholdRow button[aria-disabled='true'] {
+  cursor: default;
+}
+
+.thresholdRow button[aria-disabled='true']:hover {
+  filter: none;
+}
+
+/* D16 (ajuste 2026-11-08): largura fixa do botão de salvar — a caixa é a
+   mesma no ícone e no spinner (20×20 de conteúdo + padding do breakpoint);
+   sem isso o botão encolhia durante o salvamento. O seletor por filho direto
+   não afeta os botões km|h, que ficam dentro de .unitSelector. */
+.thresholdRow > button {
+  width: 2.45rem; /* 1,25rem (20px de conteúdo) + 1,2rem de padding */
+}
+
 /* Seletor km|h (task 07 renderiza o DOM; aqui só o visual). A especificidade
    de `.thresholdRow .unitSelector button` vence o estilo do botão de salvar. */
 .unitSelector {
@@ -256,6 +275,10 @@
 
   .thresholdRow button {
     padding: 0.2rem 0.8rem;
+  }
+
+  .thresholdRow > button {
+    width: 2.85rem; /* 1,25rem (20px) + 1,6rem de padding */
   }
 }
 

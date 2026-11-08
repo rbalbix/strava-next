@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useState, useRef } from 'react';
 import { MdClose, MdOutlineSaveAlt } from 'react-icons/md';
+import { ClipLoader } from 'react-spinners';
 import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import type {
@@ -40,6 +41,10 @@ export default function CardDetailModal({
     {},
   );
   const [visibleEditorId, setVisibleEditorId] = useState<string | null>(null);
+  // Estado "salvando" do D16 (design 2026-11-07): um booleano único cobre os
+  // três gatilhos de saveThreshold (clique duplo, Enter e clique+Enter) — o
+  // guard no início da função é quem impede a segunda requisição.
+  const [saving, setSaving] = useState(false);
 
   // Refs para os inputs
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -110,10 +115,14 @@ export default function CardDetailModal({
     }));
   }, [thresholds, gearStat.id]);
 
-  async function saveThreshold(equipmentId: string) {
+  async function saveThreshold(equipmentId: string, caption: string) {
+    // D16: enquanto a gravação está em voo, novos acionamentos são ignorados
+    // (clique duplo / Enter duplo / clique+Enter) — uma única requisição.
+    if (saving) return;
     const raw = inputs[equipmentId];
     const value = raw === '' ? 0 : Number(raw);
     const unit = unitInputs[equipmentId] ?? 'km';
+    setSaving(true);
     try {
       const updated = await apiClient.saveEquipmentThreshold({
         gearId: gearStat.id,
@@ -126,7 +135,17 @@ export default function CardDetailModal({
         'equipmentThresholds',
         JSON.stringify(updated || {}),
       );
-      showToast(value > 0 ? 'Limite salvo' : 'Limite removido', 'success');
+      // Toast de sucesso identifica componente, valor e unidade (ajuste do
+      // proprietário em 2026-11-08): "Limite salvo [corrente: 150 km]". As
+      // legendas de equipment.ts já terminam com ":" — remove antes de
+      // reinserir o separador, senão a mensagem fica com dois dois-pontos.
+      const label = caption.replace(/:\s*$/, '');
+      showToast(
+        value > 0
+          ? `Limite salvo [${label}: ${value} ${unit}]`
+          : 'Limite removido',
+        'success',
+      );
 
       // Apenas esconde o editor, NÃO limpa o input
       setVisibleEditorId(null);
@@ -137,6 +156,10 @@ export default function CardDetailModal({
       if (!endSessionOnUnauthorized(err)) {
         showToast('Falha ao salvar limite', 'error');
       }
+    } finally {
+      // Sucesso, falha ou caminho 401 (§8.13) — o estado sempre volta a
+      // normal; com signOut real a modal já desmontou e o setState é inócuo.
+      setSaving(false);
     }
   }
 
@@ -193,11 +216,12 @@ export default function CardDetailModal({
   // Função para lidar com Enter no input
   const handleInputKeyDown = (
     equipmentId: string,
+    caption: string,
     e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      saveThreshold(equipmentId);
+      saveThreshold(equipmentId, caption);
     }
   };
 
@@ -288,6 +312,7 @@ export default function CardDetailModal({
                               }}
                               type='number'
                               aria-label={`Limite de ${e.caption}`}
+                              readOnly={saving}
                               min={0}
                               step={activeUnit === 'h' ? 1 : 100}
                               value={
@@ -302,7 +327,9 @@ export default function CardDetailModal({
                                   [e.id]: ev.target.value,
                                 }))
                               }
-                              onKeyDown={(ev) => handleInputKeyDown(e.id, ev)}
+                              onKeyDown={(ev) =>
+                                handleInputKeyDown(e.id, e.caption, ev)
+                              }
                               placeholder='Limite'
                               autoFocus
                             />
@@ -337,10 +364,23 @@ export default function CardDetailModal({
                             </div>
                             <button
                               type='button'
-                              onClick={() => saveThreshold(e.id)}
+                              onClick={() => saveThreshold(e.id, e.caption)}
                               aria-label='Salvar limite'
+                              aria-disabled={saving}
+                              aria-busy={saving}
                             >
-                              <MdOutlineSaveAlt size={20} />
+                              {/* A largura é fixa no CSS (.thresholdRow >
+                                  button): os dois estados têm a mesma caixa
+                                  e o conteúdo fica centralizado como antes. */}
+                              {saving ? (
+                                <ClipLoader
+                                  size={16}
+                                  color='var(--gl-surface-card)'
+                                  cssOverride={{ boxSizing: 'border-box' }}
+                                />
+                              ) : (
+                                <MdOutlineSaveAlt size={20} />
+                              )}
                             </button>
                           </div>
                         </label>

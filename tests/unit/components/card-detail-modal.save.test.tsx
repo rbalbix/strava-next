@@ -419,7 +419,7 @@ describe('CardDetailModal save threshold', () => {
     expect(JSON.parse(sessionStorage.getItem('equipmentThresholds')!)).toEqual({
       'gear-1': { chain: { value: 100, unit: 'km' } },
     });
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
     // O editor fecha após salvar
     expect(container.querySelector('input[type="number"]')).toBeNull();
 
@@ -462,7 +462,7 @@ describe('CardDetailModal save threshold', () => {
       thresholdKm: 250,
       unit: 'km',
     });
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
 
     unmount(root, container);
   });
@@ -571,5 +571,134 @@ describe('CardDetailModal — 401 da sessão encerra a sessão (§8.13)', () => 
     expect(signOutMock).toHaveBeenCalledTimes(1);
 
     unmount(root, container);
+  });
+});
+
+// D16 mínimo (design 2026-11-07): durante a gravação o editor fica "salvando"
+// — o guard de estado garante no máximo uma requisição e a tela mostra o
+// estado (spinner + aria-busy); o caminho 401 continua sendo só o §8.13.
+describe('CardDetailModal — estado "salvando" (D16)', () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    vi.clearAllMocks();
+    showToastMock.mockClear();
+    (apiClient.getEquipmentThresholds as any).mockResolvedValue({});
+    (apiClient.saveEquipmentThreshold as any).mockResolvedValue({
+      'gear-1': { chain: { value: 100, unit: 'km' } },
+    });
+  });
+
+  // Promessa cujo desfecho o teste controla — é o que permite observar o
+  // estado pendente antes de resolver/rejeitar.
+  function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  }
+
+  it('mantém botão e campo bloqueados enquanto a requisição está pendente', async () => {
+    const d = deferred<SavedThresholds>();
+    (apiClient.saveEquipmentThreshold as any).mockReturnValue(d.promise);
+    const { container, root } = await mountModal();
+
+    openEditor(container);
+    setValue(getValueInput(container), '250');
+    await clickAndFlush(findButton(container, 'Salvar limite'));
+
+    const save = findButton(container, 'Salvar limite');
+    expect(save.getAttribute('aria-disabled')).toBe('true');
+    expect(save.getAttribute('aria-busy')).toBe('true');
+    expect(getValueInput(container).readOnly).toBe(true);
+
+    await act(async () => {
+      d.resolve({ 'gear-1': { chain: { value: 250, unit: 'km' } } });
+    });
+
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+    expect(container.querySelector('input[type="number"]')).toBeNull();
+
+    unmount(root, container);
+  });
+
+  it('clique duplo e Enter duplo durante a pendência disparam uma única gravação', async () => {
+    const d = deferred<SavedThresholds>();
+    (apiClient.saveEquipmentThreshold as any).mockReturnValue(d.promise);
+    const { container, root } = await mountModal();
+
+    openEditor(container);
+    const input = getValueInput(container);
+    setValue(input, '250');
+    const save = findButton(container, 'Salvar limite');
+
+    await clickAndFlush(save);
+    await clickAndFlush(save);
+    await act(async () => {
+      fireEvent.keyDown(input, { key: 'Enter' });
+    });
+
+    expect(apiClient.saveEquipmentThreshold).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      d.resolve({ 'gear-1': { chain: { value: 250, unit: 'km' } } });
+    });
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+
+    unmount(root, container);
+  });
+
+  it('falha que não é 401 reabilita o botão e mantém o editor aberto', async () => {
+    const d = deferred<SavedThresholds>();
+    (apiClient.saveEquipmentThreshold as any).mockReturnValue(d.promise);
+    const { container, root } = await mountModal();
+
+    openEditor(container);
+    setValue(getValueInput(container), '100');
+    await clickAndFlush(findButton(container, 'Salvar limite'));
+
+    await act(async () => {
+      d.reject(new Error('boom'));
+    });
+
+    expect(showToastMock).toHaveBeenCalledWith(
+      'Falha ao salvar limite',
+      'error',
+    );
+    const save = findButton(container, 'Salvar limite');
+    expect(save.getAttribute('aria-disabled')).not.toBe('true');
+    expect(getValueInput(container).readOnly).toBe(false);
+
+    unmount(root, container);
+  });
+
+  it('legenda já terminada em ":" não gera dois dois-pontos no toast', async () => {
+    const d = deferred<SavedThresholds>();
+    (apiClient.saveEquipmentThreshold as any).mockReturnValue(d.promise);
+    // As legendas reais de equipment.ts vêm com ":" no fim ("corrente:").
+    const originalCaption = gearStat.equipments[0].caption;
+    gearStat.equipments[0].caption = 'corrente:';
+    try {
+      const { container, root } = await mountModal();
+
+      openEditor(container);
+      setValue(getValueInput(container), '150');
+      await clickAndFlush(findButton(container, 'Salvar limite'));
+
+      await act(async () => {
+        d.resolve({ 'gear-1': { chain: { value: 150, unit: 'km' } } });
+      });
+
+      expect(showToastMock).toHaveBeenCalledWith(
+        'Limite salvo [corrente: 150 km]',
+        'success',
+      );
+
+      unmount(root, container);
+    } finally {
+      gearStat.equipments[0].caption = originalCaption;
+    }
   });
 });

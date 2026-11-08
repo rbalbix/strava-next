@@ -24,7 +24,9 @@
   max-width: min(320px, 90vw);
   font-weight: 600;
   text-align: center; /* ← Adicionar para centralizar texto */
-  white-space: nowrap; /* ← Opcional: evita quebra de linha */
+  /* Sem white-space: nowrap (ajuste 2026-11-08): mensagens como
+     "Limite salvo [Corrente: 150 km]" precisam quebrar dentro da caixa
+     (max-width 320px) em vez de estourar para fora dela. */
 }
 
 .info {
@@ -63,7 +65,6 @@
 
   .toast {
     width: auto;
-    white-space: normal; /* ← Permite quebra de linha em telas pequenas */
     text-align: center;
   }
 }
