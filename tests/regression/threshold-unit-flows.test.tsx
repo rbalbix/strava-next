@@ -209,7 +209,10 @@ describe('fluxos da feature limite por unidade', () => {
     // 1. Criação pelo editor, escolhendo horas
     const modal = await mountModal();
     await saveThroughEditor(modal.container, 'h', '48');
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo', 'success');
+    expect(showToastMock).toHaveBeenCalledWith(
+      'Limite salvo [Corrente: 48 h]',
+      'success',
+    );
 
     // Persistência: par { value, unit } no armazenamento
     expect(store.get(STORAGE_KEY)).toEqual({
@@ -272,7 +275,10 @@ describe('fluxos da feature limite por unidade', () => {
     // 1. Criação pelo editor, escolhendo quilômetros
     const modal = await mountModal();
     await saveThroughEditor(modal.container, 'km', '200');
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo', 'success');
+    expect(showToastMock).toHaveBeenCalledWith(
+      'Limite salvo [Corrente: 200 km]',
+      'success',
+    );
 
     expect(store.get(STORAGE_KEY)).toEqual({
       'gear-1': { chain: { value: 200, unit: 'km' } },

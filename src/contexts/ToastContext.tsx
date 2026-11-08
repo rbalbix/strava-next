@@ -38,8 +38,10 @@ export function ToastProvider({ children }: ToastProviderProps) {
     }
   }, []);
 
+  // Duração padrão do toast: 4000ms (+2s sobre os 2000ms anteriores —
+  // decisão do proprietário em 2026-11-08).
   const showToast = useCallback(
-    (message: string, variant: ToastVariant = 'info', durationMs = 2000) => {
+    (message: string, variant: ToastVariant = 'info', durationMs = 4000) => {
       setToast({ message, variant });
       clearTimer();
       timerRef.current = window.setTimeout(() => {
