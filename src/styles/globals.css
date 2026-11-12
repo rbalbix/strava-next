@@ -22,6 +22,15 @@ html::-webkit-scrollbar {
 }
 
 :root {
+  /* Header fixo: altura máxima estável em px — o botão usa margens e
+     paddings em px que não escalam com os breakpoints de font-size do html,
+     e 70px cobre a variação real do header, de 63,75 a 69,25px conforme o
+     media query ≤860px. Alimenta Header.module.css — min-height e ::before,
+     que sem isto ficavam com calc inválido — e o offset do painel em
+     Home.module.css — .statsSection. Não usar chaves neste comentário: o
+     parser de validate-color-contrast.mjs casa até a primeira. */
+  --header-height: 70px;
+
   /* Typography */
   --font-inter: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-jetbrains:

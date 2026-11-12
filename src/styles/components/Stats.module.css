@@ -122,7 +122,10 @@
 }
 
 /* D14: banner warning de código não reconhecido (fundo warning + token
-   medido --gl-text-on-warning; ver scripts/validate-color-contrast.mjs). */
+   medido --gl-text-on-warning; ver scripts/validate-color-contrast.mjs).
+   font-size explícito: sem ele o texto herdava --gl-text-base (1.6rem =
+   20,8px no celular) e o aviso tomava 8 linhas da tela — um passo abaixo
+   na escala de tokens. */
 .codesWarningBanner {
   position: relative;
   display: flex;
@@ -134,6 +137,7 @@
   border-radius: 1rem;
   background: var(--gl-status-warning);
   color: var(--gl-text-on-warning);
+  font-size: var(--gl-text-sm);
 }
 
 .codesWarningIcon {

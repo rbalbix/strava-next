@@ -24,7 +24,15 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 0;
+  /* O header fixo não escala (margens em px do botão) mas o padding do
+     .container escala em rem — sem este offset, no celular o topo do banner
+     (e do aviso de erro) nascia ~10px atrás do header: padding e canto
+     arredondados cortados. O −3.5rem cancela o padding-top do .container;
+     o env cobre o notch (viewport-fit=cover). Folga resultante: ~15px em
+     qualquer breakpoint. */
+  padding-top: calc(
+    var(--header-height) + env(safe-area-inset-top, 0px) + 0.5rem - 3.5rem
+  );
   padding-bottom: 1rem;
 }
 
