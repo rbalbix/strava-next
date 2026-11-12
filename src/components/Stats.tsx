@@ -1,5 +1,7 @@
 import { Divider } from '@mui/material';
+import { format, parseISO } from 'date-fns';
 import { useContext, useEffect, useState, useRef } from 'react';
+import { MdWarningAmber } from 'react-icons/md';
 import { TbBrandStrava } from 'react-icons/tb';
 import type { DetailedAthlete, ActivityStats } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
@@ -7,6 +9,7 @@ import type {
   DashboardResponse,
   EquipmentThresholds,
   ThresholdUnit,
+  UnrecognizedCode,
 } from '../contracts/api';
 import type { GearStats } from '../services/gear';
 import { getHttpStatus } from '../lib/apiClient';
@@ -106,6 +109,11 @@ function readCachedDashboard(): CachedDashboard | null {
     const equipmentThresholds = JSON.parse(
       sessionStorage.getItem('equipmentThresholds') ?? '{}',
     ) as EquipmentThresholds;
+    // D14: casos não reconhecidos entram na mesma cache do dashboard para
+    // o banner pintar sem esperar a rede.
+    const unrecognizedCodes = JSON.parse(
+      sessionStorage.getItem('unrecognizedCodes') ?? '[]',
+    ) as UnrecognizedCode[];
     const hasGear = hasGearRaw === null ? true : hasGearRaw === 'true';
     const hasActivities =
       hasActivitiesRaw === null ? true : hasActivitiesRaw === 'true';
@@ -118,6 +126,7 @@ function readCachedDashboard(): CachedDashboard | null {
         hasActivities,
         gearStats,
         equipmentThresholds,
+        unrecognizedCodes,
       },
       cacheTime,
     };
@@ -141,6 +150,12 @@ export default function Stats() {
   const [hasActivities, setHasActivities] = useState<boolean>(true);
   const [gearStats, setGearStats] = useState<GearStats[]>([]);
   const [randomIcon, setRandomIcon] = useState<JSX.Element | null>(null);
+  // D14: casos não reconhecidos + dispensa da sessão (Set por identidade
+  // activityId:word — rename de gear não reabre; recarregar volta a ver).
+  const [unrecognizedCodes, setUnrecognizedCodes] = useState<
+    UnrecognizedCode[]
+  >([]);
+  const [dismissedCases, setDismissedCases] = useState<Set<string>>(new Set());
 
   const { dashboard, isError, mutate } = useAutoSync();
   const alertedEquipmentIds = useRef<Set<string>>(new Set());
@@ -161,6 +176,7 @@ export default function Stats() {
       setHasGear(cachedData.data.hasGear);
       setHasActivities(cachedData.data.hasActivities);
       setGearStats(cachedData.data.gearStats || []);
+      setUnrecognizedCodes(cachedData.data.unrecognizedCodes || []);
 
       // Initialize alerted set from initial overdue items (valid ones only)
       const overdueItems = buildThresholdAlertItems(cachedData.data).filter(
@@ -201,6 +217,10 @@ export default function Stats() {
         'equipmentThresholds',
         JSON.stringify(dashboard.equipmentThresholds ?? {}),
       );
+      sessionStorage.setItem(
+        'unrecognizedCodes',
+        JSON.stringify(dashboard.unrecognizedCodes ?? []),
+      );
       sessionStorage.setItem('hasGear', String(dashboard.hasGear));
       sessionStorage.setItem('hasActivities', String(dashboard.hasActivities));
       sessionStorage.setItem('athleteCacheTime', Date.now().toString());
@@ -210,6 +230,7 @@ export default function Stats() {
       setHasGear(dashboard.hasGear);
       setHasActivities(dashboard.hasActivities);
       setGearStats(dashboard.gearStats || []);
+      setUnrecognizedCodes(dashboard.unrecognizedCodes || []);
 
       // Onboarding one-shot (design D2): a primeira carga com zero
       // manutenções registradas ensina a mecânica central sem depender do
@@ -290,6 +311,24 @@ export default function Stats() {
     activeModal,
   ]);
 
+  // D14: banner warning de código não reconhecido — visível só com gear e
+  // atividades e enquanto houver caso não dispensado; o ✕ dispensa os
+  // casos de agora (Set por activityId:word) e um caso novo reabre.
+  const unrecognizedCaseKey = (code: UnrecognizedCode) =>
+    `${code.activityId}:${code.word}`;
+  const hasVisibleUnrecognizedCode = unrecognizedCodes.some(
+    (code) => !dismissedCases.has(unrecognizedCaseKey(code)),
+  );
+  const dismissUnrecognizedCodes = () => {
+    setDismissedCases((previous) => {
+      const next = new Set(previous);
+      unrecognizedCodes.forEach((code) =>
+        next.add(unrecognizedCaseKey(code)),
+      );
+      return next;
+    });
+  };
+
   return (
     <div className={styles.statsContainer}>
       <main>
@@ -302,6 +341,59 @@ export default function Stats() {
             <ErroMsg error={isError} onRetry={() => mutate()} />
           </div>
         )}
+
+        {/* D14: código não reconhecido na observação privada — banner
+            warning acima de tudo (renderiza mesmo sem cards registrados).
+            Link só na data; frases empilhadas; bike identificada pelo nome. */}
+        {hasGear &&
+          hasActivities &&
+          unrecognizedCodes.length > 0 &&
+          hasVisibleUnrecognizedCode && (
+            <div className={styles.codesWarningBanner}>
+              <MdWarningAmber
+                size={22}
+                className={styles.codesWarningIcon}
+                aria-hidden='true'
+                focusable='false'
+              />
+              <div
+                className={styles.codesWarningList}
+                role='status'
+                aria-live='polite'
+              >
+                {unrecognizedCodes
+                  .filter(
+                    (code) => !dismissedCases.has(unrecognizedCaseKey(code)),
+                  )
+                  .map((code) => (
+                    <p key={unrecognizedCaseKey(code)}>
+                      Há um código não reconhecido na observação privada da
+                      atividade de {code.gearName} do dia{' '}
+                      <a
+                        href={`https://www.strava.com/activities/${code.activityId}`}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                      >
+                        {format(
+                          parseISO(code.startDate.replace(/Z$/, '')),
+                          'dd/MM/yyyy',
+                        )}
+                      </a>
+                      . “{code.word}” — você quis dizer “{code.suggestion}”?
+                      Corrija no Strava para atualizar aqui no GearLife.
+                    </p>
+                  ))}
+              </div>
+              <button
+                type='button'
+                className={styles.codesWarningClose}
+                aria-label='Dispensar aviso de código não reconhecido'
+                onClick={dismissUnrecognizedCodes}
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
         {!hasGear ? (
           <div className={styles.emptyState}>

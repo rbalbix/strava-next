@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => {
     mockVerifyIfHasAnyGears: vi.fn(),
     mockUpdateStatistics: vi.fn(),
     mockGetEquipmentThresholds: vi.fn(),
+    mockGetUnrecognizedCodes: vi.fn(),
     mockLoggerError: vi.fn(),
   };
 });
@@ -56,6 +57,12 @@ vi.mock('../../src/services/thresholds', () => ({
   getEquipmentThresholds: mocks.mockGetEquipmentThresholds,
 }));
 
+// D14: leitura best-effort do relatório de códigos não reconhecidos —
+// mockada no nível do serviço (molde dos thresholds), sem tocar no redis.
+vi.mock('../../src/services/unrecognized-codes', () => ({
+  getUnrecognizedCodes: mocks.mockGetUnrecognizedCodes,
+}));
+
 vi.mock('../../src/services/logger', () => ({
   getLogger: () => ({ error: mocks.mockLoggerError }),
 }));
@@ -75,6 +82,7 @@ describe('GET /api/dashboard integration', () => {
     vi.clearAllMocks();
     process.env.CLIENT_ID = 'client-id';
     process.env.CLIENT_SECRET = 'client-secret';
+    mocks.mockGetUnrecognizedCodes.mockResolvedValue(null);
   });
 it('returns 401 for non-GET requests when unauthenticated', async () => {
   const req = createMockRequest({
@@ -174,6 +182,91 @@ it('returns 401 when athlete cookie is missing', async () => {
       equipmentThresholds: {},
     });
     expect(mocks.mockUpdateStatistics).toHaveBeenCalledTimes(1);
+  });
+
+  // --- D14: relatório de códigos não reconhecidos ---
+
+  const unrecognizedCode = {
+    activityId: 42,
+    gearName: 'Bike A',
+    startDate: '2026-11-05T10:00:00Z',
+    word: 'chian',
+    suggestion: 'chain',
+  };
+
+  function mockFullDashboard(overrides: { hasGear?: boolean } = {}) {
+    mocks.mockGetAthleteAccessToken.mockResolvedValueOnce({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      expiresAt: 9999999999,
+    });
+    mocks.mockGetAthlete.mockResolvedValueOnce({ id: 123, name: 'Athlete' });
+    mocks.mockGetAthleteStats.mockResolvedValueOnce({
+      all_ride_totals: { count: 10 },
+    });
+    mocks.mockVerifyIfHasAnyGears.mockReturnValueOnce(
+      overrides.hasGear ?? true,
+    );
+    mocks.mockVerifyIfHasAnyActivities.mockResolvedValueOnce(true);
+    mocks.mockUpdateStatistics.mockResolvedValueOnce([
+      { id: 'bike-1', count: 1 },
+    ]);
+    mocks.mockGetEquipmentThresholds.mockResolvedValueOnce({});
+  }
+
+  it('returns unrecognizedCodes when the report has cases', async () => {
+    mockFullDashboard();
+    mocks.mockGetUnrecognizedCodes.mockResolvedValueOnce([unrecognizedCode]);
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { strava_athleteId: '123' },
+    });
+    const res = createMockResponse();
+
+    await dashboardHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.mockGetUnrecognizedCodes).toHaveBeenCalledWith(123);
+    expect((res.body as any).unrecognizedCodes).toEqual([unrecognizedCode]);
+  });
+
+  it('omits unrecognizedCodes when the report read fails (best-effort)', async () => {
+    mockFullDashboard();
+    mocks.mockGetUnrecognizedCodes.mockRejectedValueOnce(
+      new Error('redis down'),
+    );
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { strava_athleteId: '123' },
+    });
+    const res = createMockResponse();
+
+    await dashboardHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect((res.body as any).unrecognizedCodes).toBeUndefined();
+    expect(mocks.mockLoggerError).toHaveBeenCalledWith(
+      { err: expect.any(Error) },
+      'Failed to load unrecognized codes report',
+    );
+  });
+
+  it('does not read the report when the athlete has no gear', async () => {
+    mockFullDashboard({ hasGear: false });
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { strava_athleteId: '123' },
+    });
+    const res = createMockResponse();
+
+    await dashboardHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(mocks.mockGetUnrecognizedCodes).not.toHaveBeenCalled();
+    expect((res.body as any).unrecognizedCodes).toBeUndefined();
   });
 
   it('returns 200 with app/dashboard payload when thresholds exist', async () => {

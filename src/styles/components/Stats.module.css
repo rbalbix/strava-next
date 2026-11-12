@@ -121,6 +121,72 @@
   color: var(--gl-brand-primary);
 }
 
+/* D14: banner warning de código não reconhecido (fundo warning + token
+   medido --gl-text-on-warning; ver scripts/validate-color-contrast.mjs). */
+.codesWarningBanner {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.75rem 2.75rem 0.75rem 1rem;
+  border-radius: 1rem;
+  background: var(--gl-status-warning);
+  color: var(--gl-text-on-warning);
+}
+
+.codesWarningIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.codesWarningList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.codesWarningBanner p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.codesWarningBanner a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.codesWarningClose {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.codesWarningClose:hover {
+  opacity: 0.7;
+}
+
+.codesWarningClose:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
 .emptyStateInstructionsText {
   width: 60%;
   font:

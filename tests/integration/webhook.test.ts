@@ -344,6 +344,15 @@ describe('/api/webhook integration', () => {
     expect(res.body).toEqual({ received: true });
     expect(webhookEventsInc).toHaveBeenCalledTimes(1);
     expect(redisMock.del).toHaveBeenCalledTimes(1);
+    // D14: o relatório de códigos não reconhecidos sai junto no delete
+    // do atleta (LGPD).
+    expect(redisMock.del).toHaveBeenCalledWith(
+      'strava:auth:987',
+      'strava:activities:987',
+      'strava:statistics:987',
+      'strava:lock:refresh:987',
+      'strava:unrecognized-codes:987',
+    );
   });
 
   it('returns 500 in production when subscription guard is missing', async () => {

@@ -519,6 +519,9 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           REDIS_KEYS.activities(athleteId),
           REDIS_KEYS.statistics(athleteId),
           REDIS_KEYS.refreshLock(athleteId),
+          // D14: relatório de códigos não reconhecidos — dado derivado da
+          // observação privada sai junto (LGPD).
+          REDIS_KEYS.unrecognizedCodes(athleteId),
         );
         log.info({ athleteId }, 'Athlete data deleted from storage');
       } catch (error) {

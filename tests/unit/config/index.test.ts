@@ -13,4 +13,10 @@ describe('config REDIS_KEYS', () => {
       'strava:equipment-thresholds:123',
     );
   });
+
+  it('exports unrecognizedCodes as a function that builds the correct Redis key', () => {
+    expect(REDIS_KEYS.unrecognizedCodes(123)).toBe(
+      'strava:unrecognized-codes:123',
+    );
+  });
 });

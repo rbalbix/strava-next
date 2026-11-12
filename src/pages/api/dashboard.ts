@@ -10,6 +10,7 @@ import { getLogger } from '../../services/logger';
 import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
 import { getEquipmentThresholds } from '../../services/thresholds';
+import { getUnrecognizedCodes } from '../../services/unrecognized-codes';
 import type { AuthenticatedNextApiHandler } from '../../server/auth';
 
 const handler: AuthenticatedNextApiHandler = async (
@@ -58,6 +59,23 @@ const handler: AuthenticatedNextApiHandler = async (
       response.equipmentThresholds = equipmentThresholds;
     } catch (error) {
       getLogger().error({ err: error }, 'Failed to load equipment thresholds');
+    }
+
+    // D14: relatório de códigos não reconhecidos — leitura best-effort,
+    // mesmo molde dos thresholds; falha responde sem o campo e o banner
+    // simplesmente não aparece nesta abertura.
+    if (hasGear && hasActivities) {
+      try {
+        const unrecognizedCodes = await getUnrecognizedCodes(athleteId);
+        if (unrecognizedCodes && unrecognizedCodes.length > 0) {
+          response.unrecognizedCodes = unrecognizedCodes;
+        }
+      } catch (error) {
+        getLogger().error(
+          { err: error },
+          'Failed to load unrecognized codes report',
+        );
+      }
     }
 
     return res.status(200).json(response);

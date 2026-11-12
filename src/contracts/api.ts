@@ -76,6 +76,16 @@ type EquipmentThresholdsRequest = {
 type EquipmentThresholdsResponse = {
   equipmentThresholds: EquipmentThresholds;
 };
+// D14: um código não reconhecido numa observação privada, já com o nome do
+// gear anexado no servidor (só existe gear conhecido aqui).
+type UnrecognizedCode = {
+  activityId: number;
+  gearName: string;
+  startDate: string;
+  word: string;
+  suggestion: string;
+};
+
 type DashboardResponse = {
   athlete: DetailedAthlete;
   athleteStats: ActivityStats;
@@ -83,6 +93,8 @@ type DashboardResponse = {
   hasActivities: boolean;
   gearStats: GearStats[];
   equipmentThresholds?: EquipmentThresholds;
+  // D14: ausente quando não há casos (ou quando a leitura best-effort falhou).
+  unrecognizedCodes?: UnrecognizedCode[];
 };
 
 type LogoutResponse = SuccessResponse;
@@ -108,4 +120,5 @@ export type {
   SuccessResponse,
   ThresholdEntry,
   ThresholdUnit,
+  UnrecognizedCode,
 };
