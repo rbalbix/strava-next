@@ -167,6 +167,12 @@ describe('Stats D14 — banner de código não reconhecido', () => {
     expect(
       container.querySelector('[role="status"][aria-live="polite"]'),
     ).not.toBeNull();
+
+    // nome da bike em negrito (relato do proprietário)
+    const bikeName = banner!.querySelector('strong');
+    expect(bikeName).not.toBeNull();
+    expect(bikeName!.textContent).toBe('Bike A');
+
     findCloseButton(container);
 
     act(() => {
