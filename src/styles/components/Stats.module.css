@@ -124,10 +124,15 @@
 /* D14: banner warning de código não reconhecido (fundo warning + token
    medido --gl-text-on-warning; ver scripts/validate-color-contrast.mjs).
    font-size explícito: sem ele o texto herdava --gl-text-base (1.6rem =
-   20,8px no celular) e o aviso tomava 8 linhas da tela — um passo abaixo
-   na escala de tokens. */
+   20,8px no celular) e o aviso tomava 8 linhas da tela — agora xs,
+   dois passos abaixo na escala de tokens, mantendo legibilidade. */
 .codesWarningBanner {
-  position: relative;
+  /* sticky: cola logo abaixo do header fixo durante a rolagem — o aviso
+     nunca é cortado pelo topo, em qualquer posição de scroll. Folga de
+     0.25rem sob o header; z-index 10: acima dos cards, abaixo do header. */
+  position: sticky;
+  top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + 0.25rem);
+  z-index: 10;
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
@@ -137,7 +142,7 @@
   border-radius: 1rem;
   background: var(--gl-status-warning);
   color: var(--gl-text-on-warning);
-  font-size: var(--gl-text-sm);
+  font-size: var(--gl-text-xs);
 }
 
 .codesWarningIcon {

@@ -344,7 +344,7 @@ export default function Stats() {
 
         {/* D14: código não reconhecido na observação privada — banner
             warning acima de tudo (renderiza mesmo sem cards registrados).
-            Link só na data; frases empilhadas; bike identificada pelo nome. */}
+            Link só na data; frases empilhadas; bike em negrito pelo nome. */}
         {hasGear &&
           hasActivities &&
           unrecognizedCodes.length > 0 &&
@@ -368,7 +368,7 @@ export default function Stats() {
                   .map((code) => (
                     <p key={unrecognizedCaseKey(code)}>
                       Há um código não reconhecido na observação privada da
-                      atividade de {code.gearName} do dia{' '}
+                      atividade de <strong>{code.gearName}</strong> do dia{' '}
                       <a
                         href={`https://www.strava.com/activities/${code.activityId}`}
                         target='_blank'
