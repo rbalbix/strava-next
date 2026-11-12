@@ -110,6 +110,8 @@ Cada webhook:
 3. Executa a lógica apropriada (atualizar estatísticas, deletar dados, etc.)
 4. Registra erros e notifica por email em caso de falha
 
+> **Limitação conhecida (D14.1):** o Strava **não** dispara `activity/update` quando só a observação privada é editada — por isso o painel rebusca o relatório de códigos não reconhecidos com throttle próprio, e não depende do webhook.
+
 ---
 
 ## Conceitos Técnicos Críticos
@@ -212,7 +214,7 @@ Não há regras automáticas de dependência entre marcações por esta decisão
 ## Termos Ambíguos / Pendentes de Clarificação
 
 - **"Gear"**: Em Strava = bicicleta. Em GearLife = "Equipamento" geralmente. Qual é a convenção preferida?
-- **Outras dúvidas**: regras de dependência entre marcações (se necessário) devem ser formalizadas via ADR.
+- **Regras de dependência entre marcações**: **resolvidas** — formalizadas no ADR `docs/adr/0001-equipment-maintenance-dependencies.md` (2026-05-29).
 
 ---
 
@@ -229,8 +231,9 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 ### Formato de Nota Privada
 
 - Atividades sinalizadas: qualquer atividade cujo `name` contenha `*` é inspecionada.
-- Marcações: busca por substring do `equipment.id` (ex.: `"chain,lub"`).
+- Marcações: a nota é normalizada (minúsculas e sem acentos — NFD) e casa por substring com o `equipment.id` **e seus sinônimos PT** (`corrente`→`chain`, `lubrificação`→`lub`; ex.: `"chain,lub"`) — matching **case-insensitive** e tolerante a sinônimos (D14).
 - A palavra `review` é tratada como palavra isolada com regex `/\breview\b/`.
+- **Código não reconhecido (D14):** só vira relato o token que **não** gerou registro de verdade (superstrings como `chainn` registram e ficam mudas). O relato aparece no banner in-app do painel e a mensagem mostra **apenas** o nome da bike e a data — nunca o texto da nota (LGPD). Corrigido no Strava, o auto-refresh (D14.1) some com o caso.
 
 ### Semântica de Manutenção
 
@@ -251,6 +254,9 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 - `strava:auth:<athleteId>` — tokens e auth do atleta
 - `strava:activities:<athleteId>` — cache de atividades + `lastUpdated`
 - `strava:statistics:<athleteId>` — estatísticas processadas
+- `strava:equipment-thresholds:<athleteId>` — limites de manutenção por equipamento
+- `strava:unrecognized-codes:<athleteId>` — relatório de códigos não reconhecidos (D14; gravado direto via `redis.set`, fora do allowlist do remoteStorage)
+- `strava:session:<hash>` — athleteId da sessão (hash do cookie `gl_session`; ver *Sessão do Aplicativo*)
 - `strava:lock:refresh:<athleteId>` — lock distribuído para refresh de token
 
 ### Idempotência e Rate-limiting de Webhooks
