@@ -29,6 +29,11 @@ export const REDIS_KEYS = {
   statistics: (athleteId: number) => `strava:statistics:${athleteId}`,
   equipmentThresholds: (athleteId: number) =>
     `strava:equipment-thresholds:${athleteId}`,
+  // D14: relatório de códigos não reconhecidos nas observações privadas.
+  // Fora do allowlist do remoteStorage de propósito — é gravado lendo direto
+  // com redis.set (molde de equipmentThresholds), nunca pela API remota.
+  unrecognizedCodes: (athleteId: number) =>
+    `strava:unrecognized-codes:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
   // Sessão do aplicativo (D6/PR 2 do plano de usabilidade): recebe o **hash**

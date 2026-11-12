@@ -201,3 +201,43 @@ export const Equipments = {
     show: 'Freehub',
   },
 };
+
+// D14 — sinônimos PT das legendas (caption/show) para o matching tolerante.
+// Formas BRUTAS: a normalização (minúsculas + sem acentos) acontece no
+// src/services/noteCodes.ts. Termos de UMA palavra só e ≥4 letras nos
+// sinônimos — o matching é por substring e um termo curto transbordaria
+// (ex.: 'sti' casaria dentro de 'distrito'). Deliberadamente sem sinônimo:
+// newshock ('shock' casaria com shockreview/shockkit e registraria um shock
+// novo a partir de uma revisão) e os ids com [colchetes] (fronttire etc. —
+// o termo do par registra o par, comportamento decidido para 'pneu[frente]').
+// Cobertura que faltar entra aqui depois, sob evidência.
+export const EquipmentSynonyms: Record<string, string[]> = {
+  lub: ['lubrificação'],
+  review: ['revisão'],
+  clean: ['lavagem'],
+  suspension: ['suspensão'],
+  tires: ['pneu'],
+  tubes: ['câmara'],
+  tubeless: ['selante'],
+  stem: ['mesa'],
+  handlebar: ['guidão'],
+  wheelset: ['rodas'],
+  brakes: ['freio'],
+  disks: ['disco'],
+  calipers: ['caliper'],
+  levers: ['manete'],
+  tape: ['fita'],
+  grip: ['manopla'],
+  dropper: ['canote'],
+  saddle: ['selim'],
+  pedal: ['pedais'],
+  chain: ['corrente'],
+  bb: ['central'],
+  cassette: ['cassete'],
+  crankset: ['pedivela'],
+  rearderailleur: ['câmbio'],
+  rearshifter: ['shifter'],
+  helmet: ['capacete'],
+  shoes: ['sapatilha'],
+  pulley: ['roldana'],
+};

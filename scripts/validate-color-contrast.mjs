@@ -14,6 +14,8 @@ const TOKEN_PAIRS = [
   ['--gl-status-normal', '--gl-surface-primary', 45],
   ['--gl-status-warning', '--gl-surface-primary', 27],
   ['--gl-status-overdue', '--gl-surface-primary', 45],
+  // D14: texto do banner warning sobre o fundo warning.
+  ['--gl-text-on-warning', '--gl-status-warning', 60],
 ];
 
 export function parseCSSVariables(content, isDarkMode = false) {

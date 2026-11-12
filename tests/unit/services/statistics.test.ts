@@ -161,3 +161,91 @@ describe('statistics.createStatistics', () => {
     expect(ids).toContain('review');
   });
 });
+
+describe('statistics.createStatistics D14 — matching tolerante', () => {
+  const gears = [{ id: 'bike-1', name: 'Bike One' }] as any[];
+
+  function idsFor(privateNote: string) {
+    const activities = [
+      {
+        id: 1,
+        name: '* service',
+        distance: 1000,
+        moving_time: 100,
+        type: 'Ride',
+        start_date_local: '2026-01-03T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: privateNote,
+      },
+    ] as any[];
+
+    const result = createStatistics(activities as any, gears as any);
+    return (result[0]?.equipments ?? []).map((e) => e.id);
+  }
+
+  it('matches case-insensitive (CHAIN registra)', () => {
+    expect(idsFor('CHAIN')).toContain('chain');
+    expect(idsFor('Chain')).toContain('chain');
+  });
+
+  it('matches PT synonyms (corrente registra chain)', () => {
+    expect(idsFor('troquei a corrente')).toContain('chain');
+    expect(idsFor('freios velhos')).toContain('brakes');
+    expect(idsFor('pneu furado')).toContain('tires');
+  });
+
+  it('superstrings still register and stay silent (chainn registra chain)', () => {
+    expect(idsFor('chainn')).toContain('chain');
+    expect(idsFor('reviewx lub')).toContain('lub');
+  });
+
+  it('isolated PT review form registers review', () => {
+    expect(idsFor('revisão completa')).toContain('review');
+    expect(idsFor('review')).toContain('review');
+  });
+
+  it('review guard holds for compound codes (suspareview/shockreview sozinhos)', () => {
+    expect(idsFor('suspareview')).toContain('suspareview');
+    expect(idsFor('suspareview')).not.toContain('review');
+    expect(idsFor('shockreview')).not.toContain('review');
+    expect(idsFor('reviewx')).not.toContain('review');
+  });
+
+  it('sorts activities across gears without mixing them', () => {
+    const activities = [
+      {
+        id: 2,
+        name: 'Ride 2',
+        distance: 2000,
+        moving_time: 200,
+        type: 'Ride',
+        start_date_local: '2026-01-02T00:00:00Z',
+        gear_id: 'bike-2',
+        private_note: '',
+      },
+      {
+        id: 1,
+        name: 'Ride 1',
+        distance: 1000,
+        moving_time: 100,
+        type: 'Ride',
+        start_date_local: '2026-01-01T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: '',
+      },
+    ] as any[];
+
+    const result = createStatistics(activities as any, [
+      { id: 'bike-1', name: 'Bike One' },
+      { id: 'bike-2', name: 'Bike Two' },
+    ] as any);
+
+    expect(result.map((gear) => gear.id)).toEqual(['bike-1', 'bike-2']);
+    expect(result[0]).toMatchObject({ count: 1, distance: 1000 });
+    expect(result[1]).toMatchObject({ count: 1, distance: 2000 });
+  });
+
+  it('registers nothing when a * activity has no private note', () => {
+    expect(idsFor(undefined as any)).toEqual([]);
+  });
+});

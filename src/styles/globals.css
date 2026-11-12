@@ -55,6 +55,9 @@ html::-webkit-scrollbar {
   --gl-text-secondary: #4a4a4a;
   --gl-text-tertiary: #717171;
   --gl-text-on-brand: #ffffff;
+  /* D14: texto do banner warning (sobre --gl-status-warning). Medido pelo
+     script de contraste: Lc 73,2 light / 77,7 dark — ver TOKEN_PAIRS. */
+  --gl-text-on-warning: #1a1a1a;
 
   /* Status (Semáforo) - High Urgency */
   --gl-status-normal: #0d8d0d;
@@ -89,6 +92,8 @@ html::-webkit-scrollbar {
     --gl-text-secondary: #b0b8c4;
     --gl-text-tertiary: #8a94a3;
     --gl-text-on-brand: #ffffff;
+    /* D14: banner warning — mesmo valor nos dois temas (medido nos dois). */
+    --gl-text-on-warning: #1a1a1a;
 
     /* Borders & Dividers - Dark */
     --gl-border-subtle: #3a4250; /* Um pouco mais brilhante para bordas */
