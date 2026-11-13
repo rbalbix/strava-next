@@ -198,7 +198,7 @@ describe('Card component', () => {
     act(() => root.unmount());
   });
 
-  it('shows empty-state message and info button when gear has no activities (D15)', () => {
+  it('gear sem atividade renderiza igual aos outros, com ícone Road (D15)', () => {
     const openModal = vi.fn();
     const authValue = makeAuthContext({ openModal });
     const container = document.createElement('div');
@@ -220,30 +220,25 @@ describe('Card component', () => {
       );
     });
 
-    expect(container.textContent).toContain(
+    // face igual aos demais: stats zerados e ícone de bike Road
+    expect(container.textContent).toContain('Bike New');
+    expect(container.textContent).toContain('0 atividades.');
+    expect(container.textContent).toContain('0,00 km');
+    expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
+
+    // a mensagem/botão ficam DENTRO do modal (card-detail-modal.empty)
+    expect(container.textContent).not.toContain(
       'Não há atividades registradas no Strava.',
     );
-    expect(container.textContent).not.toContain('0 atividades.');
 
-    // o card em si não abre o modal de detalhes
-    const card = container.firstElementChild as HTMLElement;
+    const clickable = container.querySelector('button') as HTMLElement;
     act(() => {
-      card.click();
+      clickable.click();
     });
-    expect(openModal).not.toHaveBeenCalledWith(
+    expect(openModal).toHaveBeenCalledWith(
       'card-detail',
-      expect.anything(),
+      expect.objectContaining({ id: 'bike-new', count: 0 }),
     );
-
-    const button = Array.from(container.querySelectorAll('button')).find(
-      (el) => el.textContent === 'Ver como funciona',
-    ) as HTMLElement;
-    expect(button).toBeTruthy();
-
-    act(() => {
-      button.click();
-    });
-    expect(openModal).toHaveBeenCalledWith('info');
     act(() => {
       root.unmount();
     });

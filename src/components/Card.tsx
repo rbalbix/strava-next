@@ -21,29 +21,6 @@ export default function Card({
   equipments,
 }: GearStats) {
   const { openModal } = useContext(AuthContext);
-
-  // D15: gear sem nenhuma atividade — card informativo com mensagem e o
-  // mesmo botão do empty state do D2; não abre o modal de detalhes.
-  if (count === 0) {
-    return (
-      <div className={`${styles.cardContainer} ${styles.cardEmpty} glass-effect`}>
-        <header>
-          <div>{name}</div>
-        </header>
-        <main>
-          <p>Não há atividades registradas no Strava.</p>
-          <button
-            type='button'
-            className={styles.emptyAction}
-            onClick={() => openModal('info')}
-          >
-            Ver como funciona
-          </button>
-        </main>
-      </div>
-    );
-  }
-
   const visualType = getActivityVisualType(activityType);
   const isBikeActivity = isBikeActivityType(activityType);
   const lub = equipments.find(({ id }) => id === Equipments.Lubrification.id);
