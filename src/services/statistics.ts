@@ -12,7 +12,7 @@ import { differenceInMinutes, fromUnixTime, getUnixTime } from 'date-fns';
 import { apiRemoteStorage } from './api';
 import { getAthlete } from './athlete';
 import { Equipment, Equipments } from './equipment';
-import { GearStats, getGears } from './gear';
+import { GearStats, getGears, orderGearsByLastUse } from './gear';
 import { saveRemote } from './utils';
 import { getLogger } from './logger';
 import { ActivitySportType } from './strava-sdk';
@@ -306,8 +306,15 @@ export async function processStatistics(
   const log = getLogger();
   const athlete = await getAthlete(strava);
   const gears = getGears(athlete);
+  // D15: relatório salvo já sai ordenado por uso recente dentro de cada
+  // grupo (bikes primeiro, demais gears depois).
+  const orderedGears = orderGearsByLastUse(
+    athlete.bikes,
+    athlete.shoes,
+    updatedActivities,
+  );
 
-  const updatedStatistics = createStatistics(updatedActivities, gears);
+  const updatedStatistics = createStatistics(updatedActivities, orderedGears);
   const response = await saveRemote(
     REDIS_KEYS.statistics(athleteId),
     JSON.stringify({
@@ -466,7 +473,9 @@ export function createStatistics(
       }
     });
 
-    if (distance !== 0) {
+    // D15: gear sem nenhuma atividade aparece no fim do seu grupo
+    // (count === 0); gear com atividade e 0 km continua de fora.
+    if (distance !== 0 || count === 0) {
       const gearStat: GearStats = {
         id: gear.id,
         name: gear.name,

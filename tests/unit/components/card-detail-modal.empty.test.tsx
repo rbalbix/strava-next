@@ -37,6 +37,7 @@ import { AuthContext } from '../../../src/contexts/AuthContext';
 
 const EMPTY_STATE_TEXT =
   'Você ainda não registrou manutenção para nenhum componente da sua bike';
+const NO_ACTIVITIES_TEXT = 'Não há atividades registradas no Strava.';
 
 function makeGearStat(overrides: Record<string, unknown> = {}) {
   return {
@@ -126,6 +127,38 @@ describe('CardDetailModal — empty state (D2)', () => {
     );
 
     expect(container.textContent).not.toContain(EMPTY_STATE_TEXT);
+
+    unmount(root, container);
+  });
+
+  it('gear sem atividades mostra a mensagem D15 e o botão, sem a de manutenção', async () => {
+    const { container, root } = await mountModal(
+      makeGearStat({
+        activityType: null,
+        count: 0,
+        distance: 0,
+        movingTime: 0,
+        equipments: [],
+      }),
+    );
+
+    expect(container.textContent).toContain(NO_ACTIVITIES_TEXT);
+    // sem atividades, a mensagem de manutenção do D2 não cabe
+    expect(container.textContent).not.toContain(EMPTY_STATE_TEXT);
+    // stats zerados seguem no header, como nos demais cards
+    expect(container.textContent).toContain('0,00km');
+    // sem tipo associado → ícone de bike Road
+    expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
+
+    const button = Array.from(container.querySelectorAll('button')).find(
+      (el) => el.textContent === 'Ver como funciona',
+    );
+    expect(button).toBeDefined();
+
+    act(() => {
+      fireEvent.click(button as HTMLButtonElement);
+    });
+    expect(openModalMock).toHaveBeenCalledWith('info');
 
     unmount(root, container);
   });

@@ -12,6 +12,9 @@ export function isBikeActivityType(
 export function getActivityVisualType(
   activityType: string | null | undefined,
 ): ActivityVisualType {
+  // D15: sem tipo associado (gear sem nenhuma atividade) → ícone de bike
+  // Road por padrão; tipos conhecidos seguem a regra de antes.
+  if (activityType == null) return 'bike';
   if (activityType === 'MountainBikeRide') return 'mountain-bike';
   if (isBikeActivityType(activityType)) return 'bike';
   return 'run';

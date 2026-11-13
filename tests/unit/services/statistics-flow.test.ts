@@ -55,7 +55,12 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     apiRemoteStorage: { get: apiRemoteStorageGet },
   }));
   vi.doMock('../../../src/services/athlete', () => ({ getAthlete }));
-  vi.doMock('../../../src/services/gear', () => ({ getGears }));
+  vi.doMock('../../../src/services/gear', () => ({
+    getGears,
+    // D15: este teste de fluxo injeta os gears pelo mock do getGears; a
+    // lógica real de ordenação é coberta em gear.test.ts.
+    orderGearsByLastUse: () => getGears({} as any),
+  }));
   vi.doMock('../../../src/services/activity', () => ({
     getActivities,
     processActivities,

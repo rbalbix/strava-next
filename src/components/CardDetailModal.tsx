@@ -273,7 +273,17 @@ export default function CardDetailModal({
             </div>
           </section>
         </header>
-        {isBikeActivity && equipments.length === 0 ? (
+        {/* D15: gear sem nenhuma atividade — a mensagem e o botão aparecem
+            dentro do modal, como nos demais cards (os stats zerados do
+            header continuam visíveis). */}
+        {count === 0 ? (
+          <div className={styles.emptyState}>
+            <p>Não há atividades registradas no Strava.</p>
+            <button type='button' onClick={() => openModal('info')}>
+              Ver como funciona
+            </button>
+          </div>
+        ) : isBikeActivity && equipments.length === 0 ? (
           <div className={styles.emptyState}>
             <p>
               Você ainda não registrou manutenção para nenhum componente da

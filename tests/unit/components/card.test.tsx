@@ -197,4 +197,50 @@ describe('Card component', () => {
     expect(container.querySelector('[data-testid="icon-run"]')).toBeTruthy();
     act(() => root.unmount());
   });
+
+  it('gear sem atividade renderiza igual aos outros, com ícone Road (D15)', () => {
+    const openModal = vi.fn();
+    const authValue = makeAuthContext({ openModal });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Card
+            id='bike-new'
+            name='Bike New'
+            activityType={null}
+            count={0}
+            distance={0}
+            movingTime={0}
+            equipments={[]}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+
+    // face igual aos demais: stats zerados e ícone de bike Road
+    expect(container.textContent).toContain('Bike New');
+    expect(container.textContent).toContain('0 atividades.');
+    expect(container.textContent).toContain('0,00 km');
+    expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
+
+    // a mensagem/botão ficam DENTRO do modal (card-detail-modal.empty)
+    expect(container.textContent).not.toContain(
+      'Não há atividades registradas no Strava.',
+    );
+
+    const clickable = container.querySelector('button') as HTMLElement;
+    act(() => {
+      clickable.click();
+    });
+    expect(openModal).toHaveBeenCalledWith(
+      'card-detail',
+      expect.objectContaining({ id: 'bike-new', count: 0 }),
+    );
+    act(() => {
+      root.unmount();
+    });
+  });
 });
