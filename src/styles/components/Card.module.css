@@ -127,3 +127,32 @@
   font-weight: inherit;
   margin: 0;
 }
+
+/* D15: card de gear sem atividade — não abre modal, cursor padrão. */
+.cardEmpty {
+  cursor: default;
+}
+
+/* Mesmo par de contraste validado no empty state do D2
+   (--gl-text-on-brand sobre --gl-brand-primary). */
+.emptyAction {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1.2rem;
+  font-size: var(--gl-text-sm);
+  font-weight: 600;
+  background-color: var(--gl-brand-primary);
+  color: var(--gl-text-on-brand);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  min-height: 2.75rem; /* 44px — alvo de toque mínimo (diretriz de acessibilidade) */
+}
+
+.emptyAction:hover {
+  filter: brightness(1.1);
+}
+
+.emptyAction:focus-visible {
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: 2px;
+}

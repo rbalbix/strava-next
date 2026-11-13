@@ -120,6 +120,21 @@ describe('statistics.createStatistics', () => {
     expect(result).toHaveLength(0);
   });
 
+  it('returns gear without activities so the empty card can render (D15)', () => {
+    const result = createStatistics([] as any, [
+      { id: 'bike-new', name: 'Bike New' },
+    ] as any);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: 'bike-new',
+      count: 0,
+      distance: 0,
+      activityType: null,
+      equipments: [],
+    });
+  });
+
   it('registers pair items and suppresses single related components', () => {
     const activities = [
       {

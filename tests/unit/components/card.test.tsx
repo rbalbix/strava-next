@@ -197,4 +197,55 @@ describe('Card component', () => {
     expect(container.querySelector('[data-testid="icon-run"]')).toBeTruthy();
     act(() => root.unmount());
   });
+
+  it('shows empty-state message and info button when gear has no activities (D15)', () => {
+    const openModal = vi.fn();
+    const authValue = makeAuthContext({ openModal });
+    const container = document.createElement('div');
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Card
+            id='bike-new'
+            name='Bike New'
+            activityType={null}
+            count={0}
+            distance={0}
+            movingTime={0}
+            equipments={[]}
+          />
+        </AuthContext.Provider>,
+      );
+    });
+
+    expect(container.textContent).toContain(
+      'Não há atividades registradas no Strava.',
+    );
+    expect(container.textContent).not.toContain('0 atividades.');
+
+    // o card em si não abre o modal de detalhes
+    const card = container.firstElementChild as HTMLElement;
+    act(() => {
+      card.click();
+    });
+    expect(openModal).not.toHaveBeenCalledWith(
+      'card-detail',
+      expect.anything(),
+    );
+
+    const button = Array.from(container.querySelectorAll('button')).find(
+      (el) => el.textContent === 'Ver como funciona',
+    ) as HTMLElement;
+    expect(button).toBeTruthy();
+
+    act(() => {
+      button.click();
+    });
+    expect(openModal).toHaveBeenCalledWith('info');
+    act(() => {
+      root.unmount();
+    });
+  });
 });
