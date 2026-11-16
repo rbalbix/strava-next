@@ -169,3 +169,24 @@
     font-size: 1.5rem !important;
   }
 }
+
+/* Fase D (§8.28): no mobile o menu vira drawer de tela cheia — alvo de
+   toque e legibilidade; no desktop mantém a pílula lateral de sempre.
+   O breakpoint acompanha o do Header (860px).
+   ATENÇÃO: o header é position:fixed + transform:translateX(-50%), então ele
+   é o containing block de todo fixed dentro dele — por isso a altura vem
+   explícita (100vh/100dvh, mesma estratégia do overlay), não de top+bottom.
+   safe-area em cima e embaixo para o iOS não engolir conteúdo. */
+@media (max-width: 860px) {
+  .sidebarContainer {
+    left: 0;
+    top: 0;
+    max-width: none;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    border-radius: 0;
+    padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}

@@ -101,11 +101,16 @@ try {
   await page.waitForFunction(() => window.location.pathname === '/', {
     timeout: 10000,
   });
-  await expectVisible(
-    page,
-    'h1:text("Pedale. A gente cuida da manutenção.")',
-    'Failed to return to home.',
-  );
+  // A URL muda antes do React pintar a landing (GSSP é no-store) — contar
+  // uma vez só podia ver a página anterior e falhar. Espera o h1 da tagline
+  // renderizar de verdade (Fase D: a tagline é o h1, §8.28).
+  try {
+    await page
+      .locator('h1:text("Pedale. A gente cuida da manutenção.")')
+      .waitFor({ state: 'visible', timeout: 10000 });
+  } catch {
+    throw new Error('Failed to return to home.');
+  }
 
   // ---------------------------------------------------------------------
   // Critério de aceite do A2/A3 (§2.D.9 do plano de usabilidade): "um erro
@@ -270,6 +275,67 @@ try {
   }
 
   await expiredContext.close();
+
+  // ---------------------------------------------------------------------
+  // Fase D (§8.28 / C5): viewport mobile — o menu tem que abrir como
+  // drawer de tela cheia (alvo de toque) e o modal informativo tem que
+  // continuar operacional no telefone. Sem isto, nenhum teste exercitava
+  // o app em viewport mobile.
+  // ---------------------------------------------------------------------
+  const mobileContext = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    const mobilePage = await mobileContext.newPage();
+    await mobilePage.goto(baseUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: 20000,
+    });
+    await expectVisible(
+      mobilePage,
+      'h1:text("Pedale. A gente cuida da manutenção.")',
+      'Mobile landing not found.',
+    );
+
+    await mobilePage
+      .locator('button[aria-label="Abrir menu lateral"]')
+      .first()
+      .click();
+    await mobilePage
+      .locator('#sidebar-menu')
+      .waitFor({ state: 'visible', timeout: 5000 });
+
+    // Drawer de tela cheia: largura e altura cobrem a viewport.
+    const drawer = await mobilePage.locator('#sidebar-menu').boundingBox();
+    const viewport = mobilePage.viewportSize() || { width: 390, height: 844 };
+    if (!drawer) {
+      throw new Error('Mobile drawer not found after opening the menu.');
+    }
+    if (drawer.width < viewport.width - 10) {
+      throw new Error(
+        `Mobile drawer not fullscreen: ${drawer.width}px of ${viewport.width}px wide.`,
+      );
+    }
+    if (drawer.height < viewport.height - 10) {
+      throw new Error(
+        `Mobile drawer not fullscreen: ${drawer.height}px of ${viewport.height}px tall.`,
+      );
+    }
+
+    // Operação real no telefone: abrir o modal de Ajuda pelo drawer.
+    await mobilePage.getByRole('button', { name: 'Ajuda' }).click();
+    try {
+      await mobilePage
+        .locator('text=Como usar o aplicativo para monitorar equipamentos')
+        .waitFor({ state: 'visible', timeout: 10000 });
+    } catch {
+      throw new Error('Mobile info modal did not open.');
+    }
+    await mobilePage.keyboard.press('Escape');
+    await mobilePage.waitForTimeout(150);
+  } finally {
+    await mobileContext.close();
+  }
 
   console.log('E2E UI passed.');
 } finally {
