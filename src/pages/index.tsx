@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useContext } from 'react';
 import Header from '../components/Header';
 import MainImage from '../components/MainImage';
-import PublicPageNav from '../components/PublicPageNav';
 import SeoHead from '../components/SeoHead';
 import { AuthContext, AuthProvider } from '../contexts/AuthContext';
 import { getCookieValue, SESSION_COOKIE } from '../server/cookies';
@@ -43,10 +42,13 @@ function HomeContent() {
       ) : (
         <div className={styles.homeText}>
           <MainImage />
-          {/* <h1 className={styles.brandTitle}>GearLife</h1> */}
-          <h2 className={styles.tagline}>
+          {/* A tagline é o h1 da landing (§8.11/§8.28): a decisão do
+              proprietário foi tirar o título de marca em corpo grande, e a
+              pendência de acessibilidade ficou resolvida promovendo a
+              tagline — com o estilo que já era do h2, sem mudar o visual. */}
+          <h1 className={styles.tagline}>
             Pedale. A gente cuida da manutenção.
-          </h2>
+          </h1>
           <p className={styles.subtitle}>
             Conecte sua conta Strava e acompanhe, componente a componente,
             quanto já foi rodado desde a última manutenção — com alertas antes
@@ -75,11 +77,6 @@ function HomeContent() {
               Como funciona
             </button>
           </div>
-
-          {/* Reaproveita a navegação das páginas públicas: o plano previa
-              torná-la visível também na landing, em vez de duplicar os links
-              aqui. */}
-          {/* <PublicPageNav /> */}
         </div>
       )}
     </main>

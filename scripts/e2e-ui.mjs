@@ -28,12 +28,13 @@ try {
   // O redirect condicional era o motivo de o E2E passar num fluxo que o usuário
   // real nunca via: a home pública era inalcançável.
   //
-  // A landing não tem mais <h1> de marca nem os links das páginas públicas
-  // (§8.11 — decisões do proprietário): o texto de destaque é a tagline e o
-  // "Como funciona" abre o modal informativo em vez de navegar.
+  // A landing não tem <h1> de marca nem os links das páginas públicas
+  // (§8.11 — decisões do proprietário): o texto de destaque é a tagline,
+  // promovida a <h1> na Fase D (§8.28) sem mudar o visual, e o "Como
+  // funciona" abre o modal informativo em vez de navegar.
   await expectVisible(
     page,
-    'h2:text("Pedale. A gente cuida da manutenção.")',
+    'h1:text("Pedale. A gente cuida da manutenção.")',
     'Landing tagline not found.',
   );
   await expectVisible(
@@ -102,7 +103,7 @@ try {
   });
   await expectVisible(
     page,
-    'h2:text("Pedale. A gente cuida da manutenção.")',
+    'h1:text("Pedale. A gente cuida da manutenção.")',
     'Failed to return to home.',
   );
 

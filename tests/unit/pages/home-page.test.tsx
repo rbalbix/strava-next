@@ -39,6 +39,11 @@ describe('home page', () => {
       );
     });
     expect(container.textContent).toContain('Pedale. A gente cuida da manutenção.');
+    // Fase D (§8.28): a tagline é o h1 da landing — a página não pode ficar
+    // sem título de nível 1 (navegação por títulos no leitor de tela).
+    expect(container.querySelector('h1')?.textContent).toContain(
+      'Pedale. A gente cuida da manutenção.',
+    );
     expect(container.textContent).toContain('Entrar com Strava');
     expect(container.textContent).toContain('Como funciona');
     act(() => root.unmount());

@@ -332,6 +332,11 @@ export default function Stats() {
   return (
     <div className={styles.statsContainer}>
       <main>
+        {/* Fase D (§8.28): h1 visualmente oculto — o painel era a única
+            face da URL sem título e a navegação por leitor de tela ficava
+            sem âncora. O selector do primeiro card passou a first-of-type
+            para o h1 não deslocar a margem do primeiro card. */}
+        <h1 className={styles.srOnly}>Painel do GearLife</h1>
         {/* Falha com dados em cache: o conteúdo continua na tela e o aviso
             aparece acima dele. Antes um 429 que chegava depois da primeira
             leitura bem-sucedida não gerava mensagem alguma — o caso exato do

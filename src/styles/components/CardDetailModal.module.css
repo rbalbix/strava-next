@@ -57,8 +57,12 @@
   z-index: 1001;
 }
 
+/* Fase D (§8.28 / C2): o anel era apagado sem substituto, e é exatamente
+   aqui que o foco inicial do diálogo cai (ModalContainer.focusFirst) — o
+   botão de fechar era o foco invisível. Mesmo padrão do unitSelector. */
 .closeButton:focus-visible {
-  outline: none;
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: -2px;
 }
 
 .statCardContainer {

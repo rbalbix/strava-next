@@ -16,6 +16,15 @@ const TOKEN_PAIRS = [
   ['--gl-status-overdue', '--gl-surface-primary', 45],
   // D14: texto do banner warning sobre o fundo warning.
   ['--gl-text-on-warning', '--gl-status-warning', 60],
+  // Fase D (§8.28): preenchimentos da barra de estado sobre o card
+  // (CardItem.module.css:104-112) — uso gráfico, limiar 27 (mesmo
+  // precedente de warning×surface-primary). O uso como texto fica coberto
+  // pelos pares ×surface-primary em 45; exceção registrada no §8.28:
+  // overdue×card no dark dá Lc 44.9 (0.1 abaixo de 45, botão "Cancelar") —
+  // mexer na cor é mudança visual e fica para decisão do proprietário.
+  ['--gl-status-warning', '--gl-surface-card', 27],
+  ['--gl-status-normal', '--gl-surface-card', 27],
+  ['--gl-status-overdue', '--gl-surface-card', 27],
 ];
 
 export function parseCSSVariables(content, isDarkMode = false) {

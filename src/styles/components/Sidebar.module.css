@@ -8,10 +8,16 @@
   z-index: 1600;
   border-radius: 30px;
   opacity: 0;
+  /* Fase D (§8.28): invisível de verdade — sem isso os links do painel
+     fechado continuam focáveis por teclado apesar do aria-hidden (o
+     opacity:0 não tira do fluxo de foco). O visibility entra na transição
+     para sumir só no fim do fade, sem cortar a animação. */
+  visibility: hidden;
   pointer-events: none;
   transition:
     transform 0.35s ease,
-    opacity 0.8s ease;
+    opacity 0.8s ease,
+    visibility 0.8s;
 
   display: flex;
   flex-direction: column;
@@ -46,6 +52,7 @@
 .sidebarOpen {
   transform: translateX(0);
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
 }
 
