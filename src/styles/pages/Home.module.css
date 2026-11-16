@@ -63,25 +63,10 @@
   color: var(--gl-text-secondary);
 }
 
+/* A tagline é o h1 da landing (§8.11 → §8.28): recebeu o estilo que era do
+   h2 para manter a aparência exata. O h1 anterior era o título de marca em
+   corpo grande com gradiente, removido pelo proprietário. */
 .homeText h1 {
-  font-size: clamp(4.4rem, 10.5vw, 7.8rem);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.3rem;
-  text-align: center;
-
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  background-image: linear-gradient(
-    90deg,
-    var(--gl-brand-gradient-start),
-    var(--gl-brand-gradient-end)
-  );
-}
-
-.homeText h2 {
   font-size: clamp(1.45rem, 5.6vw, 1.9rem);
   font-weight: 400;
   line-height: 1.25;
@@ -102,14 +87,6 @@
 .tagline {
   margin-top: 0.3rem;
   max-width: 28rem;
-}
-
-/* h1 da landing: fica logo abaixo do logotipo. Tamanho e gradiente vêm de
-   `.homeText h1`. É o único h1 da home — antes não havia nenhum, o que
-   tornava a navegação por títulos (leitores de tela) impossível e deixava o
-   E2E procurando um seletor inexistente. */
-.brandTitle {
-  margin: 0;
 }
 
 .subtitle {
@@ -206,10 +183,6 @@
 
 @media (max-width: 660px) {
   .homeText h1 {
-    letter-spacing: -0.2rem;
-  }
-
-  .homeText h2 {
     letter-spacing: 0rem;
   }
 

@@ -3,9 +3,25 @@
   margin-top: 8px;
 }
 
-/* ensure the very first card in the list has no top margin */
-.statsContainer main > div:first-child .cardContainer {
+/* ensure the very first card in the list has no top margin.
+   first-of-type (não first-child): o h1 oculto do painel (§8.28) é o
+   primeiro filho de <main> e não pode deslocar o primeiro card — com só
+   divs como filhos hoje, o resultado é idêntico ao first-child antigo. */
+.statsContainer main > div:first-of-type .cardContainer {
   margin-top: 0;
+}
+
+/* Fase D (§8.28): conteúdo só para tecnologia assistiva (h1 do painel). */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .spinnerLoading {
   width: 100%;

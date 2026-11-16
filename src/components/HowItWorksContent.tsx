@@ -228,9 +228,8 @@ export default function HowItWorksContent({
       </div>
       <h3>Lista dos códigos dos componentes:</h3>
       <div>
-        Esta lista pode ser aberta clicando no ícone{' '}
-        <FaMedapps aria-hidden='true' focusable='false' /> que fica no final da
-        lista de equipamentos.
+        No app, esta lista abre pelo menu lateral, no item{' '}
+        <FaMedapps aria-hidden='true' focusable='false' /> Componentes.
       </div>
       <div className={styles.screen}>
         <Image
