@@ -301,7 +301,7 @@ export default async function handler(
         }
         await sendEmail({
           to: contactEmail,
-          subject: `[Stuff Stats] - Erro no Webhook`,
+          subject: `[GearLife] - Erro no Webhook`,
           html: createErrorEmailTemplate(
             'Erro no Processamento do Webhook',
             error,

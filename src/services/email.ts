@@ -58,7 +58,7 @@ export function createContactEmailTemplate(
     <body>
       <div class="container">
         <div class="header">
-          <h1>Novo Contato - Stuff Stats</h1>
+          <h1>Novo Contato - GearLife</h1>
         </div>
         <div class="content">
           <p><strong>Nome:</strong> ${name}</p>
@@ -67,7 +67,7 @@ export function createContactEmailTemplate(
           <p>${message}</p>
         </div>
         <div class="footer">
-          <p>Email enviado automaticamente pelo sistema Stuff Stats</p>
+          <p>Email enviado automaticamente pelo sistema GearLife</p>
         </div>
       </div>
     </body>
@@ -124,7 +124,7 @@ export function createErrorEmailTemplate(
     <body>
       <div class="container">
         <div class="header">
-          <h1>⚠️ Erro no Webhook - Stuff Stats</h1>
+          <h1>⚠️ Erro no Webhook - GearLife</h1>
         </div>
         <div class="content">
           <p><strong>Tipo de Erro:</strong> ${message}</p>
@@ -132,7 +132,7 @@ export function createErrorEmailTemplate(
           ${detailsHtml}
         </div>
         <div class="footer">
-          <p>Email enviado automaticamente pelo sistema Stuff Stats</p>
+          <p>Email enviado automaticamente pelo sistema GearLife</p>
           <p>Timestamp: ${timestamp}</p>
         </div>
       </div>

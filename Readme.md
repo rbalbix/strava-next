@@ -30,53 +30,67 @@
 
 ![Strava Configuration](assets/config-strava.png)
 
-## List of equipments:
+<!-- CODES_TABLE_START -->
+## Lista de códigos dos componentes
 
-|      Code      | Equipment                               |
-| :------------: | --------------------------------------- |
-|      lub       | `Lubrification`                         |
-|     review     | `Complete Review`                       |
-|     clean      | `Clean`                                 |
-|      susp      | `Suspension review`                     |
-|                |                                         |
-|     tires      | `Both tires`                            |
-|   fronttire    | `Front tire`                            |
-|    reartire    | `Rear tire`                             |
-|     tubes      | `Both tubes`                            |
-|    tubeless    | `Tubeless installation or replacement ` |
-|   fronttube    | `Front tube`                            |
-|    reartube    | `Rear tube`                             |
-|                |                                         |
-|      stem      | `Stem`                                  |
-|   handlebar    | `Handlebar`                             |
-|    wheelset    | `Wheel Set`                             |
-|   frontwheel   | `Front Wheel`                           |
-|   rearwheel    | `Rear Wheel`                            |
-|                |                                         |
-|     breaks     | `Both breaks pads`                      |
-|   frontbreak   | `Front brak pad`                        |
-|   rearbreak    | `Rear break pad`                        |
-|                |                                         |
-|     disks      | `Both disks`                            |
-|   frontDisk    | `Front disk`                            |
-|    rearDisk    | `Rear disk`                             |
-|                |                                         |
-|      tape      | `Handlebar Tape`                        |
-|      grip      | `Handlebar Grip`                        |
-|    dropper     | `Dropper post`                          |
-|     saddle     | `Saddle`                                |
-|                |                                         |
-|     pedal      | `Pedals`                                |
-|     chain      | `Chain`                                 |
-|       bb       | `Bottom Bracket`                        |
-|                |                                         |
-|    cassette    | `Cassette`                              |
-|    crankset    | `Crankset`                              |
-| rearderailleur | `Rear Derailleur`                       |
-|  rearshifter   | `Rear Shifter`                          |
-|                |                                         |
-|   frontlight   | `Front light`                           |
-|   rearlight    | `Rear light`                            |
+> Tabela gerada a partir de `src/services/equipment.ts` (fonte única do
+> catálogo) — para atualizar: `node scripts/generate-readme-codes.mjs`.
+> No app, a mesma lista está no menu lateral → **Componentes**.
+
+| Componente | Código |
+| --- | --- |
+| Lubrificação | `lub` |
+| Revisão | `review` |
+| Lavagem | `clean` |
+| Revisão da suspa | `suspareview` |
+| Revisão do shock | `shockreview` |
+| Suspensão (nova) | `suspension` |
+| Shock (novo) | `newshock` |
+| Kit de Suspensão | `suspakit` |
+| Kit de Shock | `shockkit` |
+| Par de pneus | `tires` |
+| Pneu dianteiro | `fronttire` |
+| Pneu traseiro | `reartire` |
+| Par de câmaras | `tubes` |
+| Selante | `tubeless` |
+| Câmara dianteira | `fronttube` |
+| Câmara traseira | `reartube` |
+| Avanço | `stem` |
+| Guidão | `handlebar` |
+| Par de rodas | `wheelset` |
+| Roda dianteira | `frontwheel` |
+| Roda traseira | `rearwheel` |
+| Par de freios | `brakes` |
+| Freio dianteiro | `frontbrake` |
+| Freio traseiro | `rearbrake` |
+| Par de discos | `disks` |
+| Disco dianteiro | `frontdisk` |
+| Disco traseiro | `reardisk` |
+| Par de calipers | `calipers` |
+| Caliper dianteiro | `frontcaliper` |
+| Caliper traseiro | `rearcaliper` |
+| Par de manetes | `levers` |
+| Manete esquerda | `leftlever` |
+| Manete direita | `rightlever` |
+| Par de STI | `stis` |
+| STI esquerda | `leftsti` |
+| STI direita | `rightsti` |
+| Fita do guidão | `tape` |
+| Manopla | `grip` |
+| Canote (retrátil ou não) | `dropper` |
+| Selim | `saddle` |
+| Pedais | `pedal` |
+| Corrente | `chain` |
+| Movimento central | `bb` |
+| Cassete | `cassette` |
+| Pedivela | `crankset` |
+| Câmbio traseiro | `rearderailleur` |
+| Roldanas do câmbio | `pulley` |
+| Trocador traseiro | `rearshifter` |
+| Capacete | `helmet` |
+| Sapatilha | `shoes` |
+| Freehub | `freehub` |
+<!-- CODES_TABLE_END -->
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -411,14 +425,14 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 <!-- TEST_STATUS_START -->
 ## Test Status
 
-Last update: 2026-11-13T17:33:27.664Z
+Last update: 2026-11-16T15:56:22.466Z
 
 | Metric | Coverage |
 | --- | ---: |
 | Lines | 99.76% |
 | Statements | 99.76% |
 | Functions | 100.00% |
-| Branches | 94.71% |
+| Branches | 94.72% |
 
 Run locally:
 - `yarn test:unit`

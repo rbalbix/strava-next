@@ -128,7 +128,7 @@ describe('email service', () => {
     expect(html).toContain('Ana');
     expect(html).toContain('ana@example.com');
     expect(html).toContain('Oi!');
-    expect(html).toContain('Novo Contato - Stuff Stats');
+    expect(html).toContain('Novo Contato - GearLife');
   });
 
   it('createErrorEmailTemplate renders context details when provided', async () => {
