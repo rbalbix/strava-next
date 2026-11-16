@@ -289,11 +289,19 @@
 
 @media (max-width: 398px) {
   .thresholdRow {
+    /* Guarda: só quebra em duas linhas se a fonte do usuário não couber de
+       jeito nenhum — no caso normal os três elementos ficam na mesma linha. */
     flex-wrap: wrap;
   }
 
   .thresholdRow input {
-    flex: 1 1 100%;
+    /* Ajuste pós-Fase D (§8.29, pedido do proprietário): com
+       `flex: 1 1 100%` o input ocupava a linha inteira e empurrava o
+       seletor km|h e o salvar para a segunda linha. Base menor (3.5rem) +
+       o min-width:0 da regra base fazem o campo encolher até caber — os
+       três elementos na mesma linha de 320px a 398px (verificado com
+       Playwright nos três breakpoints). */
+    flex: 1 1 3.5rem;
     max-width: none;
   }
 }
