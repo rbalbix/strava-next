@@ -277,10 +277,11 @@ try {
   await expiredContext.close();
 
   // ---------------------------------------------------------------------
-  // Fase D (§8.28 / C5): viewport mobile — o menu tem que abrir como
-  // drawer de tela cheia (alvo de toque) e o modal informativo tem que
-  // continuar operacional no telefone. Sem isto, nenhum teste exercitava
-  // o app em viewport mobile.
+  // Fase D (§8.28 / C5): viewport mobile — o menu tem que abrir e o modal
+  // informativo tem que continuar operacional no telefone. Sem isto, nenhum
+  // teste exercitava o app em viewport mobile. (O drawer de tela cheia do
+  // §8.28 foi revertido pelo proprietário — §8.29 — e o teste vigia a
+  // versão atual: menu abre, não estoura a viewport, modal opera.)
   // ---------------------------------------------------------------------
   const mobileContext = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -305,24 +306,19 @@ try {
       .locator('#sidebar-menu')
       .waitFor({ state: 'visible', timeout: 5000 });
 
-    // Drawer de tela cheia: largura e altura cobrem a viewport.
+    // O menu (pílula lateral) não pode estourar a viewport no celular.
     const drawer = await mobilePage.locator('#sidebar-menu').boundingBox();
     const viewport = mobilePage.viewportSize() || { width: 390, height: 844 };
-    if (!drawer) {
-      throw new Error('Mobile drawer not found after opening the menu.');
+    if (!drawer || drawer.width <= 0) {
+      throw new Error('Mobile menu did not open.');
     }
-    if (drawer.width < viewport.width - 10) {
+    if (drawer.width > viewport.width) {
       throw new Error(
-        `Mobile drawer not fullscreen: ${drawer.width}px of ${viewport.width}px wide.`,
-      );
-    }
-    if (drawer.height < viewport.height - 10) {
-      throw new Error(
-        `Mobile drawer not fullscreen: ${drawer.height}px of ${viewport.height}px tall.`,
+        `Mobile menu overflows the viewport: ${drawer.width}px > ${viewport.width}px.`,
       );
     }
 
-    // Operação real no telefone: abrir o modal de Ajuda pelo drawer.
+    // Operação real no telefone: abrir o modal de Ajuda pelo menu.
     await mobilePage.getByRole('button', { name: 'Ajuda' }).click();
     try {
       await mobilePage
