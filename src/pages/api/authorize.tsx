@@ -7,6 +7,7 @@ import {
   SESSION_COOKIE,
 } from '../../server/cookies';
 import { getStravaOAuthTokenEnv } from '../../server/env';
+import { safeCompare } from '../../server/safe-compare';
 import { createStravaSession } from '../../server/session';
 import { apiStravaAuth, apiStravaOauthToken } from '../../services/api';
 import { getLogger } from '../../services/logger';
@@ -24,7 +25,15 @@ export default async function Authorize(
       .status(400)
       .json({ error: 'Code parameter is missing or invalid' });
   }
-  if (!state || typeof state !== 'string' || !storedState || state !== storedState) {
+  // Comparação timing-safe (hardening A07/A08): o state é aleatório de 192
+  // bits e a comparação não pode depender da posição do primeiro byte
+  // divergente. Comportamento idêntico ao `!==` anterior.
+  if (
+    !state ||
+    typeof state !== 'string' ||
+    !storedState ||
+    !safeCompare(state, storedState)
+  ) {
     res.setHeader(
       'Set-Cookie',
       clearHttpOnlyCookie('strava_oauth_state', 'Lax'),
