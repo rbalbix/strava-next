@@ -3,12 +3,25 @@ import type { NextApiRequest } from 'next';
 import { STRAVA_ENDPOINTS } from '../config';
 import { getStravaOAuthStartEnv } from './env';
 
+/**
+ * Base URL da aplicação para o `redirect_uri` do OAuth.
+ *
+ * Em produção usa **exclusivamente** `NEXT_PUBLIC_APP_URL` (VULN-008): se a
+ * variável não estiver definida, lança em vez de cair para o header `Host`,
+ * que é controlável pelo cliente e permitiria redirecionar o `state`/code do
+ * OAuth para um host atacante. O chamador já trata a exceção respondendo 500.
+ *
+ * Fora de produção o fallback para `x-forwarded-proto`/`host` continua
+ * permitido (dev/localhost não é exposto).
+ */
 function getAppUrl(req: NextApiRequest): string {
-  const configured =
-    process.env.NODE_ENV === 'production'
-      ? process.env.NEXT_PUBLIC_APP_URL
-      : undefined;
-  if (configured) return configured.replace(/\/$/, '');
+  if (process.env.NODE_ENV === 'production') {
+    const configured = process.env.NEXT_PUBLIC_APP_URL;
+    if (!configured) {
+      throw new Error('NEXT_PUBLIC_APP_URL is not configured');
+    }
+    return configured.replace(/\/$/, '');
+  }
 
   const proto =
     (req.headers['x-forwarded-proto'] as string | undefined) || 'http';

@@ -275,7 +275,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 - O cookie sozinho não autentica: `withProtectedAPI` resolve o athleteId **pelo registro no Redis**; `gl_session` sem registro → 401 (sessão encerrada). Falha do Redis → 500, nunca 401 — indisponibilidade não desloga ninguém (§8.6 do plano de usabilidade).
 - No cliente, `401` de qualquer endpoint protegido do painel — `/api/app/dashboard` **ou** `/api/app/equipment-thresholds` — encerra a sessão: `signOut()` limpa o estado transitório (modal, erro) e pousa na landing (§8.10/§8.13 do plano). Falhas transitórias e `429` não deslogam.
 - `/api/logout` apaga a chave no Redis (revogação em qualquer dispositivo) além de limpar os cookies.
-- **Migração (até ~30 dias após o deploy do PR 2):** na ausência de `gl_session`, o par legado `strava_code` + `strava_athleteId` ainda é aceito como sessão; um login novo emite `gl_session` e limpa o par antigo. Remoção do fallback no release seguinte.
+- **Fallback legado removido (VULN-002):** o par `strava_code` + `strava_athleteId` **não é mais aceito** como sessão — era controlável pelo cliente e não tinha validação no servidor, permitindo forjar a identidade de qualquer atleta. `withProtectedAPI` e o GSSP do `/` só enxergam `gl_session`; quem ainda tiver os cookies antigos recebe 401 (ou cai direto na landing) e entra de novo pelo Strava. `authorize`/`logout` continuam limpando os cookies legados remanescentes.
 
 ### Métricas (Prometheus-like)
 

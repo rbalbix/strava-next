@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockRequest, createMockResponse } from '../helpers/next-api';
+import { SESSION_COOKIE } from '../../src/server/cookies';
 import { StravaSessionNotFoundError } from '../../src/services/strava-auth';
 
 const mocks = vi.hoisted(() => {
@@ -20,6 +21,7 @@ const mocks = vi.hoisted(() => {
     mockGetEquipmentThresholds: vi.fn(),
     mockGetUnrecognizedCodes: vi.fn(),
     mockLoggerError: vi.fn(),
+    mockRedisGet: vi.fn(),
   };
 });
 
@@ -67,6 +69,17 @@ vi.mock('../../src/services/logger', () => ({
   getLogger: () => ({ error: mocks.mockLoggerError }),
 }));
 
+// A sessão nova resolve o athleteId no Redis via `gl_session`; sem este mock
+// o `resolveStravaSession` bateria no Upstash real (VULN-002 removeu o
+// fallback de cookie legado, então todo teste autenticado passa por aqui).
+vi.mock('../../src/services/redis', () => ({
+  default: {
+    get: (...args: unknown[]) => mocks.mockRedisGet(...args),
+    setex: vi.fn(),
+    del: vi.fn(),
+  },
+}));
+
 describe('GET /api/dashboard integration', () => {
   let dashboardHandler: typeof import('../../src/pages/api/dashboard').default;
   let appDashboardHandler: typeof import('../../src/pages/api/app/dashboard').default;
@@ -83,6 +96,10 @@ describe('GET /api/dashboard integration', () => {
     process.env.CLIENT_ID = 'client-id';
     process.env.CLIENT_SECRET = 'client-secret';
     mocks.mockGetUnrecognizedCodes.mockResolvedValue(null);
+    // Todo teste autenticado usa `gl_session`; o registro no Redis devolve o
+    // athleteId 123 (mesmo valor do cookie legado anterior). Testes com
+    // `mockResolvedValueOnce(777)` têm precedência sobre esta base.
+    mocks.mockRedisGet.mockResolvedValue('123');
   });
 it('returns 401 for non-GET requests when unauthenticated', async () => {
   const req = createMockRequest({
@@ -109,7 +126,7 @@ it('returns 401 when athlete cookie is missing', async () => {
     mocks.mockGetAthleteAccessToken.mockResolvedValueOnce(null);
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -132,7 +149,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -166,7 +183,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -220,7 +237,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -239,7 +256,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -258,7 +275,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -290,7 +307,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -325,7 +342,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -354,7 +371,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -368,7 +385,7 @@ it('returns 401 when athlete cookie is missing', async () => {
     mocks.mockGetAthleteAccessToken.mockRejectedValueOnce(new Error('boom'));
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -400,7 +417,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 

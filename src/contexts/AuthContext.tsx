@@ -103,11 +103,11 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     sessionStorage.removeItem('hasActivities');
     sessionStorage.removeItem('athleteCacheTime');
 
-    // O cookie de sessão (`gl_session`; e, na janela de migração do PR 2, o
-    // par legado `strava_code`/`strava_athleteId`) é HttpOnly e, portanto,
+    // O cookie de sessão (`gl_session`) é HttpOnly e, portanto,
     // invisível para o JavaScript — limpar via document.cookie não tem efeito
     // algum. A remoção acontece no POST /api/app/logout, chamado acima, que
-    // também revoga a sessão no Redis. As linhas que faziam isso aqui foram
+    // também revoga a sessão no Redis (e limpa os cookies legados remanescentes).
+    // As linhas que faziam isso aqui foram
     // removidas por serem enganosas: sugeriam uma capacidade que não existe.
 
     setCodeReturned(null);

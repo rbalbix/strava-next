@@ -38,6 +38,11 @@ const WEBHOOK_SUBSCRIPTION_ID = process.env.WEBHOOK_SUBSCRIPTION_ID
   ? Number(process.env.WEBHOOK_SUBSCRIPTION_ID)
   : null;
 const WEBHOOK_RATE_LIMIT_MAX_PER_MINUTE = 60;
+// Limite por IP (sem chave de atleta), aplicado antes da checagem de
+// `subscription_id` — sem ele, o brute-force do ID de assinatura passava sem
+// nenhuma limitação (VULN-003). Mais permissivo que o limite por atleta para
+// não afetar o Strava (que dispara vários eventos por janela do mesmo IP).
+const WEBHOOK_IP_RATE_LIMIT_MAX_PER_MINUTE = 180;
 const WEBHOOK_REPLAY_TTL_SECONDS = 2 * 60 * 60; // 2 hours
 
 function getClientIp(req: NextApiRequest): string {
@@ -120,6 +125,35 @@ async function enforceWebhookRateLimit(
   return { ok: true };
 }
 
+/**
+ * Limite global por IP, aplicado **antes** da checagem de `subscription_id`.
+ *
+ * O limite por atleta só roda depois do `hasAuth`, e o `subscription_id` era
+ * validado antes de qualquer rate limit — o brute-force do ID de assinatura
+ * (VULN-003) passava ilimitado. Como o ID de assinatura é um número pequeno,
+ * bastava pacote de força bruta para acertá-lo; daí o teto por IP aqui.
+ *
+ * **Depende de `getClientIp` ser confiável** (VULN-007): se o proxy da frente
+ * deixar o cliente forjar `X-Forwarded-For`, a chave do limite é forjável
+ * também. Verificar em produção com um `curl -H 'X-Forwarded-For: 1.2.3.4'`
+ * e conferir se o IP logado é o real ou o forjado.
+ */
+async function enforceWebhookIpRateLimit(
+  req: NextApiRequest,
+): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+  const ip = normalizeIp(getClientIp(req));
+  const window = Math.floor(Date.now() / 60000);
+  const rateKey = `strava:webhook:rate:ip:${ip}:${window}`;
+  const current = await redis.incr(rateKey);
+  if (current === 1) {
+    await redis.expire(rateKey, 120);
+  }
+  if (current > WEBHOOK_IP_RATE_LIMIT_MAX_PER_MINUTE) {
+    return { ok: false, retryAfter: 60 };
+  }
+  return { ok: true };
+}
+
 async function guardWebhookReplay(event: StravaWebhookEvent): Promise<boolean> {
   const replayKey = `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
   const inserted = await redis.set(replayKey, '1', {
@@ -189,6 +223,18 @@ export default async function handler(
         },
         'Webhook recebido',
       );
+
+      // Rate limit por IP ANTES de qualquer lógica de payload: cobre o
+      // brute-force do `subscription_id` e payloads inválidos (VULN-003).
+      const ipLimit = await enforceWebhookIpRateLimit(req);
+      if (!ipLimit.ok) {
+        log.warn(
+          { sourceIp, retryAfter: ipLimit.retryAfter },
+          'Webhook rate limit exceeded (per IP)',
+        );
+        res.setHeader('Retry-After', String(ipLimit.retryAfter));
+        return res.status(429).json({ error: 'Rate limit exceeded' });
+      }
 
       // Validate payload with Zod schema
       const validation = validateWebhookEvent(req.body);

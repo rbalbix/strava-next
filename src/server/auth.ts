@@ -13,14 +13,16 @@ export type AuthenticatedNextApiHandler = (
 /**
  * Resolve o atleta autenticado da requisição.
  *
- * **Sessão real (`gl_session`)**: o token do cookie só vale se o registro
+ * **Único caminho: `gl_session`.** O token do cookie só vale se o registro
  * `strava:session:<hash>` existir no Redis — a identidade vem do servidor,
- * não de um cookie enviado pelo cliente (D6/PR 2).
+ * nunca de um cookie enviado pelo cliente (D6/PR 2).
  *
- * **Legado (janela de migração)**: na ausência do cookie novo, o par
- * `strava_athleteId` (+ `strava_code`) continua sendo aceito como sessão,
- * exatamente como antes. É o que impede deslogar a base existente no deploy;
- * a remoção deste ramo é o "release seguinte" previsto em §2.D.10.
+ * O ramo legado que aceitava o par `strava_code` + `strava_athleteId` foi
+ * **removido por segurança** (VULN-002): ambos os cookies são controlados
+ * pelo cliente e não havia validação servidor, o que permitia forjar a
+ * identidade de qualquer atleta. Quem ainda estiver com os cookies antigos
+ * recebe 401 → o cliente encerra a sessão → login pelo Strava reemite
+ * `gl_session` (§2.D.10).
  *
  * `gl_session` presente sem registro → `null`: sessão encerrada (expirada,
  * apagada ou revogada), e o responde 401 é o caminho correto.
@@ -34,18 +36,11 @@ async function getAuthenticatedAthleteId(
   req: NextApiRequest,
 ): Promise<number | null> {
   const sessionToken = req.cookies?.[SESSION_COOKIE];
-  if (sessionToken) {
-    return resolveStravaSession(sessionToken);
-  }
-
-  const athleteIdRaw = req.cookies?.strava_athleteId;
-  const athleteId = Number(athleteIdRaw);
-
-  if (!athleteIdRaw || !Number.isFinite(athleteId) || athleteId <= 0) {
+  if (!sessionToken) {
     return null;
   }
 
-  return athleteId;
+  return resolveStravaSession(sessionToken);
 }
 
 export function withProtectedAPI(handler: AuthenticatedNextApiHandler) {

@@ -89,11 +89,11 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   // D6/PR 2: a sessão nova é o cookie opaco `gl_session` — o token é só um
   // ponteiro para o registro `strava:session:*` no Redis. O par legado
-  // (strava_code + strava_athleteId) continua valendo como sinal de sessão
-  // durante a janela de migração (§2.D.10); par incompleto não conta.
+  // (strava_code + strava_athleteId) **não conta mais** como sinal de sessão:
+  // era controlável pelo cliente e a remoção do fallback fechou o bypass de
+  // autenticação (VULN-002, §2.D.10). Quem só tem os cookies antigos pousa
+  // na landing e entra de novo pelo Strava.
   const sessionToken = getCookieValue(cookies, SESSION_COOKIE);
-  const legacyCode = getCookieValue(cookies, 'strava_code');
-  const legacyAthleteId = getCookieValue(cookies, 'strava_athleteId');
 
   // A sessão é validada na primeira chamada de dados, não aqui — e, por isso,
   // só a **presença** do cookie é lida. Um `gl_session` expirado renderiza o
@@ -112,9 +112,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // (`respondIfSessionMissing`, §8.6), e o cliente encerra a sessão e volta
   // para a landing. São ~300 ms uma única vez — e, como os cookies são limpos
   // nesse processo, a visita seguinte já cai direto na landing.
-  const isAuthenticated = Boolean(
-    sessionToken || (legacyCode && legacyAthleteId),
-  );
+  const isAuthenticated = Boolean(sessionToken);
 
   // Sem sessão, renderiza a landing. Antes, qualquer visitante era redirecionado
   // para /api/oauth/start e dali para o Strava — o valor do produto, o aviso de

@@ -53,12 +53,13 @@ describe('withProtectedAPI middleware', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('forwards the request to the underlying handler if strava_athleteId cookie is present', async () => {
-    // Legado da migração do PR 2: sem `gl_session`, o par antigo continua
-    // valendo — é o que impede deslogar a base existente no deploy.
+  it('rejeita o cookie legado strava_athleteId sem gl_session (VULN-002)', async () => {
+    // O par legado é controlável pelo cliente e não tinha validação no
+    // servidor — forjava a identidade de qualquer atleta. O fallback foi
+    // removido: só `gl_session` com registro no Redis autentica.
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '55555' },
+      cookies: { strava_athleteId: '55555', strava_code: 'algo' },
     });
     const res = createMockResponse();
 
@@ -67,7 +68,8 @@ describe('withProtectedAPI middleware', () => {
 
     await wrapped(req, res);
 
-    expect(handler).toHaveBeenCalledWith(req, res, 55555);
+    expect(res.statusCode).toBe(401);
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it('resolve o athleteId pelo registro da sessão quando há gl_session', async () => {

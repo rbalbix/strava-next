@@ -413,12 +413,11 @@ export async function saveStravaAuth(
     const saved = deserializeAuthData(savedRaw);
 
     if (!saved || saved.accessToken !== accessToken) {
+      // Nunca logar o valor dos tokens: o log ia para o logger estruturado e
+      // exporia credencial viva (VULN-006). Só o fato da comparação ter
+      // falhado é diagnóstico suficiente.
       log.error(
-        {
-          athleteId,
-          savedAccessToken: saved?.accessToken,
-          newAccessToken: accessToken,
-        },
+        { athleteId, tokenMatches: saved?.accessToken === accessToken },
         'Health check falhou: token não salvo corretamente no Redis',
       );
       throw new Error(
