@@ -157,7 +157,6 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
 
   vi.doMock('../../src/services/email', () => ({
     sendEmail: vi.fn(),
-    createErrorEmailTemplate: vi.fn(() => '<p>error</p>'),
   }));
 
   vi.doMock('strava', () => ({

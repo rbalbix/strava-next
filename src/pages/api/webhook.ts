@@ -13,7 +13,6 @@ import {
 import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
 import {
-  createErrorEmailTemplate,
   sendEmail,
   type WebhookErrorContext,
 } from '../../services/email';
@@ -341,18 +340,20 @@ export default async function handler(
       log.error({ err: error }, 'Erro ao processar webhook');
       try {
         const emailEnv = getEmailServerEnv();
-        const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
-        if (!emailEnv.success || !contactEmail) {
+        if (!emailEnv.success) {
           throw new Error('Missing email configuration');
         }
+        // O endpoint resolve assunto, destinatário e HTML a partir do
+        // template (VULN-009): aqui só vão params planos — o `Error` é
+        // serializado antes, porque ele não sobrevive ao JSON.
         await sendEmail({
-          to: contactEmail,
-          subject: `[GearLife] - Erro no Webhook`,
-          html: createErrorEmailTemplate(
-            'Erro no Processamento do Webhook',
-            error,
-          ),
-          from: emailEnv.data.RESEND_EMAIL_FROM,
+          template: 'webhook-error',
+          params: {
+            message: 'Erro no Processamento do Webhook',
+            errorDetail:
+              error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error && error.stack ? error.stack : '',
+          },
         });
       } catch (emailError) {
         log.error({ err: emailError }, 'Erro ao enviar email de erro');
@@ -391,14 +392,16 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       log.error({ athleteId }, 'Token não encontrado para atleta');
       try {
         // await sendEmail({
-        //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-        //   subject: `[Stuff Stats] - Token não encontrado para atleta ${athleteId}`,
-        //   html: createErrorEmailTemplate(
-        //     'Token não encontrado',
-        //     new Error(`Athlete ${athleteId} sem token`),
-        //     errorContext,
-        //   ),
-        //   from: process.env.RESEND_EMAIL_FROM,
+        //   template: 'webhook-error',
+        //   params: {
+        //     message: 'Token não encontrado',
+        //     errorDetail: `Athlete ${athleteId} sem token`,
+        //     stack: '',
+        //     eventType: 'activity',
+        //     athleteId,
+        //     objectId: activityId,
+        //     activityUrl: `https://www.strava.com/activities/${activityId}`,
+        //   },
         // });
         log.error(
           { err: new Error(`Athlete ${athleteId} sem token`) },
@@ -508,14 +511,17 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         activityUrl: `https://www.strava.com/activities/${event.object_id}`,
       };
       // await sendEmail({
-      //   to: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
-      //   subject: `[Stuff Stats] - Erro ao processar atividade ${event.object_id}`,
-      //   html: createErrorEmailTemplate(
-      //     'Erro ao processar evento de atividade',
-      //     error,
-      //     errorContext,
-      //   ),
-      //   from: process.env.RESEND_EMAIL_FROM,
+      //   template: 'webhook-error',
+      //   params: {
+      //     message: 'Erro ao processar evento de atividade',
+      //     errorDetail:
+      //       error instanceof Error ? error.message : String(error),
+      //     stack: error instanceof Error && error.stack ? error.stack : '',
+      //     eventType: event.aspect_type,
+      //     athleteId: event.owner_id,
+      //     objectId: event.object_id,
+      //     activityUrl: `https://www.strava.com/activities/${event.object_id}`,
+      //   },
       // });
       log.error(
         { err: new Error(`Erro ao processar atividade ${event.object_id}`) },
