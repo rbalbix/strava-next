@@ -1,16 +1,5 @@
 import type { NextApiRequest } from 'next';
-import { timingSafeEqual } from 'crypto';
-
-function safeCompare(a: string, b: string): boolean {
-  const aBuffer = Buffer.from(a);
-  const bBuffer = Buffer.from(b);
-
-  if (aBuffer.length !== bBuffer.length) return false;
-  return timingSafeEqual(
-    aBuffer as unknown as Uint8Array,
-    bBuffer as unknown as Uint8Array,
-  );
-}
+import { safeCompare } from '../server/safe-compare';
 
 export function hasValidInternalApiKey(req: NextApiRequest): boolean {
   const expected = process.env.INTERNAL_API_TOKEN;
