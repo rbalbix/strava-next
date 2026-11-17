@@ -121,9 +121,10 @@ describe('home page', () => {
     expect(setHeader).toHaveBeenCalledTimes(1);
   });
 
-  it('getServerSideProps keeps accepting the legacy session pair (migration)', async () => {
-    // Janela de migração do PR 2 (§2.D.10): quem ainda tem o par antigo
-    // continua logado até reautenticar e receber um `gl_session`.
+  it('getServerSideProps rejects the legacy session pair (VULN-002)', async () => {
+    // O par antigo (strava_code + strava_athleteId) era controlável pelo
+    // cliente e não tinha validação no servidor — o fallback foi removido.
+    // Quem só tem os cookies antigos pousa na landing e entra de novo.
     const setHeader = vi.fn();
     const result = await getServerSideProps({
       req: {
@@ -133,7 +134,7 @@ describe('home page', () => {
     } as any);
 
     expect(setHeader).toHaveBeenCalledWith('Cache-Control', 'private, no-store');
-    expect((result as any).props.code).toBe('session');
+    expect((result as any).props.code).toBeNull();
     // Sem round-trip de I/O: só cookies são lidos.
     expect(setHeader).toHaveBeenCalledTimes(1);
   });

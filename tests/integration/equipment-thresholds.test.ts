@@ -29,6 +29,9 @@ describe('API /api/app/equipment-thresholds', () => {
     ({ default: handler } =
       await import('../../src/pages/api/app/equipment-thresholds'));
     vi.clearAllMocks();
+    // Todo teste autenticado usa `gl_session`; o registro no Redis devolve o
+    // athleteId 123. O caso com `mockResolvedValueOnce(777)` tem precedência.
+    mocks.mockRedisGet.mockResolvedValue(123);
   });
 it('returns 401 for unsupported methods when unauthenticated', async () => {
   const req = createMockRequest({
@@ -79,7 +82,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'GET',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 
@@ -119,7 +122,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'POST',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
       body: {
         gearId: 'bikeA',
         equipmentId: 'chain',
@@ -145,7 +148,7 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 400 for invalid POST payload', async () => {
     const req = createMockRequest({
       method: 'POST',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
       body: {
         gearId: '',
         equipmentId: 'chain',
@@ -167,7 +170,7 @@ it('returns 401 when athlete cookie is missing', async () => {
 
     const req = createMockRequest({
       method: 'POST',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
       body: {
         gearId: 'bikeA',
         equipmentId: 'suspension',
@@ -194,7 +197,7 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 400 when the unit is outside km/h', async () => {
     const req = createMockRequest({
       method: 'POST',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
       body: {
         gearId: 'bikeA',
         equipmentId: 'chain',
@@ -214,7 +217,7 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 400 when the payload contains an unknown field', async () => {
     const req = createMockRequest({
       method: 'POST',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
       body: {
         gearId: 'bikeA',
         equipmentId: 'chain',
@@ -234,7 +237,7 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 405 with the Allow header for unsupported methods when authenticated', async () => {
     const req = createMockRequest({
       method: 'PATCH',
-      cookies: { strava_athleteId: '123' },
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
     });
     const res = createMockResponse();
 

@@ -127,15 +127,13 @@ try {
   // ---------------------------------------------------------------------
   const errorContext = await browser.newContext({ serviceWorkers: 'block' });
 
-  // Cookie de sessão da **migração** (D6/PR 2): o par legado
-  // strava_code + strava_athleteId continua valendo como sessão durante a
-  // janela de transição (§2.D.10) — testá-lo aqui prova que um usuário
-  // antigo não é deslogado por um erro transitório. Só importa que
-  // `getServerSideProps` o enxergue e renderize o painel — a chamada que o
-  // validaria é justamente a que vai falhar (interceptada com 429).
+  // Cookie de sessão `gl_session` (D6/PR 2): `getServerSideProps` só lê a
+  // presença do cookie para renderizar o shell do painel — a chamada que o
+  // validaria no servidor é justamente a que vai falhar (interceptada com
+  // 429 pelo Playwright, sem sair do browser). O par legado
+  // strava_code + strava_athleteId não é mais aceito (VULN-002).
   await errorContext.addCookies([
-    { name: 'strava_code', value: 'e2e-opaque-session', url: baseUrl },
-    { name: 'strava_athleteId', value: '4242', url: baseUrl },
+    { name: 'gl_session', value: 'e2e-opaque-session', url: baseUrl },
   ]);
 
   await errorContext.route('**/api/app/dashboard', (route) =>

@@ -389,6 +389,34 @@ describe('/api/webhook integration', () => {
     expect(res.body).toEqual({ error: 'Invalid subscription' });
   });
 
+  it('rate-limits per IP BEFORE the subscription_id check (VULN-003)', async () => {
+    // O brute-force do `subscription_id` acontecia antes de qualquer rate
+    // limit (o limite por atleta só roda depois do `hasAuth`). Com o limite
+    // por IP aplicado antes da checagem, um IP acima do teto recebe 429 mesmo
+    // errando a assinatura — sem ele, responderia 403 e seguia ilimitado.
+    const { webhookHandler, req, res } = await loadWebhookHandler({
+      rateLimitCurrent: 200, // acima do teto por IP (180/min)
+      webhookSubscriptionId: '777',
+      validationResult: {
+        success: true,
+        data: {
+          aspect_type: 'delete',
+          event_time: Math.floor(Date.now() / 1000),
+          object_id: 123,
+          object_type: 'athlete',
+          owner_id: 987,
+          subscription_id: 999, // errada de propósito
+        },
+      },
+    });
+
+    await webhookHandler(req, res);
+
+    expect(res.statusCode).toBe(429);
+    expect(res.headers['Retry-After']).toBe('60');
+    expect(res.body).toEqual({ error: 'Rate limit exceeded' });
+  });
+
   it('returns 200 for athlete delete event without stored auth (idempotent)', async () => {
     const { webhookHandler, req, res } = await loadWebhookHandler({
       hasAuth: 0,
