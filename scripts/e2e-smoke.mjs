@@ -21,10 +21,11 @@ try {
     );
   }
 
-  // A landing não tem mais <h1> de marca (§8.11); o texto de destaque é a
-  // tagline. O que precisa existir é ela — prova de que a landing renderizou
-  // de verdade — e o CTA de login.
-  const tagline = page.locator('h2', {
+  // A tagline é o h1 da landing (§8.11/§8.28): o título de marca saiu e a
+  // tagline foi promovida de h2 para h1 em 027ab344 (16/11). O que precisa
+  // existir é ela — prova de que a landing renderizou de verdade — e o CTA
+  // de login.
+  const tagline = page.locator('h1', {
     hasText: 'Pedale. A gente cuida da manutenção.',
   });
   if ((await tagline.count()) === 0) {
