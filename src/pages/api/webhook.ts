@@ -44,6 +44,24 @@ const WEBHOOK_RATE_LIMIT_MAX_PER_MINUTE = 60;
 const WEBHOOK_IP_RATE_LIMIT_MAX_PER_MINUTE = 180;
 const WEBHOOK_REPLAY_TTL_SECONDS = 2 * 60 * 60; // 2 hours
 
+/**
+ * IP de origem do request (rate limit, allowlist e logs).
+ *
+ * Lê a **primeira** entrada de `X-Forwarded-For`.
+ *
+ * VULN-007 — verificado em produção em 17/11/2026: um
+ * `curl -H 'X-Forwarded-For: 1.2.3.4'` contra `/api/webhook` logou
+ * `sourceIp: 189.123.19.47` (IP real do cliente), não o forjado. A Vercel
+ * **sobrescreve** o header inteiro (docs oficiais: "we currently overwrite
+ * the X-Forwarded-For header ... to prevent IP spoofing"), então a lista tem
+ * um único valor e a primeira posição é a confiável — não explorável.
+ *
+ * Reavaliar se:
+ *  - o deploy sair da Vercel: em proxy que faz *append* do IP, a posição
+ *    confiável é a **última** entrada, não a primeira;
+ *  - entrar um proxy na frente da Vercel (Cloudflare etc.): `sourceIp` passa
+ *    a ser o IP do proxy e `WEBHOOK_ALLOWED_IPS` precisa listá-lo.
+ */
 function getClientIp(req: NextApiRequest): string {
   const xff = req.headers['x-forwarded-for'];
   if (Array.isArray(xff) && xff.length > 0) {
@@ -134,8 +152,8 @@ async function enforceWebhookRateLimit(
  *
  * **Depende de `getClientIp` ser confiável** (VULN-007): se o proxy da frente
  * deixar o cliente forjar `X-Forwarded-For`, a chave do limite é forjável
- * também. Verificar em produção com um `curl -H 'X-Forwarded-For: 1.2.3.4'`
- * e conferir se o IP logado é o real ou o forjado.
+ * também. Verificado em produção em 17/11/2026 (ver docblock de `getClientIp`):
+ * a Vercel sobrescreve o header — a chave não é forjável hoje.
  */
 async function enforceWebhookIpRateLimit(
   req: NextApiRequest,

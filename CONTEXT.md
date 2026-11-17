@@ -287,6 +287,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 - `API_ROUTES` (em `src/config/index.ts`): `/api/authorize`, `/api/remoteStorage`, `/api/save-tokens`, `/api/send-email`.
 - Métricas: `GET /api/metrics` (requere `X-Internal-Api-Key`).
 - **`POST /api/send-email` é só-por-template (VULN-009)**: o payload é `{ template, params }` (`.strict()`, params só escalares) — sem `to`/`subject`/`html` livres. Assunto, destinatário e HTML saem do registro em `src/services/email-templates.ts` (`webhook-error`, `contact`), com todos os interpolações escapados; destinatário é sempre `NEXT_PUBLIC_CONTACT_EMAIL`. Rate limit de 10/min por Redis (fail-open: Redis fora não silencia a notificação de erro). Chamador legítimo: `sendEmail()` no handler de erro do webhook.
+- **IP de origem do webhook (VULN-007, verificado 17/11/2026 — fechado)**: `getClientIp` usa a primeira entrada de `X-Forwarded-For`; teste em produção com header forjado (`1.2.3.4`) logou o IP real do cliente — a Vercel sobrescreve o header inteiro, logo não explorável. Reavaliar **se** sair da Vercel (proxy com append → posição confiável é a última entrada) ou entrar um proxy na frente (Cloudflare etc. → allowlist precisa do IP do proxy). `WEBHOOK_ALLOWED_IPS` vazio = allowlist desligado (comportamento atual).
 
 ### Regras de Ingestão de Atividades
 
