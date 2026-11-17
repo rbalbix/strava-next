@@ -1,4 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  createContactEmailTemplate,
+  createErrorEmailTemplate,
+} from '../../../src/services/email-templates';
 
 type LoadOptions = {
   postImpl?: ReturnType<typeof vi.fn>;
@@ -29,6 +33,13 @@ async function loadEmailModule(options: LoadOptions = {}) {
   return { ...mod, post, emailSentInc, emailFailedInc, logger };
 }
 
+// O chamador pede um template; assunto/destinatários/HTML saem do
+// registro no servidor (VULN-009) — payload livre não existe mais.
+const webhookErrorPayload = {
+  template: 'webhook-error' as const,
+  params: { message: 'Hello', errorDetail: 'Body' },
+};
+
 describe('email service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -43,14 +54,12 @@ describe('email service', () => {
       postImpl,
     });
 
-    const payload = {
-      to: 'foo@example.com',
-      subject: 'Hello',
-      html: '<p>Body</p>',
-    };
-    const result = await sendEmail(payload);
+    const result = await sendEmail(webhookErrorPayload);
 
-    expect(post).toHaveBeenCalledWith('/', JSON.stringify(payload));
+    expect(post).toHaveBeenCalledWith(
+      '/',
+      JSON.stringify(webhookErrorPayload),
+    );
     expect(result).toEqual({ id: 'email-1' });
     expect(emailSentInc).toHaveBeenCalledTimes(1);
     expect(emailFailedInc).not.toHaveBeenCalled();
@@ -66,15 +75,16 @@ describe('email service', () => {
       postImpl,
     });
 
-    await expect(
-      sendEmail({
-        to: 'foo@example.com',
-        subject: 'Hello',
-        html: '<p>Body</p>',
-      }),
-    ).rejects.toThrow('Send email failed: 500 Internal Error');
+    await expect(sendEmail(webhookErrorPayload)).rejects.toThrow(
+      'Send email failed: 500 Internal Error',
+    );
     expect(emailFailedInc).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(1);
+    // O log registra o template, nunca os params (podem conter dado do usuário).
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ template: 'webhook-error' }),
+      'Email service error',
+    );
   });
 
   it('sendEmail throws and increments emailFailed when apiEmail throws', async () => {
@@ -83,13 +93,9 @@ describe('email service', () => {
       postImpl,
     });
 
-    await expect(
-      sendEmail({
-        to: 'foo@example.com',
-        subject: 'Hello',
-        html: '<p>Body</p>',
-      }),
-    ).rejects.toThrow('network fail');
+    await expect(sendEmail(webhookErrorPayload)).rejects.toThrow(
+      'network fail',
+    );
     expect(emailFailedInc).toHaveBeenCalledTimes(1);
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
@@ -111,19 +117,24 @@ describe('email service', () => {
     });
 
     await expect(
-      sendEmail({ to: 'foo@example.com', subject: 'A', html: '<p>x</p>' }),
+      sendEmail({ template: 'contact', params: { message: 'A' } }),
     ).resolves.toEqual({ ok: true });
 
     await expect(
-      sendEmail({ to: 'foo@example.com', subject: 'B', html: '<p>y</p>' }),
+      sendEmail({ template: 'contact', params: { message: 'B' } }),
     ).rejects.toThrow('network fail');
 
     expect(logger.error).toHaveBeenCalledTimes(1);
   });
+});
 
-  it('createContactEmailTemplate renders contact fields', async () => {
-    const { createContactEmailTemplate } = await loadEmailModule();
-    const html = createContactEmailTemplate('Ana', 'ana@example.com', 'Oi!');
+describe('email templates', () => {
+  it('createContactEmailTemplate renders contact fields', () => {
+    const html = createContactEmailTemplate({
+      name: 'Ana',
+      email: 'ana@example.com',
+      message: 'Oi!',
+    });
 
     expect(html).toContain('Ana');
     expect(html).toContain('ana@example.com');
@@ -131,15 +142,29 @@ describe('email service', () => {
     expect(html).toContain('Novo Contato - GearLife');
   });
 
-  it('createErrorEmailTemplate renders context details when provided', async () => {
-    const { createErrorEmailTemplate } = await loadEmailModule();
-    const html = createErrorEmailTemplate('Erro webhook', new Error('boom'), {
+  it('createContactEmailTemplate escapes HTML nos params (VULN-009)', () => {
+    const html = createContactEmailTemplate({
+      name: '<script>alert(1)</script>',
+      email: 'ana@example.com',
+      message: '<b>negrito</b> & "aspas"',
+    });
+
+    // Nada de marcagem vindo do formulário chega ao e-mail do dono.
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('<b>negrito</b>');
+    expect(html).toContain('&lt;script&gt;');
+    expect(html).toContain('&lt;b&gt;negrito&lt;/b&gt;');
+    expect(html).toContain('&amp; &quot;aspas&quot;');
+  });
+
+  it('createErrorEmailTemplate renders context details when provided', () => {
+    const html = createErrorEmailTemplate({
+      message: 'Erro webhook',
+      errorDetail: 'boom',
       eventType: 'activity',
       athleteId: 123,
       objectId: 456,
       activityUrl: 'https://www.strava.com/activities/456',
-      message: 'x',
-      error: 'boom',
     });
 
     expect(html).toContain('Erro webhook');
@@ -150,26 +175,43 @@ describe('email service', () => {
     expect(html).toContain('456');
   });
 
-  it('createErrorEmailTemplate renders without context and supports non-Error values', async () => {
-    const { createErrorEmailTemplate } = await loadEmailModule();
-    const html = createErrorEmailTemplate('Erro simples', { code: 500 });
+  it('createErrorEmailTemplate renders without context', () => {
+    const html = createErrorEmailTemplate({
+      message: 'Erro simples',
+      errorDetail: 'boom',
+    });
 
     expect(html).toContain('Erro simples');
-    expect(html).toContain('[object Object]');
+    expect(html).toContain('boom');
     expect(html).not.toContain('Contexto do Evento');
   });
 
-  it('createErrorEmailTemplate with partial context omits absent optional fields', async () => {
-    const { createErrorEmailTemplate } = await loadEmailModule();
-    const html = createErrorEmailTemplate('Erro parcial', new Error('boom'), {
-      message: 'm',
-      error: 'e',
+  it('createErrorEmailTemplate with partial context omits absent optional fields', () => {
+    const html = createErrorEmailTemplate({
+      message: 'Erro parcial',
+      errorDetail: 'e',
+      eventType: 'activity',
     });
 
     expect(html).toContain('Contexto do Evento');
-    expect(html).not.toContain('Tipo de Evento');
+    expect(html).toContain('Tipo de Evento');
     expect(html).not.toContain('ID do Atleta');
     expect(html).not.toContain('ID do Objeto');
+    expect(html).not.toContain('Link da Atividade');
+  });
+
+  it('createErrorEmailTemplate escapa stack/detail e só linka https', () => {
+    const html = createErrorEmailTemplate({
+      message: 'Erro',
+      errorDetail: '<img src=x onerror=alert(1)>',
+      stack: 'at foo() <bar>',
+      activityUrl: 'javascript:alert(1)',
+    });
+
+    expect(html).not.toContain('<img');
+    expect(html).not.toContain('href="javascript:');
+    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+    expect(html).toContain('at foo() &lt;bar&gt;');
     expect(html).not.toContain('Link da Atividade');
   });
 });

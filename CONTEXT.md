@@ -286,6 +286,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 
 - `API_ROUTES` (em `src/config/index.ts`): `/api/authorize`, `/api/remoteStorage`, `/api/save-tokens`, `/api/send-email`.
 - Métricas: `GET /api/metrics` (requere `X-Internal-Api-Key`).
+- **`POST /api/send-email` é só-por-template (VULN-009)**: o payload é `{ template, params }` (`.strict()`, params só escalares) — sem `to`/`subject`/`html` livres. Assunto, destinatário e HTML saem do registro em `src/services/email-templates.ts` (`webhook-error`, `contact`), com todos os interpolações escapados; destinatário é sempre `NEXT_PUBLIC_CONTACT_EMAIL`. Rate limit de 10/min por Redis (fail-open: Redis fora não silencia a notificação de erro). Chamador legítimo: `sendEmail()` no handler de erro do webhook.
 
 ### Regras de Ingestão de Atividades
 
@@ -294,7 +295,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 
 ### Variáveis de Ambiente Críticas
 
-- `CLIENT_ID`, `CLIENT_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `VERIFY_TOKEN`, `WEBHOOK_SUBSCRIPTION_ID`, `RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `INTERNAL_API_TOKEN`, `NEXT_PUBLIC_APP_URL` (veja `Readme.md`).
+- `CLIENT_ID`, `CLIENT_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `VERIFY_TOKEN`, `WEBHOOK_SUBSCRIPTION_ID`, `RESEND_API_KEY`, `RESEND_EMAIL_FROM`, `INTERNAL_API_TOKEN`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_CONTACT_EMAIL` (veja `Readme.md`).
 
 ---
 

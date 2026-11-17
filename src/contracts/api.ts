@@ -32,9 +32,20 @@ const SaveTokensRequestSchema = z
 
 const SendEmailRequestSchema = z
   .object({
-    to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
-    subject: z.string().min(1).max(200),
-    html: z.string().min(1).max(20000),
+    // Nomes de template — fonte única do contrato. `services/email-templates`
+    // tipa o registro como `Record<SendEmailRequest['template'], ...>`, então
+    // cadastrar um nome aqui sem definição lá (ou o contrário) quebra o
+    // typecheck. HTML livre não é aceito: só o que o template renderiza
+    // chega ao destinatário (VULN-009).
+    template: z.enum(['webhook-error', 'contact']),
+    // Params planos: escalares com teto de tamanho. Sem objetos aninhados,
+    // o payload continua pequeno e o renderizador sabe o que esperar.
+    params: z
+      .record(
+        z.string().min(1).max(64),
+        z.union([z.string().max(8000), z.number(), z.boolean()]),
+      )
+      .optional(),
   })
   .strict();
 

@@ -1,17 +1,24 @@
 import { apiEmail } from './api';
+import type { EmailTemplateName, EmailTemplateParams } from './email-templates';
 import { getLogger } from './logger';
 import { emailSent, emailFailed } from './metrics';
 
-export interface EmailData {
-  to: string | string[];
-  subject: string;
-  html: string;
-  from?: string;
+/**
+ * Payload aceito por `/api/send-email`.
+ *
+ * Não existe mais `to`/`subject`/`html` livres (VULN-009): o chamador pede
+ * um template nomeado com params planos, e o endpoint resolve assunto,
+ * destinatários e HTML no servidor. Um token interno vazado não consegue
+ * mais enviar conteúdo arbitrário para endereços arbitrários.
+ */
+export interface SendEmailPayload {
+  template: EmailTemplateName;
+  params?: EmailTemplateParams;
 }
 
-export async function sendEmail(emailData: EmailData) {
+export async function sendEmail(payload: SendEmailPayload) {
   try {
-    const response = await apiEmail.post('/', JSON.stringify(emailData));
+    const response = await apiEmail.post('/', JSON.stringify(payload));
 
     if (response.status >= 200 && response.status < 300) {
       try {
@@ -29,50 +36,11 @@ export async function sendEmail(emailData: EmailData) {
     } catch (_) {}
     const log = getLogger();
     log.error(
-      { error, to: emailData.to, subject: emailData.subject },
+      { error, template: payload.template },
       'Email service error',
     );
     throw error;
   }
-}
-
-// Template de email simples de contato
-export function createContactEmailTemplate(
-  name: string,
-  email: string,
-  message: string,
-): string {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #007aff; color: white; padding: 20px; text-align: center; }
-        .content { background-color: #f9f9f9; padding: 20px; }
-        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Novo Contato - GearLife</h1>
-        </div>
-        <div class="content">
-          <p><strong>Nome:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Mensagem:</strong></p>
-          <p>${message}</p>
-        </div>
-        <div class="footer">
-          <p>Email enviado automaticamente pelo sistema GearLife</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
 }
 
 export interface WebhookErrorContext {
@@ -82,61 +50,4 @@ export interface WebhookErrorContext {
   athleteId?: number;
   objectId?: number;
   activityUrl?: string;
-}
-
-export function createErrorEmailTemplate(
-  message: string,
-  error: unknown,
-  context?: WebhookErrorContext,
-): string {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const errorStack = error instanceof Error ? error.stack : '';
-  const timestamp = new Date().toISOString();
-
-  const detailsHtml = context
-    ? `
-    <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-    <div style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin-top: 20px;">
-      <h3 style="margin-top: 0;">Contexto do Evento</h3>
-      ${context.eventType ? `<p><strong>Tipo de Evento:</strong> ${context.eventType}</p>` : ''}
-      ${context.athleteId ? `<p><strong>ID do Atleta:</strong> ${context.athleteId}</p>` : ''}
-      ${context.objectId ? `<p><strong>ID do Objeto:</strong> ${context.objectId}</p>` : ''}
-      ${context.activityUrl ? `<p><strong>Link da Atividade:</strong> <a href="${context.activityUrl}">${context.activityUrl}</a></p>` : ''}
-      <p><strong>Timestamp:</strong> ${timestamp}</p>
-    </div>
-  `
-    : '';
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; }
-        .content { background-color: #f9f9f9; padding: 20px; }
-        .error-box { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 15px; border-radius: 4px; margin: 15px 0; font-family: monospace; white-space: pre-wrap; word-break: break-word; font-size: 12px; }
-        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>⚠️ Erro no Webhook - GearLife</h1>
-        </div>
-        <div class="content">
-          <p><strong>Tipo de Erro:</strong> ${message}</p>
-          <div class="error-box">${errorMessage}${errorStack ? '\n\n' + errorStack : ''}</div>
-          ${detailsHtml}
-        </div>
-        <div class="footer">
-          <p>Email enviado automaticamente pelo sistema GearLife</p>
-          <p>Timestamp: ${timestamp}</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
 }
