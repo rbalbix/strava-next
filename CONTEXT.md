@@ -225,8 +225,8 @@ Não há regras automáticas de dependência entre marcações por esta decisão
 Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, serviços, partes):
 
 - Consumíveis: `lub`, `chain`, `tubes`, `tubeless`, `tires`, `fronttube`, `reartube`
-- Serviços: `review`, `clean`, `suspareview`, `shockreview`, `bleed`
-- Partes / Componentes: `stem`, `handlebar`, `wheelset`, `frontwheel`, `rearwheel`, `headset`, `hubs`, `brakes`, `frontbrake`, `rearbrake`, `disks`, `frontdisk`, `reardisk`, `calipers`, `levers`, `stis`, `tape`, `grip`, `dropper`, `saddle`, `pedal`, `chain`, `bb`, `cassette`, `crankset`, `coroa`, `frontderailleur`, `rearderailleur`, `pulley`, `rearshifter`, `cables`, `helmet`, `shoes`, `freehub`
+- Serviços: `review`, `clean`, `suspareview`, `shockreview`, `bleed`, `seatpostreview`
+- Partes / Componentes: `stem`, `handlebar`, `wheelset`, `frontwheel`, `rearwheel`, `headset`, `hubs`, `pivots`, `brakes`, `frontbrake`, `rearbrake`, `disks`, `frontdisk`, `reardisk`, `calipers`, `levers`, `stis`, `tape`, `grip`, `dropper`, `saddle`, `pedal`, `chain`, `bb`, `cassette`, `crankset`, `powermeter`, `coroa`, `guide`, `frontderailleur`, `rearderailleur`, `pulley`, `rearshifter`, `cables`, `lights`, `frontlight`, `rearlight`, `ebike`, `helmet`, `shoes`, `freehub`
 
 ### Formato de Nota Privada
 

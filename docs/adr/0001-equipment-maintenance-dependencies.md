@@ -28,6 +28,7 @@ O sistema GearLife processa atividades do Strava e interpreta marcações na `pr
    - `tubeless` marca automaticamente `tubes`, `fronttube` e `reartube` como registrados (câmaras são irrelevantes para instalação tubeless).
    - `brakes` marca `frontbrake` e `rearbrake` como registrados (tratamento em par para pastilhas de freio).
    - `suspension` / `newshock` marcam os itens de revisão/kit relacionados (`suspareview`, `suspakit`, `shockreview`, `shockkit`) como registrados quando aplicável.
+   - **Emenda 2026-11-18:** `lights` marca `frontlight` e `rearlight` como registrados (tratamento em par para luzes, espelho de `brakes`; lote Tiers 2/3 da pesquisa de mercado).
 
 3. Mudanças futuras nas dependências só serão aceitas quando documentadas por outro ADR (ou emenda a este), com justificativa que cubra o impacto no UX e nos cálculos de estatística.
 

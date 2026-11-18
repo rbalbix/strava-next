@@ -145,7 +145,7 @@ describe('statistics.createStatistics', () => {
         type: 'Ride',
         start_date_local: '2026-01-05T00:00:00Z',
         gear_id: 'bike-1',
-        private_note: 'brakes suspension newshock review',
+        private_note: 'brakes lights suspension newshock review',
       },
       {
         id: 1,
@@ -156,7 +156,7 @@ describe('statistics.createStatistics', () => {
         start_date_local: '2026-01-04T00:00:00Z',
         gear_id: 'bike-1',
         private_note:
-          'frontbrake rearbrake suspareview suspakit shockreview shockkit',
+          'frontbrake rearbrake frontlight rearlight suspareview suspakit shockreview shockkit',
       },
     ] as any[];
     const gears = [{ id: 'bike-1', name: 'Bike One' }] as any[];
@@ -167,6 +167,10 @@ describe('statistics.createStatistics', () => {
     expect(ids).toContain('brakes');
     expect(ids).not.toContain('frontbrake');
     expect(ids).not.toContain('rearbrake');
+    // emenda ADR 0001 (2026-11-18): par de luzes suprime os singles
+    expect(ids).toContain('lights');
+    expect(ids).not.toContain('frontlight');
+    expect(ids).not.toContain('rearlight');
     expect(ids).toContain('suspension');
     expect(ids).not.toContain('suspareview');
     expect(ids).not.toContain('suspakit');

@@ -89,6 +89,9 @@ export const Equipments = {
     show: 'Rolamento de direção',
   },
   Hubs: { id: 'hubs', caption: 'cubos:', show: 'Rolamento de cubo' },
+  // Rolamentos de pivô do quadro (full-suspension) — mesmo grupo de
+  // rolamentos de headset/hubs.
+  Pivots: { id: 'pivots', caption: 'pivôs:', show: 'Pivôs' },
 
   Brake: { id: 'brakes', caption: 'Pastilhas (par):', show: 'Pastilhas (par)' },
   FrontBrake: {
@@ -174,6 +177,14 @@ export const Equipments = {
     caption: 'canote:',
     show: 'Canote (retrátil ou não)',
   },
+  // Revisão do canote (selos/buchas) — espelho de suspareview/shockreview.
+  // Sem sinônimo: 'canote' é do dropper (troca ≠ revisão) e 'review' só
+  // registra com token isolado (guard de noteCodes), como os outros *review.
+  SeatpostReview: {
+    id: 'seatpostreview',
+    caption: 'canote (rev.):',
+    show: 'Canote (rev.)',
+  },
   Saddle: { id: 'saddle', caption: 'selim:', show: 'Selim' },
 
   Pedal: { id: 'pedal', caption: 'pedal:', show: 'Pedais' },
@@ -182,9 +193,23 @@ export const Equipments = {
 
   Cassette: { id: 'cassette', caption: 'cassete:', show: 'Cassete' },
   Crankset: { id: 'crankset', caption: 'pedivela:', show: 'Pedivela' },
+  PowerMeter: {
+    id: 'powermeter',
+    caption: 'potenciômetro:',
+    show: 'Potenciômetro',
+  },
   // id PT ('coroa'): um id 'chainring' casaria com `chain` por substring
   // ('chain' está dentro de 'chainring') e marcaria a corrente junto.
   Chainring: { id: 'coroa', caption: 'coroa:', show: 'Coroa' },
+  // id 'guide' (não 'chainguide'): a forma EN conteria 'chain' por
+  // substring e marcaria a corrente junto. Sem sinônimo: 'guia' é
+  // substring de 'guidão' — a cobertura PT vem da sugestão de código
+  // (nearestCode: 'guia' → 'guide').
+  Guide: {
+    id: 'guide',
+    caption: 'guia de corrente:',
+    show: 'Guia de corrente',
+  },
   FrontDerailleur: {
     id: 'frontderailleur',
     caption: 'câmbio[dianteiro]:',
@@ -212,6 +237,30 @@ export const Equipments = {
     caption: 'cabos:',
     show: 'Cabos de câmbio',
   },
+
+  // Luz em par + frente/trás — espelho de brakes/tires: o par é um id só
+  // ('lights') e os singles usam [frente]/[traseira]. Colisão verificada:
+  // 'frontlight'/'rearlight' NÃO contêm 'lights' (sem o 's'), então marcar
+  // um lado não registra o par — e nenhum termo do vocabulário prévio
+  // contém o fragmento 'light'.
+  // 'luz' (3 letras) fica de fora dos sinônimos pela regra D14 de ≥4;
+  // 'luzes' cobre o par (forma do caption).
+  Lights: { id: 'lights', caption: 'Luzes (par):', show: 'Luzes (par)' },
+  FrontLight: {
+    id: 'frontlight',
+    caption: 'luz[frente]:',
+    show: 'Luz dianteira',
+  },
+  RearLight: {
+    id: 'rearlight',
+    caption: 'luz[traseira]:',
+    show: 'Luz traseira',
+  },
+  // Sinônimo hifenizado de propósito: normalizeNote preserva o hífen, então
+  // a forma do caption ('e-bike') não casa sozinha com o id ('ebike').
+  // 'e-bike' não colide com nenhum termo existente (não há hífens no
+  // vocabulário) e 'bike' não é termo de equipamento.
+  EBike: { id: 'ebike', caption: 'e-bike:', show: 'E-bike' },
 
   Helmet: {
     id: 'helmet',
@@ -278,6 +327,11 @@ export function resolveCaption(equipment: {
 // substring: `coroa` ('chainring' conteria 'chain' e registraria a corrente)
 // e `frontderailleur` ('câmbio' casaria com rearderailleur; 'dianteiro' com
 // 'pneu dianteiro'). Registro desses dois = copiar o código da tabela.
+// Tiers 2 e 3 (mesma pesquisa, 8 itens) — mesmas regras: ids escolhidos
+// sem colisão verificada nos dois sentidos (novo ⊂ existente e existente ⊂
+// novo, sobre as 91 formas normalizadas do vocabulário); exceção documentada
+// é só o guard de token isolado de `review` (seatpostreview, como
+// suspareview/shockreview). Análise completa por item nas entradas.
 export const EquipmentSynonyms: Record<string, string[]> = {
   lub: ['lubrificação'],
   review: ['revisão'],
@@ -313,4 +367,17 @@ export const EquipmentSynonyms: Record<string, string[]> = {
   helmet: ['capacete'],
   shoes: ['sapatilha'],
   pulley: ['roldana'],
+  // Tiers 2 e 3 (pesquisa de mercado):
+  // 'pivô'/'pivôs' — pt; 'potenciômetro' — a forma do caption copiada p/
+  // a nota; 'luzes' — cobre o par de luzes (forma do caption; 'luz' fica
+  // de fora pela regra de ≥4); 'e-bike' — forma do caption com hífen
+  // (ver comentário na entrada).
+  // Sem sinônimo: `seatpostreview` ('canote' é do dropper — troca ≠ revisão),
+  // `guide` ('guia' ⊂ 'guidão' — casaria com o guidão na direção errada) e
+  // os singles de luz ('[frente]'/'[traseira]' são de caption; o código é o
+  // id — espelho de fronttire/rearbrake, que também não têm).
+  pivots: ['pivô'],
+  powermeter: ['potenciômetro'],
+  lights: ['luzes'],
+  ebike: ['e-bike'],
 };
