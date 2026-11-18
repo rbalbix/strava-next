@@ -2,15 +2,24 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAutoSync } from '../../../src/hooks/useAutoSync';
-import { apiClient } from '../../../src/lib/apiClient';
+import { apiClient, ApiError } from '../../../src/lib/apiClient';
 import { SWRConfig } from 'swr';
 import React from 'react';
 
-vi.mock('../../../src/lib/apiClient', () => ({
-  apiClient: {
-    getDashboard: vi.fn(),
-  },
-}));
+vi.mock('../../../src/lib/apiClient', async (importOriginal) => {
+  // `apiClient.getDashboard` é mockado, mas `getHttpStatus`/`ApiError` são
+  // utilitários reais: reimplementá-los aqui validaria uma versão paralela do
+  // status de erro (mesmol molde do dashboard.test com strava-auth).
+  const actual =
+    await importOriginal<typeof import('../../../src/lib/apiClient')>();
+  return {
+    apiClient: {
+      getDashboard: vi.fn(),
+    },
+    getHttpStatus: actual.getHttpStatus,
+    ApiError: actual.ApiError,
+  };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>
@@ -156,6 +165,60 @@ describe('useAutoSync', () => {
     // Advance time - should call API again
     await vi.advanceTimersByTimeAsync(1000);
     expect(apiClient.getDashboard).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
+
+  it('does not auto-retry or refetch on focus after a 429 rate limit response', async () => {
+    vi.useFakeTimers();
+    vi.mocked(apiClient.getDashboard)
+      .mockRejectedValueOnce(new ApiError(429))
+      .mockResolvedValue({ athlete: { id: 1 } } as any);
+
+    const { result } = renderHook(() => useAutoSync(1000), { wrapper });
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+    expect(result.current.isError).toBeDefined();
+
+    // Em 429 não existe backoff: retry automático consome mais quota e adia o
+    // reset da janela de 15 min do Strava. 30s cobrem o intervalo de retry
+    // (5s) com todo o jitter — nenhuma chamada nova pode sair.
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    // Foco na aba também fica bloqueado: era justamente o gesto que reacendia
+    // o loop de 429 a cada troca de aba.
+    window.dispatchEvent(new Event('focus'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+
+  it('recovers from a 429 through the manual retry and resumes polling', async () => {
+    vi.useFakeTimers();
+    vi.mocked(apiClient.getDashboard)
+      .mockRejectedValueOnce(new ApiError(429))
+      .mockResolvedValue({ athlete: { id: 1 } } as any);
+
+    const { result } = renderHook(() => useAutoSync(1000), { wrapper });
+
+    await vi.advanceTimersByTimeAsync(0);
+    expect(result.current.isError).toBeDefined();
+    expect(apiClient.getDashboard).toHaveBeenCalledTimes(1);
+
+    // Retry manual do painel de erro (Stats chama mutate()).
+    await result.current.mutate();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(result.current.isError).toBeUndefined();
+    expect(result.current.dashboard).toEqual({ athlete: { id: 1 } });
+
+    // 429 passou: o polling volta a rodar no intervalo normal.
+    await vi.advanceTimersByTimeAsync(1000);
+    const calls = vi.mocked(apiClient.getDashboard).mock.calls.length;
+    expect(calls).toBeGreaterThanOrEqual(3);
 
     vi.useRealTimers();
   });

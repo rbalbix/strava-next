@@ -1,23 +1,41 @@
+import { useState } from 'react';
 import useSWR from 'swr';
-import { apiClient } from '../lib/apiClient';
+import { apiClient, getHttpStatus } from '../lib/apiClient';
 
 /**
  * Intervalo do polling em estado saudável.
  *
  * Cada `/api/app/dashboard` faz ≥3 chamadas à API do Strava (`getAthlete`,
- * `getAthleteStats` e `verifyIfHasAnyActivities` — `src/pages/api/dashboard.ts:39-42`),
- * e `updateStatistics` acrescenta mais uma quando o cache de estatísticas está
+ * `getAthleteStats` e `verifyIfHasAnyActivities` — `src/pages/api/dashboard.ts:40-43`),
+ * e `updateStatistics` acrescenta mais duas quando o cache de estatísticas está
  * frio. Com o intervalo anterior de 5s isso dava 36 chamadas/minuto, ou ~540
- * por janela de 15 minutos, contra o limite de 300 da API do Strava: **uma
- * única aba aberta estourava o quota sozinha em menos de 8 minutos** — e era
- * o gatilho real do rate-limit descrito no plano de usabilidade (A3).
+ * por janela de 15 minutos, contra o limite de **100 leituras/15min por
+ * aplicativo** do Strava (tier padrão — ver
+ * https://developers.strava.com/docs/rate-limits): **uma única aba aberta
+ * estourava o quota sozinha em menos de 3 minutos** — e era o gatilho real do
+ * rate-limit descrito no plano de usabilidade (A3).
  *
- * Em 60s o polling consome ~45 chamadas por 15 minutos (≈15% do quota),
- * deixando espaço para as próprias ações do usuário. A frescura praticamente
- * não sofre: `revalidateOnFocus` refaz a leitura assim que a volta a aba, e o
- * painel de erro do `Stats` oferece retry manual.
+ * Em 60s o polling consome ~45 chamadas por janela de 100 (≈45% do quota de
+ * leitura) no pior caso; com o cache baseline de 60s em `getAthlete`,
+ * `getAthleteStats` e `verifyIfHasAnyActivities` o poll quente custa **0**
+ * chamadas Strava. A frescura praticamente não sofre: `revalidateOnFocus`
+ * refaz a leitura assim que a volta a aba, e o painel de erro do `Stats`
+ * oferece retry manual.
+ *
+ * Obs.: o orçamento é do **aplicativo**, compartilhado por todos os atletas
+ * (e por cada `next dev`/aba aberta) — não por usuário.
  */
 const BASE_INTERVAL_MS = 60_000;
+
+/**
+ * Detecta o rate limit do Strava a partir de qualquer erro do fetcher.
+ *
+ * A rota `/api/app/dashboard` devolve `429` com `Retry-After` quando a
+ * janela de leitura esgota; `ApiError` carrega o status real.
+ */
+function isRateLimitError(error: unknown): boolean {
+  return getHttpStatus(error) === 429;
+}
 
 /**
  * Base do backoff exponencial do SWR quando uma leitura falha.
@@ -38,31 +56,44 @@ const ERROR_RETRY_INTERVAL_MS = 5_000;
 /**
  * Teto de tentativas automáticas após uma falha (1 inicial + 5 retries).
  *
- * Sem isto, uma falha persistente — ex.: rate limit do Strava — geraria uma
- * fila de retries que nunca termina, mantendo o app preso a um endpoint que
- * não vai voltar. Com o teto, a recuperação fica por conta de três caminhos
- * explícitos: retry manual no painel de erro, retorno de foco à aba e
- * reconexão de rede.
+ * Sem isto, uma falha persistente geraria uma fila de retries que nunca
+ * termina, mantendo o app preso a um endpoint que não vai voltar. Com o teto,
+ * a recuperação fica por conta de três caminhos explícitos: retry manual no
+ * painel de erro, retorno de foco à aba e reconexão de rede.
  */
 const ERROR_RETRY_COUNT = 5;
 
 /**
  * Hook to automatically synchronize dashboard data using polling.
  *
+ * Em 429 (rate limit do Strava) o comportamento é deliberadamente mais
+ * conservador que em qualquer outra falha:
+ * - **sem retry automático** (`shouldRetryOnError` recusa) — cada retry
+ *   consome mais quota e adia o reset da janela;
+ * - **sem revalidação ao focar a aba** — antes, trocar de aba já bastava para
+ *   reacender o loop de 429;
+ * - **polling zerado** enquanto durar o 429.
+ * A recuperação é manual (retry no painel de erro) ou automática assim que a
+ * janela de 15 min do Strava vira (a rota devolve `retryAfterSeconds`).
+ *
  * @param intervalMs Intervalo de polling em milissegundos. Padrão: 60000ms.
  * @returns Dashboard data, loading state, error state, and mutate function.
  */
 export function useAutoSync(intervalMs = BASE_INTERVAL_MS) {
+  const [rateLimited, setRateLimited] = useState(false);
+
   const { data, error, mutate, isLoading } = useSWR(
     'dashboard',
     apiClient.getDashboard,
     {
-      refreshInterval: intervalMs,
-      revalidateOnFocus: true,
+      refreshInterval: rateLimited ? 0 : intervalMs,
+      revalidateOnFocus: !rateLimited,
       revalidateOnReconnect: true,
-      shouldRetryOnError: true,
+      shouldRetryOnError: (err: Error) => !isRateLimitError(err),
       errorRetryInterval: ERROR_RETRY_INTERVAL_MS,
       errorRetryCount: ERROR_RETRY_COUNT,
+      onError: (err) => setRateLimited(isRateLimitError(err)),
+      onSuccess: () => setRateLimited(false),
     },
   );
 

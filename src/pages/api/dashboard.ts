@@ -11,6 +11,8 @@ import { updateStatistics } from '../../services/statistics';
 import { getAthleteAccessToken } from '../../services/strava-auth';
 import { getEquipmentThresholds } from '../../services/thresholds';
 import { getUnrecognizedCodes } from '../../services/unrecognized-codes';
+import { getStravaErrorDetails } from '../../services/strava-sdk';
+import { secondsToNextStravaWindow } from '../../services/rate-limit';
 import type { AuthenticatedNextApiHandler } from '../../server/auth';
 
 const handler: AuthenticatedNextApiHandler = async (
@@ -37,7 +39,10 @@ const handler: AuthenticatedNextApiHandler = async (
       return res.status(500).json({ error: 'Server auth config missing' });
     }
 
-    const athlete = await getAthlete(strava);
+    // Cache baseline de 60s: sem o athleteId aqui o cache é bypassado e todo
+    // poll paga 1 chamada Strava só para ler o perfil (erro real observado em
+    // produção: 429 morrendo exatamente neste `getAthlete`).
+    const athlete = await getAthlete(strava, athleteId);
     const athleteStats = await getAthleteStats(strava, athlete);
     const hasGear = verifyIfHasAnyGears(athlete);
     const hasActivities = await verifyIfHasAnyActivities(strava, athlete);
@@ -85,6 +90,24 @@ const handler: AuthenticatedNextApiHandler = async (
     // usuário ficava preso num painel de erro genérico para sempre.
     if (respondIfSessionMissing(res, error)) {
       return;
+    }
+
+    // 429 do Strava ≠ erro interno: esgotou a janela de leitura (100 req/15min
+    // por aplicativo). Responde com o status real + quanto falta para o reset
+    // (janelas às :00/:15/:30/:45), para o cliente não entrar em loop de retry
+    // esquentando a mesma janela — em 429 o `useAutoSync` não faz retry
+    // automático nem revalida ao focar a aba.
+    const { status: stravaStatus } = getStravaErrorDetails(error);
+    if (stravaStatus === 429) {
+      const retryAfterSeconds = secondsToNextStravaWindow();
+      getLogger().warn(
+        { err: error, athleteId, retryAfterSeconds },
+        'Strava rate limit no dashboard',
+      );
+      res.setHeader('Retry-After', String(retryAfterSeconds));
+      return res
+        .status(429)
+        .json({ error: 'Strava rate limit', retryAfterSeconds });
     }
 
     getLogger().error({ err: error }, 'Dashboard endpoint failed');

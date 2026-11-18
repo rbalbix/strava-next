@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => {
     mockGetEquipmentThresholds: vi.fn(),
     mockGetUnrecognizedCodes: vi.fn(),
     mockLoggerError: vi.fn(),
+    mockLoggerWarn: vi.fn(),
     mockRedisGet: vi.fn(),
   };
 });
@@ -66,7 +67,10 @@ vi.mock('../../src/services/unrecognized-codes', () => ({
 }));
 
 vi.mock('../../src/services/logger', () => ({
-  getLogger: () => ({ error: mocks.mockLoggerError }),
+  getLogger: () => ({
+    error: mocks.mockLoggerError,
+    warn: mocks.mockLoggerWarn,
+  }),
 }));
 
 // A sessão nova resolve o athleteId no Redis via `gl_session`; sem este mock
@@ -432,5 +436,48 @@ it('returns 401 when athlete cookie is missing', async () => {
       gearStats,
     });
     expect(mocks.mockLoggerError).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 429 with Retry-After when the Strava rate limit window is exhausted', async () => {
+    // O quota é do aplicativo (100 leituras/15min, reset às :00/:15/:30/:45).
+    // Sem o mapeamento, tudo virava 500 e o front entrava num loop de retry
+    // esquentando a mesma janela (ver useAutoSync: 429 não faz retry).
+    mocks.mockGetAthleteAccessToken.mockResolvedValue({
+      accessToken: 'access',
+      refreshToken: 'refresh',
+      expiresAt: 9999999999,
+    });
+    mocks.mockGetAthlete.mockRejectedValue({
+      status: 429,
+      message: 'Strava API Error 429: Too Many Requests',
+    });
+
+    const req = createMockRequest({
+      method: 'GET',
+      cookies: { [SESSION_COOKIE]: 'token-opaco' },
+    });
+    const res = createMockResponse();
+
+    await dashboardHandler(req, res);
+
+    expect(res.statusCode).toBe(429);
+    expect(res.body).toEqual({
+      error: 'Strava rate limit',
+      retryAfterSeconds: expect.any(Number),
+    });
+    const { retryAfterSeconds } = res.body as { retryAfterSeconds: number };
+    // Janela de 15 min: nunca 0, nunca além do próximo reset.
+    expect(retryAfterSeconds).toBeGreaterThanOrEqual(1);
+    expect(retryAfterSeconds).toBeLessThanOrEqual(900);
+    expect(res.headers['Retry-After']).toBe(String(retryAfterSeconds));
+    // Janela esgotada ≠ erro interno: warning, não error.
+    expect(mocks.mockLoggerWarn).toHaveBeenCalledTimes(1);
+    expect(mocks.mockLoggerError).not.toHaveBeenCalled();
+
+    // O alias que o front chama (/api/app/dashboard) responde igual.
+    const appRes = createMockResponse();
+    await appDashboardHandler(req, appRes);
+    expect(appRes.statusCode).toBe(429);
+    expect((appRes.body as { error: string }).error).toBe('Strava rate limit');
   });
 });
