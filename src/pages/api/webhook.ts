@@ -7,8 +7,8 @@ import {
   ActivityBase,
   fetchStravaActivity,
   getActivities,
-  processActivities,
   processActivity,
+  withActivitiesWriteLock,
 } from '../../services/activity';
 import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
@@ -442,7 +442,10 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       throw new Error('Missing Strava API configuration');
     }
 
-    const strava = createStravaClient({ refreshToken });
+    const strava = createStravaClient(
+      { refreshToken },
+      { context: 'webhook.activity', athleteId },
+    );
     if (!strava) {
       throw new Error('Missing Strava API configuration');
     }
@@ -492,21 +495,23 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
           lastUpdated,
         );
 
-        // Merge and dedupe, preferring newest start_date_local
-        const merged = mergeActivities(
-          activitiesFromStravaAPI,
-          activities || [],
+        // Merge and dedupe, preferring newest start_date_local — sob o lock
+        // de escrita (design 2026-11-18, item 2): a base é relida dentro da
+        // seção crítica, porque o read lá em cima (p/ lastUpdated) pode estar
+        // minutos velho atrás do fetch e o write apagaria o que foi gravado
+        // nesse meio-tempo (lost update).
+        await withActivitiesWriteLock(athleteId, (current) =>
+          mergeActivities(activitiesFromStravaAPI, current),
         );
-        await processActivities(athleteId, merged);
       } else if (aspect_type === 'delete') {
         log.info(
           { athleteId, activityId },
           'Activity deleted - removing from storage and updating statistics',
         );
         try {
-          const existing: ActivityBase[] = activities || [];
-          const filtered = existing.filter((a) => a.id !== activityId);
-          await processActivities(athleteId, filtered);
+          await withActivitiesWriteLock(athleteId, (current) =>
+            current.filter((a) => a.id !== activityId),
+          );
         } catch (e) {
           log.error(
             { err: e, athleteId, activityId },
@@ -570,7 +575,10 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           throw new Error('Missing Strava API configuration');
         }
 
-        const strava = createStravaClient({ refreshToken: tokens.refreshToken });
+        const strava = createStravaClient(
+          { refreshToken: tokens.refreshToken },
+          { context: 'webhook.athlete', athleteId },
+        );
         if (!strava) {
           throw new Error('Missing Strava API configuration');
         }
@@ -584,6 +592,20 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
     }
     case 'delete': {
       try {
+        // LGPD (design 2026-11-18, item 4): espera o voo de estatísticas
+        // em andamento liberar a lock (teto 10s) antes de apagar — um
+        // recompute ao vivo recriaria as chaves logo depois do delete.
+        // Passou o teto (rebuild longo), apaga mesmo assim: a guarda
+        // athleteStillExists em toda gravação impede a ressurreição.
+        const statisticsLock = REDIS_KEYS.statisticsLock(athleteId);
+        const waitStart = Date.now();
+        while (
+          (await redis.get(statisticsLock)) &&
+          Date.now() - waitStart < 10_000
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
         await redis.del(
           REDIS_KEYS.auth(athleteId),
           REDIS_KEYS.activities(athleteId),
@@ -592,6 +614,10 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           // D14: relatório de códigos não reconhecidos — dado derivado da
           // observação privada sai junto (LGPD).
           REDIS_KEYS.unrecognizedCodes(athleteId),
+          // Locks também: segurar uma lock de dado apagado só atrasa a
+          // próxima gravação legítima (a guarda de auth já segura).
+          statisticsLock,
+          REDIS_KEYS.activitiesLock(athleteId),
         );
         log.info({ athleteId }, 'Athlete data deleted from storage');
       } catch (error) {

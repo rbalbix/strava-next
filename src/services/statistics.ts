@@ -2,14 +2,16 @@ import { Strava, SummaryGear } from 'strava';
 import { REDIS_KEYS } from '../config';
 import {
   ActivityBase,
+  athleteStillExists,
   fetchStravaActivity,
   getActivities,
   processActivity,
-  processActivities,
+  withActivitiesWriteLock,
 } from './activity';
 
 import { differenceInMinutes, fromUnixTime, getUnixTime } from 'date-fns';
 import { apiRemoteStorage } from './api';
+import redis from './redis';
 import { getAthlete } from './athlete';
 import { Equipment, Equipments } from './equipment';
 import { GearStats, getGears, orderGearsByLastUse } from './gear';
@@ -35,7 +37,305 @@ import {
 // por caso reportado (limite do Strava: 300/15 min).
 const REPORT_REFRESH_MIN_INTERVAL_SECONDS = 600;
 
+/**
+ * Merge do write final do recompute (design 2026-11-18, item 2).
+ *
+ * - `base` = releitura da chave no momento da gravação (o snapshot lido no
+ *   início do voo ficava minutos velho atrás do fetch e sobrescrevia o que
+ *   o webhook gravou nesse meio-tempo — lost update);
+ * - `delta` = o que este recompute buscou do Strava;
+ * - `startIds` = ids do snapshot inicial, para não ressuscitar atividade
+ *   que o webhook deletou durante a janela (o delta pode ainda trazer a
+ *   cópia antiga, buscada antes do delete);
+ * - `deltaComplete` = o delta é uma busca COMPLETA (from-scratch /
+ *   migração legada): nesse caso só o delta sobrevive — atividade que o
+ *   Strava não devolveu mais é apagada ou está com gear inativo, e mantê-la
+ *   em base-only reabriria a migração para sempre. Na busca incremental
+ *   (`after=lastUpdated`), base-only é preservado: dado normal fora da
+ *   janela ou escrita recente do webhook.
+ *
+ * Conflito por id: vence a cópia com `synced_at` mais novo (carimbo do
+ * fetch; campo ausente vale 0, ou seja, a cópia antiga perde para qualquer
+ * nova). Empate ou sem carimbo dos dois lados → vence o delta: no
+ * rebuild/migração o delta é a fonte do `sport_type` novo.
+ *
+ * Resultado ordenado na ordem do delta (com as cópias vencedoras na posição
+ * do delta) + base-only ao final — é a mesma ordem com que createStatistics
+ * já recebia o resultado de getActivities.
+ */
+export function mergeForRecompute(
+  base: ActivityBase[],
+  delta: ActivityBase[],
+  startIds: Set<number>,
+  deltaComplete: boolean,
+): ActivityBase[] {
+  const baseById = new Map(base.map((activity) => [activity.id, activity]));
+  const merged = new Map<number, ActivityBase>();
+
+  for (const incoming of delta) {
+    const existing = baseById.get(incoming.id);
+    if (!existing) {
+      // Estava no snapshot inicial e sumiu da base → deletada durante a
+      // janela — não ressuscitar.
+      if (startIds.has(incoming.id)) continue;
+      merged.set(incoming.id, incoming);
+      continue;
+    }
+    const baseStamp = existing.synced_at ?? 0;
+    const incomingStamp = incoming.synced_at ?? 0;
+    merged.set(incoming.id, incomingStamp >= baseStamp ? incoming : existing);
+  }
+
+  if (!deltaComplete) {
+    for (const existing of base) {
+      if (!merged.has(existing.id)) merged.set(existing.id, existing);
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
+/**
+ * Radar da janela residual do merge (design 2026-11-18, decisão 2.7): quando
+ * a releitura (base) difere do snapshot inicial, uma escrita do webhook
+ * chegou no meio do voo — loga o resumo `{added, keptFromBase, deltaWins,
+ * removed}`. É a evidência que diz se a janela (ms, sob lock) algum dia
+ * aconteceu; sem divergência, silêncio.
+ *
+ * Os contadores usam identidade de referência: `mergeForRecompute` guarda no
+ * resultado os próprios objetos de base/delta, então `winner === fromBase`
+ * distingue quem venceu sem re-comparar conteúdo.
+ */
+function logMergeDivergence(
+  log: ReturnType<typeof getLogger>,
+  athleteId: number,
+  snapshot: ActivityBase[],
+  base: ActivityBase[],
+  delta: ActivityBase[],
+  merged: ActivityBase[],
+): void {
+  if (JSON.stringify(base) === JSON.stringify(snapshot)) return; // sem escrita concorrente
+
+  const snapshotIds = new Set(snapshot.map((activity) => activity.id));
+  const baseById = new Map(base.map((activity) => [activity.id, activity]));
+  const deltaById = new Map(delta.map((activity) => [activity.id, activity]));
+  const mergedIds = new Set(merged.map((activity) => activity.id));
+
+  let added = 0;
+  let keptFromBase = 0;
+  let deltaWins = 0;
+  for (const winner of merged) {
+    if (!snapshotIds.has(winner.id)) added += 1;
+    const fromBase = baseById.get(winner.id);
+    if (fromBase && winner === fromBase) {
+      keptFromBase += 1; // só na base (ou conflito ganho pela base)
+    } else if (fromBase && deltaById.get(winner.id) === winner) {
+      deltaWins += 1; // conflito ganho pelo delta (synced_at mais novo)
+    }
+  }
+  let removed = 0;
+  for (const id of snapshotIds) {
+    if (!mergedIds.has(id)) removed += 1;
+  }
+
+  log.info(
+    { athleteId, added, keptFromBase, deltaWins, removed },
+    'Merge divergiu do snapshot inicial — escrita concorrente durante o voo',
+  );
+}
+
+// ——— Single-flight de updateStatistics (design 2026-11-18, item 3) ———
+//
+// Dois níveis de dedupe:
+// 1. Mesmo processo: Map<atleta, voo> — chamadas concorrentes compartilham
+//    o MESMO promise (antes de qualquer I/O).
+// 2. Outra instância: lock strava:lock:statistics:<id> (NX PX 300s) segura
+//    o corpo inteiro; quem chega espera (poll 500ms, teto 30s) e, se o
+//    outro voo já gravou, devolve o cache — dedupe vale mais que frescor.
+//
+// Sem heartbeat: o corpo inteiro (rebuild ~2min) cabe com folga no TTL de
+// 300s; segurar a lock muito além disso só atrasaria um delete (que tem
+// espera própria de 10s). O `del` é incondicional no finally quando a lock
+// foi adquirida (precedente: refreshLock).
+const statisticsFlights = new Map<number, Promise<GearStats[]>>();
+
+const STATISTICS_LOCK_TTL_SECONDS = 300;
+const STATISTICS_LOCK_POLL_MS = 500;
+const STATISTICS_LOCK_MAX_WAIT_MS = 30_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+type StatisticsFlightEntry =
+  | { kind: 'owned' } // adquirimos a lock — corpo roda sob ela
+  | { kind: 'lockless' } // sem lock (Redis fora / teto sem cache)
+  | { kind: 'returned'; statistics: GearStats[] }; // devolve cache, sem computar
+
+type StatisticsSnapshot = { lastUpdated: number; statistics: GearStats[] };
+
 export async function updateStatistics(
+  strava: Strava,
+  athleteId: number,
+): Promise<GearStats[]> {
+  const inFlight = statisticsFlights.get(athleteId);
+  if (inFlight) {
+    getLogger().debug(
+      { athleteId },
+      'Single-flight: aguardando voo de estatísticas em andamento',
+    );
+    return inFlight;
+  }
+
+  const flight = runStatisticsFlight(strava, athleteId);
+  statisticsFlights.set(athleteId, flight);
+  try {
+    return await flight;
+  } finally {
+    // Só quem criou o voo limpa o Map — quem chegou depois apenas aguarda
+    // o mesmo promise e retorna sem tocar no registro.
+    statisticsFlights.delete(athleteId);
+  }
+}
+
+async function runStatisticsFlight(
+  strava: Strava,
+  athleteId: number,
+): Promise<GearStats[]> {
+  const entry = await enterStatisticsFlight(athleteId);
+  if (entry.kind === 'returned') return entry.statistics;
+
+  try {
+    return await computeStatistics(strava, athleteId);
+  } finally {
+    if (entry.kind === 'owned') {
+      try {
+        await redis.del(REDIS_KEYS.statisticsLock(athleteId));
+      } catch (error) {
+        getLogger().error(
+          { err: error, athleteId },
+          'Erro ao liberar lock de statistics',
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Entra no voo de estatísticas do atleta (o dedupe no processo já aconteceu
+ * no Map antes disto).
+ *
+ * - lock livre → `owned`;
+ * - lock ocupada → espera até 30s: o outro voo gravou (devolve o cache,
+ *   stale-serve) ou liberou (assume a execução);
+ * - teto estourado → devolve o cache existente (stale-ok) ou, sem cache
+ *   (1ª sincronização), calcula `lockless` com warn;
+ * - erro de Redis → `lockless` na hora: sem I/O não há o que esperar (o
+ *   corpo falharia do mesmo jeito nas leituras dele).
+ */
+async function enterStatisticsFlight(
+  athleteId: number,
+): Promise<StatisticsFlightEntry> {
+  const log = getLogger();
+  const lockKey = REDIS_KEYS.statisticsLock(athleteId);
+  const startedAt = Date.now();
+
+  const first = await tryAcquireStatisticsLock(lockKey);
+  if (first === 'ok') return { kind: 'owned' };
+  if (first === 'error') return { kind: 'lockless' };
+
+  while (Date.now() - startedAt < STATISTICS_LOCK_MAX_WAIT_MS) {
+    await sleep(STATISTICS_LOCK_POLL_MS);
+
+    const fresh = await readFreshStatistics(athleteId, startedAt);
+    if (fresh) {
+      log.info(
+        { athleteId },
+        'Single-flight: voo em outra instância já gravou — devolvendo cache',
+      );
+      return { kind: 'returned', statistics: fresh };
+    }
+
+    const again = await tryAcquireStatisticsLock(lockKey);
+    if (again === 'ok') return { kind: 'owned' };
+    if (again === 'error') return { kind: 'lockless' };
+  }
+
+  // Teto de espera estourado (chamada do design): dedupe vale mais que
+  // frescor — devolve o cache que existir (stale-ok).
+  const cached = await readStatisticsSnapshot(athleteId);
+  if (cached) {
+    log.warn(
+      { athleteId, waitedMs: STATISTICS_LOCK_MAX_WAIT_MS },
+      'Single-flight: lock ocupada além do teto — devolvendo cache existente (stale-ok)',
+    );
+    return { kind: 'returned', statistics: cached.statistics };
+  }
+
+  // 1ª sincronização: sem cache não há o que devolver — tenta mais uma vez
+  // e, ocupado, calcula sem lock (comportamento de antes do single-flight).
+  const lastChance = await tryAcquireStatisticsLock(lockKey);
+  if (lastChance === 'ok') return { kind: 'owned' };
+  log.warn(
+    { athleteId },
+    'Single-flight: lock ocupada e sem cache — calculando sem lock',
+  );
+  return { kind: 'lockless' };
+}
+
+async function tryAcquireStatisticsLock(
+  lockKey: string,
+): Promise<'ok' | 'busy' | 'error'> {
+  try {
+    const acquired = await redis.set(lockKey, '1', {
+      nx: true,
+      ex: STATISTICS_LOCK_TTL_SECONDS,
+    });
+    return acquired ? 'ok' : 'busy';
+  } catch (error) {
+    getLogger().warn(
+      { err: error },
+      'Falha ao adquirir lock de statistics — seguindo sem lock',
+    );
+    return 'error';
+  }
+}
+
+async function readStatisticsSnapshot(
+  athleteId: number,
+): Promise<StatisticsSnapshot | null> {
+  try {
+    const res = await apiRemoteStorage.get(REDIS_KEYS.statistics(athleteId));
+    const data = res?.data as Partial<StatisticsSnapshot> | string | null;
+    if (
+      data &&
+      typeof data === 'object' &&
+      typeof data.lastUpdated === 'number' &&
+      Array.isArray(data.statistics)
+    ) {
+      return { lastUpdated: data.lastUpdated, statistics: data.statistics };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * O outro voo gravou desde a nossa chegada? `lastUpdated` é época (s) do
+ * write; compara com o segundo de chegada (o floor perdoa a sub-segundo em
+ * que o voo anterior começou).
+ */
+async function readFreshStatistics(
+  athleteId: number,
+  sinceMs: number,
+): Promise<GearStats[] | null> {
+  const snapshot = await readStatisticsSnapshot(athleteId);
+  if (!snapshot) return null;
+  return snapshot.lastUpdated >= Math.floor(sinceMs / 1000)
+    ? snapshot.statistics
+    : null;
+}
+
+async function computeStatistics(
   strava: Strava,
   athleteId: number,
 ): Promise<GearStats[]> {
@@ -99,7 +399,10 @@ export async function updateStatistics(
       );
       const athlete = await getAthlete(strava, athleteId);
       const gears = getGears(athlete);
-      let activitiesToNewStatistics: ActivityBase[] = [];
+      let deltaActivities: ActivityBase[] = [];
+      // O delta é uma busca completa (from-scratch / migração) ou só o
+      // recorte desde `lastUpdated`? Define se o base-only entra no merge.
+      let deltaComplete = true;
 
       if (
         !storedActivities.data ||
@@ -108,12 +411,7 @@ export async function updateStatistics(
         Object.keys(storedActivities.data).length === 0
       ) {
         // Recupera todas as atividades
-        activitiesToNewStatistics = await getActivities(
-          strava,
-          gears,
-          null,
-          null,
-        );
+        deltaActivities = await getActivities(strava, gears, null, null);
       } else {
         // Recupera apenas as atividades criadas depois de lastUpdated
         const { lastUpdated, activities } = storedActivities.data;
@@ -133,32 +431,64 @@ export async function updateStatistics(
             { athleteId },
             'Legacy activities detected without sport_type; rebuilding activities cache',
           );
-          activitiesToNewStatistics = await getActivities(
-            strava,
-            gears,
-            null,
-            null,
-          );
+          deltaActivities = await getActivities(strava, gears, null, null);
         } else {
-          const activitiesFromStravaAPI = await getActivities(
-            strava,
-            gears,
-            null,
-            lastUpdated,
-          );
-          activitiesToNewStatistics = [...activitiesFromStravaAPI, ...activities];
+          deltaActivities = await getActivities(strava, gears, null, lastUpdated);
+          deltaComplete = false;
         }
       }
 
+      // Ids do snapshot inicial: o delta pode trazer uma cópia que já foi
+      // deletada pelo webhook no meio da janela (só-del no delta e na
+      // base→fora, mas presente no startIds).
+      const snapshotActivities: ActivityBase[] =
+        storedActivities.data?.activities ?? [];
+      const startIds = new Set<number>(
+        snapshotActivities.map((activity: ActivityBase) => activity.id),
+      );
+
+      // Gravação merge-safe (design 2026-11-18, item 2): dentro do lock de
+      // activities, relê a base, mescla com o delta e grava — escrita do
+      // webhook do meio-tempo não é sobrescrito (nem apaga a nossa).
+      const mergedActivities = await withActivitiesWriteLock(
+        athleteId,
+        (current) => {
+          const merged = mergeForRecompute(
+            current,
+            deltaActivities,
+            startIds,
+            deltaComplete,
+          );
+          // Radar da janela residual (design, decisão 2.7): se a releitura
+          // divergiu do snapshot, uma escrita concorrente chegou no meio
+          // do voo — loga o resumo do merge como evidência.
+          logMergeDivergence(
+            log,
+            athleteId,
+            snapshotActivities,
+            current,
+            deltaActivities,
+            merged,
+          );
+          return merged;
+        },
+      );
+
+      if (mergedActivities === null) {
+        // Atleta deletado no meio do voo (guarda LGPD): nada a gravar nem
+        // estatísticas a calcular.
+        log.warn({ athleteId }, 'Recompute abortado — atleta sem auth');
+        return [];
+      }
+
       log.info(
-        { athleteId, activitiesCount: activitiesToNewStatistics.length },
+        { athleteId, activitiesCount: mergedActivities.length },
         'Persisting activities before statistics processing',
       );
-      await processActivities(athleteId, activitiesToNewStatistics);
       const updatedStatistics = await processStatistics(
         strava,
         athleteId,
-        activitiesToNewStatistics,
+        mergedActivities,
       );
       return updatedStatistics;
     }
@@ -181,6 +511,16 @@ async function backfillUnrecognizedCodes(
 ): Promise<void> {
   const log = getLogger();
   try {
+    // LGPD (design 2026-11-18, item 4): delete do atleta no meio → não
+    // recriar a chave unrecognized-codes para um dado que deve sumir.
+    if (!(await athleteStillExists(athleteId))) {
+      log.info(
+        { athleteId },
+        'Backfill de unrecognized-codes ignorado — atleta sem auth (delete em andamento)',
+      );
+      return;
+    }
+
     const existing = await getUnrecognizedCodes(athleteId);
     if (existing !== null) return; // já existe (mesmo []) — não repete
 
@@ -307,6 +647,18 @@ export async function processStatistics(
   updatedActivities: ActivityBase[],
 ): Promise<GearStats[]> {
   const log = getLogger();
+
+  // LGPD (design 2026-11-18, item 4): o delete do atleta pode ter rodado
+  // durante o voo — sem a auth não há mais o que processar nem gravar
+  // (recriar a chave statistics ressuscitaria o dado apagado).
+  if (!(await athleteStillExists(athleteId))) {
+    log.info(
+      { athleteId },
+      'Statistics ignorada — atleta sem auth (delete em andamento)',
+    );
+    return [];
+  }
+
   const athlete = await getAthlete(strava, athleteId);
   const gears = getGears(athlete);
   // D15: relatório salvo já sai ordenado por uso recente dentro de cada

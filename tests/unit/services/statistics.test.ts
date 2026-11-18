@@ -13,7 +13,7 @@ vi.mock('../../../src/services/redis', () => ({
   },
 }));
 
-import { createStatistics } from '../../../src/services/statistics';
+import { createStatistics, mergeForRecompute } from '../../../src/services/statistics';
 
 describe('statistics.createStatistics', () => {
   it('returns one gear stat with aggregated count, distance and moving time', () => {
@@ -266,5 +266,100 @@ describe('statistics.createStatistics D14 — matching tolerante', () => {
 
   it('registers nothing when a * activity has no private note', () => {
     expect(idsFor(undefined as any)).toEqual([]);
+  });
+});
+
+describe('statistics.mergeForRecompute (item 2 — gravação merge-safe)', () => {
+  const activity = (id: number, overrides: Record<string, unknown> = {}) =>
+    ({
+      id,
+      name: `a${id}`,
+      distance: 0,
+      moving_time: 0,
+      type: 'Run',
+      start_date_local: '2026-01-01T00:00:00Z',
+      gear_id: 'g1',
+      private_note: '',
+      ...overrides,
+    }) as any;
+
+  it('incremental: adds delta-only, keeps base-only and dedupes by id', () => {
+    const base = [activity(1, { private_note: 'webhook' }), activity(2)];
+    const delta = [activity(3), activity(2, { name: 'novo' })];
+
+    const merged = mergeForRecompute(base, delta, new Set<number>([1, 2]), false);
+
+    expect(merged.map((a) => a.id)).toEqual([3, 2, 1]);
+    // base-only (1) preservado: escrita do webhook / dado fora da janela.
+    expect(merged.find((a) => a.id === 1)?.private_note).toBe('webhook');
+    // dedupe: id2 aparece uma vez só (antes, o concat duplicava).
+    expect(merged.filter((a) => a.id === 2)).toHaveLength(1);
+  });
+
+  it('conflict: newest synced_at wins; unstamped legacy loses to any stamped copy', () => {
+    const legacy = activity(1, { private_note: 'legada' }); // sem campo → 0
+    const older = activity(1, { synced_at: 100, private_note: 'mais antiga' });
+    const newer = activity(1, { synced_at: 200, private_note: 'mais nova' });
+
+    // delta mais novo que a base → delta vence.
+    expect(
+      mergeForRecompute([older], [newer], new Set<number>(), true)[0]
+        .private_note,
+    ).toBe('mais nova');
+    // base mais nova que o delta (webhook leu DEPOIS do fetch) → base vence:
+    // é exatamente o cenário 14:00/14:01/14:02 do design.
+    expect(
+      mergeForRecompute([newer], [older], new Set<number>(), true)[0]
+        .private_note,
+    ).toBe('mais nova');
+    // cópia legada sem carimbo perde para qualquer delta carimbado.
+    expect(
+      mergeForRecompute([legacy], [older], new Set<number>(), true)[0]
+        .private_note,
+    ).toBe('mais antiga');
+    // sem carimbo dos dois (ou empate) → vence o delta (fonte do rebuild).
+    expect(
+      mergeForRecompute(
+        [legacy],
+        [activity(1, { private_note: 'delta' })],
+        new Set<number>(),
+        true,
+      )[0].private_note,
+    ).toBe('delta');
+  });
+
+  it('complete delta drops base-only (deleted in Strava / gear inativo)', () => {
+    const base = [activity(1), activity(2)];
+    const delta = [activity(2)];
+
+    const merged = mergeForRecompute(base, delta, new Set<number>([1, 2]), true);
+
+    // Sem isto, a migração legada nunca terminaria (base-only sem
+    // sport_type reacenderia o rebuild a cada poll).
+    expect(merged.map((a) => a.id)).toEqual([2]);
+  });
+
+  it('does not resurrect an activity deleted during the window', () => {
+    // id1 estava no snapshot inicial e no delta (fetch anterior ao delete),
+    // mas sumiu da base (releitura pós-delete).
+    const delta = [activity(1), activity(2)];
+
+    const merged = mergeForRecompute([], delta, new Set<number>([1]), false);
+
+    expect(merged.map((a) => a.id)).toEqual([2]);
+  });
+
+  it('keeps a webhook write that landed during the fetch (no lost update)', () => {
+    // base = releitura pós-webhook (nota nova); delta = fetch anterior
+    // (nota antiga) — sem o merge, o write do recompute sobrescrevia.
+    const base = [activity(1, { private_note: 'nota nova', synced_at: 300 })];
+    const delta = [
+      activity(1, { private_note: 'nota antiga', synced_at: 200 }),
+    ];
+
+    const merged = mergeForRecompute(base, delta, new Set<number>([1]), false);
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0].private_note).toBe('nota nova');
   });
 });

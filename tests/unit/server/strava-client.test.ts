@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   stravaConfigs: [] as Record<string, unknown>[],
   loggerInfo: vi.fn(),
   loggerWarn: vi.fn(),
+  responsesInc: vi.fn(),
 }));
 
 vi.mock('strava', () => ({
@@ -20,6 +21,12 @@ vi.mock('../../../src/services/logger', () => ({
     warn: mocks.loggerWarn,
     error: vi.fn(),
   }),
+}));
+
+// Atribuição do quota: o contador por `context` mora em metrics (que puxa
+// redis) — mockado aqui para o módulo carregar sem tocar no Upstash.
+vi.mock('../../../src/services/metrics', () => ({
+  stravaApiResponses: { inc: mocks.responsesInc },
 }));
 
 import {
@@ -73,6 +80,37 @@ describe('reportRateLimit', () => {
     expect(mocks.loggerInfo).toHaveBeenCalledTimes(2);
     expect(mocks.loggerWarn).not.toHaveBeenCalled();
   });
+
+  it('tags every log and the quota counter with the calling context', () => {
+    const ctx = { context: 'dashboard', athleteId: 69666780 };
+
+    reportRateLimit(rateLimit(10), ctx);
+
+    expect(mocks.loggerInfo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: 'dashboard',
+        athleteId: 69666780,
+        rateLimit: expect.anything(),
+      }),
+      'Strava rate limit usage',
+    );
+    expect(mocks.responsesInc).toHaveBeenCalledWith({ context: 'dashboard' });
+
+    // Sem contexto (chamador legado) → label 'unknown', nunca crash.
+    reportRateLimit(rateLimit(10));
+    expect(mocks.responsesInc).toHaveBeenLastCalledWith({
+      context: 'unknown',
+    });
+  });
+
+  it('includes the context in the near-limit warning', () => {
+    reportRateLimit(rateLimit(90), { context: 'webhook.activity' });
+
+    expect(mocks.loggerWarn).toHaveBeenCalledWith(
+      expect.objectContaining({ context: 'webhook.activity' }),
+      expect.any(String),
+    );
+  });
 });
 
 describe('createStravaClient', () => {
@@ -113,6 +151,28 @@ describe('createStravaClient', () => {
     // O callback ligado no SDK é o reportRateLimit (mesma assinatura).
     config.on_rate_limit_update?.(rateLimit(90));
     expect(mocks.loggerWarn).toHaveBeenCalledTimes(1);
+  });
+
+  it('binds the rate-limit context into the SDK callback closure', () => {
+    createStravaClient(
+      { refreshToken: 'refresh' },
+      { context: 'webhook.athlete', athleteId: 42 },
+    );
+
+    const config = mocks.stravaConfigs[0] as {
+      on_rate_limit_update?: (rl: RateLimit) => void;
+    };
+    config.on_rate_limit_update?.(rateLimit(10));
+
+    // O contexto dado na criação chega ao log e ao contador — sem ele o
+    // consumo do quota ficaria anônimo (design 2026-11-18, item 1).
+    expect(mocks.loggerInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ context: 'webhook.athlete', athleteId: 42 }),
+      'Strava rate limit usage',
+    );
+    expect(mocks.responsesInc).toHaveBeenCalledWith({
+      context: 'webhook.athlete',
+    });
   });
 
   it('accepts credentials without access token yet (refresh flow)', () => {

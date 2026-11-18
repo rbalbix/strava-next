@@ -14,13 +14,40 @@ type LoadOptions = {
   processActivityImpl?: ReturnType<typeof vi.fn>;
   getStoredUnrecognizedCodesImpl?: ReturnType<typeof vi.fn>;
   recordRefreshAttemptImpl?: ReturnType<typeof vi.fn>;
+  // Item 2 (merge-safe): lock de escrita e guarda LGPD — os testes de
+  // concorrência/deleção injetam o comportamento; default = fiel ao fluxo.
+  withActivitiesWriteLockImpl?: (
+    athleteId: number,
+    fn: (current: any[]) => any,
+  ) => Promise<any>;
+  athleteStillExistsImpl?: (athleteId: number) => Promise<boolean>;
+  // Item 3 (single-flight): retorno do redis.set da lock de statistics —
+  // 'OK' = livre, null = ocupada (voo em outra instância).
+  statisticsLockSetImpl?: ReturnType<typeof vi.fn>;
 };
 
 async function loadStatisticsModule(options: LoadOptions = {}) {
   vi.resetModules();
 
-  const apiRemoteStorageGet =
+  const baseRemoteGet =
     options.remoteGetImpl ?? vi.fn().mockResolvedValue({ data: null });
+  // Item 2: o helper real relê a base DENTRO do lock. Aqui a releitura usa
+  // o último payload de activities lido do remoteStorage — os testes
+  // existentes não têm uma leitura extra nas cadeias `Once`, e um read de
+  // verdade mudaria a contagem de chamadas.
+  let lastActivities: any[] = [];
+  const apiRemoteStorageGet = vi.fn(async (key: string) => {
+    const res = await baseRemoteGet(key);
+    const data = res?.data;
+    if (
+      data &&
+      typeof data === 'object' &&
+      Array.isArray((data as { activities?: unknown[] }).activities)
+    ) {
+      lastActivities = (data as { activities: any[] }).activities;
+    }
+    return res;
+  });
   const getAthlete = options.getAthleteImpl ?? vi.fn().mockResolvedValue({});
   const getGears = options.getGearsImpl ?? vi.fn().mockReturnValue([]);
   const getActivities =
@@ -51,6 +78,21 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     error: vi.fn(),
   };
 
+  // Item 3 (single-flight): statistics.ts importa redis para a lock de
+  // statistics — mockado aqui para o Upstash real nunca carregar (padrão
+  // da suíte: "o redis real nunca carrega aqui"). Default 'OK' = lock
+  // adquirida na primeira tentativa: os testes existentes não esperam.
+  const redisSet =
+    options.statisticsLockSetImpl ?? vi.fn().mockResolvedValue('OK');
+  const redisDel = vi.fn().mockResolvedValue(1);
+  vi.doMock('../../../src/services/redis', () => ({
+    default: {
+      set: redisSet,
+      del: redisDel,
+      get: vi.fn().mockResolvedValue(null),
+    },
+  }));
+
   vi.doMock('../../../src/services/api', () => ({
     apiRemoteStorage: { get: apiRemoteStorageGet },
   }));
@@ -66,6 +108,21 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     processActivities,
     fetchStravaActivity,
     processActivity,
+    // Item 2 (merge-safe): lock de escrita — relê (último payload lido,
+    // ver acima), roda o merge real de statistics e grava pelo mock de
+    // processActivities, que é o que os testes assertam.
+    withActivitiesWriteLock:
+      options.withActivitiesWriteLockImpl ??
+      (async (athleteId: number, fn: (current: any[]) => any) => {
+        const next = await fn(lastActivities);
+        if (next !== null && next !== undefined) {
+          await processActivities(athleteId, next);
+        }
+        return next;
+      }),
+    // Item 4 (LGPD): guarda antes de toda gravação — default "existe"
+    // mantém os testes existentes gravando; testes de delete injetam false.
+    athleteStillExists: options.athleteStillExistsImpl ?? (async () => true),
   }));
   vi.doMock('../../../src/services/utils', () => ({ saveRemote }));
   vi.doMock('../../../src/services/unrecognized-codes', () => ({
@@ -94,6 +151,8 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     processActivity,
     getStoredUnrecognizedCodes,
     recordRefreshAttempt,
+    redisSet,
+    redisDel,
     logger,
   };
 }
@@ -233,6 +292,174 @@ describe('statistics flow service', () => {
       1700000000,
     );
     expect(processActivities).toHaveBeenCalledWith(123, [...incoming, ...existing]);
+  });
+
+  it('updateStatistics keeps a webhook write made during the fetch (no lost update)', async () => {
+    // Snapshot lido no início do voo…
+    const snapshot = [
+      {
+        id: 1,
+        name: 'Old',
+        distance: 500,
+        moving_time: 50,
+        type: 'Ride',
+        sport_type: 'Ride',
+        start_date_local: '2025-12-31T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: 'nota antiga',
+      },
+    ];
+    // …o webhook atualizou id1 durante o fetch (a releitura dentro do lock
+    // enxerga este estado)…
+    const webhookWritten = [
+      { ...snapshot[0], private_note: 'nota nova', synced_at: 300 },
+    ];
+    // …e o fetch (after=lastUpdated) só devolveu a atividade nova id2.
+    const fetched = [
+      {
+        id: 2,
+        name: 'New',
+        distance: 1000,
+        moving_time: 100,
+        type: 'Ride',
+        sport_type: 'Ride',
+        start_date_local: '2026-01-01T00:00:00Z',
+        gear_id: 'bike-1',
+        private_note: '',
+      },
+    ];
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: { lastUpdated: 1700000000, activities: snapshot },
+      })
+      .mockResolvedValueOnce({ data: null });
+
+    const processActivitiesImpl = vi.fn().mockResolvedValue(undefined);
+
+    const { updateStatistics, getActivities, processActivities, logger } =
+      await loadStatisticsModule({
+        remoteGetImpl,
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl: vi.fn().mockResolvedValue(fetched),
+        processActivitiesImpl,
+        // Simula a releitura DENTRO do lock: a base visível no write é o
+        // estado pós-webhook (não o snapshot antigo).
+        withActivitiesWriteLockImpl: async (athleteId, fn) => {
+          const next = await fn(webhookWritten);
+          await processActivitiesImpl(athleteId, next);
+          return next;
+        },
+      });
+
+    await updateStatistics({} as any, 123);
+
+    expect(getActivities).toHaveBeenCalledWith(
+      expect.any(Object),
+      [{ id: 'bike-1', name: 'Bike' }],
+      null,
+      1700000000,
+    );
+
+    const written = processActivities.mock.calls[0][1] as any[];
+    // A nova entra, a escrita do webhook sobrevive — o write não pode
+    // devolver o snapshot antigo (lost update).
+    expect(written).toHaveLength(2);
+    expect(written.find((a) => a.id === 2)).toBeDefined();
+    expect(written.find((a) => a.id === 1)?.private_note).toBe('nota nova');
+
+    // Radar da janela residual (decisão 2.7): base ≠ snapshot → resumo do
+    // merge no log — 1 adicionada (id2), 1 mantida da base (id1-webhook),
+    // 0 conflitos ganhos pelo delta, 0 removidas.
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        athleteId: 123,
+        added: 1,
+        keptFromBase: 1,
+        deltaWins: 0,
+        removed: 0,
+      }),
+      expect.stringContaining('divergiu'),
+    );
+  });
+
+  it('updateStatistics aborts the recompute when the athlete was deleted mid-flight (LGPD)', async () => {
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated: 1700000000,
+          activities: [{ id: 1, sport_type: 'Ride' }],
+        },
+      })
+      .mockResolvedValueOnce({ data: null });
+
+    const { updateStatistics, saveRemote, logger } = await loadStatisticsModule(
+      {
+        remoteGetImpl,
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl: vi
+          .fn()
+          .mockResolvedValue([{ id: 2, sport_type: 'Ride' }]),
+        // A guarda dentro do lock detectou a auth ausente → nada a gravar.
+        withActivitiesWriteLockImpl: async () => null,
+      },
+    );
+
+    const result = await updateStatistics({} as any, 123);
+
+    expect(result).toEqual([]);
+    expect(saveRemote).not.toHaveBeenCalled(); // statistics não recriada
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({ athleteId: 123 }),
+      expect.stringContaining('atleta sem auth'),
+    );
+  });
+
+  it('processStatistics does not recreate the statistics key after the delete (LGPD)', async () => {
+    const { processStatistics, saveRemote, getAthlete } =
+      await loadStatisticsModule({
+        athleteStillExistsImpl: async () => false,
+      });
+
+    const result = await processStatistics({} as any, 123, [] as any);
+
+    expect(result).toEqual([]);
+    expect(saveRemote).not.toHaveBeenCalled();
+    expect(getAthlete).not.toHaveBeenCalled();
+  });
+
+  it('backfill of unrecognized codes is skipped for a deleted athlete (LGPD)', async () => {
+    const aligned = {
+      lastUpdated: 1700000000,
+      activities: [{ id: 1, sport_type: 'Ride', private_note: 'x y' }],
+    };
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({ data: aligned })
+      .mockResolvedValueOnce({
+        data: { lastUpdated: 1700000000, statistics: [{ id: 'old' }] },
+      });
+
+    const { updateStatistics, getUnrecognizedCodes, saveUnrecognizedCodes } =
+      await loadStatisticsModule({
+        remoteGetImpl,
+        athleteStillExistsImpl: async () => false,
+      });
+
+    const result = await updateStatistics({} as any, 123);
+
+    // Cache válido continua sendo servido (backfill é best-effort)…
+    expect(result).toEqual([{ id: 'old' }]);
+    // …mas nenhum toque nas chaves de dado do atleta deletado.
+    expect(getUnrecognizedCodes).not.toHaveBeenCalled();
+    expect(saveUnrecognizedCodes).not.toHaveBeenCalled();
   });
 
   it('updateStatistics rebuilds from scratch when stored cache has legacy activities without sport_type', async () => {
@@ -882,5 +1109,155 @@ describe('statistics flow service', () => {
     expect(fetchStravaActivity).toHaveBeenCalledTimes(1);
     expect(fetchStravaActivity).toHaveBeenCalledWith(11, expect.anything());
     expect(getAthlete).not.toHaveBeenCalled(); // sem mudança → fast path intacto
+  });
+});
+
+describe('statistics single-flight (item 3)', () => {
+  const ride = {
+    id: 10,
+    name: 'Ride',
+    distance: 100,
+    moving_time: 10,
+    type: 'Ride',
+    sport_type: 'Ride',
+    start_date_local: '2026-01-01T00:00:00Z',
+    gear_id: 'bike-1',
+    private_note: '',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('concurrent calls in the same process share one flight (Map dedupe)', async () => {
+    const getActivitiesImpl = vi.fn().mockResolvedValue([ride]);
+    const { updateStatistics, getActivities, saveRemote, redisDel } =
+      await loadStatisticsModule({
+        // Sem cache → recompute (é o corpo do voo que tem que rodar 1×).
+        remoteGetImpl: vi.fn().mockResolvedValue({ data: null }),
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl,
+      });
+
+    const [first, second] = await Promise.all([
+      updateStatistics({} as any, 123),
+      updateStatistics({} as any, 123),
+    ]);
+
+    // Um voo só: uma busca ao Strava, uma gravação — e os dois chamadores
+    // recebem o mesmo resultado.
+    expect(getActivities).toHaveBeenCalledTimes(1);
+    expect(saveRemote).toHaveBeenCalledTimes(1);
+    expect(second).toEqual(first);
+    expect(first.length).toBeGreaterThan(0);
+    // Lock adquirida no início e liberada no finally.
+    expect(redisDel).toHaveBeenCalledWith('strava:lock:statistics:123');
+  });
+
+  it('busy lock in another instance serves the fresh cache without recomputing', async () => {
+    const freshStats = [{ id: 'bike-1' }];
+    const remoteGetImpl = vi.fn().mockResolvedValue({
+      data: {
+        lastUpdated: Math.floor(Date.now() / 1000), // o outro voo acabou de gravar
+        statistics: freshStats,
+      },
+    });
+    const { updateStatistics, getActivities, logger } =
+      await loadStatisticsModule({
+        remoteGetImpl,
+        statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+      });
+
+    const result = await updateStatistics({} as any, 123);
+
+    expect(result).toEqual(freshStats);
+    expect(getActivities).not.toHaveBeenCalled(); // não recomputa
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({ athleteId: 123 }),
+      expect.stringContaining('já gravou'),
+    );
+  });
+
+  it('after the 30s cap a busy lock serves the existing cache (stale-ok)', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'], now: 1_800_000_000_000 });
+    try {
+      const staleStats = [{ id: 'stale' }];
+      const remoteGetImpl = vi.fn().mockResolvedValue({
+        data: { lastUpdated: 1, statistics: staleStats }, // bem antigo
+      });
+      const { updateStatistics, getActivities, logger } =
+        await loadStatisticsModule({
+          remoteGetImpl,
+          statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+        });
+
+      const promise = updateStatistics({} as any, 123);
+      await vi.advanceTimersByTimeAsync(31_000);
+      const result = await promise;
+
+      expect(result).toEqual(staleStats);
+      expect(getActivities).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ athleteId: 123 }),
+        expect.stringContaining('stale-ok'),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('after the cap with no cache (first sync) it computes lockless', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'], now: 1_800_000_000_000 });
+    try {
+      const { updateStatistics, getActivities, logger } =
+        await loadStatisticsModule({
+          remoteGetImpl: vi.fn().mockResolvedValue({ data: null }), // sem cache
+          statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+          getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+          getGearsImpl: vi.fn().mockReturnValue([
+            { id: 'bike-1', name: 'Bike' },
+          ]),
+          getActivitiesImpl: vi.fn().mockResolvedValue([ride]),
+        });
+
+      const promise = updateStatistics({} as any, 123);
+      await vi.advanceTimersByTimeAsync(31_000);
+      const result = await promise;
+
+      expect(getActivities).toHaveBeenCalledTimes(1); // calculou mesmo assim
+      expect(result.length).toBeGreaterThan(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ athleteId: 123 }),
+        expect.stringContaining('sem lock'),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a redis failure on the lock degrades to lockless immediately (no 30s stall)', async () => {
+    const { updateStatistics, getActivities, redisSet } =
+      await loadStatisticsModule({
+        remoteGetImpl: vi.fn().mockResolvedValue({ data: null }),
+        statisticsLockSetImpl: vi
+          .fn()
+          .mockRejectedValue(new Error('redis down')),
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl: vi.fn().mockResolvedValue([ride]),
+      });
+
+    // Sem I/O não há o que esperar: vai direto para o corpo (um teste de
+    // 5s estouraria se isso virasse a espera de 30s).
+    const result = await updateStatistics({} as any, 123);
+
+    expect(redisSet).toHaveBeenCalledTimes(1);
+    expect(getActivities).toHaveBeenCalledTimes(1);
+    expect(result.length).toBeGreaterThan(0);
   });
 });

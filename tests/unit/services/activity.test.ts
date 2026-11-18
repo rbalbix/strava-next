@@ -2,6 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type LoadOptions = {
   redisGet?: ReturnType<typeof vi.fn>;
+  redisSet?: ReturnType<typeof vi.fn>;
+  redisDel?: ReturnType<typeof vi.fn>;
+  // Item 4 (LGPD): valor lido na chave strava:auth:<id> — undefined = o
+  // atleta "existe" (default dos testes); null = deletado (guarda pula a
+  // gravação).
+  authGet?: unknown;
   saveRemoteResult?: { success: boolean };
   updateActivityInArrayResult?: unknown[];
   isAxiosError?: (value: unknown) => boolean;
@@ -12,8 +18,23 @@ type LoadOptions = {
 async function loadActivityModule(options: LoadOptions = {}) {
   vi.resetModules();
 
+  const baseRedisGet = options.redisGet ?? vi.fn().mockResolvedValue(null);
   const redis = {
-    get: options.redisGet ?? vi.fn().mockResolvedValue(null),
+    // Key-aware: a guarda LGPD lê strava:auth:<id> e o resto (activities,
+    // unrecognized-codes…) cai no redisGet do teste.
+    get: vi.fn((key: string) => {
+      if (String(key).includes(':auth:')) {
+        return Promise.resolve(
+          options.authGet !== undefined
+            ? options.authGet
+            : { accessToken: 'access-token' },
+        );
+      }
+      return Promise.resolve(baseRedisGet(key));
+    }),
+    // 'OK' = lock adquirido na primeira tentativa (nenhum teste espera).
+    set: options.redisSet ?? vi.fn().mockResolvedValue('OK'),
+    del: options.redisDel ?? vi.fn().mockResolvedValue(1),
   };
   const saveRemote = vi
     .fn()
@@ -370,6 +391,174 @@ describe('activity service', () => {
     });
 
     await expect(processActivity({ id: 2 } as any, 321)).resolves.toBeNull();
+  });
+
+  // ——— Item 2 (merge-safe): lock de escrita + guarda LGPD ———
+
+  it('processActivity runs under the activities write lock and releases it', async () => {
+    const merged = [{ id: 2 }, { id: 1 }];
+    const {
+      processActivity,
+      updateActivityInArray,
+      redis,
+      saveRemote,
+      activityProcessedInc,
+    } = await loadActivityModule({
+      redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+      updateActivityInArrayResult: merged,
+    });
+
+    const result = await processActivity({ id: 2 } as any, 321);
+
+    // Lock NX com TTL, relê o estado atual e grava dentro da seção crítica.
+    expect(redis.set).toHaveBeenCalledWith(
+      'strava:lock:activities:321',
+      '1',
+      { nx: true, ex: 30 },
+    );
+    expect(updateActivityInArray).toHaveBeenCalledWith(
+      { id: 2 },
+      [{ id: 1 }],
+    );
+    expect(saveRemote).toHaveBeenCalled();
+    // Libera a lock no finally — mesmo caminho de sucesso.
+    expect(redis.del).toHaveBeenCalledWith('strava:lock:activities:321');
+    expect(result).toEqual(merged);
+    expect(activityProcessedInc).toHaveBeenCalled();
+  });
+
+  it('processActivity waits for a busy activities lock and then proceeds', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'] });
+    try {
+      const setMock = vi
+        .fn()
+        .mockResolvedValueOnce(null) // tentativa inicial: ocupada
+        .mockResolvedValueOnce(null) // 1º poll (100ms): ainda ocupada
+        .mockResolvedValue('OK'); // 2º poll (200ms): liberada
+      const { processActivity, updateActivityInArray } =
+        await loadActivityModule({
+          redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+          redisSet: setMock,
+          updateActivityInArrayResult: [{ id: 2 }],
+        });
+
+      const promise = processActivity({ id: 2 } as any, 321);
+      await vi.advanceTimersByTimeAsync(350);
+      const result = await promise;
+
+      expect(result).toEqual([{ id: 2 }]);
+      expect(setMock).toHaveBeenCalledTimes(3);
+      expect(updateActivityInArray).toHaveBeenCalledWith({ id: 2 }, [
+        { id: 1 },
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('processActivity writes lockless after the wait cap and never releases someone else’s lock', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'] });
+    try {
+      const setMock = vi.fn().mockResolvedValue(null); // sempre ocupada
+      const delMock = vi.fn().mockResolvedValue(1);
+      const { processActivity, saveRemote } = await loadActivityModule({
+        redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+        redisSet: setMock,
+        redisDel: delMock,
+        updateActivityInArrayResult: [{ id: 2 }],
+      });
+
+      const promise = processActivity({ id: 2 } as any, 321);
+      await vi.advanceTimersByTimeAsync(2_500); // teto de espera: 2s
+      const result = await promise;
+
+      // Degrada para o comportamento de antes do lock: grava mesmo assim.
+      expect(result).toEqual([{ id: 2 }]);
+      expect(saveRemote).toHaveBeenCalled();
+      // Nunca liberou a lock de ninguém (não a adquiriu).
+      expect(delMock).not.toHaveBeenCalled();
+      // ~1 inicial + 20 polls de 100ms em 2s.
+      expect(setMock.mock.calls.length).toBeGreaterThanOrEqual(20);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('processActivity skips the write when the athlete auth key is gone (LGPD)', async () => {
+    const {
+      processActivity,
+      saveRemote,
+      logger,
+      activityProcessedInc,
+      redis,
+    } = await loadActivityModule({
+      authGet: null, // delete do atleta já executou
+      redisGet: vi.fn().mockResolvedValue({ activities: [{ id: 1 }] }),
+      updateActivityInArrayResult: [{ id: 2 }],
+    });
+
+    const result = await processActivity({ id: 2 } as any, 321);
+
+    // Sem auth não há gravação (senão a atividade "revivida" persistiria
+    // para sempre — não há próximo evento para limpá-la).
+    expect(result).toBeNull();
+    expect(saveRemote).not.toHaveBeenCalled();
+    expect(activityProcessedInc).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({ athleteId: 321 }),
+      expect.stringContaining('atleta sem auth'),
+    );
+    // A lock é liberada mesmo no caminho de skip.
+    expect(redis.del).toHaveBeenCalledWith('strava:lock:activities:321');
+  });
+
+  it('athleteStillExists reads the auth key', async () => {
+    const deleted = await loadActivityModule({ authGet: null });
+    await expect(deleted.athleteStillExists(5)).resolves.toBe(false);
+
+    const alive = await loadActivityModule();
+    await expect(alive.athleteStillExists(5)).resolves.toBe(true);
+
+    // Falha de leitura → abre (abre): o guard existe para detectar delete,
+    // não para medir disponibilidade.
+    const failing = await loadActivityModule({
+      redisGet: vi.fn().mockRejectedValue(new Error('redis down')),
+    });
+    await expect(failing.athleteStillExists(5)).resolves.toBe(true);
+  });
+
+  it('getActivities stamps synced_at (the merge tie-breaker) on every copy', async () => {
+    const { getActivities } = await loadActivityModule();
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockResolvedValueOnce([
+            {
+              id: 1,
+              name: 'Ride',
+              distance: 10,
+              moving_time: 5,
+              type: 'Ride',
+              start_date_local: '2026-01-01T00:00:00Z',
+              gear_id: 'g1',
+            },
+          ])
+          .mockResolvedValueOnce([]),
+        getActivityById: vi.fn(),
+      },
+    } as any;
+
+    const result = await getActivities(
+      strava,
+      [{ id: 'g1' }] as any,
+      null,
+      null,
+    );
+
+    expect(result).toHaveLength(1);
+    expect(typeof result[0].synced_at).toBe('number');
+    expect(result[0].synced_at).toBeGreaterThan(1_700_000_000);
   });
 
   it('verifyIfHasAnyActivities returns false for empty activity list and throws on errors', async () => {
