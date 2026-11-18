@@ -125,7 +125,7 @@ describe('activity service', () => {
     // expect(strava.activities.getActivityById).toHaveBeenCalledTimes(1);
   });
 
-  it('getActivities forwards before/after params and tolerates detail fetch failures', async () => {
+  it('getActivities forwards before/after params and aborts when a detail fetch fails', async () => {
     const { getActivities, logger } = await loadActivityModule();
     const strava = {
       activities: {
@@ -147,7 +147,13 @@ describe('activity service', () => {
       },
     } as any;
 
-    const result = await getActivities(strava, [{ id: 'g1' }] as any, 11, 22);
+    // Falha no detalhe de atividade com `*` aborta a operação inteira (não
+    // só o 429): gravar parcialmente custaria o marking de manutenção —
+    // `private_note` viraria '' em silêncio e nunca seria refeito.
+    await expect(
+      getActivities(strava, [{ id: 'g1' }] as any, 11, 22),
+    ).rejects.toThrow('detail down');
+
     expect(
       strava.activities.getLoggedInAthleteActivities,
     ).toHaveBeenCalledTimes(2);
@@ -156,9 +162,10 @@ describe('activity service', () => {
     expect(firstCallParams.before).toBe(11);
     expect(firstCallParams.after).toBe(22);
     expect(firstCallParams.per_page).toBe(200);
-    expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ id: 10, private_note: '' });
-    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ activityId: 10 }),
+      'Falha ao buscar detalhes da atividade — abortando o fetch para não gravar nota vazia',
+    );
   });
 
   it('getActivities normalizes missing private_note from activity detail', async () => {
@@ -509,7 +516,8 @@ describe('activity service', () => {
       expect.objectContaining({ activityId: 1 }),
       'Rate limit do Strava ao buscar detalhes — abortando o fetch',
     );
-    // Erros que não são 429 continuam tolerados (registro + segue).
+    // Qualquer erro no detalhe de atividade com `*` aborta (429 ou não) —
+    // o caminho de tolerância agora é só para enriquecer sport_type.
     expect(logger.error).not.toHaveBeenCalledWith(
       expect.anything(),
       'Erro ao obter detalhes da atividade para enriquecer dados',
