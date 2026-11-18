@@ -115,6 +115,74 @@ describe('noteCodes.equipmentMatches — lote 2026-11', () => {
   });
 });
 
+// Tiers 2 e 3 (pesquisa de mercado): 8 itens novos + as colisões de
+// substring que decidiram os ids/sinônimos (ver comentário D14 em
+// src/services/equipment.ts).
+describe('noteCodes.equipmentMatches — Tiers 2 e 3', () => {
+  it('registra os códigos novos e seus sinônimos PT', () => {
+    expect(equipmentMatches('pivos', ['pivos'], 'pivots')).toBe(true);
+    expect(equipmentMatches('pivo', ['pivo'], 'pivots')).toBe(true);
+    expect(
+      equipmentMatches('seatpostreview', ['seatpostreview'], 'seatpostreview'),
+    ).toBe(true);
+    expect(equipmentMatches('guide', ['guide'], 'guide')).toBe(true);
+    expect(equipmentMatches('powermeter', ['powermeter'], 'powermeter')).toBe(
+      true,
+    );
+    expect(
+      equipmentMatches('potenciometro', ['potenciometro'], 'powermeter'),
+    ).toBe(true);
+    expect(equipmentMatches('lights', ['lights'], 'lights')).toBe(true);
+    expect(equipmentMatches('luzes', ['luzes'], 'lights')).toBe(true);
+    expect(equipmentMatches('frontlight', ['frontlight'], 'frontlight')).toBe(
+      true,
+    );
+    expect(equipmentMatches('rearlight', ['rearlight'], 'rearlight')).toBe(
+      true,
+    );
+    expect(equipmentMatches('ebike', ['ebike'], 'ebike')).toBe(true);
+    // forma do caption com hífen (normalizeNote preserva '-')
+    expect(equipmentMatches('e-bike', ['e', 'bike'], 'ebike')).toBe(true);
+  });
+
+  it('não deixa os novos transbordarem para outros equipamentos', () => {
+    // 'pivôs' não marca a suspensão (nem o contrário)
+    expect(equipmentMatches('pivos', ['pivos'], 'suspension')).toBe(false);
+    expect(equipmentMatches('suspensao', ['suspensao'], 'pivots')).toBe(false);
+    // revisão do canote: não registra review (guard de token isolado) nem o dropper
+    expect(equipmentMatches('seatpostreview', ['seatpostreview'], 'review')).toBe(
+      false,
+    );
+    expect(equipmentMatches('seatpostreview', ['seatpostreview'], 'dropper')).toBe(
+      false,
+    );
+    expect(equipmentMatches('canote', ['canote'], 'seatpostreview')).toBe(false);
+    // 'guide' não marca o guidão ('guidao' não contém 'guide') nem a corrente
+    expect(equipmentMatches('guidao', ['guidao'], 'guide')).toBe(false);
+    expect(equipmentMatches('guide', ['guide'], 'handlebar')).toBe(false);
+    expect(equipmentMatches('guide', ['guide'], 'chain')).toBe(false);
+    // potenciômetro não marca o grupo pedivela/central
+    expect(equipmentMatches('powermeter', ['powermeter'], 'crankset')).toBe(
+      false,
+    );
+    expect(equipmentMatches('potenciometro', ['potenciometro'], 'bb')).toBe(
+      false,
+    );
+    // luz: um lado não registra o par ('frontlight' não contém 'lights')
+    // e o par não registra um lado só
+    expect(equipmentMatches('frontlight', ['frontlight'], 'lights')).toBe(
+      false,
+    );
+    expect(equipmentMatches('rearlight', ['rearlight'], 'lights')).toBe(false);
+    expect(equipmentMatches('lights', ['lights'], 'frontlight')).toBe(false);
+    expect(equipmentMatches('luzes', ['luzes'], 'rearlight')).toBe(false);
+    // 'luz' (3 letras) fica de fora dos sinônimos pela regra D14 de ≥4
+    expect(equipmentMatches('luz', ['luz'], 'lights')).toBe(false);
+    // e-bike não marca peças do drivetrain
+    expect(equipmentMatches('ebike', ['ebike'], 'pedal')).toBe(false);
+  });
+});
+
 describe('noteCodes.findUnresolvedCases', () => {
   it('stays silent when the note registered something (superstring e case)', () => {
     expect(findUnresolvedCases([makeActivity({ private_note: 'chainn' })])).toEqual([]);

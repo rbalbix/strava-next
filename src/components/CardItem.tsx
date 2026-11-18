@@ -1,6 +1,6 @@
 import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Equipments } from '../services/equipment';
+import { Equipments, resolveCaption } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 import { copyEventDetailsToClipboard } from '../utils/clipboard';
 import { locale, secondsToHms } from '../utils/format';
@@ -37,6 +37,8 @@ export default function CardItem({
   if (!e.date) return null;
   const equipmentDistance = e.distance ?? 0;
   const equipmentMovingTime = e.movingTime ?? 0;
+  // Rótulo vigente do catálogo (o cache pode trazer um caption antigo).
+  const caption = resolveCaption(e);
 
   const localDate = parseISO(e.date.replace(/Z$/, ''));
   const formattedDate = format(localDate, 'dd/MM/yyyy');
@@ -96,14 +98,14 @@ export default function CardItem({
         type='button'
         className={styles.eventButton}
         onClick={handleCardItemClick}
-        aria-label={`${isEditorVisible ? 'Fechar editor e' : 'Abrir editor e'} copiar detalhes de ${e.caption}${
+        aria-label={`${isEditorVisible ? 'Fechar editor e' : 'Abrir editor e'} copiar detalhes de ${caption}${
           hasUsage ? '' : ' — recém-registrado, defina o limite'
         }`}
       >
         <div className={styles.firstLine}>
           <div className={styles.dateAndCaption}>
             <div className={styles.bol}>{formattedDate}</div>
-            <div className={styles.caption}>{e.caption}</div>
+            <div className={styles.caption}>{caption}</div>
           </div>
           <div className={styles.timeago}>{timeAgo}</div>
         </div>

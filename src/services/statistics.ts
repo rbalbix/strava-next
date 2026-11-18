@@ -428,6 +428,19 @@ export function createStatistics(
                   });
                   break;
 
+                // When pair of lights, only rear or front does not matter.
+                // (emenda do ADR 0001, 2026-11-18 — lote Tiers 2/3)
+                case Equipments.Lights.id:
+                  equipmentsStatTemplate.forEach((e) => {
+                    if (
+                      e.id === Equipments.FrontLight.id ||
+                      e.id === Equipments.RearLight.id
+                    ) {
+                      e.isRegistered = true;
+                    }
+                  });
+                  break;
+
                 // When new suspension, suspencion review/kit does not matter.
                 case Equipments.Suspension.id:
                   equipmentsStatTemplate.forEach((e) => {

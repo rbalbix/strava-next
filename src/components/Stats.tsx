@@ -12,6 +12,7 @@ import type {
   UnrecognizedCode,
 } from '../contracts/api';
 import type { GearStats } from '../services/gear';
+import { resolveCaption } from '../services/equipment';
 import { getHttpStatus } from '../lib/apiClient';
 import {
   computeThresholdState,
@@ -70,7 +71,7 @@ function buildThresholdAlertItems(
           gearId: gearStat.id,
           gearName: gearStat.name,
           equipmentId: equipment.id,
-          label: equipment.caption,
+          label: resolveCaption(equipment),
           current,
           limit: entry.value,
           unit: entry.unit,

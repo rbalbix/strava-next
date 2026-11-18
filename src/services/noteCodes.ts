@@ -135,11 +135,20 @@ function levenshtein(a: string, b: string): number {
   return previous[b.length];
 }
 
-/** Código/sinônimo mais próximo a ≤2 edições; desempate por distância e depois ordem alfabética. */
+/**
+ * Código/sinônimo mais próximo a ≤2 edições; desempate por distância e
+ * depois ordem alfabética.
+ *
+ * Exige a MESMA primeira letra: sem isso, uma palavra comum do texto livre
+ * que estenda um código novo vira "você quis dizer?" — o lote Tiers 2/3
+ * expôs com 'bike' → 'ebike' (1 edição). Tipos reais de código mantêm a
+ * 1ª letra ('chian'→'chain', 'revisaox'→'revisão', 'cabl'→'cables').
+ */
 function nearestCode(token: string): string | null {
   let best: { distance: number; display: string } | null = null;
 
   for (const term of VOCAB.all) {
+    if (term.norm[0] !== token[0]) continue;
     const distance = levenshtein(token, term.norm);
     if (distance > MAX_LEVENSHTEIN) continue;
 
