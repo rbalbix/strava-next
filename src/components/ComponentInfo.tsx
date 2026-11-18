@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 
-import { Equipments } from '../services/equipment';
+import { orderedEquipments } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 
 import { Divider } from '@mui/material';
@@ -18,7 +18,7 @@ export default function ComponentInfo() {
   const { showToast } = useToast();
 
   useEffect(() => {
-    if (Equipments) setEquipment(Object.values(Equipments));
+    setEquipment(orderedEquipments);
   }, []);
 
   const handleCopyCode = (code: string) => {

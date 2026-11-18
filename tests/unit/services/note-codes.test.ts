@@ -71,6 +71,50 @@ describe('noteCodes.equipmentMatches', () => {
   });
 });
 
+// Lote 2026-11 (pesquisa de mercado): 6 itens novos + as colisões de
+// substring que decidiram os ids/sinônimos (ver comentário D14 em
+// src/services/equipment.ts).
+describe('noteCodes.equipmentMatches — lote 2026-11', () => {
+  it('registra os códigos novos e seus sinônimos PT', () => {
+    expect(equipmentMatches('sangria', ['sangria'], 'bleed')).toBe(true);
+    expect(equipmentMatches('bleed', ['bleed'], 'bleed')).toBe(true);
+    // caption dos cards passou a dizer "Pastilhas (par)" — sinônimo cobre a
+    // nota escrita com o rótulo novo
+    expect(
+      equipmentMatches('troca de pastilhas', ['troca', 'de', 'pastilhas'], 'brakes'),
+    ).toBe(true);
+    expect(equipmentMatches('cabos', ['cabos'], 'cables')).toBe(true);
+    expect(equipmentMatches('cables', ['cables'], 'cables')).toBe(true);
+    expect(equipmentMatches('cable', ['cable'], 'cables')).toBe(true);
+    expect(equipmentMatches('cubos', ['cubos'], 'hubs')).toBe(true);
+    expect(equipmentMatches('direcao', ['direcao'], 'headset')).toBe(true);
+    expect(equipmentMatches('coroa', ['coroa'], 'coroa')).toBe(true);
+    expect(
+      equipmentMatches('frontderailleur', ['frontderailleur'], 'frontderailleur'),
+    ).toBe(true);
+  });
+
+  it('não deixa os novos transbordarem para outros equipamentos', () => {
+    // 'sangria' não marca as pastilhas ('freio' é que é sinônimo de brakes)
+    expect(equipmentMatches('fiz sangria', ['fiz', 'sangria'], 'brakes')).toBe(false);
+    // cabos não marca o trocador traseiro
+    expect(equipmentMatches('troca de cabos', ['troca', 'de', 'cabos'], 'rearshifter')).toBe(false);
+    // 'cubo' não marca central/direção; 'direção' não marca central
+    expect(equipmentMatches('cubo', ['cubo'], 'bb')).toBe(false);
+    expect(equipmentMatches('cubo', ['cubo'], 'headset')).toBe(false);
+    expect(equipmentMatches('direcao', ['direcao'], 'bb')).toBe(false);
+    // 'coroa' não marca a corrente
+    expect(equipmentMatches('coroa', ['coroa'], 'chain')).toBe(false);
+    // e a forma EN 'chainring' NÃO existe como id/sinônimo de propósito:
+    // conteria 'chain' e marcaria a corrente junto (id é 'coroa')
+    expect(equipmentMatches('chainring', ['chainring'], 'coroa')).toBe(false);
+    expect(equipmentMatches('chainring', ['chainring'], 'chain')).toBe(true);
+    // 'câmbio' segue só pro traseiro — frontderailleur não tem sinônimo
+    expect(equipmentMatches('cambio', ['cambio'], 'rearderailleur')).toBe(true);
+    expect(equipmentMatches('cambio', ['cambio'], 'frontderailleur')).toBe(false);
+  });
+});
+
 describe('noteCodes.findUnresolvedCases', () => {
   it('stays silent when the note registered something (superstring e case)', () => {
     expect(findUnresolvedCases([makeActivity({ private_note: 'chainn' })])).toEqual([]);
