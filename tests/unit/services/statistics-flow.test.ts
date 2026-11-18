@@ -21,6 +21,9 @@ type LoadOptions = {
     fn: (current: any[]) => any,
   ) => Promise<any>;
   athleteStillExistsImpl?: (athleteId: number) => Promise<boolean>;
+  // Item 3 (single-flight): retorno do redis.set da lock de statistics —
+  // 'OK' = livre, null = ocupada (voo em outra instância).
+  statisticsLockSetImpl?: ReturnType<typeof vi.fn>;
 };
 
 async function loadStatisticsModule(options: LoadOptions = {}) {
@@ -74,6 +77,21 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     warn: vi.fn(),
     error: vi.fn(),
   };
+
+  // Item 3 (single-flight): statistics.ts importa redis para a lock de
+  // statistics — mockado aqui para o Upstash real nunca carregar (padrão
+  // da suíte: "o redis real nunca carrega aqui"). Default 'OK' = lock
+  // adquirida na primeira tentativa: os testes existentes não esperam.
+  const redisSet =
+    options.statisticsLockSetImpl ?? vi.fn().mockResolvedValue('OK');
+  const redisDel = vi.fn().mockResolvedValue(1);
+  vi.doMock('../../../src/services/redis', () => ({
+    default: {
+      set: redisSet,
+      del: redisDel,
+      get: vi.fn().mockResolvedValue(null),
+    },
+  }));
 
   vi.doMock('../../../src/services/api', () => ({
     apiRemoteStorage: { get: apiRemoteStorageGet },
@@ -133,6 +151,8 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
     processActivity,
     getStoredUnrecognizedCodes,
     recordRefreshAttempt,
+    redisSet,
+    redisDel,
     logger,
   };
 }
@@ -1089,5 +1109,155 @@ describe('statistics flow service', () => {
     expect(fetchStravaActivity).toHaveBeenCalledTimes(1);
     expect(fetchStravaActivity).toHaveBeenCalledWith(11, expect.anything());
     expect(getAthlete).not.toHaveBeenCalled(); // sem mudança → fast path intacto
+  });
+});
+
+describe('statistics single-flight (item 3)', () => {
+  const ride = {
+    id: 10,
+    name: 'Ride',
+    distance: 100,
+    moving_time: 10,
+    type: 'Ride',
+    sport_type: 'Ride',
+    start_date_local: '2026-01-01T00:00:00Z',
+    gear_id: 'bike-1',
+    private_note: '',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('concurrent calls in the same process share one flight (Map dedupe)', async () => {
+    const getActivitiesImpl = vi.fn().mockResolvedValue([ride]);
+    const { updateStatistics, getActivities, saveRemote, redisDel } =
+      await loadStatisticsModule({
+        // Sem cache → recompute (é o corpo do voo que tem que rodar 1×).
+        remoteGetImpl: vi.fn().mockResolvedValue({ data: null }),
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl,
+      });
+
+    const [first, second] = await Promise.all([
+      updateStatistics({} as any, 123),
+      updateStatistics({} as any, 123),
+    ]);
+
+    // Um voo só: uma busca ao Strava, uma gravação — e os dois chamadores
+    // recebem o mesmo resultado.
+    expect(getActivities).toHaveBeenCalledTimes(1);
+    expect(saveRemote).toHaveBeenCalledTimes(1);
+    expect(second).toEqual(first);
+    expect(first.length).toBeGreaterThan(0);
+    // Lock adquirida no início e liberada no finally.
+    expect(redisDel).toHaveBeenCalledWith('strava:lock:statistics:123');
+  });
+
+  it('busy lock in another instance serves the fresh cache without recomputing', async () => {
+    const freshStats = [{ id: 'bike-1' }];
+    const remoteGetImpl = vi.fn().mockResolvedValue({
+      data: {
+        lastUpdated: Math.floor(Date.now() / 1000), // o outro voo acabou de gravar
+        statistics: freshStats,
+      },
+    });
+    const { updateStatistics, getActivities, logger } =
+      await loadStatisticsModule({
+        remoteGetImpl,
+        statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+      });
+
+    const result = await updateStatistics({} as any, 123);
+
+    expect(result).toEqual(freshStats);
+    expect(getActivities).not.toHaveBeenCalled(); // não recomputa
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({ athleteId: 123 }),
+      expect.stringContaining('já gravou'),
+    );
+  });
+
+  it('after the 30s cap a busy lock serves the existing cache (stale-ok)', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'], now: 1_800_000_000_000 });
+    try {
+      const staleStats = [{ id: 'stale' }];
+      const remoteGetImpl = vi.fn().mockResolvedValue({
+        data: { lastUpdated: 1, statistics: staleStats }, // bem antigo
+      });
+      const { updateStatistics, getActivities, logger } =
+        await loadStatisticsModule({
+          remoteGetImpl,
+          statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+        });
+
+      const promise = updateStatistics({} as any, 123);
+      await vi.advanceTimersByTimeAsync(31_000);
+      const result = await promise;
+
+      expect(result).toEqual(staleStats);
+      expect(getActivities).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ athleteId: 123 }),
+        expect.stringContaining('stale-ok'),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('after the cap with no cache (first sync) it computes lockless', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'], now: 1_800_000_000_000 });
+    try {
+      const { updateStatistics, getActivities, logger } =
+        await loadStatisticsModule({
+          remoteGetImpl: vi.fn().mockResolvedValue({ data: null }), // sem cache
+          statisticsLockSetImpl: vi.fn().mockResolvedValue(null), // lock ocupada (outra instância)
+          getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+          getGearsImpl: vi.fn().mockReturnValue([
+            { id: 'bike-1', name: 'Bike' },
+          ]),
+          getActivitiesImpl: vi.fn().mockResolvedValue([ride]),
+        });
+
+      const promise = updateStatistics({} as any, 123);
+      await vi.advanceTimersByTimeAsync(31_000);
+      const result = await promise;
+
+      expect(getActivities).toHaveBeenCalledTimes(1); // calculou mesmo assim
+      expect(result.length).toBeGreaterThan(0);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ athleteId: 123 }),
+        expect.stringContaining('sem lock'),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a redis failure on the lock degrades to lockless immediately (no 30s stall)', async () => {
+    const { updateStatistics, getActivities, redisSet } =
+      await loadStatisticsModule({
+        remoteGetImpl: vi.fn().mockResolvedValue({ data: null }),
+        statisticsLockSetImpl: vi
+          .fn()
+          .mockRejectedValue(new Error('redis down')),
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([
+          { id: 'bike-1', name: 'Bike' },
+        ]),
+        getActivitiesImpl: vi.fn().mockResolvedValue([ride]),
+      });
+
+    // Sem I/O não há o que esperar: vai direto para o corpo (um teste de
+    // 5s estouraria se isso virasse a espera de 30s).
+    const result = await updateStatistics({} as any, 123);
+
+    expect(redisSet).toHaveBeenCalledTimes(1);
+    expect(getActivities).toHaveBeenCalledTimes(1);
+    expect(result.length).toBeGreaterThan(0);
   });
 });

@@ -592,6 +592,20 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
     }
     case 'delete': {
       try {
+        // LGPD (design 2026-11-18, item 4): espera o voo de estatísticas
+        // em andamento liberar a lock (teto 10s) antes de apagar — um
+        // recompute ao vivo recriaria as chaves logo depois do delete.
+        // Passou o teto (rebuild longo), apaga mesmo assim: a guarda
+        // athleteStillExists em toda gravação impede a ressurreição.
+        const statisticsLock = REDIS_KEYS.statisticsLock(athleteId);
+        const waitStart = Date.now();
+        while (
+          (await redis.get(statisticsLock)) &&
+          Date.now() - waitStart < 10_000
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+
         await redis.del(
           REDIS_KEYS.auth(athleteId),
           REDIS_KEYS.activities(athleteId),
@@ -600,6 +614,10 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           // D14: relatório de códigos não reconhecidos — dado derivado da
           // observação privada sai junto (LGPD).
           REDIS_KEYS.unrecognizedCodes(athleteId),
+          // Locks também: segurar uma lock de dado apagado só atrasa a
+          // próxima gravação legítima (a guarda de auth já segura).
+          statisticsLock,
+          REDIS_KEYS.activitiesLock(athleteId),
         );
         log.info({ athleteId }, 'Athlete data deleted from storage');
       } catch (error) {

@@ -48,6 +48,9 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
 
   const redisMock = {
     exists: vi.fn().mockResolvedValue(options.hasAuth ?? 1),
+    // Espera do delete (item 3/4): checa a lock de statistics antes de
+    // apagar — null = sem voo em andamento (nenhuma espera nos testes).
+    get: vi.fn().mockResolvedValue(null),
     incr: vi.fn().mockResolvedValue(options.rateLimitCurrent ?? 1),
     expire: vi.fn().mockResolvedValue(1),
     set: vi
@@ -370,14 +373,57 @@ describe('/api/webhook integration', () => {
     expect(webhookEventsInc).toHaveBeenCalledTimes(1);
     expect(redisMock.del).toHaveBeenCalledTimes(1);
     // D14: o relatório de códigos não reconhecidos sai junto no delete
-    // do atleta (LGPD).
+    // do atleta (LGPD). Item 3/4: as duas locks de sync também — segurar
+    // lock de dado apagado só atrasaria a próxima gravação legítima.
     expect(redisMock.del).toHaveBeenCalledWith(
       'strava:auth:987',
       'strava:activities:987',
       'strava:statistics:987',
       'strava:lock:refresh:987',
       'strava:unrecognized-codes:987',
+      'strava:lock:statistics:987',
+      'strava:lock:activities:987',
     );
+  });
+
+  it('athlete delete waits for the in-flight statistics flight before wiping (LGPD)', async () => {
+    const { webhookHandler, req, res, redisMock } = await loadWebhookHandler({
+      hasAuth: 1,
+      rateLimitCurrent: 1,
+      replayInsertResult: 'OK',
+      validationResult: {
+        success: true,
+        data: {
+          aspect_type: 'delete',
+          event_time: Math.floor(Date.now() / 1000),
+          object_id: 123,
+          object_type: 'athlete',
+          owner_id: 987,
+          subscription_id: 1,
+        },
+      },
+    });
+    // O voo em andamento segura a lock na primeira checagem; no poll
+    // seguinte (500ms) já liberou.
+    redisMock.get.mockResolvedValueOnce('1');
+
+    await webhookHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(redisMock.get).toHaveBeenCalledWith('strava:lock:statistics:987');
+    // O apagar acontece DEPOIS da espera — nunca antes.
+    expect(redisMock.del).toHaveBeenCalledWith(
+      'strava:auth:987',
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      expect.any(String),
+      'strava:lock:statistics:987',
+      'strava:lock:activities:987',
+    );
+    const heldAt = redisMock.get.mock.invocationCallOrder[0];
+    const wipedAt = redisMock.del.mock.invocationCallOrder[0];
+    expect(heldAt).toBeLessThan(wipedAt);
   });
 
   it('returns 500 in production when subscription guard is missing', async () => {

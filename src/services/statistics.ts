@@ -11,6 +11,7 @@ import {
 
 import { differenceInMinutes, fromUnixTime, getUnixTime } from 'date-fns';
 import { apiRemoteStorage } from './api';
+import redis from './redis';
 import { getAthlete } from './athlete';
 import { Equipment, Equipments } from './equipment';
 import { GearStats, getGears, orderGearsByLastUse } from './gear';
@@ -143,7 +144,198 @@ function logMergeDivergence(
   );
 }
 
+// ——— Single-flight de updateStatistics (design 2026-11-18, item 3) ———
+//
+// Dois níveis de dedupe:
+// 1. Mesmo processo: Map<atleta, voo> — chamadas concorrentes compartilham
+//    o MESMO promise (antes de qualquer I/O).
+// 2. Outra instância: lock strava:lock:statistics:<id> (NX PX 300s) segura
+//    o corpo inteiro; quem chega espera (poll 500ms, teto 30s) e, se o
+//    outro voo já gravou, devolve o cache — dedupe vale mais que frescor.
+//
+// Sem heartbeat: o corpo inteiro (rebuild ~2min) cabe com folga no TTL de
+// 300s; segurar a lock muito além disso só atrasaria um delete (que tem
+// espera própria de 10s). O `del` é incondicional no finally quando a lock
+// foi adquirida (precedente: refreshLock).
+const statisticsFlights = new Map<number, Promise<GearStats[]>>();
+
+const STATISTICS_LOCK_TTL_SECONDS = 300;
+const STATISTICS_LOCK_POLL_MS = 500;
+const STATISTICS_LOCK_MAX_WAIT_MS = 30_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+type StatisticsFlightEntry =
+  | { kind: 'owned' } // adquirimos a lock — corpo roda sob ela
+  | { kind: 'lockless' } // sem lock (Redis fora / teto sem cache)
+  | { kind: 'returned'; statistics: GearStats[] }; // devolve cache, sem computar
+
+type StatisticsSnapshot = { lastUpdated: number; statistics: GearStats[] };
+
 export async function updateStatistics(
+  strava: Strava,
+  athleteId: number,
+): Promise<GearStats[]> {
+  const inFlight = statisticsFlights.get(athleteId);
+  if (inFlight) {
+    getLogger().debug(
+      { athleteId },
+      'Single-flight: aguardando voo de estatísticas em andamento',
+    );
+    return inFlight;
+  }
+
+  const flight = runStatisticsFlight(strava, athleteId);
+  statisticsFlights.set(athleteId, flight);
+  try {
+    return await flight;
+  } finally {
+    // Só quem criou o voo limpa o Map — quem chegou depois apenas aguarda
+    // o mesmo promise e retorna sem tocar no registro.
+    statisticsFlights.delete(athleteId);
+  }
+}
+
+async function runStatisticsFlight(
+  strava: Strava,
+  athleteId: number,
+): Promise<GearStats[]> {
+  const entry = await enterStatisticsFlight(athleteId);
+  if (entry.kind === 'returned') return entry.statistics;
+
+  try {
+    return await computeStatistics(strava, athleteId);
+  } finally {
+    if (entry.kind === 'owned') {
+      try {
+        await redis.del(REDIS_KEYS.statisticsLock(athleteId));
+      } catch (error) {
+        getLogger().error(
+          { err: error, athleteId },
+          'Erro ao liberar lock de statistics',
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Entra no voo de estatísticas do atleta (o dedupe no processo já aconteceu
+ * no Map antes disto).
+ *
+ * - lock livre → `owned`;
+ * - lock ocupada → espera até 30s: o outro voo gravou (devolve o cache,
+ *   stale-serve) ou liberou (assume a execução);
+ * - teto estourado → devolve o cache existente (stale-ok) ou, sem cache
+ *   (1ª sincronização), calcula `lockless` com warn;
+ * - erro de Redis → `lockless` na hora: sem I/O não há o que esperar (o
+ *   corpo falharia do mesmo jeito nas leituras dele).
+ */
+async function enterStatisticsFlight(
+  athleteId: number,
+): Promise<StatisticsFlightEntry> {
+  const log = getLogger();
+  const lockKey = REDIS_KEYS.statisticsLock(athleteId);
+  const startedAt = Date.now();
+
+  const first = await tryAcquireStatisticsLock(lockKey);
+  if (first === 'ok') return { kind: 'owned' };
+  if (first === 'error') return { kind: 'lockless' };
+
+  while (Date.now() - startedAt < STATISTICS_LOCK_MAX_WAIT_MS) {
+    await sleep(STATISTICS_LOCK_POLL_MS);
+
+    const fresh = await readFreshStatistics(athleteId, startedAt);
+    if (fresh) {
+      log.info(
+        { athleteId },
+        'Single-flight: voo em outra instância já gravou — devolvendo cache',
+      );
+      return { kind: 'returned', statistics: fresh };
+    }
+
+    const again = await tryAcquireStatisticsLock(lockKey);
+    if (again === 'ok') return { kind: 'owned' };
+    if (again === 'error') return { kind: 'lockless' };
+  }
+
+  // Teto de espera estourado (chamada do design): dedupe vale mais que
+  // frescor — devolve o cache que existir (stale-ok).
+  const cached = await readStatisticsSnapshot(athleteId);
+  if (cached) {
+    log.warn(
+      { athleteId, waitedMs: STATISTICS_LOCK_MAX_WAIT_MS },
+      'Single-flight: lock ocupada além do teto — devolvendo cache existente (stale-ok)',
+    );
+    return { kind: 'returned', statistics: cached.statistics };
+  }
+
+  // 1ª sincronização: sem cache não há o que devolver — tenta mais uma vez
+  // e, ocupado, calcula sem lock (comportamento de antes do single-flight).
+  const lastChance = await tryAcquireStatisticsLock(lockKey);
+  if (lastChance === 'ok') return { kind: 'owned' };
+  log.warn(
+    { athleteId },
+    'Single-flight: lock ocupada e sem cache — calculando sem lock',
+  );
+  return { kind: 'lockless' };
+}
+
+async function tryAcquireStatisticsLock(
+  lockKey: string,
+): Promise<'ok' | 'busy' | 'error'> {
+  try {
+    const acquired = await redis.set(lockKey, '1', {
+      nx: true,
+      ex: STATISTICS_LOCK_TTL_SECONDS,
+    });
+    return acquired ? 'ok' : 'busy';
+  } catch (error) {
+    getLogger().warn(
+      { err: error },
+      'Falha ao adquirir lock de statistics — seguindo sem lock',
+    );
+    return 'error';
+  }
+}
+
+async function readStatisticsSnapshot(
+  athleteId: number,
+): Promise<StatisticsSnapshot | null> {
+  try {
+    const res = await apiRemoteStorage.get(REDIS_KEYS.statistics(athleteId));
+    const data = res?.data as Partial<StatisticsSnapshot> | string | null;
+    if (
+      data &&
+      typeof data === 'object' &&
+      typeof data.lastUpdated === 'number' &&
+      Array.isArray(data.statistics)
+    ) {
+      return { lastUpdated: data.lastUpdated, statistics: data.statistics };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * O outro voo gravou desde a nossa chegada? `lastUpdated` é época (s) do
+ * write; compara com o segundo de chegada (o floor perdoa a sub-segundo em
+ * que o voo anterior começou).
+ */
+async function readFreshStatistics(
+  athleteId: number,
+  sinceMs: number,
+): Promise<GearStats[] | null> {
+  const snapshot = await readStatisticsSnapshot(athleteId);
+  if (!snapshot) return null;
+  return snapshot.lastUpdated >= Math.floor(sinceMs / 1000)
+    ? snapshot.statistics
+    : null;
+}
+
+async function computeStatistics(
   strava: Strava,
   athleteId: number,
 ): Promise<GearStats[]> {
