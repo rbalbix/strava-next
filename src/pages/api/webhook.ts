@@ -7,8 +7,8 @@ import {
   ActivityBase,
   fetchStravaActivity,
   getActivities,
-  processActivities,
   processActivity,
+  withActivitiesWriteLock,
 } from '../../services/activity';
 import { apiRemoteStorage } from '../../services/api';
 import { getAthlete } from '../../services/athlete';
@@ -495,21 +495,23 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
           lastUpdated,
         );
 
-        // Merge and dedupe, preferring newest start_date_local
-        const merged = mergeActivities(
-          activitiesFromStravaAPI,
-          activities || [],
+        // Merge and dedupe, preferring newest start_date_local — sob o lock
+        // de escrita (design 2026-11-18, item 2): a base é relida dentro da
+        // seção crítica, porque o read lá em cima (p/ lastUpdated) pode estar
+        // minutos velho atrás do fetch e o write apagaria o que foi gravado
+        // nesse meio-tempo (lost update).
+        await withActivitiesWriteLock(athleteId, (current) =>
+          mergeActivities(activitiesFromStravaAPI, current),
         );
-        await processActivities(athleteId, merged);
       } else if (aspect_type === 'delete') {
         log.info(
           { athleteId, activityId },
           'Activity deleted - removing from storage and updating statistics',
         );
         try {
-          const existing: ActivityBase[] = activities || [];
-          const filtered = existing.filter((a) => a.id !== activityId);
-          await processActivities(athleteId, filtered);
+          await withActivitiesWriteLock(athleteId, (current) =>
+            current.filter((a) => a.id !== activityId),
+          );
         } catch (e) {
           log.error(
             { err: e, athleteId, activityId },

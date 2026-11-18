@@ -42,6 +42,10 @@ export const REDIS_KEYS = {
     `strava:athlete-stats-cache:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
+  // Lock curto de escrita da chave activities (merge-safe, design
+  // 2026-11-18): serializa reler→fn→gravar por atleta para o recompute não
+  // sobrescrever escrita do webhook do meio-tempo (lost update).
+  activitiesLock: (athleteId: number) => `strava:lock:activities:${athleteId}`,
   // Sessão do aplicativo (D6/PR 2 do plano de usabilidade): recebe o **hash**
   // do token opaco do cookie `gl_session` e devolve o athleteId. O token em
   // claro nunca vira nome de chave. Ver src/server/session.ts.

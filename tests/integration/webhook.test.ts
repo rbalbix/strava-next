@@ -131,6 +131,30 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
     getActivities,
     processActivities,
     processActivity,
+    // Item 2 (merge-safe): lock de escrita — relê via remoteStorage (neste
+    // suíte o get é determinístico, sem cadeias `Once`), roda o merge/filter
+    // real e grava pelo mock de processActivities, que é o que os testes
+    // assertam.
+    withActivitiesWriteLock: async (
+      athleteId: number,
+      fn: (current: any[]) => any,
+    ) => {
+      const res = await apiRemoteStorageGet(
+        `strava:activities:${athleteId}`,
+      );
+      const data = res?.data;
+      const current =
+        data && typeof data === 'object' && Array.isArray(data.activities)
+          ? data.activities
+          : [];
+      const next = await fn(current);
+      if (next !== null && next !== undefined) {
+        await processActivities(athleteId, next);
+      }
+      return next;
+    },
+    // Item 4 (LGPD): guarda antes de toda gravação (default: atleta existe).
+    athleteStillExists: async () => true,
   }));
 
   vi.doMock('../../src/services/api', () => ({

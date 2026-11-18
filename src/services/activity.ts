@@ -27,6 +27,13 @@ export type ActivityBase = {
   start_date_local: string;
   gear_id: string;
   private_note: string;
+  /**
+   * Época (s) da última leitura desta cópia no Strava — carimbo do fetch
+   * (design 2026-11-18, item 2). No merge de cópias do mesmo id, vence a
+   * mais nova; cópia gravada antes do deploy não tem o campo e vale 0
+   * (é antiga de verdade), então nenhuma migração é necessária.
+   */
+  synced_at?: number;
 };
 
 /**
@@ -169,6 +176,9 @@ async function getActivities(
           start_date_local: activity.start_date_local,
           gear_id: activity.gear_id,
           private_note,
+          // Carimbo do fetch: feito por atividade, logo após o detalhe — é o
+          // "quando li esta cópia do Strava" usado pelo merge do recompute.
+          synced_at: getUnixTime(Date.now()),
         });
       }),
     );
@@ -202,23 +212,147 @@ export async function fetchStravaActivity(
   }
 }
 
+// Lock curto de escrita da chave activities (design 2026-11-18, item 2):
+// a seção crítica é reler→fn→gravar (ms), então o TTL de 30s cobre até um
+// saveRemote lento com retries sem deixar lock órfão por tempo demais. A
+// espera de 2s cobre a concorrência normal (webhook × recompute); passou
+// disso, grava sem lock e degrada para o comportamento de antes do lock.
+const ACTIVITIES_LOCK_TTL_SECONDS = 30;
+const ACTIVITIES_LOCK_WAIT_MS = 2_000;
+const ACTIVITIES_LOCK_POLL_MS = 100;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * A chave de auth do atleta ainda existe? Toda gravação de dados passa por
+ * aqui antes de escrever (design 2026-11-18, item 4 — LGPD): um recompute
+ * em andamento não pode ressuscitar `activities`/`statistics` de um atleta
+ * cujo delete já rodou (o dado "revivido" persistiria para sempre — não há
+ * próximo evento para limpá-lo).
+ *
+ * Falha de leitura → `true` (abre): hoje uma falha do Redis derrubaria a
+ * gravação de qualquer jeito no passo seguinte, e o guard existe para
+ * detectar delete, não para medir disponibilidade.
+ */
+async function athleteStillExists(athleteId: number): Promise<boolean> {
+  try {
+    const auth = await redis.get(REDIS_KEYS.auth(athleteId));
+    return auth !== null && auth !== undefined;
+  } catch (error) {
+    getLogger().warn(
+      { err: error, athleteId },
+      'Falha ao verificar auth do atleta — seguindo como existente',
+    );
+    return true;
+  }
+}
+
+/**
+ * Serializa a leitura-modificação-gravação da chave `activities` por atleta
+ * (design 2026-11-18, item 2): o recompute lê no início e grava no final —
+ * sem esta seção crítica, qualquer `processActivity`/webhook do meio era
+ * sobrescrito pelo snapshot antigo (lost update de nota/perfil).
+ *
+ * `fn` recebe o estado atual (relido **dentro** do lock) e devolve o array
+ * a gravar via `processActivities`; devolver `null` pula a gravação (a
+ * guarda LGPD detectou delete no meio). Retorna o resultado de `fn` ou
+ * `null`. Fora do lock (teto de espera estourado), avisa e executa mesmo
+ * assim — nunca pior do que antes do lock.
+ */
+async function withActivitiesWriteLock(
+  athleteId: number,
+  fn: (
+    current: ActivityBase[],
+  ) => ActivityBase[] | null | Promise<ActivityBase[] | null>,
+): Promise<ActivityBase[] | null> {
+  const log = getLogger();
+  const lockKey = REDIS_KEYS.activitiesLock(athleteId);
+
+  const tryAcquire = async (): Promise<boolean> => {
+    try {
+      return Boolean(
+        await redis.set(lockKey, '1', {
+          nx: true,
+          ex: ACTIVITIES_LOCK_TTL_SECONDS,
+        }),
+      );
+    } catch (error) {
+      log.warn(
+        { err: error, athleteId },
+        'Falha ao adquirir lock de activities — tentando sem lock',
+      );
+      return false;
+    }
+  };
+
+  let acquired = await tryAcquire();
+  if (!acquired) {
+    const start = Date.now();
+    while (!acquired && Date.now() - start < ACTIVITIES_LOCK_WAIT_MS) {
+      await sleep(ACTIVITIES_LOCK_POLL_MS);
+      acquired = await tryAcquire();
+    }
+    if (!acquired) {
+      log.warn(
+        { athleteId, waitMs: ACTIVITIES_LOCK_WAIT_MS },
+        'Lock de activities ocupado além do teto — gravando sem lock',
+      );
+    }
+  }
+
+  try {
+    const stored = await redis.get<StravaAuthData>(
+      REDIS_KEYS.activities(athleteId),
+    );
+    const current = Array.isArray(stored?.activities) ? stored.activities : [];
+
+    if (!(await athleteStillExists(athleteId))) {
+      log.info(
+        { athleteId },
+        'Gravação de activities cancelada — atleta sem auth (delete em andamento)',
+      );
+      return null;
+    }
+
+    const next = await fn(current);
+    if (next === null) {
+      return null;
+    }
+
+    await processActivities(athleteId, next);
+    return next;
+  } finally {
+    if (acquired) {
+      try {
+        await redis.del(lockKey);
+      } catch (error) {
+        log.error(
+          { err: error, athleteId },
+          'Erro ao liberar lock de activities',
+        );
+      }
+    }
+  }
+}
+
 async function processActivity(
   activity: DetailedActivity,
   athleteId: number,
 ): Promise<ActivityBase[] | null> {
   try {
-    const stored = await redis.get<StravaAuthData>(
-      REDIS_KEYS.activities(athleteId),
+    // Update or insert the single activity — sob o lock de escrita: a
+    // releitura dentro da seção crítica é o que impede o recompute de
+    // sobrescrever esta escrita (e vice-versa).
+    const updatedActivities = await withActivitiesWriteLock(
+      athleteId,
+      (current) => updateActivityInArray(activity, current),
     );
-    const activities = stored?.activities || [];
 
-    // Update or insert the single activity
-    const updatedActivities = updateActivityInArray(activity, activities);
-    await processActivities(athleteId, updatedActivities);
-
-    try {
-      activityProcessed.inc();
-    } catch (_) {}
+    if (updatedActivities) {
+      try {
+        activityProcessed.inc();
+      } catch (_) {}
+    }
 
     return updatedActivities;
   } catch (error) {
@@ -305,4 +439,6 @@ export {
   processActivities,
   processActivity,
   verifyIfHasAnyActivities,
+  withActivitiesWriteLock,
+  athleteStillExists,
 };

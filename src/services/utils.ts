@@ -3,6 +3,7 @@ import { apiRemoteStorage } from './api';
 import { GearStats } from './gear';
 import { getLogger } from './logger';
 import { getActivitySportType } from './strava-sdk';
+import { getUnixTime } from 'date-fns';
 
 export interface RemoteStorageResponse {
   success: boolean;
@@ -117,6 +118,11 @@ function safeActivityParse(data: Partial<ActivityBase>): ActivityBase {
     start_date_local: data.start_date_local ?? '',
     gear_id: data.gear_id ?? '',
     private_note: data.private_note ?? '',
+    // Carimbo do fetch (design 2026-11-18, item 2): quando a mesma
+    // atividade existe em duas cópias (rebuild × webhook), a lida do Strava
+    // mais recente vence no merge — sem este campo não dá para saber qual
+    // é a mais nova. Cópia antiga sem o campo vale 0.
+    synced_at: getUnixTime(Date.now()),
   };
 }
 
