@@ -15,13 +15,13 @@ export const Equipments = {
 
   SuspensionReview: {
     id: 'suspareview',
-    caption: 'suspa revisada a:',
-    show: 'Revisão da suspa',
+    caption: 'suspensão (rev.):',
+    show: 'Suspensão (rev.)',
   },
   ShockReview: {
     id: 'shockreview',
-    caption: 'shock revisado a:',
-    show: 'Revisão do shock',
+    caption: 'shock (rev.):',
+    show: 'Shock (rev.)',
   },
   Suspension: {
     id: 'suspension',
@@ -35,16 +35,16 @@ export const Equipments = {
   },
   SuspensionKit: {
     id: 'suspakit',
-    caption: 'kit de suspensão:',
-    show: 'Kit de Suspensão',
+    caption: 'suspensão (kit):',
+    show: 'Suspensão (kit)',
   },
   ShockKit: {
     id: 'shockkit',
-    caption: 'kit de shock:',
-    show: 'Kit de Shock',
+    caption: 'shock (kit):',
+    show: 'Shock (kit)',
   },
 
-  Tires: { id: 'tires', caption: 'par de pneus:', show: 'Par de pneus' },
+  Tires: { id: 'tires', caption: 'Pneus (par):', show: 'Pneus (par)' },
   Fronttire: {
     id: 'fronttire',
     caption: 'pneu[frente]:',
@@ -55,7 +55,7 @@ export const Equipments = {
     caption: 'pneu[traseiro]:',
     show: 'Pneu traseiro',
   },
-  Tube: { id: 'tubes', caption: 'par de câmaras:', show: 'Par de câmaras' },
+  Tube: { id: 'tubes', caption: 'Câmaras (par):', show: 'Câmaras (par)' },
   Tubeless: { id: 'tubeless', caption: 'tubeless:', show: 'Selante' },
   FrontTube: {
     id: 'fronttube',
@@ -70,7 +70,7 @@ export const Equipments = {
 
   Stem: { id: 'stem', caption: 'mesa:', show: 'Avanço' },
   Handlebar: { id: 'handlebar', caption: 'guidão:', show: 'Guidão' },
-  Wheelset: { id: 'wheelset', caption: 'par de rodas:', show: 'Par de rodas' },
+  Wheelset: { id: 'wheelset', caption: 'Rodas (par):', show: 'Rodas (par)' },
   FrontWheel: {
     id: 'frontwheel',
     caption: 'roda[frente]:',
@@ -82,19 +82,27 @@ export const Equipments = {
     show: 'Roda traseira',
   },
 
-  Brake: { id: 'brakes', caption: 'par de freios:', show: 'Par de freios' },
+  // Rolamentos — inspeção de calendário (6 meses / 3.000 mi, Park Tool).
+  Headset: {
+    id: 'headset',
+    caption: 'direção:',
+    show: 'Rolamento de direção',
+  },
+  Hubs: { id: 'hubs', caption: 'cubos:', show: 'Rolamento de cubo' },
+
+  Brake: { id: 'brakes', caption: 'Pastilhas (par):', show: 'Pastilhas (par)' },
   FrontBrake: {
     id: 'frontbrake',
-    caption: 'freio[frente]:',
-    show: 'Freio dianteiro',
+    caption: 'pastilha dianteira:',
+    show: 'Pastilha dianteira',
   },
   RearBrake: {
     id: 'rearbrake',
-    caption: 'freio[traseiro]:',
-    show: 'Freio traseiro',
+    caption: 'pastilha traseira:',
+    show: 'Pastilha traseira',
   },
 
-  Disks: { id: 'disks', caption: 'par de discos:', show: 'Par de discos' },
+  Disks: { id: 'disks', caption: 'Discos (par):', show: 'Discos (par)' },
   FrontDisk: {
     id: 'frontdisk',
     caption: 'disco[frente]:',
@@ -108,8 +116,8 @@ export const Equipments = {
 
   Calipers: {
     id: 'calipers',
-    caption: 'par de caliper:',
-    show: 'Par de calipers',
+    caption: 'calipers (par):',
+    show: 'Calipers (par)',
   },
   FrontCaliper: {
     id: 'frontcaliper',
@@ -122,10 +130,15 @@ export const Equipments = {
     show: 'Caliper traseiro',
   },
 
+  // Ação de manutenção de calendário (DOT 6–12m / mineral 12–24m) — caption
+  // deliberadamente SEM a palavra 'freio' (é sinônimo de `brakes` = pastilhas
+  // e marcaria as pastilhas junto numa sangria).
+  Bleed: { id: 'bleed', caption: 'sangria:', show: 'Sangria de freio' },
+
   Levers: {
     id: 'levers',
-    caption: 'par de manetes:',
-    show: 'Par de manetes',
+    caption: 'manetes (par):',
+    show: 'Manetes (par)',
   },
   LeftLever: {
     id: 'leftlever',
@@ -134,14 +147,14 @@ export const Equipments = {
   },
   RightLever: {
     id: 'rightlever',
-    caption: 'Manete[direita]:',
+    caption: 'manete[direita]:',
     show: 'Manete direita',
   },
 
   STIs: {
     id: 'stis',
-    caption: 'par de STI:',
-    show: 'Par de STI',
+    caption: 'STI (par):',
+    show: 'STI (par)',
   },
   LeftSTI: {
     id: 'leftsti',
@@ -169,6 +182,14 @@ export const Equipments = {
 
   Cassette: { id: 'cassette', caption: 'cassete:', show: 'Cassete' },
   Crankset: { id: 'crankset', caption: 'pedivela:', show: 'Pedivela' },
+  // id PT ('coroa'): um id 'chainring' casaria com `chain` por substring
+  // ('chain' está dentro de 'chainring') e marcaria a corrente junto.
+  Chainring: { id: 'coroa', caption: 'coroa:', show: 'Coroa' },
+  FrontDerailleur: {
+    id: 'frontderailleur',
+    caption: 'câmbio[dianteiro]:',
+    show: 'Câmbio dianteiro',
+  },
   RearDerailleur: {
     id: 'rearderailleur',
     caption: 'câmbio[traseiro]:',
@@ -183,6 +204,13 @@ export const Equipments = {
     id: 'rearshifter',
     caption: 'shifter[traseiro]:',
     show: 'Trocador traseiro',
+  },
+  // id EN 'cables' (não 'shiftercables' — continha 'shifter', sinônimo de
+  // rearshifter, e registraria o trocador junto).
+  Cables: {
+    id: 'cables',
+    caption: 'cabos:',
+    show: 'Cabos de câmbio',
   },
 
   Helmet: {
@@ -202,6 +230,14 @@ export const Equipments = {
   },
 };
 
+// Ordem de exibição alfabética pelo nome mostrado na tela (show), com locale
+// pt-BR para tratar acentos e caixa. Uso: modal "Componentes"
+// (ComponentInfo.tsx). Não mexe no objeto Equipments — noteCodes.ts e
+// statistics.ts seguem com a ordem de declaração.
+export const orderedEquipments: Equipment[] = Object.values(Equipments)
+  .slice()
+  .sort((a, b) => a.show.localeCompare(b.show, 'pt-BR'));
+
 // D14 — sinônimos PT das legendas (caption/show) para o matching tolerante.
 // Formas BRUTAS: a normalização (minúsculas + sem acentos) acontece no
 // src/services/noteCodes.ts. Termos de UMA palavra só e ≥4 letras nos
@@ -211,6 +247,10 @@ export const Equipments = {
 // novo a partir de uma revisão) e os ids com [colchetes] (fronttire etc. —
 // o termo do par registra o par, comportamento decidido para 'pneu[frente]').
 // Cobertura que faltar entra aqui depois, sob evidência.
+// Lote 2026-11 (pesquisa de mercado) — também sem sinônimo, por colisão de
+// substring: `coroa` ('chainring' conteria 'chain' e registraria a corrente)
+// e `frontderailleur` ('câmbio' casaria com rearderailleur; 'dianteiro' com
+// 'pneu dianteiro'). Registro desses dois = copiar o código da tabela.
 export const EquipmentSynonyms: Record<string, string[]> = {
   lub: ['lubrificação'],
   review: ['revisão'],
@@ -222,7 +262,12 @@ export const EquipmentSynonyms: Record<string, string[]> = {
   stem: ['mesa'],
   handlebar: ['guidão'],
   wheelset: ['rodas'],
-  brakes: ['freio'],
+  headset: ['direção'],
+  hubs: ['cubo'],
+  // 'pastilha' (singular) casa 'pastilhas'/'pastilha' — cobre o rótulo novo
+  // dos cards; 'freio' mantido pra nota antiga/legacy.
+  brakes: ['freio', 'pastilha'],
+  bleed: ['sangria'],
   disks: ['disco'],
   calipers: ['caliper'],
   levers: ['manete'],
@@ -235,6 +280,7 @@ export const EquipmentSynonyms: Record<string, string[]> = {
   bb: ['central'],
   cassette: ['cassete'],
   crankset: ['pedivela'],
+  cables: ['cabos', 'cable'],
   rearderailleur: ['câmbio'],
   rearshifter: ['shifter'],
   helmet: ['capacete'],

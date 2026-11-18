@@ -24,6 +24,7 @@ async function loadActivityModule(options: LoadOptions = {}) {
   const mergeActivities = vi.fn();
   const logger = {
     info: vi.fn(),
+    warn: vi.fn(),
     error: vi.fn(),
   };
   const activityProcessedInc = options.activityProcessedIncImpl ?? vi.fn();
@@ -414,5 +415,144 @@ describe('activity service', () => {
     await expect(verifyIfHasAnyActivities(strava, {} as any)).rejects.toThrow(
       'boom',
     );
+  });
+
+  it('verifyIfHasAnyActivities answers from the Redis cache without calling Strava', async () => {
+    const { verifyIfHasAnyActivities, redis } = await loadActivityModule({
+      redisGet: vi
+        .fn()
+        .mockResolvedValue({ lastUpdated: 1, activities: [{ id: 1 }] }),
+    });
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi.fn(),
+      },
+    } as any;
+
+    await expect(
+      verifyIfHasAnyActivities(strava, { id: 7 } as any),
+    ).resolves.toBe(true);
+
+    expect(redis.get).toHaveBeenCalledWith('strava:activities:7');
+    // A razão do cache: zero chamadas à API do Strava neste poll.
+    expect(strava.activities.getLoggedInAthleteActivities).not.toHaveBeenCalled();
+  });
+
+  it('verifyIfHasAnyActivities falls back to Strava when the cache read fails or is empty', async () => {
+    // 1) Leitura de cache falha → warn + caminho antigo (API do Strava).
+    const failing = await loadActivityModule({
+      redisGet: vi.fn().mockRejectedValue(new Error('redis down')),
+    });
+    const stravaDown = {
+      activities: {
+        getLoggedInAthleteActivities: vi.fn().mockResolvedValue([{ id: 1 }]),
+      },
+    } as any;
+
+    await expect(
+      failing.verifyIfHasAnyActivities(stravaDown, { id: 9 } as any),
+    ).resolves.toBe(true);
+    expect(failing.logger.warn).toHaveBeenCalledTimes(1);
+    expect(stravaDown.activities.getLoggedInAthleteActivities).toHaveBeenCalledTimes(
+      1,
+    );
+
+    // 2) Cache existe mas vazio → o cache não prova nada; Strava decide
+    //    (preserva o comportamento pré-otimização).
+    const emptyCache = await loadActivityModule({
+      redisGet: vi.fn().mockResolvedValue({ lastUpdated: 1, activities: [] }),
+    });
+    const stravaEmpty = {
+      activities: {
+        getLoggedInAthleteActivities: vi.fn().mockResolvedValue([{ id: 1 }]),
+      },
+    } as any;
+
+    await expect(
+      emptyCache.verifyIfHasAnyActivities(stravaEmpty, { id: 9 } as any),
+    ).resolves.toBe(true);
+    expect(
+      stravaEmpty.activities.getLoggedInAthleteActivities,
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it('getActivities aborts on 429 while fetching details instead of storing empty private notes', async () => {
+    const { getActivities, logger } = await loadActivityModule();
+    const starred = (id: number) => ({
+      id,
+      name: `* bike ${id}`,
+      distance: 1000,
+      moving_time: 100,
+      type: 'Ride',
+      start_date_local: '2026-01-01T00:00:00Z',
+      gear_id: 'g1',
+    });
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockResolvedValueOnce([starred(1), starred(2)])
+          .mockResolvedValueOnce([]),
+        getActivityById: vi
+          .fn()
+          .mockRejectedValue({ status: 429, message: 'Too Many Requests' }),
+      },
+    } as any;
+
+    // A operação inteira falha: gravar parcialmente custaria os markings de
+    // manutenção (`private_note` viraria '' em silêncio).
+    await expect(
+      getActivities(strava, [{ id: 'g1' }] as any, null, null),
+    ).rejects.toEqual({ status: 429, message: 'Too Many Requests' });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ activityId: 1 }),
+      'Rate limit do Strava ao buscar detalhes — abortando o fetch',
+    );
+    // Erros que não são 429 continuam tolerados (registro + segue).
+    expect(logger.error).not.toHaveBeenCalledWith(
+      expect.anything(),
+      'Erro ao obter detalhes da atividade para enriquecer dados',
+    );
+  });
+
+  it('getActivities fetches details with bounded concurrency (batches of 8)', async () => {
+    const { getActivities } = await loadActivityModule();
+    const activities = Array.from({ length: 24 }, (_, index) => ({
+      id: index + 1,
+      name: `* bike ${index + 1}`,
+      distance: 1000,
+      moving_time: 100,
+      type: 'Ride',
+      start_date_local: '2026-01-01T00:00:00Z',
+      gear_id: 'g1',
+    }));
+
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const strava = {
+      activities: {
+        getLoggedInAthleteActivities: vi
+          .fn()
+          .mockResolvedValueOnce(activities)
+          .mockResolvedValueOnce([]),
+        getActivityById: vi.fn().mockImplementation(async () => {
+          inFlight += 1;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          await new Promise((resolve) => setTimeout(resolve, 2));
+          inFlight -= 1;
+          return { private_note: 'chain' };
+        }),
+      },
+    } as any;
+
+    const result = await getActivities(strava, [{ id: 'g1' }] as any, null, null);
+
+    expect(result).toHaveLength(24);
+    expect(strava.activities.getActivityById).toHaveBeenCalledTimes(24);
+    // O `Promise.all` original mandava 24 de uma vez (num rebuild real, 201):
+    // contra o limite de 100 leituras/15min do Strava, era 429 garantido.
+    expect(maxInFlight).toBeLessThanOrEqual(8);
+    expect(maxInFlight).toBeGreaterThan(1);
   });
 });

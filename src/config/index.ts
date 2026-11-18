@@ -34,6 +34,12 @@ export const REDIS_KEYS = {
   // com redis.set (molde de equipmentThresholds), nunca pela API remota.
   unrecognizedCodes: (athleteId: number) =>
     `strava:unrecognized-codes:${athleteId}`,
+  // Cache baseline de 60s do atleta/estatísticas — enxuta as chamadas do
+  // poll do dashboard (hoje `getAthlete` + `getAthleteStats` = 2 das ≥3
+  // chamadas Strava por leitura). Ver src/services/athlete.ts.
+  athleteCache: (athleteId: number) => `strava:athlete-cache:${athleteId}`,
+  athleteStatsCache: (athleteId: number) =>
+    `strava:athlete-stats-cache:${athleteId}`,
   // Lock key used to serialize token refresh per athlete
   refreshLock: (athleteId: number) => `strava:lock:refresh:${athleteId}`,
   // Sessão do aplicativo (D6/PR 2 do plano de usabilidade): recebe o **hash**

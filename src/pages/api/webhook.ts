@@ -482,7 +482,7 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
           { athleteId, activityId },
           'Processing new activity and merging with stored list',
         );
-        const athlete = await getAthlete(strava);
+        const athlete = await getAthlete(strava, athleteId);
         const gears = getGears(athlete);
 
         const activitiesFromStravaAPI = await getActivities(

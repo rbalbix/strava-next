@@ -205,6 +205,16 @@ describe('modal child components', () => {
 
     expect(container.textContent).toContain('Componentes:');
     expect(container.textContent).toContain('Clique no código para copiar.');
+
+    // Lista em ordem alfabética pelo nome exibido (pt-BR)
+    const names = Array.from(
+      container.querySelectorAll('tbody tr td:first-child'),
+    ).map((td) => td.textContent ?? '');
+    expect(names.length).toBe(Object.keys(Equipments).length);
+    expect(names).toEqual(
+      [...names].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    );
+
     const copyButton = container.querySelector(
       'button[aria-label^="Copiar codigo"]',
     ) as HTMLButtonElement;
