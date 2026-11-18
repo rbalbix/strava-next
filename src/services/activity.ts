@@ -129,6 +129,24 @@ async function getActivities(
               );
               throw error;
             }
+            if (requiresPrivateNote) {
+              // Qualquer erro no detalhe de uma atividade com `*` também
+              // aborta — não só o 429. Uma nota perdida nunca é refeita
+              // (o sync incremental busca só atividades novas; editar só a
+              // nota no Strava não dispara webhook), então seguir em frente
+              // aqui gravaria `private_note: ''` em silêncio e o marking
+              // sumiria do card para sempre. Incidente de 2026-11-18:
+              // 157/200 notas saíram vazias de um rebuild por erros
+              // não-429 engolidos aqui. A próxima tentativa refaz o fetch.
+              getLogger().error(
+                { err: error, activityId: activity.id, status },
+                'Falha ao buscar detalhes da atividade — abortando o fetch para não gravar nota vazia',
+              );
+              throw error;
+            }
+            // Enriquecer só o sport_type continua best-effort: não há dado
+            // de manutenção em jogo e a atividade é reprocessada sem o
+            // detalhe.
             getLogger().error(
               {
                 err: error,
