@@ -44,7 +44,7 @@ export const Equipments = {
     show: 'Shock (kit)',
   },
 
-  Tires: { id: 'tires', caption: 'Pneus (par):', show: 'Pneus (par)' },
+  Tires: { id: 'tires', caption: 'pneus (par):', show: 'Pneus (par)' },
   Fronttire: {
     id: 'fronttire',
     caption: 'pneu[frente]:',
@@ -93,7 +93,11 @@ export const Equipments = {
   // rolamentos de headset/hubs.
   Pivots: { id: 'pivots', caption: 'pivôs:', show: 'Pivôs' },
 
-  Brake: { id: 'brakes', caption: 'Pastilhas (par):', show: 'Pastilhas (par)' },
+  Brake: {
+    id: 'brakes',
+    caption: 'pastilhas de freio (par):',
+    show: 'Pastilhas (par)',
+  },
   FrontBrake: {
     id: 'frontbrake',
     caption: 'pastilha dianteira:',
