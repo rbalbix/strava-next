@@ -34,7 +34,10 @@ const handler: AuthenticatedNextApiHandler = async (
       return res.status(500).json({ error: 'Server auth config missing' });
     }
 
-    const strava = createStravaClient(tokens);
+    const strava = createStravaClient(tokens, {
+      context: 'dashboard',
+      athleteId,
+    });
     if (!strava) {
       return res.status(500).json({ error: 'Server auth config missing' });
     }

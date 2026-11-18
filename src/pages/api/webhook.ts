@@ -442,7 +442,10 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       throw new Error('Missing Strava API configuration');
     }
 
-    const strava = createStravaClient({ refreshToken });
+    const strava = createStravaClient(
+      { refreshToken },
+      { context: 'webhook.activity', athleteId },
+    );
     if (!strava) {
       throw new Error('Missing Strava API configuration');
     }
@@ -570,7 +573,10 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
           throw new Error('Missing Strava API configuration');
         }
 
-        const strava = createStravaClient({ refreshToken: tokens.refreshToken });
+        const strava = createStravaClient(
+          { refreshToken: tokens.refreshToken },
+          { context: 'webhook.athlete', athleteId },
+        );
         if (!strava) {
           throw new Error('Missing Strava API configuration');
         }

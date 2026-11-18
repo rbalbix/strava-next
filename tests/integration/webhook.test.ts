@@ -122,6 +122,8 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
   vi.doMock('../../src/services/metrics', () => ({
     webhookEvents: { inc: webhookEventsInc },
     webhookValidationFailed: { inc: webhookValidationFailedInc },
+    // strava-client (real) importa o contador de atribuição do quota.
+    stravaApiResponses: { inc: vi.fn() },
   }));
 
   vi.doMock('../../src/services/activity', () => ({

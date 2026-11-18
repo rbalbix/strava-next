@@ -214,6 +214,18 @@ export const activityFailed = createCounter(
   'Total number of activity processing failures',
 );
 
+/**
+ * Respostas da API do Strava observadas via `on_rate_limit_update`
+ * (atribuição do quota — design 2026-11-18): 1 relatório ≈ 1 resposta ≈
+ * 1 unidade de quota. Label `context` = fluxo dono da chamada
+ * (dashboard / webhook.activity / webhook.athlete / unknown).
+ */
+export const stravaApiResponses = createCounter(
+  'strava_api_responses_total',
+  'Strava API responses observed via rate limit headers, by calling context',
+  ['context'],
+);
+
 export { register };
 
 export default register;
