@@ -97,7 +97,7 @@ export async function updateStatistics(
           ? 'Recomputing statistics (report refreshed)'
           : 'Recomputing statistics',
       );
-      const athlete = await getAthlete(strava);
+      const athlete = await getAthlete(strava, athleteId);
       const gears = getGears(athlete);
       let activitiesToNewStatistics: ActivityBase[] = [];
 
@@ -187,7 +187,10 @@ async function backfillUnrecognizedCodes(
     const cases = findUnresolvedCases(activities);
     const codes =
       cases.length > 0
-        ? toUnrecognizedCodes(cases, getGears(await getAthlete(strava)))
+        ? toUnrecognizedCodes(
+            cases,
+            getGears(await getAthlete(strava, athleteId)),
+          )
         : [];
 
     await saveUnrecognizedCodes(athleteId, codes);
@@ -304,7 +307,7 @@ export async function processStatistics(
   updatedActivities: ActivityBase[],
 ): Promise<GearStats[]> {
   const log = getLogger();
-  const athlete = await getAthlete(strava);
+  const athlete = await getAthlete(strava, athleteId);
   const gears = getGears(athlete);
   // D15: relatório salvo já sai ordenado por uso recente dentro de cada
   // grupo (bikes primeiro, demais gears depois).
