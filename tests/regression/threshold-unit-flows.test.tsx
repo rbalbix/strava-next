@@ -210,7 +210,7 @@ describe('fluxos da feature limite por unidade', () => {
     const modal = await mountModal();
     await saveThroughEditor(modal.container, 'h', '48');
     expect(showToastMock).toHaveBeenCalledWith(
-      'Limite salvo [Corrente: 48 h]',
+      'Limite salvo [corrente: 48 h]',
       'success',
     );
 
@@ -276,7 +276,7 @@ describe('fluxos da feature limite por unidade', () => {
     const modal = await mountModal();
     await saveThroughEditor(modal.container, 'km', '200');
     expect(showToastMock).toHaveBeenCalledWith(
-      'Limite salvo [Corrente: 200 km]',
+      'Limite salvo [corrente: 200 km]',
       'success',
     );
 

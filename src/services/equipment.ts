@@ -238,6 +238,33 @@ export const orderedEquipments: Equipment[] = Object.values(Equipments)
   .slice()
   .sort((a, b) => a.show.localeCompare(b.show, 'pt-BR'));
 
+const equipmentsById: ReadonlyMap<string, Equipment> = new Map(
+  Object.values(Equipments).map((equipment) => [equipment.id, equipment]),
+);
+
+/**
+ * Rótulo atual (caption) de um equipment, resolvido em tempo de render.
+ *
+ * O cache do dashboard (Redis/localStorage) guarda uma cópia do `caption`
+ * feita no momento do recompute — um rename de rótulo só chegava à tela
+ * quando as estatísticas eram reprocessadas (ou seja: o card antigo ficava
+ * visível até alguém tocar numa nota de atividade). Resolvendo pelo `id`
+ * aqui, a renomeação vale no primeiro render, sem esperar o recompute.
+ *
+ * Preferência: catálogo vigente → caption gravado no cache (id fora do
+ * catálogo, dados legados) → o próprio id (último recurso).
+ */
+export function resolveCaption(equipment: {
+  id: string;
+  caption?: string;
+}): string {
+  return (
+    equipmentsById.get(equipment.id)?.caption ??
+    equipment.caption ??
+    equipment.id
+  );
+}
+
 // D14 — sinônimos PT das legendas (caption/show) para o matching tolerante.
 // Formas BRUTAS: a normalização (minúsculas + sem acentos) acontece no
 // src/services/noteCodes.ts. Termos de UMA palavra só e ≥4 letras nos

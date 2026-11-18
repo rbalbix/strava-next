@@ -106,7 +106,9 @@ describe('CardItem progress bar', () => {
       threshold: { value: 10, unit: 'h' },
     });
 
-    expect(container.textContent).toContain('Corrente');
+    // Caption resolvido do catálogo (id 'chain' → 'corrente:'), ignorando o
+    // caption antigo do fixture.
+    expect(container.textContent).toContain('corrente:');
     expect(container.querySelector('[role="progressbar"]')).not.toBeNull();
 
     act(() => root.unmount());

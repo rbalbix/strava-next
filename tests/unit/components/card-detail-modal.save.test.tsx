@@ -276,7 +276,9 @@ describe('CardDetailModal save threshold', () => {
 
     // O <label> envolve o radiogroup; sem aria-label o nome seria "km h"
     expect(getValueInput(container).getAttribute('aria-label')).toBe(
-      'Limite de Corrente',
+      // Rótulo resolvido do catálogo (id 'chain' → caption 'corrente:'),
+      // mesmo com o cache do fixture trazendo o caption antigo 'Corrente'.
+      'Limite de corrente:',
     );
 
     unmount(root, container);
@@ -419,7 +421,7 @@ describe('CardDetailModal save threshold', () => {
     expect(JSON.parse(sessionStorage.getItem('equipmentThresholds')!)).toEqual({
       'gear-1': { chain: { value: 100, unit: 'km' } },
     });
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [corrente: 250 km]', 'success');
     // O editor fecha após salvar
     expect(container.querySelector('input[type="number"]')).toBeNull();
 
@@ -462,7 +464,7 @@ describe('CardDetailModal save threshold', () => {
       thresholdKm: 250,
       unit: 'km',
     });
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [corrente: 250 km]', 'success');
 
     unmount(root, container);
   });
@@ -618,7 +620,7 @@ describe('CardDetailModal — estado "salvando" (D16)', () => {
       d.resolve({ 'gear-1': { chain: { value: 250, unit: 'km' } } });
     });
 
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [corrente: 250 km]', 'success');
     expect(container.querySelector('input[type="number"]')).toBeNull();
 
     unmount(root, container);
@@ -645,7 +647,7 @@ describe('CardDetailModal — estado "salvando" (D16)', () => {
     await act(async () => {
       d.resolve({ 'gear-1': { chain: { value: 250, unit: 'km' } } });
     });
-    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [Corrente: 250 km]', 'success');
+    expect(showToastMock).toHaveBeenCalledWith('Limite salvo [corrente: 250 km]', 'success');
 
     unmount(root, container);
   });

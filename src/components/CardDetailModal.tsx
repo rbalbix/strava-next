@@ -10,6 +10,7 @@ import type {
 } from '../contracts/api';
 import { apiClient, getHttpStatus } from '../lib/apiClient';
 import type { GearStats } from '../services/gear';
+import { resolveCaption } from '../services/equipment';
 import styles from '../styles/components/CardDetailModal.module.css';
 import { locale, secondsToHms } from '../utils/format';
 import {
@@ -321,7 +322,7 @@ export default function CardDetailModal({
                                 inputRefs.current[e.id] = el;
                               }}
                               type='number'
-                              aria-label={`Limite de ${e.caption}`}
+                              aria-label={`Limite de ${resolveCaption(e)}`}
                               readOnly={saving}
                               min={0}
                               step={activeUnit === 'h' ? 1 : 100}
@@ -338,7 +339,7 @@ export default function CardDetailModal({
                                 }))
                               }
                               onKeyDown={(ev) =>
-                                handleInputKeyDown(e.id, e.caption, ev)
+                                handleInputKeyDown(e.id, resolveCaption(e), ev)
                               }
                               placeholder='Limite'
                               autoFocus
@@ -374,7 +375,9 @@ export default function CardDetailModal({
                             </div>
                             <button
                               type='button'
-                              onClick={() => saveThreshold(e.id, e.caption)}
+                              onClick={() =>
+                                saveThreshold(e.id, resolveCaption(e))
+                              }
                               aria-label='Salvar limite'
                               aria-disabled={saving}
                               aria-busy={saving}
