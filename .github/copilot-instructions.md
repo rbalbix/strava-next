@@ -8,13 +8,13 @@ Este documento define regras de codificação, padrões de segurança e receitas
 
 ### 💻 A. Restrições de Runtime e Ambiente
 
-- **Next.js & TypeScript**: O projeto roda em Next.js (Node >= 16) com tipagem estática. Toda nova implementação deve manter o TypeScript estrito (`tsconfig.json`).
+- **Next.js & TypeScript**: O projeto roda em Next.js (Node >= 20 — a CI usa Node 22) com tipagem estática. Toda nova implementação deve manter o TypeScript estrito (`tsconfig.json`).
 - **Segredos e Variáveis de Ambiente**: Nunca versione tokens, senhas ou credenciais de APIs. Use exclusivamente o arquivo `.env.local` (não versionado) para carregar credenciais. Siga a estrutura de `.env.example`.
 
 ### 🛡️ B. Segurança de Dados e Privacidade
 
 - **Redis Server-Only**: O acesso direto ao Redis (`src/services/redis.ts`) é estritamente **server-side**. Nunca importe ou use conexões com o Redis em páginas frontend ou componentes client-side.
-- **Cookies de Sessão**: Cookies sensíveis (como `strava_code` e `strava_athleteId`) gerados em rotas de API devem ser configurados com `HttpOnly`, `Secure` (em produção) e política `SameSite=Strict` para mitigar CSRF.
+- **Cookies de Sessão**: A sessão é o cookie opaco **`gl_session`** (`src/server/cookies.ts`), sempre `HttpOnly`, `Secure` (em produção) e `SameSite=Lax`. O par legado `strava_code` + `strava_athleteId` foi removido por segurança (**VULN-002**) e **não pode ser recriado**: era controlável pelo cliente e permitia forjar a identidade de qualquer atleta. `withProtectedAPI` e o GSSP do `/` só enxergam `gl_session`.
 - **Privacidade do Ciclista (GDPR / LGPD)**: Eventos de deleção do atleta recebidos via webhook (`athlete` com `aspect_type: delete`) devem apagar imediatamente todas as chaves do atleta do Redis.
 
 ### ⚡ C. Concorrência e Resiliência
@@ -109,6 +109,18 @@ Para testar alterações nos fluxos de dados sem precisar de túneis HTTPS ou co
    ```bash
    node scripts/dev-harness.mjs redis-inspect 999888
    ```
+
+---
+
+## 📸 Skill 5: Regenerar as Imagens e Blocos Gerados do Readme
+
+As telas do `Readme.md` (`assets/readme/*`) e da página `/como-funciona` (`public/images/*`) são **geradas por script** — nunca edite PNGs manualmente nem cole capturas com dados reais de atletas.
+
+1. **Suba o app**: `yarn dev` (ou `yarn build && yarn start`) em um terminal.
+2. **Gere as imagens**: `yarn docs:screenshots` (aceita `site` ou `readme` para regenerar só um conjunto).
+3. **Como os mocks funcionam**: `scripts/capture-docs-screenshots.mjs` injeta um cookie `gl_session` fictício e intercepta `/api/app/dashboard` e `/api/app/equipment-thresholds` com `page.route()` — sem Strava, sem Redis e sem dado pessoal.
+4. **Se a captura mudar de proporção**, ajuste `width`/`height` das `<Image>` em `src/components/HowItWorksContent.tsx`. As imagens manuais (`strava-config.png`, `config-strava.png`, `tela-inicio-*.jpeg`) não são tocadas pelo script.
+5. **Blocos gerados do Readme**: após alterar o catálogo de componentes rode `node scripts/generate-readme-codes.mjs`; após alterar testes/cobertura rode `yarn test:report`.
 
 ---
 

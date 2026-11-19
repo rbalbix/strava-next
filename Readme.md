@@ -1,28 +1,34 @@
-# Strava Stats
+# GearLife
 
-🚴 **Strava Next** é uma aplicação web desenvolvida com Next.js que interage com a API do Strava para exibir estatísticas de atividades, equipamentos e outros dados dos usuários.
+🚴 **GearLife** (anteriormente *Strava Stats*) é uma aplicação web desenvolvida com Next.js que interage com a API do Strava para acompanhar a vida útil dos seus equipamentos: cada bicicleta cadastrada vira um cartão no painel, com a manutenção dos componentes registrada a partir das atividades e limites de uso em **quilômetros ou horas de pedalagem**.
+
+> 📖 Passo a passo de uso no app: página **`/como-funciona`**.
 
 ## 📸 Capturas de Tela
 
-### Login page
+> Estas imagens são geradas pelo script `yarn docs:screenshots` (Playwright), que
+> sobe o app localmente e captura as telas com dados fictícios — sem chamadas ao
+> Strava e sem dado pessoal. Para regenerar: `yarn dev` em um terminal e
+> `yarn docs:screenshots` em outro.
 
-| ![Login page](assets/Captura%20de%20tela%20de%202023-05-15%2011-57-24.png) | ![Login page](assets/Captura%20de%20tela%20de%202023-05-15%2011-57-42.png) |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+### Entrada e painel
 
-### List of equipments
+<table>
+  <tr>
+    <td align="center" width="560"><img src="assets/readme/landing.png" alt="Página inicial do GearLife com o botão Entrar com Strava" width="560"></td>
+    <td align="center" width="380"><img src="assets/readme/dashboard.png" alt="Painel autenticado com a lista de equipamentos" width="380"></td>
+  </tr>
+</table>
 
-| ![List of equipments](assets/Captura%20de%20tela%20de%202023-05-15%2011-58-16.png) | ![List of equipments](assets/Captura%20de%20tela%20de%202023-05-15%2011-58-02.png) |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+### Estatísticas, detalhe do equipamento e códigos
 
-### General statistics
-
-| ![General statistics](assets/Captura%20de%20tela%20de%202023-05-15%2011-58-30.png) | ![General statistics](assets/Captura%20de%20tela%20de%202023-05-15%2011-58-48.png) |
-| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-
-### Equipment statistics
-
-| ![Equipment statistics](assets/Captura%20de%20tela%20de%202023-05-15%2011-59-09.png) | ![Equipment statistics](assets/Captura%20de%20tela%20de%202023-05-15%2011-59-01.png) |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+<table>
+  <tr>
+    <td align="center" width="280"><img src="assets/readme/statistics.png" alt="Modal de estatísticas gerais de ciclismo e corrida" width="280"></td>
+    <td align="center" width="340"><img src="assets/readme/equipment-detail.png" alt="Detalhe do equipamento com os componentes e as barras de limite" width="340"></td>
+    <td align="center" width="340"><img src="assets/readme/components-codes.png" alt="Modal com a lista de códigos dos componentes" width="340"></td>
+  </tr>
+</table>
 
 <br/>
 
@@ -42,51 +48,65 @@
 | Lubrificação | `lub` |
 | Revisão | `review` |
 | Lavagem | `clean` |
-| Revisão da suspa | `suspareview` |
-| Revisão do shock | `shockreview` |
+| Suspensão (rev.) | `suspareview` |
+| Shock (rev.) | `shockreview` |
 | Suspensão (nova) | `suspension` |
 | Shock (novo) | `newshock` |
-| Kit de Suspensão | `suspakit` |
-| Kit de Shock | `shockkit` |
-| Par de pneus | `tires` |
+| Suspensão (kit) | `suspakit` |
+| Shock (kit) | `shockkit` |
+| Pneus (par) | `tires` |
 | Pneu dianteiro | `fronttire` |
 | Pneu traseiro | `reartire` |
-| Par de câmaras | `tubes` |
+| Câmaras (par) | `tubes` |
 | Selante | `tubeless` |
 | Câmara dianteira | `fronttube` |
 | Câmara traseira | `reartube` |
 | Avanço | `stem` |
 | Guidão | `handlebar` |
-| Par de rodas | `wheelset` |
+| Rodas (par) | `wheelset` |
 | Roda dianteira | `frontwheel` |
 | Roda traseira | `rearwheel` |
-| Par de freios | `brakes` |
-| Freio dianteiro | `frontbrake` |
-| Freio traseiro | `rearbrake` |
-| Par de discos | `disks` |
+| Rolamento de direção | `headset` |
+| Rolamento de cubo | `hubs` |
+| Pivôs | `pivots` |
+| Pastilhas (par) | `brakes` |
+| Pastilha dianteira | `frontbrake` |
+| Pastilha traseira | `rearbrake` |
+| Discos (par) | `disks` |
 | Disco dianteiro | `frontdisk` |
 | Disco traseiro | `reardisk` |
-| Par de calipers | `calipers` |
+| Calipers (par) | `calipers` |
 | Caliper dianteiro | `frontcaliper` |
 | Caliper traseiro | `rearcaliper` |
-| Par de manetes | `levers` |
+| Sangria de freio | `bleed` |
+| Manetes (par) | `levers` |
 | Manete esquerda | `leftlever` |
 | Manete direita | `rightlever` |
-| Par de STI | `stis` |
+| STI (par) | `stis` |
 | STI esquerda | `leftsti` |
 | STI direita | `rightsti` |
 | Fita do guidão | `tape` |
 | Manopla | `grip` |
 | Canote (retrátil ou não) | `dropper` |
+| Canote (rev.) | `seatpostreview` |
 | Selim | `saddle` |
 | Pedais | `pedal` |
 | Corrente | `chain` |
 | Movimento central | `bb` |
 | Cassete | `cassette` |
 | Pedivela | `crankset` |
+| Potenciômetro | `powermeter` |
+| Coroa | `coroa` |
+| Guia de corrente | `guide` |
+| Câmbio dianteiro | `frontderailleur` |
 | Câmbio traseiro | `rearderailleur` |
 | Roldanas do câmbio | `pulley` |
 | Trocador traseiro | `rearshifter` |
+| Cabos de câmbio | `cables` |
+| Luzes (par) | `lights` |
+| Luz dianteira | `frontlight` |
+| Luz traseira | `rearlight` |
+| E-bike | `ebike` |
 | Capacete | `helmet` |
 | Sapatilha | `shoes` |
 | Freehub | `freehub` |
@@ -105,7 +125,7 @@
 
 Antes de iniciar, certifique-se de ter instalado:
 
-- **Node.js** (versão 16 ou superior)
+- **Node.js** (versão 20 ou superior — a CI usa Node 22)
 - **Yarn** ou **npm**
 - Uma conta de desenvolvedor no **Strava API**
 
@@ -200,18 +220,33 @@ Comandos úteis adicionais:
 - `yarn test:coverage`
 - `yarn test:e2e:smoke`
 - `yarn test:e2e:ui`
+- `yarn docs:screenshots` — regenera as imagens deste README e da página
+  `/como-funciona` (requer o servidor local rodando)
 
 ## 🛠️ Estrutura do Projeto
 
 ```plaintext
 📂 strava-next
- ├── 📁 components    # Componentes reutilizáveis
- ├── 📁 pages         # Páginas da aplicação
- ├── 📁 styles        # Estilos CSS/Tailwind
- ├── 📁 utils         # Funções auxiliares
- ├── .env.local       # Configuração de variáveis ambiente (não versionado)
- ├── package.json     # Configuração do projeto
- ├── README.md        # Documentação
+ ├── 📁 src
+ │    ├── 📁 components   # Componentes React (painel, modais, sidebar)
+ │    ├── 📁 pages        # Páginas Next.js e rotas /api/*
+ │    ├── 📁 services     # Integrações: Strava, Redis, email, métricas
+ │    ├── 📁 contracts    # Schemas Zod e tipos das APIs
+ │    ├── 📁 contexts     # Contextos React (sessão, toast)
+ │    ├── 📁 hooks        # Hooks (ex.: polling do painel)
+ │    ├── 📁 lib          # apiClient, sessão, registro do service worker
+ │    ├── 📁 server       # Validação de ambiente server-side
+ │    ├── 📁 styles       # CSS Modules e globals
+ │    ├── 📁 utils        # Funções auxiliares
+ │    └── 📁 config       # Configurações compartilhadas
+ ├── 📁 public            # Manifest, service worker, ícones e imagens
+ ├── 📁 assets            # Imagens deste README
+ ├── 📁 scripts           # Automação (capturas, e2e, relatórios)
+ ├── 📁 tests             # unit / integration / regression
+ ├── 📁 docs              # ADRs e documentos de planejamento
+ ├── .env.example         # Modelo de variáveis de ambiente
+ ├── package.json         # Configuração do projeto
+ └── Readme.md            # Documentação
 ```
 
 ## 📡 API do Strava
@@ -374,8 +409,8 @@ Observações importantes:
 ## ✅ Melhorias Futuras
 
 - [ ] Melhorar a interface para dispositivos móveis 📱
-- [ ] Publicar um `.env.example` para acelerar o onboarding
-- [ ] Adicionar smoke tests obrigatórios na CI
+- [x] Publicar um `.env.example` para acelerar o onboarding
+- [x] Adicionar smoke tests obrigatórios na CI
 - [ ] Adicionar cache para reduzir chamadas à API 🚀
 
 ## 🤝 Contribuição
@@ -418,21 +453,21 @@ Feito com ❤️ por [rbalbix](https://github.com/rbalbix) 🚴‍♂️
 
 ## Contribuidores
 
-<a href="https://github.com/rbalbix/strava-stats/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=rbalbix/strava-stats" alt="Lista de contribuidores"/>
+<a href="https://github.com/rbalbix/strava-next/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=rbalbix/strava-next" alt="Lista de contribuidores"/>
 </a>
 
 <!-- TEST_STATUS_START -->
 ## Test Status
 
-Last update: 2026-11-16T17:28:19.425Z
+Last update: 2026-11-19T13:40:00.048Z
 
 | Metric | Coverage |
 | --- | ---: |
-| Lines | 99.76% |
-| Statements | 99.76% |
+| Lines | 99.06% |
+| Statements | 99.06% |
 | Functions | 100.00% |
-| Branches | 94.71% |
+| Branches | 94.32% |
 
 Run locally:
 - `yarn test:unit`
