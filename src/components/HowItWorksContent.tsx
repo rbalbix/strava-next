@@ -1,7 +1,6 @@
 import Divider from '@mui/material/Divider';
 import Image from 'next/image';
 import { FaMedapps } from 'react-icons/fa';
-import { IoLogInOutline } from 'react-icons/io5';
 import styles from '../styles/components/InitialInfo.module.css';
 
 export interface HowItWorksContentProps {
@@ -30,36 +29,27 @@ export default function HowItWorksContent({
       </div>
       <h2>Passo 1: Acesso Inicial e Login</h2>
       <div>
-        Ao abrir o aplicativo, você verá uma tela para fazer login ou ele te
-        redirecionará para a tela de login do Strava.
+        Ao abrir o aplicativo, você verá a página inicial do GearLife com o
+        botão para entrar com o Strava. Ao clicar nele, o aplicativo te
+        redireciona para a tela de login do Strava.
       </div>
-      {/* <div className={styles.screen}>
+      <div className={styles.screen}>
         <Image
           src='/images/login.png'
           alt='Tela inicial do aplicativo com botão de login via Strava'
           width={203}
-          height={387}
+          height={439}
           priority={true}
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
           sizes='(max-width: 480px) 90vw, 240px'
         />
-      </div> */}
+      </div>
       <ol>
-        {/* <li>
-          Clique no ícone{' '}
-          <IoLogInOutline
-            color='var(--gl-brand-primary)'
-            size={22}
-            aria-hidden='true'
-            focusable='false'
-          />{' '}
-          localizado no canto superior direito da tela ou no botão &quot;Entrar
-          com Strava&quot;.
-        </li>
+        <li>Clique em &quot;Entrar com Strava&quot; na página inicial.</li>
         <li>
           Você será redirecionado para a página de autenticação do Strava.
-        </li> */}
+        </li>
         <li>
           Insira suas credenciais do Strava e autorize a conexão com o
           aplicativo.
@@ -80,7 +70,7 @@ export default function HowItWorksContent({
           src='/images/equipments.png'
           alt='Lista de Equipamentos'
           width={203}
-          height={387}
+          height={439}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -104,14 +94,14 @@ export default function HowItWorksContent({
       <h2>Passo 3: Detalhes de um Equipamento</h2>
       <div>
         Ao clicar no cartão do equipamento, o aplicativo abre uma tela detalhada
-        com todas os componentes e eventos registrados para o equipamento.
+        com todos os componentes e eventos registrados para o equipamento.
       </div>
       <div className={styles.screen}>
         <Image
           src='/images/components.png'
-          alt='Lista de Componentes'
+          alt='Detalhe do equipamento com a lista de componentes e eventos'
           width={203}
-          height={387}
+          height={439}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -144,9 +134,9 @@ export default function HowItWorksContent({
       <div className={styles.screen}>
         <Image
           src='/images/threshold-screen.png'
-          alt='Lista de equipamentos com alerta de limite atingido'
+          alt='Alerta exibido ao abrir o painel com os componentes que atingiram o limite'
           width={203}
-          height={387}
+          height={439}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -169,7 +159,7 @@ export default function HowItWorksContent({
             src='/images/threshold-editor.png'
             alt='Edição do limite de distância para um componente'
             width={203}
-            height={387}
+            height={439}
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
@@ -198,7 +188,7 @@ export default function HowItWorksContent({
             src='/images/threshold-progress-bar.png'
             alt='Barra de progresso indicando o status do componente em relação ao limite definido'
             width={203}
-            height={387}
+            height={439}
             loading='lazy'
             placeholder='blur'
             blurDataURL={BLUR_DATA_URL}
@@ -218,8 +208,8 @@ export default function HowItWorksContent({
         <Image
           src='/images/strava-config.png'
           alt='Configuração na atividade'
-          width={203}
-          height={387}
+          width={191}
+          height={385}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -236,7 +226,7 @@ export default function HowItWorksContent({
           src='/images/component-list.png'
           alt='Lista de Códigos'
           width={203}
-          height={387}
+          height={448}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -259,7 +249,7 @@ export default function HowItWorksContent({
           src='/images/tela-inicio-1.jpeg'
           alt='Ícone para tela início'
           width={285}
-          height={90}
+          height={87}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
@@ -275,7 +265,7 @@ export default function HowItWorksContent({
           src='/images/tela-inicio-2.jpeg'
           alt='Ícone para tela início'
           width={295}
-          height={55}
+          height={54}
           loading='lazy'
           placeholder='blur'
           blurDataURL={BLUR_DATA_URL}
