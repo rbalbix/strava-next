@@ -341,13 +341,13 @@ async function computeStatistics(
 ): Promise<GearStats[]> {
   const log = getLogger();
   try {
-    let storedActivities = await apiRemoteStorage.get(
-      REDIS_KEYS.activities(athleteId),
-    );
-
-    const storedStatistics = await apiRemoteStorage.get(
-      REDIS_KEYS.statistics(athleteId),
-    );
+    // Duas leituras independentes do mesmo storage — em paralelo: uma não
+    // usa o resultado da outra (async-parallel).
+    const [storedActivitiesResult, storedStatistics] = await Promise.all([
+      apiRemoteStorage.get(REDIS_KEYS.activities(athleteId)),
+      apiRemoteStorage.get(REDIS_KEYS.statistics(athleteId)),
+    ]);
+    let storedActivities = storedActivitiesResult;
 
     // D14.1: auto-refresh antes da decisão cache/recálculo — editar só a
     // observação privada no Strava não dispara webhook, então sem isto o

@@ -367,11 +367,8 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 500 when CLIENT_ID or CLIENT_SECRET is missing', async () => {
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
-    mocks.mockGetAthleteAccessToken.mockResolvedValueOnce({
-      accessToken: 'access',
-      refreshToken: 'refresh',
-      expiresAt: 9999999999,
-    });
+    // Sem mock de token: o guard síncrono de config responde antes de
+    // qualquer I/O (a ordem nova é guard → token), então o fetch nem roda.
 
     const req = createMockRequest({
       method: 'GET',

@@ -25,8 +25,22 @@ type LoadWebhookOptions = {
 async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
   vi.resetModules();
 
-  (process.env as Record<string, string | undefined>).VERIFY_TOKEN =
-    options.verifyToken ?? 'verify-token';
+  // `'verifyToken' in options` distingue "não informado" (default) de
+  // explicitamente `undefined` — o caso de env ausente que o guard de
+  // verificação precisa rejeitar (fail-closed). Atribuir `undefined` ao
+  // process.env viraria a string "undefined"; apagar a chave é o único
+  // jeito de simular a env ausente.
+  if ('verifyToken' in options) {
+    if (options.verifyToken === undefined) {
+      delete (process.env as Record<string, string | undefined>).VERIFY_TOKEN;
+    } else {
+      (process.env as Record<string, string | undefined>).VERIFY_TOKEN =
+        options.verifyToken;
+    }
+  } else {
+    (process.env as Record<string, string | undefined>).VERIFY_TOKEN =
+      'verify-token';
+  }
   (process.env as Record<string, string | undefined>).NODE_ENV =
     options.nodeEnv ?? 'test';
   (process.env as Record<string, string | undefined>).WEBHOOK_ALLOWED_IPS =
@@ -281,6 +295,24 @@ describe('/api/webhook integration', () => {
 
     expect(res.statusCode).toBe(403);
     expect(res.body).toEqual({ error: 'Token inválido' });
+  });
+
+  it('returns 500 when VERIFY_TOKEN is not configured (fail-closed)', async () => {
+    // Sem a env, a comparação virava `undefined === undefined` e aceitava a
+    // verificação sem token — qualquer originador ativava o webhook.
+    const { webhookHandler, req, res } = await loadWebhookHandler({
+      method: 'GET',
+      verifyToken: undefined,
+      query: {
+        'hub.mode': 'subscribe',
+        'hub.challenge': 'challenge-value',
+      },
+    });
+
+    await webhookHandler(req, res);
+
+    expect(res.statusCode).toBe(500);
+    expect(res.body).toEqual({ error: 'Webhook verification not configured' });
   });
 
   it('returns 400 when payload validation fails', async () => {

@@ -191,6 +191,16 @@ export default async function handler(
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
+    // Fail-closed: sem a env configurada, `token === VERIFY_TOKEN` virava
+    // `undefined === undefined` e validava a verificação sem token — qualquer
+    // originador ativava o webhook (mesma molde do guard de subscription_id).
+    if (!VERIFY_TOKEN) {
+      log.error('Missing VERIFY_TOKEN configuration');
+      return res
+        .status(500)
+        .json({ error: 'Webhook verification not configured' });
+    }
+
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       log.info('Webhook validado com sucesso');
       return res.status(200).json({ 'hub.challenge': challenge });
@@ -391,8 +401,17 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       'Processando evento de atividade',
     );
 
-    // Buscar access token do atleta
-    const tokens = await getAthleteAccessToken(athleteId);
+    // Checagem barata síncrona antes de qualquer I/O: sem ela, o token era
+    // buscado (Redis + refresh potencial) só para descobrir que falta config.
+    if (!getStravaServerEnv().success) {
+      throw new Error('Missing Strava API configuration');
+    }
+
+    // Token do atleta e base de atividades não se dependem — disparados juntos.
+    const [tokens, storedActivities] = await Promise.all([
+      getAthleteAccessToken(athleteId),
+      apiRemoteStorage.get(REDIS_KEYS.activities(athleteId)),
+    ]);
     if (!tokens?.accessToken || !tokens.refreshToken) {
       throw new Error(`Token não encontrado para athlete ${athleteId}`);
     }
@@ -432,14 +451,6 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         );
       }
       return;
-    }
-
-    const storedActivities = await apiRemoteStorage.get(
-      REDIS_KEYS.activities(athleteId),
-    );
-
-    if (!getStravaServerEnv().success) {
-      throw new Error('Missing Strava API configuration');
     }
 
     const strava = createStravaClient(
@@ -566,13 +577,14 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
   switch (aspect_type) {
     case 'update': {
       try {
+        // Guard barato síncrono antes do I/O de token (async-cheap-condition).
+        if (!getStravaServerEnv().success) {
+          throw new Error('Missing Strava API configuration');
+        }
         const tokens = await getAthleteAccessToken(athleteId);
         if (!tokens?.refreshToken) {
           log.warn({ athleteId }, 'Athlete update ignored: missing tokens');
           return;
-        }
-        if (!getStravaServerEnv().success) {
-          throw new Error('Missing Strava API configuration');
         }
 
         const strava = createStravaClient(

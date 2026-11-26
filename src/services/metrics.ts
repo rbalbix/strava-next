@@ -140,10 +140,14 @@ function createRegistry(): Registry {
 
       let output = '';
       const metricNames = Array.from(metricDefinitions.keys());
-      for (const metricName of metricNames) {
+      // Leituras Redis independentes: disparadas todas antes de aguardar —
+      // antes eram N round-trips sequenciais só para montar o texto.
+      const persistedEntries = await Promise.all(
+        metricNames.map((metricName) => getPersistentMetric(metricName)),
+      );
+      for (const [index, metricName] of metricNames.entries()) {
         const definition = metricDefinitions.get(metricName);
-        const persistedEntries = await getPersistentMetric(metricName);
-        const entries = persistedEntries ?? metricsStore.get(metricName) ?? [];
+        const entries = persistedEntries[index] ?? metricsStore.get(metricName) ?? [];
         output += `# HELP ${metricName} ${definition?.help || 'Custom metric'}\n`;
         output += `# TYPE ${metricName} counter\n`;
 
