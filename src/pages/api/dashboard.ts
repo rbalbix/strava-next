@@ -86,7 +86,15 @@ const handler: AuthenticatedNextApiHandler = async (
       : [];
 
     const response: DashboardResponse = {
-      athlete,
+      // Só os campos consumidos pela UI: o DetailedAthlete completo não
+      // saía daqui para uso nenhum (P2/A1 — redução de payload).
+      athlete: {
+        id: athlete.id,
+        profile: athlete.profile,
+        firstname: athlete.firstname,
+        lastname: athlete.lastname,
+        city: athlete.city,
+      },
       athleteStats,
       hasGear,
       hasActivities,

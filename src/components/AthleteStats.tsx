@@ -1,11 +1,10 @@
-import Divider from '@mui/material/Divider';
 import { useContext } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { IoMdStats } from 'react-icons/io';
 import { MdClose, MdDirectionsBike, MdDirectionsRun } from 'react-icons/md';
 import type { ActivityTotal } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
-import { locale, secondsToHms } from '../utils/format';
+import { formatNumber, secondsToHms } from '../utils/format';
 import cardStyles from '../styles/components/Card.module.css';
 
 export default function AthleteStats() {
@@ -42,10 +41,10 @@ export default function AthleteStats() {
       <div>
         {title === 'Ciclismo' && (
           <>
-            <p>{`Maior distância: ${locale.format(',.2f')(
+            <p>{`Maior distância: ${formatNumber(
               (stats?.biggestDistance || 0) / 1000,
             )}km`}</p>
-            <p>{`Maior escalada: ${locale.format(',.2f')(
+            <p>{`Maior escalada: ${formatNumber(
               stats?.biggestClimb || 0,
             )}m`}</p>
           </>
@@ -59,10 +58,10 @@ export default function AthleteStats() {
             <strong>&nbsp;Últimas 4 semanas:</strong>
           </span>
         </p>
-        <p>{`[${stats?.recent?.count || 0} atividades | ${locale.format(',.2f')(
+        <p>{`[${stats?.recent?.count || 0} atividades | ${formatNumber(
           (stats?.recent?.distance || 0) / 1000,
         )}km | ${secondsToHms(stats?.recent?.moving_time || 0)}h
-              | ${locale.format(',.2f')(
+              | ${formatNumber(
                 stats?.recent?.elevation_gain || 0,
               )}m]`}</p>
 
@@ -74,13 +73,13 @@ export default function AthleteStats() {
             <strong>&nbsp;Último ano:</strong>
           </span>
         </p>
-        <p>{`[${stats?.ytd?.count || 0} atividades | ${locale.format(',.2f')(
+        <p>{`[${stats?.ytd?.count || 0} atividades | ${formatNumber(
           (stats?.ytd?.distance || 0) / 1000,
         )}km |  
               
               ${secondsToHms(stats?.ytd?.moving_time || 0)}h
               
-              | ${locale.format(',.2f')(
+              | ${formatNumber(
                 stats?.ytd?.elevation_gain || 0,
               )}m]`}</p>
 
@@ -92,13 +91,13 @@ export default function AthleteStats() {
             <strong>&nbsp;Totais:</strong>
           </span>
         </p>
-        <p>{`[${stats?.all?.count || 0} atividades | ${locale.format(',.2f')(
+        <p>{`[${stats?.all?.count || 0} atividades | ${formatNumber(
           (stats?.all?.distance || 0) / 1000,
         )}km |  
               
               ${secondsToHms(stats?.all?.moving_time || 0)}h
               
-              | ${locale.format(',.2f')(
+              | ${formatNumber(
                 stats?.all?.elevation_gain || 0,
               )}m]`}</p>
       </div>
@@ -147,7 +146,7 @@ export default function AthleteStats() {
             all: athleteStats?.all_ride_totals,
           })}
 
-          <Divider />
+          <hr />
 
           {renderStats('Corrida', {
             recent: athleteStats?.recent_run_totals,
@@ -155,7 +154,7 @@ export default function AthleteStats() {
             all: athleteStats?.all_run_totals,
           })}
 
-          <Divider />
+          <hr />
         </main>
       )}
     </>

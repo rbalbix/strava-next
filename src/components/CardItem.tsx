@@ -3,7 +3,7 @@ import { ptBR } from 'date-fns/locale';
 import { Equipments, resolveCaption } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 import { copyEventDetailsToClipboard } from '../utils/clipboard';
-import { locale, secondsToHms } from '../utils/format';
+import { formatNumber, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
 import type { ThresholdEntry } from '../contracts/api';
@@ -143,7 +143,7 @@ export default function CardItem({
             <span className={styles.chipRegistered}>Registrado</span>
           )} */}
           <div className={styles.chipbadge}>
-            {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
+            {`${formatNumber(equipmentDistance / 1000)}km`}
           </div>
           <div className={styles.chipbadge}>
             {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}

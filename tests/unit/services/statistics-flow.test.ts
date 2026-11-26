@@ -662,7 +662,11 @@ describe('statistics flow service', () => {
 
     await updateStatistics({} as any, 123);
 
-    expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, []);
+    // P2/A2: o backfill roda em background — espera o comportamento eventual
+    // em vez de assumir que ele completou junto com o retorno.
+    await vi.waitFor(() =>
+      expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, []),
+    );
     expect(getAthlete).not.toHaveBeenCalled();
   });
 
@@ -685,16 +689,19 @@ describe('statistics flow service', () => {
 
     await updateStatistics({} as any, 123);
 
-    expect(getAthlete).toHaveBeenCalledTimes(1);
-    expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, [
-      {
-        activityId: 11,
-        gearName: 'Bike A',
-        startDate: '2026-01-02T00:00:00Z',
-        word: 'chian',
-        suggestion: 'chain',
-      },
-    ]);
+    // P2/A2: backfill em background — asserções positivas esperam ele rodar.
+    await vi.waitFor(() => {
+      expect(getAthlete).toHaveBeenCalledTimes(1);
+      expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, [
+        {
+          activityId: 11,
+          gearName: 'Bike A',
+          startDate: '2026-01-02T00:00:00Z',
+          word: 'chian',
+          suggestion: 'chain',
+        },
+      ]);
+    });
   });
 
   it('updateStatistics keeps cached stats when the backfill fails', async () => {
@@ -709,7 +716,8 @@ describe('statistics flow service', () => {
     const result = await updateStatistics({} as any, 123);
 
     expect(result).toEqual([{ id: 'bike-1' }]);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    // P2/A2: o warn é do backfill em background — espera o eventual.
+    await vi.waitFor(() => expect(logger.warn).toHaveBeenCalledTimes(1));
   });
 
   // --- D14.1: auto-refresh do relatório (caminho B) ---

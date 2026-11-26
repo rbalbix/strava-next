@@ -157,11 +157,13 @@
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    filter 0.2s ease;
 }
 
 .editThresholdButton:hover {
-  background-color: rgba(var(--gl-brand-primary), 0.1);
+  background-color: color-mix(in srgb, var(--gl-brand-primary) 10%, transparent);
   filter: brightness(1.1);
 }
 
@@ -180,11 +182,17 @@
   padding: 0.25rem 0.5rem;
   min-height: 2.75rem; /* 44px — alvo de toque mínimo (Fase D, §8.28) */
   border-radius: 4px;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    filter 0.2s ease;
 }
 
 .cancelButton:hover {
-  background-color: rgba(var(--gl-status-overdue), 0.1);
+  background-color: color-mix(
+    in srgb,
+    var(--gl-status-overdue) 10%,
+    transparent
+  );
   filter: brightness(1.1);
 }
 
@@ -225,7 +233,8 @@
 .thresholdRow input:focus {
   outline: none;
   border-color: var(--gl-brand-primary);
-  box-shadow: 0 0 0 2px rgba(var(--gl-brand-primary), 0.25);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--gl-brand-primary) 25%, transparent);
 }
 
 .thresholdRow button {

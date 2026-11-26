@@ -71,6 +71,14 @@
   margin: 10px;
 }
 
+/* O outline acima é decorativo e permanente: sem um :focus-visible próprio,
+   ele substituía o anel de foco do teclado (o estilo de autor vence o UA) e
+   o estado de foco ficava invisível. Específico e depois da base → vence. */
+.buttonSidebarHeader:focus-visible {
+  outline: 2px solid var(--gl-brand-primary);
+  outline-offset: 2px;
+}
+
 .iconButtonLink {
   border: none;
   border-radius: 8px;

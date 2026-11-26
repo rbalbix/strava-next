@@ -47,7 +47,11 @@
   outline-offset: 2px;
 }
 
-.cardContainer header {
+/* header/main/p dentro do <button> viraram spans (P2/C6): os seletores de
+   elemento seguem valendo para o AthleteStats, que usa a mesma classe com
+   DOM próprio (header/div/p fora de button). */
+.cardContainer header,
+.cardContainer .cardHeader {
   font-size: var(--gl-text-lg);
   font-weight: 600;
   gap: 0.75rem;
@@ -72,20 +76,30 @@
   font-size: 14px;
 }
 
-.cardContainer main p {
+.cardContainer .cardBody {
+  display: block;
+}
+
+.cardContainer .cardText {
+  display: block;
+}
+
+.cardContainer .cardBody > .cardText {
   font-size: var(--gl-text-sm);
 }
 
-.cardContainer main > :first-child {
+.cardContainer .cardBody > :first-child {
   color: var(--gl-text-secondary);
 }
 
-.cardContainer div p {
+.cardContainer div p,
+.cardContainer .cardLub .cardText {
   font-size: 1.1rem;
   color: var(--gl-text-tertiary);
 }
 
-.cardContainer div p:first-child {
+.cardContainer div p:first-child,
+.cardContainer .cardLub .cardText:first-child {
   margin-top: 0.75rem;
 }
 

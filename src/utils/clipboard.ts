@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import type { Equipment } from '../services/equipment';
-import { locale, secondsToHms } from './format';
+import { formatNumber, secondsToHms } from './format';
 
 function fallbackCopyTextToClipboard(text: string) {
   const textArea = document.createElement('textarea');
@@ -39,8 +39,8 @@ function copyEventDetailsToClipboard(
   movingTime: number,
 ) {
   const formattedDate = format(new Date(), 'dd/MM/yyyy');
-  const formattedDistance = locale.format(',.2f')(distance / 1000);
-  const formattedEquipmentDistance = locale.format(',.2f')(
+  const formattedDistance = formatNumber(distance / 1000);
+  const formattedEquipmentDistance = formatNumber(
     (equipment.distance ?? 0) / 1000,
   );
   const formattedTime = secondsToHms(movingTime);

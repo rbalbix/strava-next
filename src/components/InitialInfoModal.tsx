@@ -1,4 +1,3 @@
-import Divider from '@mui/material/Divider';
 import { useContext } from 'react';
 import { MdClose } from 'react-icons/md';
 import { TfiHelp } from 'react-icons/tfi';
@@ -41,7 +40,7 @@ export default function InitialInfoModal() {
         <InitialInfo />
       </section>
       <footer>
-        <Divider className={styles.divider} style={{ margin: 'auto' }} />
+        <hr className={styles.divider} style={{ margin: 'auto' }} />
       </footer>
     </main>
   );

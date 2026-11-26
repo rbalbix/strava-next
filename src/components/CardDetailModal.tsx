@@ -12,7 +12,7 @@ import { apiClient, getHttpStatus } from '../lib/apiClient';
 import type { GearStats } from '../services/gear';
 import { resolveCaption } from '../services/equipment';
 import styles from '../styles/components/CardDetailModal.module.css';
-import { locale, secondsToHms } from '../utils/format';
+import { formatNumber, secondsToHms } from '../utils/format';
 import {
   getActivityVisualType,
   isBikeActivityType,
@@ -262,7 +262,7 @@ export default function CardDetailModal({
             <div className={styles.statCardContainer}>
               <StatCard value={count} label='Atividades' icon='📊' />
               <StatCard
-                value={`${locale.format(',.2f')(distance / 1000)}km`}
+                value={`${formatNumber(distance / 1000)}km`}
                 label='Distância Total'
                 icon='📍'
               />

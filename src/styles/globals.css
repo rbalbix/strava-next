@@ -193,3 +193,28 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* <hr> — o MUI só era usado pelo <Divider>, que renderiza exatamente isto
+   (B1): com o token de borda, a linha funciona nos dois temas — o
+   rgba(0,0,0,0.12) do tema padrão do MUI ficava invisível no dark. */
+hr {
+  border: none;
+  border-top: 1px solid var(--gl-border-subtle);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Movimento reduzido (web-design-guidelines): quem pediu menos animação
+   recebe transições e animações em um flash mínimo — cobre o pulse do
+   skeleton, o slideDown das modais e qualquer loop futuro. O GIF do
+   VeloIcon não é alcançável por CSS (mídia rasterizada no HTML). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

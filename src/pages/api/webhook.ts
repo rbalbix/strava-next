@@ -374,14 +374,22 @@ export default async function handler(
         // O endpoint resolve assunto, destinatário e HTML a partir do
         // template (VULN-009): aqui só vão params planos — o `Error` é
         // serializado antes, porque ele não sobrevive ao JSON.
-        await sendEmail({
-          template: 'webhook-error',
-          params: {
-            message: 'Erro no Processamento do Webhook',
-            errorDetail:
-              error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error && error.stack ? error.stack : '',
-          },
+        // Efeito colateral do 500, não parte da resposta: disparado sem
+        // await (async-defer-await) — um SMTP lento não segurava o retorno.
+        // `Promise.resolve` tolera o mock de teste que devolve undefined;
+        // a falha segue para o mesmo log do catch abaixo.
+        void Promise.resolve(
+          sendEmail({
+            template: 'webhook-error',
+            params: {
+              message: 'Erro no Processamento do Webhook',
+              errorDetail:
+                error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error && error.stack ? error.stack : '',
+            },
+          }),
+        ).catch((emailError) => {
+          log.error({ err: emailError }, 'Erro ao enviar email de erro');
         });
       } catch (emailError) {
         log.error({ err: emailError }, 'Erro ao enviar email de erro');

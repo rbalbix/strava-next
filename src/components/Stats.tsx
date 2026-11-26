@@ -1,11 +1,11 @@
-import { Divider } from '@mui/material';
 import { format, parseISO } from 'date-fns';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { MdWarningAmber } from 'react-icons/md';
 import { TbBrandStrava } from 'react-icons/tb';
-import type { DetailedAthlete, ActivityStats } from 'strava';
+import type { ActivityStats } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import type {
+  DashboardAthlete,
   DashboardResponse,
   EquipmentThresholds,
   ThresholdUnit,
@@ -104,7 +104,7 @@ function readCachedDashboard(): CachedDashboard | null {
 
     if (!athleteRaw || !athleteStatsRaw || !gearStatsRaw) return null;
 
-    const athlete = JSON.parse(athleteRaw) as DetailedAthlete;
+    const athlete = JSON.parse(athleteRaw) as DashboardAthlete;
     const athleteStats = JSON.parse(athleteStatsRaw) as ActivityStats;
     const gearStats = JSON.parse(gearStatsRaw) as GearStats[];
     const equipmentThresholds = JSON.parse(
@@ -463,10 +463,7 @@ export default function Stats() {
                   movingTime={gearStat.movingTime}
                   equipments={gearStat.equipments}
                 />
-                <Divider
-                  className={styles.divider}
-                  style={{ margin: 'auto' }}
-                />
+                <hr className={styles.divider} style={{ margin: 'auto' }} />
               </div>
             );
           })

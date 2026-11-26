@@ -384,7 +384,11 @@ async function computeStatistics(
       // D14: backfill best-effort — o relatório de códigos não reconhecidos
       // é gravado uma vez por atleta no primeiro load com cache válido
       // (senão o banner só apareceria após o próximo evento do Strava).
-      await backfillUnrecognizedCodes(
+      // Disparado sem await (async-defer-await): o resultado não entra na
+      // resposta e segurar o retorno do caminho de cache custava 2+ idas ao
+      // Redis (e, havendo caso pendente, uma ao Strava) antes do dashboard
+      // responder. A função engole os próprios erros — nunca rejeita.
+      void backfillUnrecognizedCodes(
         strava,
         athleteId,
         storedActivities.data.activities,

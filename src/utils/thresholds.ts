@@ -1,5 +1,5 @@
 import type { ThresholdEntry, ThresholdUnit } from '../contracts/api';
-import { locale } from './format';
+import { formatNumber } from './format';
 
 export type ThresholdState = 'normal' | 'warning' | 'overdue' | 'no-threshold';
 
@@ -46,5 +46,5 @@ export function formatThresholdValue(
   value: number,
   unit: ThresholdUnit,
 ): string {
-  return `${locale.format(unit === 'h' ? ',.1f' : ',.2f')(value)} ${unit}`;
+  return `${formatNumber(value, unit === 'h' ? 1 : 2)} ${unit}`;
 }

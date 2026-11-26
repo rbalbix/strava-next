@@ -23,7 +23,6 @@ vi.mock('../../../src/components/SeoHead', () => ({ default: () => null }));
 vi.mock('../../../src/components/Header', () => ({ default: () => <header>header</header> }));
 vi.mock('../../../src/components/Footer', () => ({ default: () => <footer>footer</footer> }));
 vi.mock('../../../src/components/ErroMsg', () => ({ default: () => <div>erro</div> }));
-vi.mock('../../../src/components/ChainIcon', () => ({ default: () => <span>chain</span> }));
 vi.mock('../../../src/components/ModalContainer', () => ({ default: () => <div>modal</div> }));
 
 describe('home page', () => {

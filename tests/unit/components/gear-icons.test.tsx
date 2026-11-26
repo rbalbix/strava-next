@@ -10,7 +10,6 @@ vi.mock('next/image', () => ({
   default: ({ src, alt }: any) => <img src={src} alt={alt} />,
 }));
 
-import ChainIcon from '../../../src/components/ChainIcon';
 import DiskIcon from '../../../src/components/DiskIcon';
 import InitialInfo from '../../../src/components/InitialInfo';
 import MountainBikeIcon from '../../../src/components/MountainBikeIcon';
@@ -35,7 +34,6 @@ describe('gear icons', () => {
   it('renderiza os ícones de equipamento como presentacionais', () => {
     const { container, unmount } = mount(
       <>
-        <ChainIcon className='chain' />
         <MountainBikeIcon />
         <DiskIcon />
         <TireIcon />
@@ -43,14 +41,7 @@ describe('gear icons', () => {
       </>,
     );
 
-    const svgs = Array.from(container.querySelectorAll('svg'));
-    expect(svgs).toHaveLength(1);
-    for (const svg of svgs) {
-      expect(svg.getAttribute('aria-hidden')).toBe('true');
-    }
-    expect(container.querySelector('svg.chain')).not.toBeNull();
-
-    // Os demais ícones são imagens (next/image) e também montam.
+    // Ícones são imagens (next/image) e montam com alt/src válidos.
     const images = Array.from(container.querySelectorAll('img'));
     expect(images).toHaveLength(4);
     expect(

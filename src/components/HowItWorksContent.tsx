@@ -1,4 +1,3 @@
-import Divider from '@mui/material/Divider';
 import Image from 'next/image';
 import { FaMedapps } from 'react-icons/fa';
 import styles from '../styles/components/InitialInfo.module.css';
@@ -59,7 +58,7 @@ export default function HowItWorksContent({
           Strava.
         </li>
       </ol>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 2: Lista de Equipamentos</h2>
       <div>
         Após realizar o login, você será redirecionado para o painel principal
@@ -90,7 +89,7 @@ export default function HowItWorksContent({
           corrente.
         </li>
       </ul>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 3: Detalhes de um Equipamento</h2>
       <div>
         Ao clicar no cartão do equipamento, o aplicativo abre uma tela detalhada
@@ -117,7 +116,7 @@ export default function HowItWorksContent({
         </li>
         <li>Tempo total: Tempo de uso desde a última manutenção.</li>
       </ul>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h3>Limites por Equipamento: km ou horas de pedalagem</h3>
       <div>
         Você pode definir um limite para cada componente do seu equipamento a
@@ -196,7 +195,7 @@ export default function HowItWorksContent({
           />
         </div>
       </ol>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 4: Lista de Códigos dos Componentes</h2>
       <div>
         Para monitorar diferentes tipos de <span>componentes</span> do
@@ -233,7 +232,7 @@ export default function HowItWorksContent({
           sizes='(max-width: 480px) 90vw, 240px'
         />
       </div>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h3>Observações:</h3>
       <div>
         O tema claro ou escuro é definido pela configuração do ambiente /

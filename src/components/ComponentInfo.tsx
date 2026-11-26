@@ -4,7 +4,6 @@ import { FaMedapps } from 'react-icons/fa';
 import { orderedEquipments } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 
-import { Divider } from '@mui/material';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -93,7 +92,7 @@ export default function ComponentInfo() {
         </table>
       </section>
 
-      <Divider className={styles.dividerFooter} />
+      <hr className={styles.dividerFooter} />
     </main>
   );
 }

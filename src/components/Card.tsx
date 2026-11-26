@@ -9,7 +9,7 @@ import {
 import { AuthContext } from '../contexts/AuthContext';
 import { Equipments } from '../services/equipment';
 import type { GearStats } from '../services/gear';
-import { locale, secondsToHms } from '../utils/format';
+import { formatNumber, secondsToHms } from '../utils/format';
 
 export default function Card({
   id,
@@ -51,9 +51,12 @@ export default function Card({
       onClick={handleCardClick}
       aria-label={`Abrir detalhes de ${name}`}
     >
-      <header>
-        <div>{name}</div>
-        <div>
+      {/* <button> só aceita conteúdo de frase: header/main/div/p viram spans
+          e o Card.module.css dá display:block para o layout não mudar
+          (P2/C6 — content model inválido). */}
+      <span className={styles.cardHeader}>
+        <span>{name}</span>
+        <span>
           {renderActivityIcon(
             visualType,
             visualType === 'run'
@@ -62,25 +65,29 @@ export default function Card({
                 ? styles.iconMountainBike
                 : styles.iconBike,
           )}
-        </div>
-      </header>
-      <main>
-        <p>{`${count} atividades.`}</p>
-        <p>{`${locale.format(',.2f')(distance / 1000)} km`}</p>
-        <p>{`${secondsToHms(movingTime)}h`}</p>
+        </span>
+      </span>
+      <span className={styles.cardBody}>
+        <span className={styles.cardText}>{`${count} atividades.`}</span>
+        <span className={styles.cardText}>
+          {`${formatNumber(distance / 1000)} km`}
+        </span>
+        <span className={styles.cardText}>{`${secondsToHms(movingTime)}h`}</span>
 
         {isBikeActivity && lub && (
-          <div>
+          <span className={styles.cardLub}>
             {lubDistance !== 0 ? (
-              <p>{`. lubrificada a: ${locale.format(',.2f')(
-                lubDistance / 1000,
-              )} km  | ${secondsToHms(lubMovingTime)}h`}</p>
+              <span className={styles.cardText}>
+                {`. lubrificada a: ${formatNumber(lubDistance / 1000)} km  | ${secondsToHms(lubMovingTime)}h`}
+              </span>
             ) : (
-              <p>Bike lubrificada. &#x1F44F;</p>
+              <span className={styles.cardText}>
+                Bike lubrificada. &#x1F44F;
+              </span>
             )}
-          </div>
+          </span>
         )}
-      </main>
+      </span>
     </button>
   );
 }

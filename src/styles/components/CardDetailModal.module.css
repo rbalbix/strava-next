@@ -99,7 +99,10 @@
   font-size: 0.85rem;
   min-height: 2.75rem; /* 44px — alvo de toque mínimo (Fase D, §8.28) */
   line-height: normal;
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
   background-color: var(--gl-surface-card);
   color: var(--gl-text-primary);
 }
