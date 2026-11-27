@@ -149,6 +149,7 @@ export default function Stats() {
     signOut,
     openModal,
     activeModal,
+    modalData,
     closeModal,
   } = useContext(AuthContext);
 
@@ -316,6 +317,20 @@ export default function Stats() {
     closeModal,
     activeModal,
   ]);
+
+  useEffect(() => {
+    if (activeModal !== 'card-detail') return;
+
+    const snapshot = modalData as GearStats | null;
+    if (!snapshot) return;
+
+    const latest = gearStats.find((gear) => gear.id === snapshot.id);
+    if (!latest) return;
+
+    if (JSON.stringify(snapshot) !== JSON.stringify(latest)) {
+      openModal('card-detail', latest);
+    }
+  }, [activeModal, gearStats, modalData, openModal]);
 
   // D14: banner warning de código não reconhecido — visível só com gear e
   // atividades e enquanto houver caso não dispensado; o ✕ dispensa os
