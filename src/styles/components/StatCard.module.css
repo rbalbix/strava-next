@@ -21,6 +21,9 @@
 .statValue {
   font-size: 1.5rem;
   font-weight: bold;
+  /* Dígitos de largura fixa (P3): os números do painel mudam a cada
+     revalidação (5–60s) e sem isto os algarismos "pulavam". */
+  font-variant-numeric: tabular-nums;
 }
 
 .statLabel {

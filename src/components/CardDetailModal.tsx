@@ -12,7 +12,7 @@ import { apiClient, getHttpStatus } from '../lib/apiClient';
 import type { GearStats } from '../services/gear';
 import { resolveCaption } from '../services/equipment';
 import styles from '../styles/components/CardDetailModal.module.css';
-import { locale, secondsToHms } from '../utils/format';
+import { formatNumber, secondsToHms } from '../utils/format';
 import {
   getActivityVisualType,
   isBikeActivityType,
@@ -228,7 +228,8 @@ export default function CardDetailModal({
 
   return (
     <div className={styles.cardDetailModalContainer}>
-      <main>
+      {/* Não é <main> (P3): o documento já tem um, o da página. */}
+      <div className={styles.modalBody}>
         <header>
           <div>
             <div>
@@ -262,7 +263,7 @@ export default function CardDetailModal({
             <div className={styles.statCardContainer}>
               <StatCard value={count} label='Atividades' icon='📊' />
               <StatCard
-                value={`${locale.format(',.2f')(distance / 1000)}km`}
+                value={`${formatNumber(distance / 1000)}km`}
                 label='Distância Total'
                 icon='📍'
               />
@@ -315,7 +316,10 @@ export default function CardDetailModal({
                   >
                     {isEditorVisible && (
                       <div className={styles.thresholdEditor}>
-                        <label>
+                        {/* <label> virou <div> (P3): label envolvia grupo
+                            radiogroup e botões — label só rotula controle.
+                            O input já tem aria-label próprio. */}
+                        <div>
                           <div className={styles.thresholdRow}>
                             <input
                               ref={(el) => {
@@ -396,7 +400,7 @@ export default function CardDetailModal({
                               )}
                             </button>
                           </div>
-                        </label>
+                        </div>
                       </div>
                     )}
                   </CardItem>
@@ -404,7 +408,7 @@ export default function CardDetailModal({
               })}
           </ul>
         )}
-      </main>
+      </div>
     </div>
   );
 }

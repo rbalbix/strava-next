@@ -1,10 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 
 import { orderedEquipments } from '../services/equipment';
-import type { Equipment } from '../services/equipment';
 
-import { Divider } from '@mui/material';
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -13,21 +11,21 @@ import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/Footer.module.css';
 
 export default function ComponentInfo() {
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const { closeModal } = useContext(AuthContext);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    setEquipment(orderedEquipments);
-  }, []);
-
-  const handleCopyCode = (code: string) => {
-    copyTextToClipboard(code);
-    showToast(`Copiado: ${code}`, 'success');
+  const handleCopyCode = async (code: string) => {
+    // P4: o utilitário devolve o resultado — antes o toast "Copiado"
+    // aparecia mesmo quando a cópia falhava (permissão negada).
+    const copied = await copyTextToClipboard(code);
+    showToast(
+      copied ? `Copiado: ${code}` : `Não foi possível copiar ${code}`,
+      copied ? 'success' : 'error',
+    );
   };
 
   return (
-    <main className={cardStyles.athleteStatInfoContent}>
+    <div className={cardStyles.athleteStatInfoContent}>
       <header>
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
@@ -72,7 +70,9 @@ export default function ComponentInfo() {
             </tr>
           </thead>
           <tbody>
-            {equipment.map((e) => {
+            {/* orderedEquipments é constante do catálogo: o useState+effect
+                anterior só acrescentava um render vazio (P3). */}
+            {orderedEquipments.map((e) => {
               return (
                 <tr key={e.id}>
                   <td>{e.show}</td>
@@ -80,8 +80,8 @@ export default function ComponentInfo() {
                     <button
                       type='button'
                       className={styles.copyButton}
-                      onClick={() => handleCopyCode(e.id)}
-                      aria-label={`Copiar codigo ${e.id}`}
+                      onClick={() => void handleCopyCode(e.id)}
+                      aria-label={`Copiar código ${e.id}`}
                     >
                       {e.id}
                     </button>
@@ -93,7 +93,7 @@ export default function ComponentInfo() {
         </table>
       </section>
 
-      <Divider className={styles.dividerFooter} />
-    </main>
+      <hr className={styles.dividerFooter} />
+    </div>
   );
 }

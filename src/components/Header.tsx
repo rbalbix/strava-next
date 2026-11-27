@@ -10,7 +10,7 @@ export default function Header() {
   const { athlete, codeReturned, signOut, openModal } = useContext(AuthContext);
 
   const [sidebar, setSidebar] = useState(false);
-  const showSidebar = () => setSidebar(!sidebar);
+  const showSidebar = () => setSidebar((prev) => !prev);
   const sidebarId = 'sidebar-menu';
 
   return (
@@ -63,7 +63,11 @@ export default function Header() {
               <Sidebar active={setSidebar} isOpen={sidebar} />
             </div>
           ) : (
-            <span className={styles.spinnerLoading}>
+            <span
+              className={styles.spinnerLoading}
+              role='status'
+              aria-label='Carregando dados do atleta'
+            >
               <PulseLoader
                 color='var(--athlete-name)'
                 loading={true}

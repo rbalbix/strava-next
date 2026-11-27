@@ -4,7 +4,7 @@ import styles from '../styles/pages/PublicPage.module.css';
 
 export default function PrivacidadePage() {
   return (
-    <main className={styles.container}>
+    <main className={styles.container} id='main-content' tabIndex={-1}>
       <SeoHead
         title='Privacidade | GearLife'
         description='Política de privacidade do GearLife: quais dados são tratados, por que são tratados e como proteger sua conta Strava.'

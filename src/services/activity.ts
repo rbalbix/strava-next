@@ -60,7 +60,8 @@ async function getActivities(
   const activities: SummaryActivity[] = [];
   let data: SummaryActivity[] = [];
   const activitiesPreparedToStore: ActivityBase[] = [];
-  const gearIds = gears.map((gear) => gear.id);
+  // Set de ids de gear (P4): `.has` em vez de `.includes` por atividade.
+  const gearIds = new Set(gears.map((gear) => gear.id));
 
   const queryParams: {
     before?: number;
@@ -83,7 +84,7 @@ async function getActivities(
   } while (data.length !== 0);
 
   const activitiesFilteredByActiveGear = activities.filter((activity) => {
-    return activity.gear_id != null && gearIds.includes(activity.gear_id);
+    return activity.gear_id != null && gearIds.has(activity.gear_id);
   });
 
   // Concorrência limitada dos detalhes: o `Promise.all` original disparava um

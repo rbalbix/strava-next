@@ -6,8 +6,9 @@ import {
   useMemo,
   useState,
 } from 'react';
-import type { ActivityStats, DetailedAthlete } from 'strava';
+import type { ActivityStats } from 'strava';
 import { apiClient } from '../lib/apiClient';
+import type { DashboardAthlete } from '../contracts/api';
 
 interface AuthContextData {
   codeReturned: string | null;
@@ -17,12 +18,12 @@ interface AuthContextData {
   approval_prompt?: string;
   scope?: string;
   oauth_state: string;
-  athlete: DetailedAthlete | null;
+  athlete: DashboardAthlete | null;
   athleteStats: ActivityStats | null;
   codeError: unknown;
   activeModal: string | null;
   modalData: unknown;
-  setAthleteInfo: (athlete: DetailedAthlete | null) => void;
+  setAthleteInfo: (athlete: DashboardAthlete | null) => void;
   setAthleteInfoStats: (athleteStats: ActivityStats | null) => void;
   setErrorInfo: (error: unknown) => void;
   signOut: () => void;
@@ -38,7 +39,7 @@ interface AuthProviderProps {
   approval_prompt?: string;
   scope?: string;
   oauth_state: string;
-  athlete?: DetailedAthlete;
+  athlete?: DashboardAthlete;
   athleteStats?: ActivityStats;
   codeError?: unknown;
 }
@@ -49,7 +50,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
   const [codeReturned, setCodeReturned] = useState<string | null>(
     rest.codeReturned,
   );
-  const [athlete, setAthlete] = useState<DetailedAthlete | null>(
+  const [athlete, setAthlete] = useState<DashboardAthlete | null>(
     rest.athlete || null,
   );
   const [athleteStats, setAthleteStats] = useState<ActivityStats | null>(
@@ -71,7 +72,7 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
     oauth_state,
   } = rest;
 
-  const setAthleteInfo = useCallback((athlete: DetailedAthlete | null) => {
+  const setAthleteInfo = useCallback((athlete: DashboardAthlete | null) => {
     setAthlete(athlete);
   }, []);
 
@@ -95,13 +96,20 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
       console.warn('Server logout failed', err);
     }
 
-    sessionStorage.removeItem('athlete');
-    sessionStorage.removeItem('athleteStats');
-    sessionStorage.removeItem('gearStats');
-    sessionStorage.removeItem('equipmentThresholds');
-    sessionStorage.removeItem('hasGear');
-    sessionStorage.removeItem('hasActivities');
-    sessionStorage.removeItem('athleteCacheTime');
+    // sessionStorage pode lançar em modo privado (Safari) — sem try/catch
+    // o próprio signOut quebrava no meio e o usuário não conseguia deslogar
+    // (P3). Falha aqui é irrelevante: o servidor já revogou a sessão acima.
+    try {
+      sessionStorage.removeItem('athlete');
+      sessionStorage.removeItem('athleteStats');
+      sessionStorage.removeItem('gearStats');
+      sessionStorage.removeItem('equipmentThresholds');
+      sessionStorage.removeItem('hasGear');
+      sessionStorage.removeItem('hasActivities');
+      sessionStorage.removeItem('athleteCacheTime');
+    } catch (err) {
+      console.warn('sessionStorage cleanup failed', err);
+    }
 
     // O cookie de sessão (`gl_session`) é HttpOnly e, portanto,
     // invisível para o JavaScript — limpar via document.cookie não tem efeito

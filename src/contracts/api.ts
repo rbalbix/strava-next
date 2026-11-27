@@ -97,8 +97,16 @@ type UnrecognizedCode = {
   suggestion: string;
 };
 
+// Apenas os campos que a UI consome (header, avatar e nome): o restante do
+// DetailedAthlete — peso, email, clubes, bikes, shoes… — atravessava o
+// payload de /api/app/dashboard sem leitura nenhuma (P2/A1).
+type DashboardAthlete = Pick<
+  DetailedAthlete,
+  'id' | 'profile' | 'firstname' | 'lastname' | 'city'
+>;
+
 type DashboardResponse = {
-  athlete: DetailedAthlete;
+  athlete: DashboardAthlete;
   athleteStats: ActivityStats;
   hasGear: boolean;
   hasActivities: boolean;
@@ -121,6 +129,7 @@ export {
 
 export type {
   ApiErrorResponse,
+  DashboardAthlete,
   DashboardResponse,
   EquipmentThresholdsRequest,
   EquipmentThresholdsResponse,

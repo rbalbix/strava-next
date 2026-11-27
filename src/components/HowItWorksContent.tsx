@@ -1,10 +1,8 @@
-import Divider from '@mui/material/Divider';
 import Image from 'next/image';
 import { FaMedapps } from 'react-icons/fa';
 import styles from '../styles/components/InitialInfo.module.css';
 
 export interface HowItWorksContentProps {
-  showReferenceLink?: boolean;
   showTopHeading?: boolean;
 }
 
@@ -16,11 +14,15 @@ export default function HowItWorksContent({
 
   return (
     <>
+      {/* h2 e não h1 (P3): o único contexto com esta heading é a modal,
+          cujo título (h2 "Como funciona") vem ANTES no documento — h1
+          após h2 quebrava a hierarquia. Na página /como-funciona a
+          heading não é renderizada (showTopHeading={false}). */}
       {showTopHeading ? (
-        <h1>
+        <h2>
           Como usar o aplicativo para monitorar equipamentos usando as
           atividades do <span>Strava</span>
-        </h1>
+        </h2>
       ) : null}
       <div>
         Este passo a passo foi feito para ajudar a utilizar esse aplicativo, que
@@ -46,7 +48,7 @@ export default function HowItWorksContent({
         />
       </div>
       <ol>
-        <li>Clique em &quot;Entrar com Strava&quot; na página inicial.</li>
+        <li>Clique em “Entrar com Strava” na página inicial.</li>
         <li>
           Você será redirecionado para a página de autenticação do Strava.
         </li>
@@ -59,7 +61,7 @@ export default function HowItWorksContent({
           Strava.
         </li>
       </ol>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 2: Lista de Equipamentos</h2>
       <div>
         Após realizar o login, você será redirecionado para o painel principal
@@ -90,7 +92,7 @@ export default function HowItWorksContent({
           corrente.
         </li>
       </ul>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 3: Detalhes de um Equipamento</h2>
       <div>
         Ao clicar no cartão do equipamento, o aplicativo abre uma tela detalhada
@@ -117,7 +119,7 @@ export default function HowItWorksContent({
         </li>
         <li>Tempo total: Tempo de uso desde a última manutenção.</li>
       </ul>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h3>Limites por Equipamento: km ou horas de pedalagem</h3>
       <div>
         Você pode definir um limite para cada componente do seu equipamento a
@@ -149,7 +151,7 @@ export default function HowItWorksContent({
         </li>
         <li>
           Na seção de componentes, escolha a unidade no seletor (km ou h),
-          informe o valor e clique em &quot;Salvar&quot;. As setas do campo
+          informe o valor e clique em “Salvar”. As setas do campo
           avançam de 100 em 100 km e de hora em hora; qualquer valor na unidade
           escolhida também pode ser digitado. Trocar a unidade mantém o que
           estiver digitado no campo, que passa a valer na unidade escolhida.
@@ -196,13 +198,13 @@ export default function HowItWorksContent({
           />
         </div>
       </ol>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h2>Passo 4: Lista de Códigos dos Componentes</h2>
       <div>
         Para monitorar diferentes tipos de <span>componentes</span> do
         equipamento, você precisa adicionar o <span>código</span> correspondente
         no campo de <span>Observações Privadas</span> na atividade do Strava e
-        incluir um <span>&quot;*&quot;</span> no título da atividade.
+        incluir um <span>“*”</span> no título da atividade.
       </div>
       <div className={styles.screen}>
         <Image
@@ -233,7 +235,7 @@ export default function HowItWorksContent({
           sizes='(max-width: 480px) 90vw, 240px'
         />
       </div>
-      <Divider className={styles.divider} style={{ margin: 'auto' }} />
+      <hr className={styles.divider} style={{ margin: 'auto' }} />
       <h3>Observações:</h3>
       <div>
         O tema claro ou escuro é definido pela configuração do ambiente /
@@ -257,8 +259,8 @@ export default function HowItWorksContent({
         />
       </div>
       <div>
-        E depois, nas opções que aparecem, clique em &quot;Adicionar à Tela de
-        Início&quot;.
+        E depois, nas opções que aparecem, clique em “Adicionar à Tela de
+        Início”.
       </div>
       <div className={styles.screen}>
         <Image

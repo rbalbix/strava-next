@@ -7,7 +7,7 @@ const contactEmail =
 
 export default function ContatoPage() {
   return (
-    <main className={styles.container}>
+    <main className={styles.container} id='main-content' tabIndex={-1}>
       <SeoHead
         title='Contato | GearLife'
         description='Entre em contato com a equipe do GearLife para dúvidas, suporte e sugestões de melhoria.'

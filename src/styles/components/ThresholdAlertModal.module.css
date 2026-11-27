@@ -56,7 +56,9 @@
   color: inherit;
   font-size: 1.25rem;
   z-index: 1001;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -76,6 +78,9 @@
   list-style: none;
   max-height: 60vh;
   overflow-y: auto;
+  /* Rolagem confinada na lista (P3): o fim da lista não empurra a página
+     por trás do modal. */
+  overscroll-behavior: contain;
   /* Esconde a barra de rolagem mantendo a funcionalidade */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
@@ -119,6 +124,16 @@
 }
 
 .item {
+  /* Reset de <button> (P3: a linha era div com onClick, sem teclado):
+     sem isto o botão traz fundo/borda/padding do UA e o texto centralizado. */
+  appearance: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
@@ -129,6 +144,13 @@
   word-break: break-word;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+
+/* span com display:block dentro do <button> (o content model do botão é
+   phrasing content — div lá dentro é HTML inválido). */
+.itemBody,
+.itemMetrics {
+  display: block;
 }
 
 .item:hover {

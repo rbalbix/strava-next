@@ -1,6 +1,11 @@
+// URL pública canônica em produção: sem a env var as URLs da API seriam
+// "undefined/api/..." silenciosamente (P3). É a mesma base usada pelo
+// SeoHead para canonical/OG.
+export const DEFAULT_APP_URL = 'https://gearlife.vercel.app';
+
 const baseAppURL =
   process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_APP_URL
+    ? process.env.NEXT_PUBLIC_APP_URL || DEFAULT_APP_URL
     : 'http://localhost:3000';
 
 const baseStravaURL = 'https://www.strava.com';
@@ -16,11 +21,7 @@ export const APP_CONFIG = {
   // URLs da API Strava
   strava: {
     oauthStravaUrl: `${baseStravaURL}/oauth`,
-    apiStravaUrl: `${baseStravaURL}/api/v3`,
   },
-
-  isProduction: process.env.NODE_ENV === 'production',
-  isDevelopment: process.env.NODE_ENV === 'development',
 };
 
 export const REDIS_KEYS = {
@@ -57,7 +58,6 @@ export const REDIS_KEYS = {
 
 // URLs completas da nossa API
 export const API_ROUTES = {
-  authorizeUrl: `${APP_CONFIG.appUrl}/api/authorize`,
   remoteStorage: `${APP_CONFIG.appUrl}/api/remoteStorage`,
   stravaAuthTokens: `${APP_CONFIG.appUrl}/api/save-tokens`,
   emailUrl: `${APP_CONFIG.appUrl}/api/send-email`,

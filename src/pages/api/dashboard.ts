@@ -26,13 +26,27 @@ const handler: AuthenticatedNextApiHandler = async (
   }
 
   try {
+    // Checagem barata síncrona antes do I/O do token (Redis + refresh
+    // potencial): sem ela, pagava-se a I/O só para responder 500.
+    if (!getStravaServerEnv().success) {
+      return res.status(500).json({ error: 'Server auth config missing' });
+    }
+
     const tokens = await getAthleteAccessToken(athleteId);
     if (!tokens?.accessToken || !tokens?.refreshToken || !tokens?.expiresAt) {
       return res.status(401).json({ error: 'Missing auth tokens' });
     }
-    if (!getStravaServerEnv().success) {
-      return res.status(500).json({ error: 'Server auth config missing' });
-    }
+
+    // Leitura Redis best-effort, independente da cadeia Strava: disparada já
+    // aqui e aguardada só na montagem da resposta. Os dois lados do `.then`
+    // são anexados na criação para a rejeição não ficar sem tratamento nos
+    // caminhos de erro que retornam antes do await final.
+    const equipmentThresholdsPromise = Promise.resolve(
+      getEquipmentThresholds(athleteId),
+    ).then(
+      (value) => ({ ok: true as const, value }),
+      (error) => ({ ok: false as const, error }),
+    );
 
     const strava = createStravaClient(tokens, {
       context: 'dashboard',
@@ -46,41 +60,66 @@ const handler: AuthenticatedNextApiHandler = async (
     // poll paga 1 chamada Strava só para ler o perfil (erro real observado em
     // produção: 429 morrendo exatamente neste `getAthlete`).
     const athlete = await getAthlete(strava, athleteId);
-    const athleteStats = await getAthleteStats(strava, athlete);
+    // stats e activities só dependem do athlete (id) — não se entreolham:
+    // uma espera a outra à toa no caminho sequencial (async-parallel).
+    const [athleteStats, hasActivities] = await Promise.all([
+      getAthleteStats(strava, athlete),
+      verifyIfHasAnyActivities(strava, athlete),
+    ]);
     const hasGear = verifyIfHasAnyGears(athlete);
-    const hasActivities = await verifyIfHasAnyActivities(strava, athlete);
-    const gearStats =
-      hasGear && hasActivities
-        ? await updateStatistics(strava, athlete.id)
-        : [];
+    const needsGearStats = hasGear && hasActivities;
+
+    // D14: relatório de códigos não reconhecidos — leitura best-effort,
+    // mesmo molde dos thresholds; falha responde sem o campo e o banner
+    // simplesmente não aparece nesta abertura. Disparada assim que a condição
+    // fica conhecida, para sobrepor ao recálculo de estatísticas (o await é
+    // lá embaixo). Fora da condição, nem é chamada.
+    const unrecognizedCodesPromise = needsGearStats
+      ? Promise.resolve(getUnrecognizedCodes(athleteId)).then(
+          (value) => ({ ok: true as const, value }),
+          (error) => ({ ok: false as const, error }),
+        )
+      : null;
+
+    const gearStats = needsGearStats
+      ? await updateStatistics(strava, athlete.id)
+      : [];
 
     const response: DashboardResponse = {
-      athlete,
+      // Só os campos consumidos pela UI: o DetailedAthlete completo não
+      // saía daqui para uso nenhum (P2/A1 — redução de payload).
+      athlete: {
+        id: athlete.id,
+        profile: athlete.profile,
+        firstname: athlete.firstname,
+        lastname: athlete.lastname,
+        city: athlete.city,
+      },
       athleteStats,
       hasGear,
       hasActivities,
       gearStats,
     };
 
-    try {
-      const equipmentThresholds = await getEquipmentThresholds(athleteId);
-      response.equipmentThresholds = equipmentThresholds;
-    } catch (error) {
-      getLogger().error({ err: error }, 'Failed to load equipment thresholds');
+    const equipmentThresholds = await equipmentThresholdsPromise;
+    if (equipmentThresholds.ok) {
+      response.equipmentThresholds = equipmentThresholds.value;
+    } else {
+      getLogger().error(
+        { err: equipmentThresholds.error },
+        'Failed to load equipment thresholds',
+      );
     }
 
-    // D14: relatório de códigos não reconhecidos — leitura best-effort,
-    // mesmo molde dos thresholds; falha responde sem o campo e o banner
-    // simplesmente não aparece nesta abertura.
-    if (hasGear && hasActivities) {
-      try {
-        const unrecognizedCodes = await getUnrecognizedCodes(athleteId);
-        if (unrecognizedCodes && unrecognizedCodes.length > 0) {
-          response.unrecognizedCodes = unrecognizedCodes;
+    if (unrecognizedCodesPromise) {
+      const unrecognizedCodes = await unrecognizedCodesPromise;
+      if (unrecognizedCodes.ok) {
+        if (unrecognizedCodes.value && unrecognizedCodes.value.length > 0) {
+          response.unrecognizedCodes = unrecognizedCodes.value;
         }
-      } catch (error) {
+      } else {
         getLogger().error(
-          { err: error },
+          { err: unrecognizedCodes.error },
           'Failed to load unrecognized codes report',
         );
       }

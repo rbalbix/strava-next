@@ -37,7 +37,7 @@ function loadEnv() {
 
 loadEnv();
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+const APP_URL = process.env.DEV_HARNESS_URL || 'http://localhost:3000';
 const INTERNAL_API_TOKEN = process.env.INTERNAL_API_TOKEN;
 const WEBHOOK_SUBSCRIPTION_ID = Number(process.env.WEBHOOK_SUBSCRIPTION_ID || '123456');
 
@@ -67,6 +67,9 @@ const commands = {
 
 Uso:
   node scripts/dev-harness.mjs <comando> [argumentos]
+
+Destino padrão: http://localhost:3000. Para direcionar explicitamente a outro
+servidor/túnel, defina DEV_HARNESS_URL. NEXT_PUBLIC_APP_URL não é usado aqui.
 
 Comandos Disponíveis:
   

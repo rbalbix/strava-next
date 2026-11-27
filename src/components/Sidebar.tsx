@@ -7,7 +7,7 @@ import { TbBrandStrava } from 'react-icons/tb';
 import { TfiHelp } from 'react-icons/tfi';
 
 import Link from 'next/link';
-import { IoLogInOutline, IoLogOutOutline } from 'react-icons/io5';
+import { IoLogInOutline } from 'react-icons/io5';
 import { AuthContext } from '../contexts/AuthContext';
 import styles from '../styles/components/Sidebar.module.css';
 import AthleteAvatar from './AthleteAvatar';

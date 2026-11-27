@@ -2,7 +2,9 @@
   min-height: 100vh;
   max-width: 920px;
   margin: 0 auto;
-  padding: 2.2rem 1.5rem 3.2rem;
+  /* Topo com safe-area (P3): com viewport-fit=cover o notch cortava o
+     nav/title — o inset entra na margem superior em telas com recorte. */
+  padding: calc(2.2rem + env(safe-area-inset-top, 0px)) 1.5rem 3.2rem;
 }
 
 .topNav {

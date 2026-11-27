@@ -18,6 +18,9 @@
   width: 30vw;
   max-height: 90%;
   overflow-y: auto;
+  /* Sem isto o scroll do modal vaza para a página de fundo quando o conteúdo
+     chega ao fim (chaining) — no iOS chega a disparar pull-to-refresh (P3). */
+  overscroll-behavior: contain;
   position: relative;
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;
@@ -32,31 +35,6 @@
   width: 0px; /* Largura zero */
   height: 0px;
   display: none;
-}
-
-.closeButton {
-  position: absolute;
-  top: 1.2rem;
-  right: 1.2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.8rem;
-  height: 2.8rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--gl-text-secondary);
-  cursor: pointer;
-  color: inherit;
-  font-size: 1.45rem;
-  z-index: 1001;
-  transition:
-    color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.closeButton:hover {
-  color: var(--gl-brand-primary);
 }
 
 @keyframes fadeIn {
@@ -79,12 +57,8 @@
   }
 }
 
-@media (max-width: 1400px) {
-  .modalContent {
-    width: 35vw;
-  }
-}
-
+/* Segundo bloco 1400px (40vw) vence o primeiro (35vw) por cascata — o
+   primeiro era CSS morto (P4), removido. */
 @media (max-width: 1400px) {
   .modalContent {
     width: 40vw;

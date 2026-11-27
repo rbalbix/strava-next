@@ -169,7 +169,13 @@ it('returns 401 when athlete cookie is missing', async () => {
   });
 
   it('returns 200 with dashboard payload when athlete has gear and activities', async () => {
-    const athlete = { id: 123, name: 'Athlete Name' };
+    const athlete = {
+      id: 123,
+      firstname: 'Athlete',
+      lastname: 'Name',
+      profile: 'https://example.com/avatar.jpg',
+      city: 'São Paulo',
+    };
     const athleteStats = { all_ride_totals: { count: 10 } };
     const gearStats = [{ id: 'bike-1', count: 1 }];
 
@@ -221,7 +227,13 @@ it('returns 401 when athlete cookie is missing', async () => {
       refreshToken: 'refresh',
       expiresAt: 9999999999,
     });
-    mocks.mockGetAthlete.mockResolvedValueOnce({ id: 123, name: 'Athlete' });
+    mocks.mockGetAthlete.mockResolvedValueOnce({
+      id: 123,
+      firstname: 'Athlete',
+      lastname: 'Name',
+      profile: 'https://example.com/avatar.jpg',
+      city: 'São Paulo',
+    });
     mocks.mockGetAthleteStats.mockResolvedValueOnce({
       all_ride_totals: { count: 10 },
     });
@@ -291,7 +303,13 @@ it('returns 401 when athlete cookie is missing', async () => {
   });
 
   it('returns 200 with app/dashboard payload when thresholds exist', async () => {
-    const athlete = { id: 123, name: 'Athlete Name' };
+    const athlete = {
+      id: 123,
+      firstname: 'Athlete',
+      lastname: 'Name',
+      profile: 'https://example.com/avatar.jpg',
+      city: 'São Paulo',
+    };
     const athleteStats = { all_ride_totals: { count: 10 } };
     const gearStats = [{ id: 'bike-1', count: 1 }];
 
@@ -329,7 +347,13 @@ it('returns 401 when athlete cookie is missing', async () => {
   });
 
   it('returns empty gearStats when athlete has no gear or activities', async () => {
-    const athlete = { id: 123, name: 'Athlete Name' };
+    const athlete = {
+      id: 123,
+      firstname: 'Athlete',
+      lastname: 'Name',
+      profile: 'https://example.com/avatar.jpg',
+      city: 'São Paulo',
+    };
     const athleteStats = { all_ride_totals: { count: 0 } };
 
     mocks.mockGetAthleteAccessToken.mockResolvedValueOnce({
@@ -367,11 +391,8 @@ it('returns 401 when athlete cookie is missing', async () => {
   it('returns 500 when CLIENT_ID or CLIENT_SECRET is missing', async () => {
     delete process.env.CLIENT_ID;
     delete process.env.CLIENT_SECRET;
-    mocks.mockGetAthleteAccessToken.mockResolvedValueOnce({
-      accessToken: 'access',
-      refreshToken: 'refresh',
-      expiresAt: 9999999999,
-    });
+    // Sem mock de token: o guard síncrono de config responde antes de
+    // qualquer I/O (a ordem nova é guard → token), então o fetch nem roda.
 
     const req = createMockRequest({
       method: 'GET',
@@ -401,7 +422,13 @@ it('returns 401 when athlete cookie is missing', async () => {
   });
 
   it('returns 200 and skips equipmentThresholds if thresholds fail', async () => {
-    const athlete = { id: 123, name: 'Athlete Name' };
+    const athlete = {
+      id: 123,
+      firstname: 'Athlete',
+      lastname: 'Name',
+      profile: 'https://example.com/avatar.jpg',
+      city: 'São Paulo',
+    };
     const athleteStats = { all_ride_totals: { count: 10 } };
     const gearStats = [{ id: 'bike-1', count: 1 }];
 

@@ -4,7 +4,7 @@ import styles from '../styles/pages/PublicPage.module.css';
 
 export default function FaqPage() {
   return (
-    <main className={styles.container}>
+    <main className={styles.container} id='main-content' tabIndex={-1}>
       <SeoHead
         title='FAQ | GearLife'
         description='Perguntas frequentes sobre login com Strava, privacidade de dados, atualização das métricas e funcionamento do GearLife.'

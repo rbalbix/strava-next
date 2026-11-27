@@ -23,11 +23,15 @@ vi.mock('next/document', () => ({
 }));
 
 describe('base pages', () => {
-  it('_app renders page component and vercel helpers', () => {
+  // P2/B2: Analytics/SpeedInsights são importados dinamicamente (depois da
+  // hidratação) — o teste precisa aguardar a resolução do lazy.
+  it('_app renders page component and vercel helpers', async () => {
     const Component = () => <div>page-content</div>;
     const container = document.createElement('div');
     const root = createRoot(container);
-    act(() => root.render(<MyApp Component={Component as any} pageProps={{}} router={{} as any} />));
+    await act(async () => {
+      root.render(<MyApp Component={Component as any} pageProps={{}} router={{} as any} />);
+    });
     expect(container.textContent).toContain('page-content');
     expect(container.textContent).toContain('analytics');
     expect(container.textContent).toContain('speed-insights');

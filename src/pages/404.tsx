@@ -12,7 +12,7 @@ import styles from '../styles/pages/PublicPage.module.css';
  */
 export default function NotFoundPage() {
   return (
-    <main className={styles.container}>
+    <main className={styles.container} id='main-content' tabIndex={-1}>
       <SeoHead
         title='Página não encontrada | GearLife'
         description='A página que você procura não existe. Volte para o início do GearLife.'

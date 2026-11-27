@@ -19,17 +19,19 @@ export type RawUnresolvedCase = {
 const MIN_REPORT_LENGTH = 4;
 const MAX_LEVENSHTEIN = 2;
 
+/** Combinações diacríticas (NFD) — constantes de módulo (P4): antes eram
+ *  recriadas a cada chamada de normalizeNote/tokenizeNote. */
+const ACCENT_MARKS_RE = /[\u0300-\u036f]/g;
+const WORD_TOKEN_RE = /[\p{L}\p{N}]+/gu;
+
 /** Minúsculas + sem acentos — o case-insensitive é pedido do proprietário. */
 export function normalizeNote(note: string): string {
-  return note
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+  return note.toLowerCase().normalize('NFD').replace(ACCENT_MARKS_RE, '');
 }
 
 /** Palavras do texto normalizado (limites \p{L}/\p{N} ≈ \b para o nosso vocabulário). */
 export function tokenizeNote(normalizedNote: string): string[] {
-  return normalizedNote.match(/[\p{L}\p{N}]+/gu) ?? [];
+  return normalizedNote.match(WORD_TOKEN_RE) ?? [];
 }
 
 type Term = {

@@ -15,6 +15,33 @@ html {
   color: var(--gl-text-primary);
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  /* Foco por âncora/teclado para baixo do header fixo (P3): sem isto o
+     elemento alvo fica escondido atrás dos ~70px do header + notch. */
+  scroll-padding-top: calc(
+    var(--header-height) + env(safe-area-inset-top, 0px)
+  );
+}
+
+/* Skip link (P3): primeiro focável do documento — teclado/leitor de tela
+   pula header e menu e vai direto ao conteúdo. Fora da tela até receber
+   foco; o alvo (#main-content) recebe tabIndex -1 para o foco de fato
+   migrar. */
+.skipLink {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 4000;
+  padding: 0.75rem 1.25rem;
+  background: var(--gl-surface-card);
+  color: var(--gl-text-primary);
+  border: 1px solid var(--gl-brand-primary);
+  border-radius: 0 0 8px 0;
+  font-size: 1.4rem;
+  transform: translateY(-150%);
+}
+
+.skipLink:focus {
+  transform: translateY(0);
 }
 
 html::-webkit-scrollbar {
@@ -192,4 +219,35 @@ button {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* Títulos com linhas equilibradas (P4): evita palavra órfã sozinha na
+   última linha do h1. Browsers sem suporte ignoram a propriedade. */
+h1 {
+  text-wrap: balance;
+}
+
+/* <hr> — o MUI só era usado pelo <Divider>, que renderiza exatamente isto
+   (B1): com o token de borda, a linha funciona nos dois temas — o
+   rgba(0,0,0,0.12) do tema padrão do MUI ficava invisível no dark. */
+hr {
+  border: none;
+  border-top: 1px solid var(--gl-border-subtle);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Movimento reduzido (web-design-guidelines): quem pediu menos animação
+   recebe transições e animações em um flash mínimo — cobre o pulse do
+   skeleton, o slideDown das modais e qualquer loop futuro. O GIF do
+   VeloIcon não é alcançável por CSS (mídia rasterizada no HTML). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

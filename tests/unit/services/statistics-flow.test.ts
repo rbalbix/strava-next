@@ -160,6 +160,128 @@ async function loadStatisticsModule(options: LoadOptions = {}) {
 describe('statistics flow service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.RECONCILIATION_INTERVAL_SECONDS;
+    delete process.env.RECONCILIATION_LOOKBACK_SECONDS;
+  });
+
+  it('uses the reconciliation defaults and validates environment overrides', async () => {
+    const { getReconciliationIntervalSeconds, getReconciliationLookbackSeconds } =
+      await loadStatisticsModule();
+
+    expect(getReconciliationIntervalSeconds()).toBe(Infinity);
+    expect(getReconciliationLookbackSeconds()).toBe(14 * 24 * 60 * 60);
+
+    process.env.RECONCILIATION_INTERVAL_SECONDS = '60';
+    process.env.RECONCILIATION_LOOKBACK_SECONDS = '1000';
+    expect(getReconciliationIntervalSeconds()).toBe(60);
+    expect(getReconciliationLookbackSeconds()).toBe(1000);
+  });
+
+  it('reconciles from the last reconciliation time despite fresh activity writes', async () => {
+    process.env.RECONCILIATION_INTERVAL_SECONDS = '60';
+    process.env.RECONCILIATION_LOOKBACK_SECONDS = '1000';
+
+    const now = Math.floor(Date.now() / 1000);
+    const lastUpdated = now;
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated,
+          activities: [{ id: 1, sport_type: 'Ride' }],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated,
+          lastReconciledAt: now - 120,
+          statistics: [{ id: 'bike-1' }],
+        },
+      });
+    const getActivities = vi.fn().mockResolvedValue([]);
+    const saveRemote = vi.fn().mockResolvedValue({ success: true });
+
+    const { updateStatistics, getAthlete } = await loadStatisticsModule({
+      remoteGetImpl,
+      getActivitiesImpl: getActivities,
+      saveRemoteImpl: saveRemote,
+      getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+      getGearsImpl: vi.fn().mockReturnValue([]),
+    });
+
+    await updateStatistics({} as any, 123);
+
+    expect(getAthlete).toHaveBeenCalled();
+    expect(getActivities).toHaveBeenCalledWith(
+      expect.anything(),
+      [],
+      null,
+      now - 1000,
+    );
+    expect(JSON.parse(saveRemote.mock.calls[0][1]).lastReconciledAt).toBe(now);
+  });
+
+  it('persists a maintenance code returned by a periodic activity reconciliation', async () => {
+    process.env.RECONCILIATION_INTERVAL_SECONDS = '60';
+    process.env.RECONCILIATION_LOOKBACK_SECONDS = '1000';
+
+    const now = Math.floor(Date.now() / 1000);
+    const cachedActivity = {
+      id: 42,
+      name: 'PCN **',
+      distance: 10_000,
+      moving_time: 600,
+      sport_type: 'Ride',
+      start_date_local: '2026-11-26T08:00:00Z',
+      gear_id: 'bike-1',
+      private_note: '',
+      synced_at: now - 120,
+    };
+    const editedActivity = {
+      ...cachedActivity,
+      name: 'PCN *',
+      private_note: 'Lub rearshifter rearderailleur',
+      synced_at: now,
+    };
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: { lastUpdated: now, activities: [cachedActivity] },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated: now,
+          lastReconciledAt: now - 120,
+          statistics: [{ id: 'bike-1' }],
+        },
+      });
+    const getActivities = vi.fn().mockResolvedValue([editedActivity]);
+    const saveRemote = vi.fn().mockResolvedValue({ success: true });
+
+    const { updateStatistics } = await loadStatisticsModule({
+      remoteGetImpl,
+      getActivitiesImpl: getActivities,
+      saveRemoteImpl: saveRemote,
+      getAthleteImpl: vi.fn().mockResolvedValue({
+        id: 123,
+        bikes: [{ id: 'bike-1', name: 'Bike' }],
+        shoes: [],
+      }),
+      getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+    });
+
+    await updateStatistics({} as any, 123);
+
+    const statisticsWrite = saveRemote.mock.calls.find(
+      ([key]) => key === 'strava:statistics:123',
+    );
+    expect(statisticsWrite).toBeDefined();
+    expect(JSON.parse(statisticsWrite![1]).statistics[0].equipments).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'rearshifter' }),
+        expect.objectContaining({ id: 'rearderailleur' }),
+      ]),
+    );
   });
 
   it('updateStatistics uses cached statistics when timestamps are aligned', async () => {
@@ -181,6 +303,87 @@ describe('statistics flow service', () => {
     expect(getAthlete).not.toHaveBeenCalled();
     expect(getActivities).not.toHaveBeenCalled();
     expect(processActivities).not.toHaveBeenCalled();
+  });
+
+  it('recomputes when webhook activity data and statistics differ within one minute', async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const updatedActivity = {
+      id: 42,
+      name: '* Ride',
+      distance: 1000,
+      moving_time: 100,
+      sport_type: 'Ride',
+      start_date_local: '2026-11-26T08:00:00Z',
+      gear_id: 'bike-1',
+      private_note: 'rearshifter',
+      synced_at: now,
+    };
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: { lastUpdated: now, activities: [updatedActivity] },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated: now - 10,
+          statistics: [{ id: 'bike-1', equipments: [] }],
+        },
+      });
+    const getActivities = vi.fn().mockResolvedValue([]);
+
+    const { updateStatistics, getAthlete } = await loadStatisticsModule({
+      remoteGetImpl,
+      getActivitiesImpl: getActivities,
+      getAthleteImpl: vi
+        .fn()
+        .mockResolvedValue({ id: 123, bikes: [{ id: 'bike-1' }], shoes: [] }),
+      getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+    });
+
+    await updateStatistics({} as any, 123);
+
+    expect(getAthlete).toHaveBeenCalled();
+    expect(getActivities).toHaveBeenCalledWith(
+      expect.anything(),
+      [{ id: 'bike-1', name: 'Bike' }],
+      null,
+      now,
+    );
+  });
+
+  it('forces a local recompute for webhook writes with equal timestamps', async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const remoteGetImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        data: {
+          lastUpdated: now,
+          activities: [{ id: 1, sport_type: 'Ride' }],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: { lastUpdated: now, statistics: [{ id: 'bike-1' }] },
+      });
+    const getActivities = vi.fn().mockResolvedValue([]);
+
+    const { updateStatistics, getAthlete } = await loadStatisticsModule({
+      remoteGetImpl,
+      getActivitiesImpl: getActivities,
+      getAthleteImpl: vi
+        .fn()
+        .mockResolvedValue({ id: 123, bikes: [{ id: 'bike-1' }], shoes: [] }),
+      getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+    });
+
+    await updateStatistics({} as any, 123, { forceRecompute: true });
+
+    expect(getAthlete).toHaveBeenCalled();
+    expect(getActivities).toHaveBeenCalledWith(
+      expect.anything(),
+      [{ id: 'bike-1', name: 'Bike' }],
+      null,
+      now,
+    );
   });
 
   it('updateStatistics recomputes from scratch when no stored activities exist', async () => {
@@ -662,7 +865,11 @@ describe('statistics flow service', () => {
 
     await updateStatistics({} as any, 123);
 
-    expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, []);
+    // P2/A2: o backfill roda em background — espera o comportamento eventual
+    // em vez de assumir que ele completou junto com o retorno.
+    await vi.waitFor(() =>
+      expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, []),
+    );
     expect(getAthlete).not.toHaveBeenCalled();
   });
 
@@ -685,16 +892,19 @@ describe('statistics flow service', () => {
 
     await updateStatistics({} as any, 123);
 
-    expect(getAthlete).toHaveBeenCalledTimes(1);
-    expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, [
-      {
-        activityId: 11,
-        gearName: 'Bike A',
-        startDate: '2026-01-02T00:00:00Z',
-        word: 'chian',
-        suggestion: 'chain',
-      },
-    ]);
+    // P2/A2: backfill em background — asserções positivas esperam ele rodar.
+    await vi.waitFor(() => {
+      expect(getAthlete).toHaveBeenCalledTimes(1);
+      expect(saveUnrecognizedCodes).toHaveBeenCalledWith(123, [
+        {
+          activityId: 11,
+          gearName: 'Bike A',
+          startDate: '2026-01-02T00:00:00Z',
+          word: 'chian',
+          suggestion: 'chain',
+        },
+      ]);
+    });
   });
 
   it('updateStatistics keeps cached stats when the backfill fails', async () => {
@@ -709,7 +919,8 @@ describe('statistics flow service', () => {
     const result = await updateStatistics({} as any, 123);
 
     expect(result).toEqual([{ id: 'bike-1' }]);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    // P2/A2: o warn é do backfill em background — espera o eventual.
+    await vi.waitFor(() => expect(logger.warn).toHaveBeenCalledTimes(1));
   });
 
   // --- D14.1: auto-refresh do relatório (caminho B) ---
@@ -1157,14 +1368,46 @@ describe('statistics single-flight (item 3)', () => {
     expect(redisDel).toHaveBeenCalledWith('strava:lock:statistics:123');
   });
 
+  it('runs a forced recompute after an older statistics flight completes', async () => {
+    let releaseFirstFetch!: (activities: typeof ride[]) => void;
+    const firstFetch = new Promise<typeof ride[]>((resolve) => {
+      releaseFirstFetch = resolve;
+    });
+    const getActivitiesImpl = vi
+      .fn()
+      .mockImplementationOnce(() => firstFetch)
+      .mockResolvedValue([ride]);
+    const { updateStatistics, getActivities } = await loadStatisticsModule({
+      remoteGetImpl: vi.fn().mockResolvedValue({ data: null }),
+      getAthleteImpl: vi.fn().mockResolvedValue({
+        id: 123,
+        bikes: [{ id: 'bike-1', name: 'Bike' }],
+        shoes: [],
+      }),
+      getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+      getActivitiesImpl,
+    });
+
+    const existingFlight = updateStatistics({} as any, 123);
+    await vi.waitFor(() => expect(getActivities).toHaveBeenCalledTimes(1));
+    const forcedFlight = updateStatistics({} as any, 123, {
+      forceRecompute: true,
+    });
+
+    releaseFirstFetch([ride]);
+    await Promise.all([existingFlight, forcedFlight]);
+
+    expect(getActivities).toHaveBeenCalledTimes(2);
+  });
+
   it('busy lock in another instance serves the fresh cache without recomputing', async () => {
     const freshStats = [{ id: 'bike-1' }];
-    const remoteGetImpl = vi.fn().mockResolvedValue({
+    const remoteGetImpl = vi.fn().mockImplementation(async () => ({
       data: {
-        lastUpdated: Math.floor(Date.now() / 1000), // o outro voo acabou de gravar
+        lastUpdated: Math.floor(Date.now() / 1000),
         statistics: freshStats,
       },
-    });
+    }));
     const { updateStatistics, getActivities, logger } =
       await loadStatisticsModule({
         remoteGetImpl,
@@ -1179,6 +1422,44 @@ describe('statistics single-flight (item 3)', () => {
       expect.objectContaining({ athleteId: 123 }),
       expect.stringContaining('já gravou'),
     );
+  });
+
+  it('does not serve another instance cache for a forced recompute', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'Date'], now: 1_800_000_000_000 });
+    try {
+      const getActivities = vi.fn().mockResolvedValue([ride]);
+      const { updateStatistics } = await loadStatisticsModule({
+        remoteGetImpl: vi.fn().mockResolvedValue({
+          data: {
+            lastUpdated: 1_800_000_000,
+            activities: [ride],
+            statistics: [{ id: 'stale' }],
+          },
+        }),
+        getAthleteImpl: vi.fn().mockResolvedValue({
+          id: 123,
+          bikes: [{ id: 'bike-1', name: 'Bike' }],
+          shoes: [],
+        }),
+        getGearsImpl: vi.fn().mockReturnValue([{ id: 'bike-1', name: 'Bike' }]),
+        getActivitiesImpl: getActivities,
+        statisticsLockSetImpl: vi
+          .fn()
+          .mockResolvedValueOnce(null)
+          .mockResolvedValue('OK'),
+      });
+
+      const promise = updateStatistics({} as any, 123, {
+        forceRecompute: true,
+      });
+      await vi.advanceTimersByTimeAsync(500);
+      const result = await promise;
+
+      expect(getActivities).toHaveBeenCalledTimes(1);
+      expect(result[0].id).toBe('bike-1');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('after the 30s cap a busy lock serves the existing cache (stale-ok)', async () => {

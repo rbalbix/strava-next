@@ -107,15 +107,18 @@ export default function ThresholdAlertModal({
               <strong className={styles.gearName}>{group.gearName}</strong>
               <div className={styles.equipmentsList}>
                 {group.equipments.map((item) => (
-                  <div
+                  <button
                     key={`${item.gearId}-${item.equipmentId}`}
+                    type='button'
                     className={styles.item}
                     onClick={() => onViewEquipment(item.gearId)}
                     role='button'
-                    tabIndex={0}
                     onKeyDown={(ev) => {
-                      // role='button' num div precisa da ativação por
-                      // teclado (Enter/Espaço) — WCAG 2.1.1.
+                      // Linha é <button> de verdade desde P3 — o role
+                      // explícito e esta ativação por teclado permanecem
+                      // porque os testes casam [role="button"] e o
+                      // preventDefault evita o clique nativo duplicado
+                      // (Enter/Espaço disparariam duas vezes).
                       if (ev.key === 'Enter' || ev.key === ' ') {
                         ev.preventDefault();
                         onViewEquipment(item.gearId);
@@ -123,8 +126,8 @@ export default function ThresholdAlertModal({
                     }}
                     aria-label={`Ver detalhes de ${item.label} do equipamento ${item.gearName}`}
                   >
-                    <div>
-                      <div className={styles.labelContainer}>
+                    <span className={styles.itemBody}>
+                      <span className={styles.labelContainer}>
                         <span className={styles.equipmentLabel}>
                           {item.label}
                         </span>
@@ -134,18 +137,18 @@ export default function ThresholdAlertModal({
                           focusable='false'
                           size={18}
                         />
-                      </div>
+                      </span>
 
-                      <div>
+                      <span className={styles.itemMetrics}>
                         <span className={styles.metrics}>
                           <span className={styles.limitConfigured}>
                             {formatThresholdValue(item.current, item.unit)}
                           </span>{' '}
                           / {formatThresholdValue(item.limit, item.unit)}
                         </span>
-                      </div>
-                    </div>
-                  </div>
+                      </span>
+                    </span>
+                  </button>
                 ))}
               </div>
             </li>

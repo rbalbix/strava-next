@@ -5,7 +5,7 @@ import styles from '../styles/pages/PublicPage.module.css';
 
 export default function ComoFuncionaPage() {
   return (
-    <main className={styles.container}>
+    <main className={styles.container} id='main-content' tabIndex={-1}>
       <SeoHead
         title='Como funciona | GearLife'
         description='Entenda como o GearLife conecta com o Strava e transforma suas atividades em métricas práticas de manutenção de equipamentos.'

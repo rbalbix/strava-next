@@ -25,6 +25,10 @@ class ApiError extends Error {
   }
 }
 
+/** Extração do status de "HTTP 4xx"/"HTTP 5xx" — constante de módulo (P4):
+ *  regex recriada a cada erro era micro-custo desnecessário. */
+const HTTP_STATUS_RE = /HTTP\s(\d{3})\b/;
+
 /**
  * Lê o status HTTP de qualquer erro, sem lançar.
  *
@@ -43,7 +47,7 @@ function getHttpStatus(error: unknown): number | undefined {
   }
 
   const message = error instanceof Error ? error.message : '';
-  const match = /HTTP\s(\d{3})\b/.exec(message);
+  const match = HTTP_STATUS_RE.exec(message);
   return match ? Number(match[1]) : undefined;
 }
 

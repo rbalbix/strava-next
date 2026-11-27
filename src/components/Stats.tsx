@@ -1,11 +1,11 @@
-import { Divider } from '@mui/material';
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { MdWarningAmber } from 'react-icons/md';
 import { TbBrandStrava } from 'react-icons/tb';
-import type { DetailedAthlete, ActivityStats } from 'strava';
+import type { ActivityStats } from 'strava';
 import { AuthContext } from '../contexts/AuthContext';
 import type {
+  DashboardAthlete,
   DashboardResponse,
   EquipmentThresholds,
   ThresholdUnit,
@@ -18,6 +18,7 @@ import {
   computeThresholdState,
   resolveCurrentConsumption,
 } from '../utils/thresholds';
+import { formatDate } from '../utils/format';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -27,6 +28,10 @@ import VeloIcon from './VeloIcon';
 import { useAutoSync } from '../hooks/useAutoSync';
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
+
+/** Sufixo "Z" do ISO (P4): constante de módulo — antes a regex era
+ *  construída a cada linha do banner em render. */
+const ISO_ZULU_RE = /Z$/;
 
 type CachedDashboard = {
   data: DashboardResponse;
@@ -104,7 +109,7 @@ function readCachedDashboard(): CachedDashboard | null {
 
     if (!athleteRaw || !athleteStatsRaw || !gearStatsRaw) return null;
 
-    const athlete = JSON.parse(athleteRaw) as DetailedAthlete;
+    const athlete = JSON.parse(athleteRaw) as DashboardAthlete;
     const athleteStats = JSON.parse(athleteStatsRaw) as ActivityStats;
     const gearStats = JSON.parse(gearStatsRaw) as GearStats[];
     const equipmentThresholds = JSON.parse(
@@ -332,7 +337,10 @@ export default function Stats() {
 
   return (
     <div className={styles.statsContainer}>
-      <main>
+      {/* Wrapper interno deixou de ser <main> (P3): a spec permite um main
+          por documento e o da página (index) já é este — aqui vive um
+          <div> comum. */}
+      <div className={styles.statsMain}>
         {/* Fase D (§8.28): h1 visualmente oculto — o painel era a única
             face da URL sem título e a navegação por leitor de tela ficava
             sem âncora. O selector do primeiro card passou a first-of-type
@@ -367,12 +375,11 @@ export default function Stats() {
                 role='status'
                 aria-live='polite'
               >
-                {unrecognizedCodes
-                  .filter(
-                    (code) => !dismissedCases.has(unrecognizedCaseKey(code)),
-                  )
-                  .map((code) => (
-                    <p key={unrecognizedCaseKey(code)}>
+                {unrecognizedCodes.flatMap((code) => {
+                  const caseKey = unrecognizedCaseKey(code);
+                  if (dismissedCases.has(caseKey)) return [];
+                  return [
+                    <p key={caseKey}>
                       Há um código não reconhecido na observação privada da
                       atividade de <strong>{code.gearName}</strong> do dia{' '}
                       <a
@@ -380,15 +387,15 @@ export default function Stats() {
                         target='_blank'
                         rel='noopener noreferrer'
                       >
-                        {format(
-                          parseISO(code.startDate.replace(/Z$/, '')),
-                          'dd/MM/yyyy',
+                        {formatDate(
+                          parseISO(code.startDate.replace(ISO_ZULU_RE, '')),
                         )}
                       </a>
                       . “{code.word}” — você quis dizer “{code.suggestion}”?
                       Corrija no Strava para atualizar aqui no GearLife.
-                    </p>
-                  ))}
+                    </p>,
+                  ];
+                })}
               </div>
               <button
                 type='button'
@@ -436,10 +443,10 @@ export default function Stats() {
           </div>
         ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <div className={styles.loadingPanel}>
+            <div className={styles.loadingPanel} role='status'>
               <div>
                 <span>Aguarde.</span>
-                <span>Carregando suas estatísticas ...</span>
+                <span>Carregando suas estatísticas…</span>
               </div>
               <span>{randomIcon}</span>
             </div>
@@ -463,15 +470,12 @@ export default function Stats() {
                   movingTime={gearStat.movingTime}
                   equipments={gearStat.equipments}
                 />
-                <Divider
-                  className={styles.divider}
-                  style={{ margin: 'auto' }}
-                />
+                <hr className={styles.divider} style={{ margin: 'auto' }} />
               </div>
             );
           })
         )}
-      </main>
+      </div>
     </div>
   );
 }

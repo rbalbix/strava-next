@@ -53,7 +53,7 @@ vi.mock('../../src/contexts/ToastContext', () => ({
 }));
 
 vi.mock('../../src/utils/clipboard', () => ({
-  copyEventDetailsToClipboard: vi.fn(),
+  copyEventDetailsToClipboard: vi.fn(() => Promise.resolve(true)),
 }));
 
 import CardDetailModal from '../../src/components/CardDetailModal';

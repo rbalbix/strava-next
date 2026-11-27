@@ -46,6 +46,8 @@
   font-size: 1.2rem;
   border: 1px solid;
   padding: 8px;
+  /* Dígitos com largura fixa (P3): a tabela não "pula" ao revalidar. */
+  font-variant-numeric: tabular-nums;
 }
 
 .footerEquipmentTable tr:nth-child(even) {

@@ -8,8 +8,9 @@
 // A política foi derivada do build real (17/11/2026), não de suposição:
 //  - nenhum script executável inline (apenas __NEXT_DATA__ em JSON) e
 //    nenhum handler on* → `script-src` SEM 'unsafe-inline';
-//  - estilos do emotion/MUI injetados em <style> → `style-src` com
-//    'unsafe-inline' (não há como evitar sem nonce dinâmico);
+//  - estilos inline (atributos style= dos componentes) exigem
+//    `style-src` com 'unsafe-inline' — sem nonce dinâmico não dá para
+//    evitar (MUI/emotion, que também injetavam <style>, saíram no P2/B1);
 //  - imagens: própria origem + data: (next/image) + *.cloudfront.net
 //    (remotePatterns — avatares do Strava);
 //  - Analytics/Speed Insights (@vercel/* no _app.tsx) carregam de

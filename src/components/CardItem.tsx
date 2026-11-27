@@ -1,9 +1,9 @@
-import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
+import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Equipments, resolveCaption } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 import { copyEventDetailsToClipboard } from '../utils/clipboard';
-import { locale, secondsToHms } from '../utils/format';
+import { formatDate, formatNumber, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
 import type { ThresholdEntry } from '../contracts/api';
@@ -13,6 +13,10 @@ import {
   formatThresholdValue,
   resolveCurrentConsumption,
 } from '../utils/thresholds';
+
+/** Sufixo "Z" do ISO (P4): constante de módulo — antes a regex era
+ *  construída a cada render do item. */
+const ISO_ZULU_RE = /Z$/;
 
 type Props = {
   equipment: Equipment;
@@ -40,8 +44,8 @@ export default function CardItem({
   // Rótulo vigente do catálogo (o cache pode trazer um caption antigo).
   const caption = resolveCaption(e);
 
-  const localDate = parseISO(e.date.replace(/Z$/, ''));
-  const formattedDate = format(localDate, 'dd/MM/yyyy');
+  const localDate = parseISO(e.date.replace(ISO_ZULU_RE, ''));
+  const formattedDate = formatDate(localDate);
   const timeAgo = formatDistanceToNowStrict(localDate, {
     locale: ptBR,
   });
@@ -60,8 +64,15 @@ export default function CardItem({
   );
 
   const handleCardItemClick = () => {
-    copyEventDetailsToClipboard(e, distance, movingTime);
-    // showToast('Detalhes copiados', 'success');
+    // P4: o utilitário devolve se o copiou — antes o catch engolia a falha
+    // e o usuário ficava sem nenhum feedback.
+    void copyEventDetailsToClipboard(e, distance, movingTime).then(
+      (copied) => {
+        if (!copied) {
+          showToast('Não foi possível copiar os detalhes', 'error');
+        }
+      },
+    );
 
     if (onToggleEditor) {
       onToggleEditor();
@@ -139,11 +150,8 @@ export default function CardItem({
           )}
 
         <div className={styles.badges}>
-          {/* {!hasUsage && (
-            <span className={styles.chipRegistered}>Registrado</span>
-          )} */}
           <div className={styles.chipbadge}>
-            {`${locale.format(',.2f')(equipmentDistance / 1000)}km`}
+            {`${formatNumber(equipmentDistance / 1000)}km`}
           </div>
           <div className={styles.chipbadge}>
             {`⏱️ ${secondsToHms(equipmentMovingTime)}h`}

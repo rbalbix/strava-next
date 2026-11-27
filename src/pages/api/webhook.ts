@@ -171,9 +171,12 @@ async function enforceWebhookIpRateLimit(
   return { ok: true };
 }
 
+function getWebhookReplayKey(event: StravaWebhookEvent): string {
+  return `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
+}
+
 async function guardWebhookReplay(event: StravaWebhookEvent): Promise<boolean> {
-  const replayKey = `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
-  const inserted = await redis.set(replayKey, '1', {
+  const inserted = await redis.set(getWebhookReplayKey(event), '1', {
     nx: true,
     ex: WEBHOOK_REPLAY_TTL_SECONDS,
   });
@@ -191,6 +194,16 @@ export default async function handler(
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
+    // Fail-closed: sem a env configurada, `token === VERIFY_TOKEN` virava
+    // `undefined === undefined` e validava a verificação sem token — qualquer
+    // originador ativava o webhook (mesma molde do guard de subscription_id).
+    if (!VERIFY_TOKEN) {
+      log.error('Missing VERIFY_TOKEN configuration');
+      return res
+        .status(500)
+        .json({ error: 'Webhook verification not configured' });
+    }
+
     if (mode === 'subscribe' && token === VERIFY_TOKEN) {
       log.info('Webhook validado com sucesso');
       return res.status(200).json({ 'hub.challenge': challenge });
@@ -205,6 +218,7 @@ export default async function handler(
   // Processamento de eventos (POST)
   if (req.method === 'POST') {
     const log = getLogger(req.headers['x-request-id'] as string);
+    let replayKey: string | null = null;
 
     // In production, require subscription pinning. IP allowlist is optional.
     if (process.env.NODE_ENV === 'production') {
@@ -317,6 +331,7 @@ export default async function handler(
           );
           return res.status(200).json({ received: true, duplicate: true });
         }
+        replayKey = getWebhookReplayKey(event);
       }
 
       try {
@@ -356,6 +371,16 @@ export default async function handler(
     } catch (error) {
       const log = getLogger(req.headers['x-request-id'] as string);
       log.error({ err: error }, 'Erro ao processar webhook');
+      if (replayKey) {
+        try {
+          await redis.del(replayKey);
+        } catch (clearError) {
+          log.error(
+            { err: clearError },
+            'Erro ao remover marcador de replay após falha do webhook',
+          );
+        }
+      }
       try {
         const emailEnv = getEmailServerEnv();
         if (!emailEnv.success) {
@@ -364,14 +389,22 @@ export default async function handler(
         // O endpoint resolve assunto, destinatário e HTML a partir do
         // template (VULN-009): aqui só vão params planos — o `Error` é
         // serializado antes, porque ele não sobrevive ao JSON.
-        await sendEmail({
-          template: 'webhook-error',
-          params: {
-            message: 'Erro no Processamento do Webhook',
-            errorDetail:
-              error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error && error.stack ? error.stack : '',
-          },
+        // Efeito colateral do 500, não parte da resposta: disparado sem
+        // await (async-defer-await) — um SMTP lento não segurava o retorno.
+        // `Promise.resolve` tolera o mock de teste que devolve undefined;
+        // a falha segue para o mesmo log do catch abaixo.
+        void Promise.resolve(
+          sendEmail({
+            template: 'webhook-error',
+            params: {
+              message: 'Erro no Processamento do Webhook',
+              errorDetail:
+                error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error && error.stack ? error.stack : '',
+            },
+          }),
+        ).catch((emailError) => {
+          log.error({ err: emailError }, 'Erro ao enviar email de erro');
         });
       } catch (emailError) {
         log.error({ err: emailError }, 'Erro ao enviar email de erro');
@@ -391,8 +424,17 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       'Processando evento de atividade',
     );
 
-    // Buscar access token do atleta
-    const tokens = await getAthleteAccessToken(athleteId);
+    // Checagem barata síncrona antes de qualquer I/O: sem ela, o token era
+    // buscado (Redis + refresh potencial) só para descobrir que falta config.
+    if (!getStravaServerEnv().success) {
+      throw new Error('Missing Strava API configuration');
+    }
+
+    // Token do atleta e base de atividades não se dependem — disparados juntos.
+    const [tokens, storedActivities] = await Promise.all([
+      getAthleteAccessToken(athleteId),
+      apiRemoteStorage.get(REDIS_KEYS.activities(athleteId)),
+    ]);
     if (!tokens?.accessToken || !tokens.refreshToken) {
       throw new Error(`Token não encontrado para athlete ${athleteId}`);
     }
@@ -434,14 +476,6 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
       return;
     }
 
-    const storedActivities = await apiRemoteStorage.get(
-      REDIS_KEYS.activities(athleteId),
-    );
-
-    if (!getStravaServerEnv().success) {
-      throw new Error('Missing Strava API configuration');
-    }
-
     const strava = createStravaClient(
       { refreshToken },
       { context: 'webhook.activity', athleteId },
@@ -462,24 +496,23 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         'No stored activities: handling initial sync',
       );
       if (aspect_type === 'create' || aspect_type === 'update') {
-        try {
-          const activity = await fetchStravaActivity(activityId, strava);
-          await processActivity(activity, athleteId);
-        } catch (e) {
-          log.warn(
-            { err: e, athleteId, activityId },
-            'Failed to fetch/process single activity during initial sync',
-          );
+        const activity = await fetchStravaActivity(activityId, strava);
+        const updated = await processActivity(activity, athleteId);
+        if (updated === null) {
+          throw new Error(`Failed to persist activity ${activityId}`);
         }
       }
-      await updateStatistics(strava, athleteId);
+      await updateStatistics(strava, athleteId, { forceRecompute: true });
     } else {
       const { lastUpdated, activities } = storedActivities.data;
 
       if (aspect_type === 'update') {
         log.info({ athleteId, activityId }, 'Updating existing activity');
         const activity = await fetchStravaActivity(activityId, strava);
-        await processActivity(activity, athleteId);
+        const updated = await processActivity(activity, athleteId);
+        if (updated === null) {
+          throw new Error(`Failed to persist activity ${activityId}`);
+        }
       } else if (aspect_type === 'create') {
         log.info(
           { athleteId, activityId },
@@ -517,10 +550,11 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
             { err: e, athleteId, activityId },
             'Error removing deleted activity from storage',
           );
+          throw e;
         }
       }
 
-      await updateStatistics(strava, athleteId);
+      await updateStatistics(strava, athleteId, { forceRecompute: true });
     }
   } catch (error) {
     log.error({ err: error, event }, 'Erro ao processar evento de atividade');
@@ -556,6 +590,7 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         'Erro ao enviar email após falha em processamento de atividade',
       );
     }
+    throw error;
   }
 }
 
@@ -566,13 +601,14 @@ async function handleAthleteEvent(event: StravaWebhookEvent, log: Logger) {
   switch (aspect_type) {
     case 'update': {
       try {
+        // Guard barato síncrono antes do I/O de token (async-cheap-condition).
+        if (!getStravaServerEnv().success) {
+          throw new Error('Missing Strava API configuration');
+        }
         const tokens = await getAthleteAccessToken(athleteId);
         if (!tokens?.refreshToken) {
           log.warn({ athleteId }, 'Athlete update ignored: missing tokens');
           return;
-        }
-        if (!getStravaServerEnv().success) {
-          throw new Error('Missing Strava API configuration');
         }
 
         const strava = createStravaClient(
