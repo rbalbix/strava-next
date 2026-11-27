@@ -213,6 +213,87 @@ describe('Stats component', () => {
     });
   });
 
+  it('updates an open card-detail modal when dashboard gear stats change', async () => {
+    const oldGear = {
+      id: 'bike-1',
+      name: 'Bike One',
+      activityType: 'Ride',
+      count: 1,
+      distance: 1000,
+      movingTime: 100,
+      equipments: [
+        {
+          id: 'chain',
+          caption: 'corrente:',
+          show: 'Corrente',
+          distance: 1000,
+          movingTime: 100,
+        },
+      ],
+    };
+    const newGear = {
+      ...oldGear,
+      count: 2,
+      distance: 1500,
+      movingTime: 150,
+    };
+    const openModal = vi.fn();
+    const authValue = makeAuthContext({
+      activeModal: 'card-detail',
+      modalData: oldGear,
+      openModal,
+    });
+
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: {
+        athlete: { id: 1 } as any,
+        athleteStats: {} as any,
+        hasGear: true,
+        hasActivities: true,
+        gearStats: [oldGear],
+      },
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={authValue}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    vi.mocked(useAutoSyncModule.useAutoSync).mockReturnValue({
+      dashboard: {
+        athlete: { id: 1 } as any,
+        athleteStats: {} as any,
+        hasGear: true,
+        hasActivities: true,
+        gearStats: [newGear],
+      },
+      isLoading: false,
+      isError: null,
+      mutate: vi.fn(),
+    });
+
+    await act(async () => {
+      root.render(
+        <AuthContext.Provider value={{ ...authValue }}>
+          <Stats />
+        </AuthContext.Provider>,
+      );
+      await Promise.resolve();
+    });
+
+    expect(openModal).toHaveBeenCalledWith('card-detail', newGear);
+    act(() => root.unmount());
+  });
+
   it('keeps the session and shows the error panel on a transient failure', async () => {
     // Antes, qualquer erro sem cache no sessionStorage chamava signOut() — que
     // limpa cookies e cache, redireciona ao Strava, que reemite o token
