@@ -18,6 +18,9 @@
   width: 30vw;
   max-height: 90%;
   overflow-y: auto;
+  /* Sem isto o scroll do modal vaza para a página de fundo quando o conteúdo
+     chega ao fim (chaining) — no iOS chega a disparar pull-to-refresh (P3). */
+  overscroll-behavior: contain;
   position: relative;
   animation: slideIn 0.3s ease;
   padding: 0.5rem 0;

@@ -1,8 +1,7 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { FaMedapps } from 'react-icons/fa';
 
 import { orderedEquipments } from '../services/equipment';
-import type { Equipment } from '../services/equipment';
 
 import { MdClose } from 'react-icons/md';
 import { AuthContext } from '../contexts/AuthContext';
@@ -12,13 +11,8 @@ import cardStyles from '../styles/components/Card.module.css';
 import styles from '../styles/components/Footer.module.css';
 
 export default function ComponentInfo() {
-  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const { closeModal } = useContext(AuthContext);
   const { showToast } = useToast();
-
-  useEffect(() => {
-    setEquipment(orderedEquipments);
-  }, []);
 
   const handleCopyCode = (code: string) => {
     copyTextToClipboard(code);
@@ -26,7 +20,7 @@ export default function ComponentInfo() {
   };
 
   return (
-    <main className={cardStyles.athleteStatInfoContent}>
+    <div className={cardStyles.athleteStatInfoContent}>
       <header>
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
@@ -71,7 +65,9 @@ export default function ComponentInfo() {
             </tr>
           </thead>
           <tbody>
-            {equipment.map((e) => {
+            {/* orderedEquipments é constante do catálogo: o useState+effect
+                anterior só acrescentava um render vazio (P3). */}
+            {orderedEquipments.map((e) => {
               return (
                 <tr key={e.id}>
                   <td>{e.show}</td>
@@ -93,6 +89,6 @@ export default function ComponentInfo() {
       </section>
 
       <hr className={styles.dividerFooter} />
-    </main>
+    </div>
   );
 }

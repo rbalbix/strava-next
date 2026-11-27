@@ -26,6 +26,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ToastProvider>
+      {/* Skip link (P3): primeiro focável do documento, leva ao único
+          <main> da página (#main-content em cada página). */}
+      <a href='#main-content' className='skipLink'>
+        Pular para o conteúdo
+      </a>
       <Component {...pageProps} />
       <Toast />
       <Analytics />

@@ -26,14 +26,10 @@
   box-shadow: var(--gl-shadow-card);
 }
 
-.initialInfoContainer h1 {
-  font-size: var(--gl-title-sm);
-  font-weight: 600;
-  line-height: var(--gl-line-tight);
-}
-
-.initialInfoContainer h1 > span {
-  font-size: var(--gl-title-sm);
+/* O heading de topo do conteúdo virou h2 (P3: ficava depois do h2 do
+   título da modal) — o h1 deste container não existe mais. */
+.initialInfoContainer h2 > span {
+  font-size: var(--gl-text-lg);
   font-weight: 600;
   color: var(--gl-brand-primary);
 }

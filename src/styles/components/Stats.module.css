@@ -5,9 +5,10 @@
 
 /* ensure the very first card in the list has no top margin.
    first-of-type (não first-child): o h1 oculto do painel (§8.28) é o
-   primeiro filho de <main> e não pode deslocar o primeiro card — com só
-   divs como filhos hoje, o resultado é idêntico ao first-child antigo. */
-.statsContainer main > div:first-of-type .cardContainer {
+   primeiro filho do wrapper e não pode deslocar o primeiro card — com só
+   divs como filhos hoje, o resultado é idêntico ao first-child antigo.
+   O wrapper deixou de ser <main> (P3: um main por documento, o da página). */
+.statsContainer .statsMain > div:first-of-type .cardContainer {
   margin-top: 0;
 }
 

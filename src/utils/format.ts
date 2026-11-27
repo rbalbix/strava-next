@@ -24,6 +24,22 @@ function formatNumber(value: number, fractionDigits = 2): string {
   return getNumberFormatter(fractionDigits).format(value);
 }
 
+// dd/MM/yyyy em pt-BR via Intl.DateTimeFormat (P3) — substitui o
+// format(date, 'dd/MM/yyyy') hardcoded do date-fns nos mesmos pontos.
+// Formatter criado uma vez e reutilizado (js-cache-function-results).
+const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+});
+
+/**
+ * formatDate(new Date('2026-11-26')) → '26/11/2026'.
+ */
+function formatDate(date: Date): string {
+  return dateFormatter.format(date);
+}
+
 function secondsToHms(totalSeconds: number) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -34,4 +50,4 @@ function secondsToHms(totalSeconds: number) {
   )}`;
 }
 
-export { formatNumber, secondsToHms };
+export { formatDate, formatNumber, secondsToHms };

@@ -63,7 +63,11 @@ export default function Header() {
               <Sidebar active={setSidebar} isOpen={sidebar} />
             </div>
           ) : (
-            <span className={styles.spinnerLoading}>
+            <span
+              className={styles.spinnerLoading}
+              role='status'
+              aria-label='Carregando dados do atleta'
+            >
               <PulseLoader
                 color='var(--athlete-name)'
                 loading={true}

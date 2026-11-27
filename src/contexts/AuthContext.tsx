@@ -96,13 +96,20 @@ export function AuthProvider({ children, ...rest }: AuthProviderProps) {
       console.warn('Server logout failed', err);
     }
 
-    sessionStorage.removeItem('athlete');
-    sessionStorage.removeItem('athleteStats');
-    sessionStorage.removeItem('gearStats');
-    sessionStorage.removeItem('equipmentThresholds');
-    sessionStorage.removeItem('hasGear');
-    sessionStorage.removeItem('hasActivities');
-    sessionStorage.removeItem('athleteCacheTime');
+    // sessionStorage pode lançar em modo privado (Safari) — sem try/catch
+    // o próprio signOut quebrava no meio e o usuário não conseguia deslogar
+    // (P3). Falha aqui é irrelevante: o servidor já revogou a sessão acima.
+    try {
+      sessionStorage.removeItem('athlete');
+      sessionStorage.removeItem('athleteStats');
+      sessionStorage.removeItem('gearStats');
+      sessionStorage.removeItem('equipmentThresholds');
+      sessionStorage.removeItem('hasGear');
+      sessionStorage.removeItem('hasActivities');
+      sessionStorage.removeItem('athleteCacheTime');
+    } catch (err) {
+      console.warn('sessionStorage cleanup failed', err);
+    }
 
     // O cookie de sessão (`gl_session`) é HttpOnly e, portanto,
     // invisível para o JavaScript — limpar via document.cookie não tem efeito

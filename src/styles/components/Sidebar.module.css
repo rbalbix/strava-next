@@ -104,6 +104,12 @@
   cursor: pointer;
   margin: 0.2rem 0.6rem;
   border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover (P3): item do menu sem nenhum feedback ao mouse. */
+.sidebarItemContainer:hover {
+  background-color: var(--gl-surface-primary);
 }
 
 .sidebarItemIcon {
@@ -116,6 +122,11 @@
   font-size: 1.4rem !important;
   color: var(--gl-text-primary);
   letter-spacing: 0.4px;
+  transition: color 0.2s ease;
+}
+
+.linkText:hover {
+  color: var(--gl-brand-primary);
 }
 
 .linkText:focus {

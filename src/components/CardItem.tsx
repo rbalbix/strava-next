@@ -1,9 +1,9 @@
-import { format, formatDistanceToNowStrict, parseISO } from 'date-fns';
+import { formatDistanceToNowStrict, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Equipments, resolveCaption } from '../services/equipment';
 import type { Equipment } from '../services/equipment';
 import { copyEventDetailsToClipboard } from '../utils/clipboard';
-import { formatNumber, secondsToHms } from '../utils/format';
+import { formatDate, formatNumber, secondsToHms } from '../utils/format';
 import styles from '../styles/components/CardItem.module.css';
 import { useToast } from '../contexts/ToastContext';
 import type { ThresholdEntry } from '../contracts/api';
@@ -41,7 +41,7 @@ export default function CardItem({
   const caption = resolveCaption(e);
 
   const localDate = parseISO(e.date.replace(/Z$/, ''));
-  const formattedDate = format(localDate, 'dd/MM/yyyy');
+  const formattedDate = formatDate(localDate);
   const timeAgo = formatDistanceToNowStrict(localDate, {
     locale: ptBR,
   });

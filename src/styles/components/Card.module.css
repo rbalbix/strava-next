@@ -13,6 +13,12 @@
   color: inherit;
 
   border: 1px solid var(--gl-text-secondary);
+  transition: border-color 0.2s ease;
+}
+
+/* Hover (P3): o card é clicável mas não dava nenhum feedback ao mouse. */
+.cardContainer:hover {
+  border-color: var(--gl-brand-primary);
 }
 
 .cardContainer:last-child {

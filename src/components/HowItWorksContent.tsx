@@ -15,11 +15,15 @@ export default function HowItWorksContent({
 
   return (
     <>
+      {/* h2 e não h1 (P3): o único contexto com esta heading é a modal,
+          cujo título (h2 "Como funciona") vem ANTES no documento — h1
+          após h2 quebrava a hierarquia. Na página /como-funciona a
+          heading não é renderizada (showTopHeading={false}). */}
       {showTopHeading ? (
-        <h1>
+        <h2>
           Como usar o aplicativo para monitorar equipamentos usando as
           atividades do <span>Strava</span>
-        </h1>
+        </h2>
       ) : null}
       <div>
         Este passo a passo foi feito para ajudar a utilizar esse aplicativo, que

@@ -10,7 +10,7 @@ export default function InitialInfoModal() {
   const { closeModal } = useContext(AuthContext);
 
   return (
-    <main className={cardStyles.athleteStatInfoContent}>
+    <div className={cardStyles.athleteStatInfoContent}>
       <header>
         <div className={cardStyles.athleteStatInfoTitle}>
           <div>
@@ -42,6 +42,6 @@ export default function InitialInfoModal() {
       <footer>
         <hr className={styles.divider} style={{ margin: 'auto' }} />
       </footer>
-    </main>
+    </div>
   );
 }

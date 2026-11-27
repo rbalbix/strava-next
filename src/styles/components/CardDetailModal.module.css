@@ -2,21 +2,21 @@
   padding: 1rem;
 }
 
-.cardDetailModalContainer main header div {
+.cardDetailModalContainer .modalBody header div {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.cardDetailModalContainer main header section span {
+.cardDetailModalContainer .modalBody header section span {
   font-size: 1rem;
 
   font-weight: 400;
   color: var(--gl-text-primary);
 }
 
-.cardDetailModalContainer main span {
+.cardDetailModalContainer .modalBody span {
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--gl-text-primary);
@@ -24,7 +24,7 @@
   margin-right: 8px;
 }
 
-.cardDetailModalContainer main section {
+.cardDetailModalContainer .modalBody section {
   margin-bottom: 10px;
 }
 
@@ -253,7 +253,7 @@
 }
 
 @media (max-width: 768px) {
-  .cardDetailModalContainer main span {
+  .cardDetailModalContainer .modalBody span {
     font-size: 1.6rem;
   }
 }

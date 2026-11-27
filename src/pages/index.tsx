@@ -10,7 +10,11 @@ import { getCookieValue, SESSION_COOKIE } from '../server/cookies';
 import styles from '../styles/pages/Home.module.css';
 
 const Stats = dynamic(() => import('../components/Stats'), {
-  loading: () => <div className={styles.homeLoading}>Carregando...</div>,
+  loading: () => (
+    <div className={styles.homeLoading} role='status'>
+      Carregando...
+    </div>
+  ),
 });
 const ModalContainer = dynamic(() => import('../components/ModalContainer'));
 
@@ -31,6 +35,8 @@ function HomeContent() {
     <main
       className={codeReturned ? styles.statsSection : styles.homeSection}
       aria-live='polite'
+      id='main-content'
+      tabIndex={-1}
     >
       {/* A landing não renderiza <ErroMsg /> de propósito: `codeError` só é
           preenchido pelo `Stats`, então um aviso de erro aqui seria sempre o

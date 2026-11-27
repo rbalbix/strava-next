@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { apiClient, getHttpStatus } from '../lib/apiClient';
+
+/** Chave do SWR compartilhada entre o hook e a leitura do cache abaixo. */
+const DASHBOARD_KEY = 'dashboard';
 
 /**
  * Intervalo do polling em estado saudável.
@@ -80,10 +82,17 @@ const ERROR_RETRY_COUNT = 5;
  * @returns Dashboard data, loading state, error state, and mutate function.
  */
 export function useAutoSync(intervalMs = BASE_INTERVAL_MS) {
-  const [rateLimited, setRateLimited] = useState(false);
+  // rateLimited é DERIVADO do erro no cache do SWR (P3) — antes era
+  // useState espelho alimentado por onError/onSuccess: estado guardado em
+  // estado podia divergir do erro real e custava um render extra. O cache é
+  // lido ANTES do useSWR porque as opções abaixo precisam do valor já neste
+  // render; o próprio SWR re-renderiza o hook quando o erro muda, então a
+  // leitura fica sempre fresca.
+  const { cache } = useSWRConfig();
+  const rateLimited = isRateLimitError(cache.get(DASHBOARD_KEY)?.error);
 
   const { data, error, mutate, isLoading } = useSWR(
-    'dashboard',
+    DASHBOARD_KEY,
     apiClient.getDashboard,
     {
       refreshInterval: rateLimited ? 0 : intervalMs,
@@ -92,8 +101,6 @@ export function useAutoSync(intervalMs = BASE_INTERVAL_MS) {
       shouldRetryOnError: (err: Error) => !isRateLimitError(err),
       errorRetryInterval: ERROR_RETRY_INTERVAL_MS,
       errorRetryCount: ERROR_RETRY_COUNT,
-      onError: (err) => setRateLimited(isRateLimitError(err)),
-      onSuccess: () => setRateLimited(false),
     },
   );
 

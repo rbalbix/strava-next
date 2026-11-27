@@ -15,6 +15,33 @@ html {
   color: var(--gl-text-primary);
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
+  /* Foco por âncora/teclado para baixo do header fixo (P3): sem isto o
+     elemento alvo fica escondido atrás dos ~70px do header + notch. */
+  scroll-padding-top: calc(
+    var(--header-height) + env(safe-area-inset-top, 0px)
+  );
+}
+
+/* Skip link (P3): primeiro focável do documento — teclado/leitor de tela
+   pula header e menu e vai direto ao conteúdo. Fora da tela até receber
+   foco; o alvo (#main-content) recebe tabIndex -1 para o foco de fato
+   migrar. */
+.skipLink {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 4000;
+  padding: 0.75rem 1.25rem;
+  background: var(--gl-surface-card);
+  color: var(--gl-text-primary);
+  border: 1px solid var(--gl-brand-primary);
+  border-radius: 0 0 8px 0;
+  font-size: 1.4rem;
+  transform: translateY(-150%);
+}
+
+.skipLink:focus {
+  transform: translateY(0);
 }
 
 html::-webkit-scrollbar {

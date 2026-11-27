@@ -1,6 +1,11 @@
+// URL pública canônica em produção: sem a env var as URLs da API seriam
+// "undefined/api/..." silenciosamente (P3). É a mesma base usada pelo
+// SeoHead para canonical/OG.
+export const DEFAULT_APP_URL = 'https://gearlife.vercel.app';
+
 const baseAppURL =
   process.env.NODE_ENV === 'production'
-    ? process.env.NEXT_PUBLIC_APP_URL
+    ? process.env.NEXT_PUBLIC_APP_URL || DEFAULT_APP_URL
     : 'http://localhost:3000';
 
 const baseStravaURL = 'https://www.strava.com';

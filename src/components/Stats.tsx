@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useContext, useEffect, useState, useRef } from 'react';
 import { MdWarningAmber } from 'react-icons/md';
 import { TbBrandStrava } from 'react-icons/tb';
@@ -18,6 +18,7 @@ import {
   computeThresholdState,
   resolveCurrentConsumption,
 } from '../utils/thresholds';
+import { formatDate } from '../utils/format';
 import styles from '../styles/components/Stats.module.css';
 import Card from './Card';
 import DiskIcon from './DiskIcon';
@@ -332,7 +333,10 @@ export default function Stats() {
 
   return (
     <div className={styles.statsContainer}>
-      <main>
+      {/* Wrapper interno deixou de ser <main> (P3): a spec permite um main
+          por documento e o da página (index) já é este — aqui vive um
+          <div> comum. */}
+      <div className={styles.statsMain}>
         {/* Fase D (§8.28): h1 visualmente oculto — o painel era a única
             face da URL sem título e a navegação por leitor de tela ficava
             sem âncora. O selector do primeiro card passou a first-of-type
@@ -380,10 +384,7 @@ export default function Stats() {
                         target='_blank'
                         rel='noopener noreferrer'
                       >
-                        {format(
-                          parseISO(code.startDate.replace(/Z$/, '')),
-                          'dd/MM/yyyy',
-                        )}
+                        {formatDate(parseISO(code.startDate.replace(/Z$/, '')))}
                       </a>
                       . “{code.word}” — você quis dizer “{code.suggestion}”?
                       Corrija no Strava para atualizar aqui no GearLife.
@@ -436,7 +437,7 @@ export default function Stats() {
           </div>
         ) : gearStats.length === 0 ? (
           <div className={styles.spinnerLoading}>
-            <div className={styles.loadingPanel}>
+            <div className={styles.loadingPanel} role='status'>
               <div>
                 <span>Aguarde.</span>
                 <span>Carregando suas estatísticas ...</span>
@@ -468,7 +469,7 @@ export default function Stats() {
             );
           })
         )}
-      </main>
+      </div>
     </div>
   );
 }

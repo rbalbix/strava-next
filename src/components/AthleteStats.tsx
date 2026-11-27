@@ -107,7 +107,7 @@ export default function AthleteStats() {
   return (
     <>
       {athleteStats && athlete?.id && (
-        <main className={cardStyles.athleteStatInfoContent}>
+        <div className={cardStyles.athleteStatInfoContent}>
           <header>
             <div className={cardStyles.athleteStatInfoTitle}>
               <div>
@@ -155,7 +155,7 @@ export default function AthleteStats() {
           })}
 
           <hr />
-        </main>
+        </div>
       )}
     </>
   );

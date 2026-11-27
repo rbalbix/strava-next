@@ -1,5 +1,7 @@
 import Head from 'next/head';
 
+import { DEFAULT_APP_URL } from '../config';
+
 interface SeoHeadProps {
   title: string;
   description: string;
@@ -15,7 +17,7 @@ interface SeoHeadProps {
   noindex?: boolean;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://gearlife.vercel.app';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || DEFAULT_APP_URL;
 const OG_IMAGE_PATH = '/images/tela-inicio-1.jpeg';
 
 export default function SeoHead({
@@ -37,8 +39,12 @@ export default function SeoHead({
         name='viewport'
         content='width=device-width, initial-scale=1, viewport-fit=cover'
       />
-      <meta name='theme-color' content='#121212' />
+      {/* theme-color saiu daqui para o _document.tsx (P3): duas metas
+          conflitantes no mesmo documento. */}
       <link rel='canonical' href={canonicalUrl} />
+      {/* Avatares do Strava vêm do CloudFront: sem preconnect o handshake
+          do primeiro avatar só começa depois do HTML (P3). */}
+      <link rel='preconnect' href='https://dgalywyr863hv.cloudfront.net' />
 
       <meta property='og:type' content='website' />
       <meta property='og:site_name' content='GearLife' />

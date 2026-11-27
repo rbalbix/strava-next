@@ -46,6 +46,8 @@
   font-size: 1.2rem;
   border: 1px solid;
   padding: 8px;
+  /* Dígitos com largura fixa (P3): a tabela não "pula" ao revalidar. */
+  font-variant-numeric: tabular-nums;
 }
 
 .footerEquipmentTable tr:nth-child(even) {
@@ -95,12 +97,28 @@
   color: inherit;
   font-size: 1.45rem;
   z-index: 1001;
+  transition: color 0.2s ease;
+}
+
+/* Hover (P3): fechar sem feedback ao mouse. Mesmo padrão do ModalContainer. */
+.closeButton:hover {
+  color: var(--gl-brand-primary);
 }
 
 .copyButton {
   font-size: 1.2rem;
   background-color: transparent;
   border: 0;
+  transition:
+    color 0.2s ease,
+    text-decoration-color 0.2s ease;
+}
+
+/* Hover (P3): "clique para copiar" sem nenhum sinal de alvo clicável. */
+.copyButton:hover {
+  color: var(--gl-brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .footerContainer footer {
