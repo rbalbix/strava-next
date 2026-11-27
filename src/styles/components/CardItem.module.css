@@ -25,12 +25,6 @@
   outline-offset: 2px;
 }
 
-/* Hover (P3): a linha era clicável (abre editor + copia) mas não reagia
-   ao mouse — a borda dos chips de km/h acende na cor da marca. */
-.eventButton:hover .chipbadge {
-  border-color: var(--gl-brand-primary);
-}
-
 .firstLine {
   display: flex;
   align-items: center;

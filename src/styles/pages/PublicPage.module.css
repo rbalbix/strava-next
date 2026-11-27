@@ -52,25 +52,6 @@
   margin-bottom: 1rem;
 }
 
-/* Links do corpo (404 "Voltar para o início", e-mail do contato, links do
-   FAQ): antes herdavam a cor do texto sem sublinhado — mouse parecia morto
-   (P3, hover ausente). */
-.content a {
-  color: var(--gl-brand-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.content a:hover {
-  color: var(--gl-brand-active);
-}
-
-.content a:focus-visible {
-  outline: 2px solid var(--gl-brand-primary);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
 .content li {
   color: var(--gl-text-primary);
 }

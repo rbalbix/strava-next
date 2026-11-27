@@ -69,12 +69,6 @@
   outline: 2px solid var(--gl-border-subtle);
   outline-offset: 2px;
   margin: 10px;
-  transition: background-color 0.2s ease;
-}
-
-/* Hover (P3): botão do menu sem feedback ao mouse. */
-.buttonSidebarHeader:hover {
-  background-color: var(--gl-surface-secondary);
 }
 
 /* O outline acima é decorativo e permanente: sem um :focus-visible próprio,
