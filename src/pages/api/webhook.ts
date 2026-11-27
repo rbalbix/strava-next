@@ -171,9 +171,12 @@ async function enforceWebhookIpRateLimit(
   return { ok: true };
 }
 
+function getWebhookReplayKey(event: StravaWebhookEvent): string {
+  return `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
+}
+
 async function guardWebhookReplay(event: StravaWebhookEvent): Promise<boolean> {
-  const replayKey = `strava:webhook:seen:${event.owner_id}:${event.object_type}:${event.object_id}:${event.aspect_type}:${event.event_time}`;
-  const inserted = await redis.set(replayKey, '1', {
+  const inserted = await redis.set(getWebhookReplayKey(event), '1', {
     nx: true,
     ex: WEBHOOK_REPLAY_TTL_SECONDS,
   });
@@ -215,6 +218,7 @@ export default async function handler(
   // Processamento de eventos (POST)
   if (req.method === 'POST') {
     const log = getLogger(req.headers['x-request-id'] as string);
+    let replayKey: string | null = null;
 
     // In production, require subscription pinning. IP allowlist is optional.
     if (process.env.NODE_ENV === 'production') {
@@ -327,6 +331,7 @@ export default async function handler(
           );
           return res.status(200).json({ received: true, duplicate: true });
         }
+        replayKey = getWebhookReplayKey(event);
       }
 
       try {
@@ -366,6 +371,16 @@ export default async function handler(
     } catch (error) {
       const log = getLogger(req.headers['x-request-id'] as string);
       log.error({ err: error }, 'Erro ao processar webhook');
+      if (replayKey) {
+        try {
+          await redis.del(replayKey);
+        } catch (clearError) {
+          log.error(
+            { err: clearError },
+            'Erro ao remover marcador de replay após falha do webhook',
+          );
+        }
+      }
       try {
         const emailEnv = getEmailServerEnv();
         if (!emailEnv.success) {
@@ -481,24 +496,23 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         'No stored activities: handling initial sync',
       );
       if (aspect_type === 'create' || aspect_type === 'update') {
-        try {
-          const activity = await fetchStravaActivity(activityId, strava);
-          await processActivity(activity, athleteId);
-        } catch (e) {
-          log.warn(
-            { err: e, athleteId, activityId },
-            'Failed to fetch/process single activity during initial sync',
-          );
+        const activity = await fetchStravaActivity(activityId, strava);
+        const updated = await processActivity(activity, athleteId);
+        if (updated === null) {
+          throw new Error(`Failed to persist activity ${activityId}`);
         }
       }
-      await updateStatistics(strava, athleteId);
+      await updateStatistics(strava, athleteId, { forceRecompute: true });
     } else {
       const { lastUpdated, activities } = storedActivities.data;
 
       if (aspect_type === 'update') {
         log.info({ athleteId, activityId }, 'Updating existing activity');
         const activity = await fetchStravaActivity(activityId, strava);
-        await processActivity(activity, athleteId);
+        const updated = await processActivity(activity, athleteId);
+        if (updated === null) {
+          throw new Error(`Failed to persist activity ${activityId}`);
+        }
       } else if (aspect_type === 'create') {
         log.info(
           { athleteId, activityId },
@@ -536,10 +550,11 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
             { err: e, athleteId, activityId },
             'Error removing deleted activity from storage',
           );
+          throw e;
         }
       }
 
-      await updateStatistics(strava, athleteId);
+      await updateStatistics(strava, athleteId, { forceRecompute: true });
     }
   } catch (error) {
     log.error({ err: error, event }, 'Erro ao processar evento de atividade');
@@ -575,6 +590,7 @@ async function handleActivityEvent(event: StravaWebhookEvent, log: Logger) {
         'Erro ao enviar email após falha em processamento de atividade',
       );
     }
+    throw error;
   }
 }
 

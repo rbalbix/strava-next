@@ -110,7 +110,7 @@ Cada webhook:
 3. Executa a lógica apropriada (atualizar estatísticas, deletar dados, etc.)
 4. Registra erros e notifica por email em caso de falha
 
-> **Limitação conhecida (D14.1):** o Strava **não** dispara `activity/update` quando só a observação privada é editada — por isso o painel rebusca o relatório de códigos não reconhecidos com throttle próprio, e não depende do webhook.
+> **Limitação conhecida:** o Strava pode não disparar `activity/update` quando só a observação privada é editada. O dashboard reconcilia periodicamente uma janela retroativa de atividades; eventos recebidos forçam o recálculo. Se o processamento falhar, o endpoint responde `500` e remove o marcador de replay para permitir nova tentativa.
 
 ---
 
@@ -136,7 +136,7 @@ Cada evento de webhook é rastreado no Redis com uma chave temporária:
 
 - **Chave**: baseada em `athleteId`, `objectId`, `aspectType`, `eventTime`
 - **TTL**: 2 horas
-- **Ação**: Se a chave já existe, ignora o evento
+- **Ação**: Se a chave já existe, ignora o evento; em caso de falha no processamento, remove a chave para permitir retry
 
 **Por quê?** O Strava pode reenviar o mesmo evento múltiplas vezes (rede instável, retry policies).
 
@@ -253,7 +253,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 
 - `strava:auth:<athleteId>` — tokens e auth do atleta
 - `strava:activities:<athleteId>` — cache de atividades + `lastUpdated`
-- `strava:statistics:<athleteId>` — estatísticas processadas
+- `strava:statistics:<athleteId>` — estatísticas processadas; o snapshot mantém `lastReconciledAt`, independente das gravações de atividades, para reconciliar periodicamente alterações sem webhook
 - `strava:equipment-thresholds:<athleteId>` — limites de manutenção por equipamento
 - `strava:unrecognized-codes:<athleteId>` — relatório de códigos não reconhecidos (D14; gravado direto via `redis.set`, fora do allowlist do remoteStorage)
 - `strava:session:<hash>` — athleteId da sessão (hash do cookie `gl_session`; ver *Sessão do Aplicativo*)
@@ -293,6 +293,7 @@ Extraído de `src/services/equipment.ts`. Agrupado por tipo (consumíveis, servi
 
 - Atividades com `*` no `name` disparam fetch detalhado (`getActivityById`) para recuperar `private_note` e sport type.
 - Atividades são ordenadas por `gear_id` e `start_date_local` para cálculo cumulativo correto (ver `createStatistics`).
+- Webhooks de atividade forçam o recálculo a partir do cache atualizado, mesmo se os timestamps de atividades e estatísticas coincidirem. Uma reconciliação periódica busca novamente uma janela retroativa configurável (padrões: 15 minutos entre reconciliações e 14 dias de histórico), pois o `after` da API do Strava filtra por data da atividade, não por data de edição. O marco `lastReconciledAt` não é renovado por gravações normais do cache.
 
 ### Variáveis de Ambiente Críticas
 

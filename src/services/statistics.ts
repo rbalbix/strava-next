@@ -9,7 +9,7 @@ import {
   withActivitiesWriteLock,
 } from './activity';
 
-import { differenceInMinutes, fromUnixTime, getUnixTime } from 'date-fns';
+import { getUnixTime } from 'date-fns';
 import { apiRemoteStorage } from './api';
 import redis from './redis';
 import { getAthlete } from './athlete';
@@ -36,6 +36,48 @@ import {
 // (10 min): por atleta com banner ativo, ~1 chamada Strava a cada 10 min
 // por caso reportado (limite do Strava: 300/15 min).
 const REPORT_REFRESH_MIN_INTERVAL_SECONDS = 600;
+
+/**
+ * Intervalo de expiração do cache de estatísticas para reconciliação periódica
+ * com a API do Strava (default: 15 minutos).
+ *
+ * Evita o congelamento silencioso quando o Strava falha na entrega de webhooks.
+ * Em ambiente de teste (`NODE_ENV === 'test'`), caso a env não esteja definida,
+ * assume Infinity para preservar o isolamento dos testes legados com timestamps fixos.
+ */
+export function getReconciliationIntervalSeconds(): number {
+  if (process.env.RECONCILIATION_INTERVAL_SECONDS !== undefined) {
+    const val = Number(process.env.RECONCILIATION_INTERVAL_SECONDS);
+    if (Number.isFinite(val) && val >= 0) return val;
+  }
+  if (process.env.NODE_ENV === 'test') {
+    return Infinity;
+  }
+  return 15 * 60; // 15 minutos em produção/desenvolvimento
+}
+
+/**
+ * Janela retroativa para reconciliação periódica com o Strava (default: 14 dias).
+ *
+ * O endpoint `GET /athlete/activities?after=` da API do Strava filtra apenas por
+ * `start_date` da atividade (momento em que a pedalada ocorreu), e NÃO pela data
+ * de edição/modificação. Portanto, para detectar alterações feitas em atividades
+ * passadas (como edição de título para incluir '*' ou atualização da nota privada),
+ * a busca incremental recua até esta janela retroativa e mescla os resultados
+ * com o histórico existente via `mergeForRecompute`.
+ */
+export function getReconciliationLookbackSeconds(): number {
+  if (process.env.RECONCILIATION_LOOKBACK_SECONDS !== undefined) {
+    const val = Number(process.env.RECONCILIATION_LOOKBACK_SECONDS);
+    if (Number.isFinite(val) && val >= 0) return val;
+  }
+  return 14 * 24 * 60 * 60; // 14 dias
+}
+
+export type UpdateStatisticsOptions = {
+  forceRecompute?: boolean;
+  forceReconcile?: boolean;
+};
 
 /**
  * Merge do write final do recompute (design 2026-11-18, item 2).
@@ -170,22 +212,35 @@ type StatisticsFlightEntry =
   | { kind: 'lockless' } // sem lock (Redis fora / teto sem cache)
   | { kind: 'returned'; statistics: GearStats[] }; // devolve cache, sem computar
 
-type StatisticsSnapshot = { lastUpdated: number; statistics: GearStats[] };
+type StatisticsSnapshot = {
+  lastUpdated: number;
+  lastReconciledAt?: number;
+  statistics: GearStats[];
+};
 
 export async function updateStatistics(
   strava: Strava,
   athleteId: number,
+  options?: UpdateStatisticsOptions,
 ): Promise<GearStats[]> {
   const inFlight = statisticsFlights.get(athleteId);
   if (inFlight) {
     getLogger().debug(
-      { athleteId },
+      {
+        athleteId,
+        forceRecompute: Boolean(options?.forceRecompute),
+        forceReconcile: Boolean(options?.forceReconcile),
+      },
       'Single-flight: aguardando voo de estatísticas em andamento',
     );
+    if (options?.forceRecompute || options?.forceReconcile) {
+      await inFlight;
+      return updateStatistics(strava, athleteId, options);
+    }
     return inFlight;
   }
 
-  const flight = runStatisticsFlight(strava, athleteId);
+  const flight = runStatisticsFlight(strava, athleteId, options);
   statisticsFlights.set(athleteId, flight);
   try {
     return await flight;
@@ -199,12 +254,16 @@ export async function updateStatistics(
 async function runStatisticsFlight(
   strava: Strava,
   athleteId: number,
+  options?: UpdateStatisticsOptions,
 ): Promise<GearStats[]> {
-  const entry = await enterStatisticsFlight(athleteId);
+  const entry = await enterStatisticsFlight(
+    athleteId,
+    Boolean(options?.forceRecompute || options?.forceReconcile),
+  );
   if (entry.kind === 'returned') return entry.statistics;
 
   try {
-    return await computeStatistics(strava, athleteId);
+    return await computeStatistics(strava, athleteId, options);
   } finally {
     if (entry.kind === 'owned') {
       try {
@@ -233,6 +292,7 @@ async function runStatisticsFlight(
  */
 async function enterStatisticsFlight(
   athleteId: number,
+  requireFresh = false,
 ): Promise<StatisticsFlightEntry> {
   const log = getLogger();
   const lockKey = REDIS_KEYS.statisticsLock(athleteId);
@@ -245,13 +305,15 @@ async function enterStatisticsFlight(
   while (Date.now() - startedAt < STATISTICS_LOCK_MAX_WAIT_MS) {
     await sleep(STATISTICS_LOCK_POLL_MS);
 
-    const fresh = await readFreshStatistics(athleteId, startedAt);
-    if (fresh) {
-      log.info(
-        { athleteId },
-        'Single-flight: voo em outra instância já gravou — devolvendo cache',
-      );
-      return { kind: 'returned', statistics: fresh };
+    if (!requireFresh) {
+      const fresh = await readFreshStatistics(athleteId, startedAt);
+      if (fresh) {
+        log.info(
+          { athleteId },
+          'Single-flight: voo em outra instância já gravou — devolvendo cache',
+        );
+        return { kind: 'returned', statistics: fresh };
+      }
     }
 
     const again = await tryAcquireStatisticsLock(lockKey);
@@ -262,7 +324,7 @@ async function enterStatisticsFlight(
   // Teto de espera estourado (chamada do design): dedupe vale mais que
   // frescor — devolve o cache que existir (stale-ok).
   const cached = await readStatisticsSnapshot(athleteId);
-  if (cached) {
+  if (cached && !requireFresh) {
     log.warn(
       { athleteId, waitedMs: STATISTICS_LOCK_MAX_WAIT_MS },
       'Single-flight: lock ocupada além do teto — devolvendo cache existente (stale-ok)',
@@ -311,7 +373,14 @@ async function readStatisticsSnapshot(
       typeof data.lastUpdated === 'number' &&
       Array.isArray(data.statistics)
     ) {
-      return { lastUpdated: data.lastUpdated, statistics: data.statistics };
+      return {
+        lastUpdated: data.lastUpdated,
+        lastReconciledAt:
+          typeof data.lastReconciledAt === 'number'
+            ? data.lastReconciledAt
+            : undefined,
+        statistics: data.statistics,
+      };
     }
     return null;
   } catch {
@@ -338,6 +407,7 @@ async function readFreshStatistics(
 async function computeStatistics(
   strava: Strava,
   athleteId: number,
+  options?: UpdateStatisticsOptions,
 ): Promise<GearStats[]> {
   const log = getLogger();
   try {
@@ -367,20 +437,53 @@ async function computeStatistics(
       );
     }
 
-    if (
-      !refreshed &&
+    const hasActivitiesData =
       storedActivities.data !== null &&
       storedActivities.data !== undefined &&
-      Object.keys(storedActivities.data).length !== 0 &&
+      Object.keys(storedActivities.data).length !== 0;
+
+    const hasStatisticsData =
       storedStatistics.data !== null &&
       storedStatistics.data !== undefined &&
-      Object.keys(storedStatistics.data).length !== 0 &&
-      differenceInMinutes(
-        fromUnixTime(storedStatistics.data.lastUpdated),
-        fromUnixTime(storedActivities.data.lastUpdated),
-      ) === 0
+      Object.keys(storedStatistics.data).length !== 0;
+
+    const lastUpdatedActivities = storedActivities?.data?.lastUpdated;
+    const lastUpdatedStatistics = storedStatistics?.data?.lastUpdated;
+
+    const isAligned =
+      hasActivitiesData &&
+      hasStatisticsData &&
+      typeof lastUpdatedActivities === 'number' &&
+      typeof lastUpdatedStatistics === 'number' &&
+      lastUpdatedStatistics === lastUpdatedActivities;
+
+    const nowUnix = Math.floor(Date.now() / 1000);
+    const lastReconciledAt =
+      typeof storedStatistics?.data?.lastReconciledAt === 'number'
+        ? storedStatistics.data.lastReconciledAt
+        : lastUpdatedActivities;
+    const reconciliationAgeSeconds =
+      typeof lastReconciledAt === 'number'
+        ? Math.max(0, nowUnix - lastReconciledAt)
+        : Infinity;
+
+    const reconciliationInterval = getReconciliationIntervalSeconds();
+    const isReconciliationDue =
+      reconciliationAgeSeconds >= reconciliationInterval;
+    const isForced = Boolean(options?.forceReconcile);
+    const isForcedRecompute = Boolean(options?.forceRecompute);
+
+    if (
+      !refreshed &&
+      !isForced &&
+      !isForcedRecompute &&
+      isAligned &&
+      !isReconciliationDue
     ) {
-      log.debug({ athleteId }, 'Using cached statistics');
+      log.debug(
+        { athleteId, reconciliationAgeSeconds },
+        'Using cached statistics',
+      );
       // D14: backfill best-effort — o relatório de códigos não reconhecidos
       // é gravado uma vez por atleta no primeiro load com cache válido
       // (senão o banner só apareceria após o próximo evento do Strava).
@@ -396,14 +499,31 @@ async function computeStatistics(
       return storedStatistics.data.statistics;
     } else {
       log.info(
-        { athleteId },
+        {
+          athleteId,
+          reconciliationAgeSeconds,
+          isReconciliationDue,
+          isForced,
+          isForcedRecompute,
+          refreshed,
+        },
         refreshed
           ? 'Recomputing statistics (report refreshed)'
-          : 'Recomputing statistics',
+          : isForced
+            ? 'Recomputing statistics (forced reconciliation)'
+            : isForcedRecompute
+              ? 'Recomputing statistics (forced by activity webhook)'
+              : isReconciliationDue
+                ? 'Recomputing statistics (periodic reconciliation)'
+                : 'Recomputing statistics',
       );
       const athlete = await getAthlete(strava, athleteId);
       const gears = getGears(athlete);
       let deltaActivities: ActivityBase[] = [];
+      let reconciledAt =
+        typeof storedStatistics?.data?.lastReconciledAt === 'number'
+          ? storedStatistics.data.lastReconciledAt
+          : lastUpdatedActivities;
       // O delta é uma busca completa (from-scratch / migração) ou só o
       // recorte desde `lastUpdated`? Define se o base-only entra no merge.
       let deltaComplete = true;
@@ -416,6 +536,7 @@ async function computeStatistics(
       ) {
         // Recupera todas as atividades
         deltaActivities = await getActivities(strava, gears, null, null);
+        reconciledAt = nowUnix;
       } else {
         // Recupera apenas as atividades criadas depois de lastUpdated
         const { lastUpdated, activities } = storedActivities.data;
@@ -436,9 +557,21 @@ async function computeStatistics(
             'Legacy activities detected without sport_type; rebuilding activities cache',
           );
           deltaActivities = await getActivities(strava, gears, null, null);
+          reconciledAt = nowUnix;
         } else {
-          deltaActivities = await getActivities(strava, gears, null, lastUpdated);
+          // Quando reconciliando periodicamente (ou forçado), recua uma janela de lookback
+          // para capturar edições em atividades recentes (ex.: alteração de título/private_note).
+          const lookbackWindow = getReconciliationLookbackSeconds();
+          const fetchAfter =
+            isReconciliationDue || isForced
+              ? Math.min(lastUpdated, nowUnix - lookbackWindow)
+              : lastUpdated;
+
+          deltaActivities = await getActivities(strava, gears, null, fetchAfter);
           deltaComplete = false;
+          if (isReconciliationDue || isForced) {
+            reconciledAt = nowUnix;
+          }
         }
       }
 
@@ -493,6 +626,7 @@ async function computeStatistics(
         strava,
         athleteId,
         mergedActivities,
+        reconciledAt,
       );
       return updatedStatistics;
     }
@@ -649,6 +783,7 @@ export async function processStatistics(
   strava: Strava,
   athleteId: number,
   updatedActivities: ActivityBase[],
+  lastReconciledAt?: number,
 ): Promise<GearStats[]> {
   const log = getLogger();
 
@@ -678,6 +813,7 @@ export async function processStatistics(
     REDIS_KEYS.statistics(athleteId),
     JSON.stringify({
       lastUpdated: getUnixTime(Date.now()),
+      lastReconciledAt,
       statistics: updatedStatistics,
     }),
   );

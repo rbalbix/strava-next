@@ -9,6 +9,7 @@ type LoadWebhookOptions = {
   storedActivitiesData?: unknown;
   athleteTokens?: unknown;
   fetchedActivity?: unknown;
+  processActivityResult?: unknown;
   getActivitiesResult?: unknown[];
   mergedActivitiesResult?: unknown[];
   athleteData?: unknown;
@@ -102,7 +103,11 @@ async function loadWebhookHandler(options: LoadWebhookOptions = {}) {
     .fn()
     .mockResolvedValue(options.getActivitiesResult ?? []);
   const processActivities = vi.fn().mockResolvedValue(undefined);
-  const processActivity = vi.fn().mockResolvedValue(undefined);
+  const processActivity = vi
+    .fn()
+    .mockResolvedValue(
+      'processActivityResult' in options ? options.processActivityResult : [],
+    );
   const apiRemoteStorageGet = vi.fn().mockResolvedValue({
     data: options.storedActivitiesData ?? null,
   });
@@ -577,7 +582,9 @@ describe('/api/webhook integration', () => {
     expect(res.body).toEqual({ received: true });
     expect(fetchStravaActivity).toHaveBeenCalledWith(4321, expect.any(Object));
     expect(processActivity).toHaveBeenCalledWith(expect.any(Object), 987);
-    expect(updateStatistics).toHaveBeenCalledWith(expect.any(Object), 987);
+    expect(updateStatistics).toHaveBeenCalledWith(expect.any(Object), 987, {
+      forceRecompute: true,
+    });
   });
 
   it('processes activity update with stored activities', async () => {
@@ -608,6 +615,44 @@ describe('/api/webhook integration', () => {
     expect(processActivity).toHaveBeenCalledWith(expect.any(Object), 987);
     expect(processActivities).not.toHaveBeenCalled();
     expect(updateStatistics).toHaveBeenCalledTimes(1);
+    expect(updateStatistics).toHaveBeenCalledWith(expect.any(Object), 987, {
+      forceRecompute: true,
+    });
+  });
+
+  it('does not acknowledge an activity update when persistence fails', async () => {
+    const eventTime = Math.floor(Date.now() / 1000);
+    const replayKey = `strava:webhook:seen:987:activity:200:update:${eventTime}`;
+    const { webhookHandler, req, res, redisMock, updateStatistics } =
+      await loadWebhookHandler({
+        validationResult: {
+          success: true,
+          data: {
+            aspect_type: 'update',
+            event_time: eventTime,
+            object_id: 200,
+            object_type: 'activity',
+            owner_id: 987,
+            subscription_id: 1,
+          },
+        },
+        storedActivitiesData: {
+          lastUpdated: 1700000000,
+          activities: [{ id: 200 }],
+        },
+        fetchedActivity: {
+          id: 200,
+          name: 'PCN *',
+          private_note: 'Lub rearshifter rearderailleur',
+        },
+        processActivityResult: null,
+      });
+
+    await webhookHandler(req, res);
+
+    expect(res.statusCode).toBe(500);
+    expect(redisMock.del).toHaveBeenCalledWith(replayKey);
+    expect(updateStatistics).not.toHaveBeenCalled();
   });
 
   it('processes activity create with stored activities and merges collections', async () => {
