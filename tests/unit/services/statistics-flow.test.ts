@@ -1402,12 +1402,12 @@ describe('statistics single-flight (item 3)', () => {
 
   it('busy lock in another instance serves the fresh cache without recomputing', async () => {
     const freshStats = [{ id: 'bike-1' }];
-    const remoteGetImpl = vi.fn().mockResolvedValue({
+    const remoteGetImpl = vi.fn().mockImplementation(async () => ({
       data: {
-        lastUpdated: Math.floor(Date.now() / 1000), // o outro voo acabou de gravar
+        lastUpdated: Math.floor(Date.now() / 1000),
         statistics: freshStats,
       },
-    });
+    }));
     const { updateStatistics, getActivities, logger } =
       await loadStatisticsModule({
         remoteGetImpl,
