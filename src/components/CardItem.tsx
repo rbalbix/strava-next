@@ -14,6 +14,10 @@ import {
   resolveCurrentConsumption,
 } from '../utils/thresholds';
 
+/** Sufixo "Z" do ISO (P4): constante de módulo — antes a regex era
+ *  construída a cada render do item. */
+const ISO_ZULU_RE = /Z$/;
+
 type Props = {
   equipment: Equipment;
   distance: number;
@@ -40,7 +44,7 @@ export default function CardItem({
   // Rótulo vigente do catálogo (o cache pode trazer um caption antigo).
   const caption = resolveCaption(e);
 
-  const localDate = parseISO(e.date.replace(/Z$/, ''));
+  const localDate = parseISO(e.date.replace(ISO_ZULU_RE, ''));
   const formattedDate = formatDate(localDate);
   const timeAgo = formatDistanceToNowStrict(localDate, {
     locale: ptBR,
@@ -60,8 +64,15 @@ export default function CardItem({
   );
 
   const handleCardItemClick = () => {
-    copyEventDetailsToClipboard(e, distance, movingTime);
-    // showToast('Detalhes copiados', 'success');
+    // P4: o utilitário devolve se o copiou — antes o catch engolia a falha
+    // e o usuário ficava sem nenhum feedback.
+    void copyEventDetailsToClipboard(e, distance, movingTime).then(
+      (copied) => {
+        if (!copied) {
+          showToast('Não foi possível copiar os detalhes', 'error');
+        }
+      },
+    );
 
     if (onToggleEditor) {
       onToggleEditor();
@@ -139,9 +150,6 @@ export default function CardItem({
           )}
 
         <div className={styles.badges}>
-          {/* {!hasUsage && (
-            <span className={styles.chipRegistered}>Registrado</span>
-          )} */}
           <div className={styles.chipbadge}>
             {`${formatNumber(equipmentDistance / 1000)}km`}
           </div>

@@ -79,26 +79,6 @@
   outline-offset: 2px;
 }
 
-.iconButtonLink {
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px;
-  cursor: pointer;
-}
-
-.iconButtonLink:focus-visible {
-  outline: 2px solid var(--gl-brand-primary);
-  outline-offset: 2px;
-}
-
-.iconButtonLink:hover {
-  background-color: transparent;
-}
-
 .spinnerLoading {
   margin: 0 15px;
 }
@@ -108,18 +88,6 @@
   width: 2rem;
   height: 2rem;
   cursor: pointer;
-}
-
-.sidebarIcon,
-.headerLoginIcon,
-.headerInfoIcon {
-  transition: color 0.2s ease;
-}
-
-.sidebarIcon:hover,
-.headerLoginIcon:hover,
-.headerInfoIcon:hover {
-  transform: none;
 }
 
 .headerButtons {
@@ -134,37 +102,7 @@
   align-items: center;
 }
 
-.headerLoginIcon {
-  color: var(--gl-brand-primary);
-  margin-right: 0.2rem;
-  height: 2.5rem;
-  width: 2.5rem;
-}
-
-.headerLoginIcon:hover {
-  color: var(--gl-brand-active);
-}
-
-.headerInfoIcon:hover {
-  color: var(--gl-brand-primary);
-}
-
-.headerInfoIcon {
-  width: 2rem;
-  height: 2rem;
-}
-
-.divider {
-  width: 60%;
-  background-color: var(--gl-border-subtle);
-}
-
 @media (max-width: 860px) {
-  .headerLoginIcon {
-    height: 2.8rem;
-    width: 2.8rem;
-  }
-
   .sidebarIcon {
     width: 2.5rem;
     height: 2.5rem;

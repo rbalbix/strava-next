@@ -81,29 +81,28 @@ function mergeActivities(
   incoming: ActivityBase[],
   existing: ActivityBase[],
 ): ActivityBase[] {
-  const map = new Map<number, ActivityBase>();
+  // Timestamp pré-computado por atividade (P4): antes cada comparação do
+  // sort construía dois `new Date` — O(n log n) parses contra O(n) aqui.
+  const map = new Map<number, { activity: ActivityBase; start: number }>();
 
   const add = (a: ActivityBase) => {
+    const start = new Date(a.start_date_local).getTime();
     const current = map.get(a.id);
     if (!current) {
-      map.set(a.id, a);
+      map.set(a.id, { activity: a, start });
       return;
     }
     // prefer the one with later start_date_local
-    const curDate = new Date(current.start_date_local).getTime();
-    const newDate = new Date(a.start_date_local).getTime();
-    if (newDate >= curDate) map.set(a.id, a);
+    if (start >= current.start) map.set(a.id, { activity: a, start });
   };
 
   // add existing first, then incoming (incoming may override)
   existing.forEach(add);
   incoming.forEach(add);
 
-  return Array.from(map.values()).sort(
-    (a, b) =>
-      new Date(b.start_date_local).getTime() -
-      new Date(a.start_date_local).getTime(),
-  );
+  return Array.from(map.values())
+    .sort((a, b) => b.start - a.start)
+    .map((entry) => entry.activity);
 }
 
 function safeActivityParse(data: Partial<ActivityBase>): ActivityBase {

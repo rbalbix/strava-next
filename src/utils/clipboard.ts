@@ -1,7 +1,9 @@
 import type { Equipment } from '../services/equipment';
 import { formatDate, formatNumber, secondsToHms } from './format';
 
-function fallbackCopyTextToClipboard(text: string) {
+/** Fallback via execCommand (P4): devolve se o navegador aceitou a cópia.
+ *  Navegador sem suporte lança — o chamador trata como falha. */
+function fallbackCopyTextToClipboard(text: string): boolean {
   const textArea = document.createElement('textarea');
   textArea.value = text;
 
@@ -14,29 +16,40 @@ function fallbackCopyTextToClipboard(text: string) {
   textArea.focus();
   textArea.select();
 
-  document.execCommand('copy');
+  const copied = document.execCommand('copy');
 
   document.body.removeChild(textArea);
+  return copied;
 }
 
-function copyTextToClipboard(text: string) {
+/**
+ * Copia para a área de transferência e DEVOLVE se deu certo (P4).
+ *
+ * Antes o `.catch` engolia o erro (permissão negada, contexto não-seguro) e
+ * o chamador mostrava "Copiado" mesmo na falha. Agora `false` chega ao
+ * chamador, que decide o feedback — `execCommand` ausente ou quebrado
+ * também vira `false` em vez de exceção solta.
+ */
+function copyTextToClipboard(text: string): Promise<boolean> {
   if (!navigator.clipboard) {
-    fallbackCopyTextToClipboard(text);
-    return;
+    try {
+      return Promise.resolve(fallbackCopyTextToClipboard(text));
+    } catch {
+      return Promise.resolve(false);
+    }
   }
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      return;
-    })
-    .catch((err) => console.error('Error copying text', err));
+  return navigator.clipboard.writeText(text).then(
+    () => true,
+    () => false,
+  );
 }
 
+/** Monta o resumo do evento e copia — repassa o resultado da cópia (P4). */
 function copyEventDetailsToClipboard(
   equipment: Equipment,
   distance: number,
   movingTime: number,
-) {
+): Promise<boolean> {
   const formattedDate = formatDate(new Date());
   const formattedDistance = formatNumber(distance / 1000);
   const formattedEquipmentDistance = formatNumber(
@@ -46,7 +59,7 @@ function copyEventDetailsToClipboard(
 
   const text = `. ${formattedDate} - ${formattedDistance} km - ${formattedTime} h [${formattedEquipmentDistance} km]`;
 
-  copyTextToClipboard(text);
+  return copyTextToClipboard(text);
 }
 
 export { copyEventDetailsToClipboard, copyTextToClipboard };

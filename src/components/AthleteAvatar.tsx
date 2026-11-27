@@ -15,7 +15,7 @@ export default function AthleteAvatar() {
         <Image
           className={styles.athleteAvatar}
           src={avatarUrl}
-          alt={`${athlete.firstname || 'Athlete'}'s Profile`}
+          alt={`Perfil de ${athlete.firstname || 'Atleta'}`}
           width={64}
           height={64}
           unoptimized

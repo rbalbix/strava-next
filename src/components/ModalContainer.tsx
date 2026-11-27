@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import type { ThresholdUnit } from '../contracts/api';
 import { GearStats } from '../services/gear';
@@ -9,41 +9,48 @@ import ComponentInfo from './ComponentInfo';
 import InitialInfoModal from './InitialInfoModal';
 import ThresholdAlertModal from './ThresholdAlertModal';
 
+/* P4: switch de string puro no módulo — o useMemo custava mais que o
+   valor memoizado (derivado de uma string). */
+function resolveModalLabelId(activeModal: string | null): string {
+  switch (activeModal) {
+    case 'stats':
+      return 'modal-title-stats';
+    case 'equipments':
+      return 'modal-title-equipments';
+    case 'info':
+      return 'modal-title-info';
+    case 'card-detail':
+      return 'modal-title-card-detail';
+    case 'threshold-alert':
+      return 'modal-title-threshold-alert';
+    default:
+      return 'modal-title';
+  }
+}
+
+function resolveModalDescriptionId(
+  activeModal: string | null,
+): string | undefined {
+  switch (activeModal) {
+    case 'equipments':
+      return 'modal-desc-equipments';
+    case 'info':
+      return 'modal-desc-info';
+    case 'threshold-alert':
+      return 'modal-desc-threshold-alert';
+    default:
+      return undefined;
+  }
+}
+
 export default function ModalContainer() {
   const { activeModal, modalData, closeModal, openModal } =
     useContext(AuthContext);
   const modalRef = useRef<HTMLDivElement | null>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
 
-  const modalLabelId = useMemo(() => {
-    switch (activeModal) {
-      case 'stats':
-        return 'modal-title-stats';
-      case 'equipments':
-        return 'modal-title-equipments';
-      case 'info':
-        return 'modal-title-info';
-      case 'card-detail':
-        return 'modal-title-card-detail';
-      case 'threshold-alert':
-        return 'modal-title-threshold-alert';
-      default:
-        return 'modal-title';
-    }
-  }, [activeModal]);
-
-  const modalDescriptionId = useMemo(() => {
-    switch (activeModal) {
-      case 'equipments':
-        return 'modal-desc-equipments';
-      case 'info':
-        return 'modal-desc-info';
-      case 'threshold-alert':
-        return 'modal-desc-threshold-alert';
-      default:
-        return undefined;
-    }
-  }, [activeModal]);
+  const modalLabelId = resolveModalLabelId(activeModal);
+  const modalDescriptionId = resolveModalDescriptionId(activeModal);
 
   const getFocusableElements = () => {
     if (!modalRef.current) return [];

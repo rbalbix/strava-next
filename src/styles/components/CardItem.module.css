@@ -124,171 +124,10 @@
     sans-serif;
 }
 
-/* Componente cuja manutenção foi registrada mas ainda não acumulou uso.
-   Diferente dos badges de km/h por usar a cor da marca na borda, para que a
-   condição não dependa apenas da leitura dos números zerados. */
-.chipRegistered {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--gl-brand-primary);
-  background-color: var(--gl-surface-card);
-  color: var(--gl-text-primary);
-  font:
-    600 1rem var(--font-jetbrains),
-    sans-serif;
-}
-
-/* Editor Toggle Container */
-.editorToggleContainer {
-  margin-top: 0.5rem;
-  padding: 0 0.5rem 0.5rem 0.5rem;
-  border-top: 1px solid var(--gl-border-subtle);
-  display: flex;
-  justify-content: flex-end;
-}
-
-.editThresholdButton {
-  background: none;
-  border: none;
-  color: var(--gl-brand-primary);
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition:
-    background-color 0.2s ease,
-    filter 0.2s ease;
-}
-
-.editThresholdButton:hover {
-  background-color: color-mix(in srgb, var(--gl-brand-primary) 10%, transparent);
-  filter: brightness(1.1);
-}
-
-.editThresholdButton:focus {
-  outline: 2px solid var(--gl-brand-primary);
-  outline-offset: 2px;
-}
-
-/* Cancel Button */
-.cancelButton {
-  background: none;
-  border: none;
-  color: var(--gl-status-overdue);
-  font-size: 0.8rem;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-  min-height: 2.75rem; /* 44px — alvo de toque mínimo (Fase D, §8.28) */
-  border-radius: 4px;
-  transition:
-    background-color 0.2s ease,
-    filter 0.2s ease;
-}
-
-.cancelButton:hover {
-  background-color: color-mix(
-    in srgb,
-    var(--gl-status-overdue) 10%,
-    transparent
-  );
-  filter: brightness(1.1);
-}
-
-.cancelButton:focus {
-  outline: 2px solid var(--gl-status-overdue);
-  outline-offset: 2px;
-}
-
-/* Estilos para o editor (usando classes locais) */
-.thresholdEditor {
-  margin: 0.5rem;
-  padding: 0.75rem;
-  background-color: var(--gl-surface-secondary);
-  border-radius: 6px;
-  animation: slideDown 0.2s ease-out;
-}
-
-.thresholdRow {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-  align-items: center;
-}
-
-.thresholdRow input {
-  width: 10rem;
-  flex: none;
-  padding: 0.25rem 0.8rem;
-  border: 1px solid var(--gl-border-subtle);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  min-height: 2.75rem; /* 44px — alvo de toque mínimo (Fase D, §8.28) */
-  line-height: normal;
-  background-color: var(--gl-surface-card);
-  color: var(--gl-text-primary);
-}
-
-.thresholdRow input:focus {
-  outline: none;
-  border-color: var(--gl-brand-primary);
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--gl-brand-primary) 25%, transparent);
-}
-
-.thresholdRow button {
-  padding: 0.25rem 1rem;
-  background-color: var(--gl-status-normal);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  min-height: 2.75rem; /* 44px — alvo de toque mínimo (Fase D, §8.28) */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-}
-
-.thresholdRow button:hover {
-  filter: brightness(1.1);
-}
-
-.thresholdRow button:focus {
-  outline: 2px solid var(--gl-status-normal);
-  outline-offset: 2px;
-}
-
-/* Remove as setas do input number */
-.thresholdRow input::-webkit-outer-spin-button,
-.thresholdRow input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-.thresholdRow input[type='number'] {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .cardItemContainer:nth-child(odd) span {
-    color: var(--gl-surface-card);
-  }
-}
+/* Bloco do editor (thresholdEditor/thresholdRow/editThresholdButton/
+   cancelButton/chipRegistered/slideDown) removido em P4: o JSX usa o
+   CardDetailModal.module.css — este arquivo só é importado por
+   CardItem.tsx. */
 
 @media (max-width: 768px) {
   .bol {
@@ -302,27 +141,10 @@
   .timeago {
     font-size: 0.9rem !important;
   }
-
-  .thresholdRow input {
-    width: 8rem;
-    font-size: 0.85rem;
-  }
-
-  .thresholdRow button {
-    padding: 0.2rem 0.8rem;
-  }
 }
 
 @media (max-width: 398px) {
   .caption {
     font-size: 1.15rem;
-  }
-
-  .thresholdRow {
-    flex-wrap: wrap;
-  }
-
-  .thresholdRow input {
-    width: 100%;
   }
 }

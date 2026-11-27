@@ -12,7 +12,7 @@ import styles from '../styles/pages/Home.module.css';
 const Stats = dynamic(() => import('../components/Stats'), {
   loading: () => (
     <div className={styles.homeLoading} role='status'>
-      Carregando...
+      Carregando…
     </div>
   ),
 });
@@ -56,9 +56,9 @@ function HomeContent() {
             Pedale. A gente cuida da manutenção.
           </h1>
           <p className={styles.subtitle}>
-            Conecte sua conta Strava e acompanhe, componente a componente,
-            quanto já foi rodado desde a última manutenção — com alertas antes
-            de a peça desgastar.
+            Conecte sua conta <span translate='no'>Strava</span> e acompanhe,
+            componente a componente, quanto já foi rodado desde a última
+            manutenção — com alertas antes de a peça desgastar.
           </p>
 
           <div

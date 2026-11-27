@@ -45,7 +45,7 @@ describe('gear icons', () => {
     const images = Array.from(container.querySelectorAll('img'));
     expect(images).toHaveLength(4);
     expect(
-      container.querySelector('img[alt="[icone de um ciclista de mountain bike]"]'),
+      container.querySelector('img[alt="Ícone de um ciclista de mountain bike"]'),
     ).not.toBeNull();
     for (const image of images) {
       expect(image.getAttribute('src')).toBeTruthy();

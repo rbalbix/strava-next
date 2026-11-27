@@ -221,6 +221,12 @@ a {
   text-decoration: none;
 }
 
+/* Títulos com linhas equilibradas (P4): evita palavra órfã sozinha na
+   última linha do h1. Browsers sem suporte ignoram a propriedade. */
+h1 {
+  text-wrap: balance;
+}
+
 /* <hr> — o MUI só era usado pelo <Divider>, que renderiza exatamente isto
    (B1): com o token de borda, a linha funciona nos dois temas — o
    rgba(0,0,0,0.12) do tema padrão do MUI ficava invisível no dark. */

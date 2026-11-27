@@ -29,6 +29,10 @@ import { useAutoSync } from '../hooks/useAutoSync';
 
 const DASHBOARD_CACHE_TTL_MS = 5 * 60 * 1000;
 
+/** Sufixo "Z" do ISO (P4): constante de módulo — antes a regex era
+ *  construída a cada linha do banner em render. */
+const ISO_ZULU_RE = /Z$/;
+
 type CachedDashboard = {
   data: DashboardResponse;
   cacheTime: number;
@@ -371,12 +375,11 @@ export default function Stats() {
                 role='status'
                 aria-live='polite'
               >
-                {unrecognizedCodes
-                  .filter(
-                    (code) => !dismissedCases.has(unrecognizedCaseKey(code)),
-                  )
-                  .map((code) => (
-                    <p key={unrecognizedCaseKey(code)}>
+                {unrecognizedCodes.flatMap((code) => {
+                  const caseKey = unrecognizedCaseKey(code);
+                  if (dismissedCases.has(caseKey)) return [];
+                  return [
+                    <p key={caseKey}>
                       Há um código não reconhecido na observação privada da
                       atividade de <strong>{code.gearName}</strong> do dia{' '}
                       <a
@@ -384,12 +387,15 @@ export default function Stats() {
                         target='_blank'
                         rel='noopener noreferrer'
                       >
-                        {formatDate(parseISO(code.startDate.replace(/Z$/, '')))}
+                        {formatDate(
+                          parseISO(code.startDate.replace(ISO_ZULU_RE, '')),
+                        )}
                       </a>
                       . “{code.word}” — você quis dizer “{code.suggestion}”?
                       Corrija no Strava para atualizar aqui no GearLife.
-                    </p>
-                  ))}
+                    </p>,
+                  ];
+                })}
               </div>
               <button
                 type='button'
@@ -440,7 +446,7 @@ export default function Stats() {
             <div className={styles.loadingPanel} role='status'>
               <div>
                 <span>Aguarde.</span>
-                <span>Carregando suas estatísticas ...</span>
+                <span>Carregando suas estatísticas…</span>
               </div>
               <span>{randomIcon}</span>
             </div>

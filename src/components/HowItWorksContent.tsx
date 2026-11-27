@@ -3,7 +3,6 @@ import { FaMedapps } from 'react-icons/fa';
 import styles from '../styles/components/InitialInfo.module.css';
 
 export interface HowItWorksContentProps {
-  showReferenceLink?: boolean;
   showTopHeading?: boolean;
 }
 
@@ -49,7 +48,7 @@ export default function HowItWorksContent({
         />
       </div>
       <ol>
-        <li>Clique em &quot;Entrar com Strava&quot; na página inicial.</li>
+        <li>Clique em “Entrar com Strava” na página inicial.</li>
         <li>
           Você será redirecionado para a página de autenticação do Strava.
         </li>
@@ -152,7 +151,7 @@ export default function HowItWorksContent({
         </li>
         <li>
           Na seção de componentes, escolha a unidade no seletor (km ou h),
-          informe o valor e clique em &quot;Salvar&quot;. As setas do campo
+          informe o valor e clique em “Salvar”. As setas do campo
           avançam de 100 em 100 km e de hora em hora; qualquer valor na unidade
           escolhida também pode ser digitado. Trocar a unidade mantém o que
           estiver digitado no campo, que passa a valer na unidade escolhida.
@@ -205,7 +204,7 @@ export default function HowItWorksContent({
         Para monitorar diferentes tipos de <span>componentes</span> do
         equipamento, você precisa adicionar o <span>código</span> correspondente
         no campo de <span>Observações Privadas</span> na atividade do Strava e
-        incluir um <span>&quot;*&quot;</span> no título da atividade.
+        incluir um <span>“*”</span> no título da atividade.
       </div>
       <div className={styles.screen}>
         <Image
@@ -260,8 +259,8 @@ export default function HowItWorksContent({
         />
       </div>
       <div>
-        E depois, nas opções que aparecem, clique em &quot;Adicionar à Tela de
-        Início&quot;.
+        E depois, nas opções que aparecem, clique em “Adicionar à Tela de
+        Início”.
       </div>
       <div className={styles.screen}>
         <Image

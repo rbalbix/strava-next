@@ -12,7 +12,7 @@ const { showToastMock, signOutMock } = vi.hoisted(() => ({
 
 // Mock do clipboard
 vi.mock('../../../src/utils/clipboard', () => ({
-  copyEventDetailsToClipboard: vi.fn(),
+  copyEventDetailsToClipboard: vi.fn(() => Promise.resolve(true)),
 }));
 
 // Mantém os utilitários reais do módulo (ApiError/getHttpStatus) — o

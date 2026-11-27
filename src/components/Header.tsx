@@ -10,7 +10,7 @@ export default function Header() {
   const { athlete, codeReturned, signOut, openModal } = useContext(AuthContext);
 
   const [sidebar, setSidebar] = useState(false);
-  const showSidebar = () => setSidebar(!sidebar);
+  const showSidebar = () => setSidebar((prev) => !prev);
   const sidebarId = 'sidebar-menu';
 
   return (

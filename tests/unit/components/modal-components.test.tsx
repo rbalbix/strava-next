@@ -22,8 +22,8 @@ vi.mock('../../../src/utils/clipboard', async (importOriginal) => {
   const mod = (await importOriginal()) as Record<string, unknown>;
   return {
     ...mod,
-    copyTextToClipboard: vi.fn(),
-    copyEventDetailsToClipboard: vi.fn(),
+    copyTextToClipboard: vi.fn(() => Promise.resolve(true)),
+    copyEventDetailsToClipboard: vi.fn(() => Promise.resolve(true)),
   };
 });
 
@@ -216,7 +216,7 @@ describe('modal child components', () => {
     );
 
     const copyButton = container.querySelector(
-      'button[aria-label^="Copiar codigo"]',
+      'button[aria-label^="Copiar código"]',
     ) as HTMLButtonElement;
     expect(copyButton).toBeTruthy();
     act(() => copyButton.click());

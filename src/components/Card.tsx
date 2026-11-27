@@ -70,7 +70,9 @@ export default function Card({
       <span className={styles.cardBody}>
         <span className={styles.cardText}>{`${count} atividades.`}</span>
         <span className={styles.cardText}>
-          {`${formatNumber(distance / 1000)} km`}
+          {/* &nbsp; (P4): número e unidade não podem quebrar em linhas
+              diferentes. */}
+          {`${formatNumber(distance / 1000)}\u00A0km`}
         </span>
         <span className={styles.cardText}>{`${secondsToHms(movingTime)}h`}</span>
 

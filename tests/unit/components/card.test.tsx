@@ -50,7 +50,7 @@ describe('Card component', () => {
 
     expect(container.textContent).toContain('Bike One');
     expect(container.textContent).toContain('3 atividades.');
-    expect(container.textContent).toContain('12,00 km');
+    expect(container.textContent).toContain('12,00\u00A0km');
     expect(container.textContent).toContain('01:00h');
 
     const clickable = container.querySelector('button') as HTMLElement;
@@ -223,7 +223,7 @@ describe('Card component', () => {
     // face igual aos demais: stats zerados e ícone de bike Road
     expect(container.textContent).toContain('Bike New');
     expect(container.textContent).toContain('0 atividades.');
-    expect(container.textContent).toContain('0,00 km');
+    expect(container.textContent).toContain('0,00\u00A0km');
     expect(container.querySelector('[data-testid="icon-bike"]')).toBeTruthy();
 
     // a mensagem/botão ficam DENTRO do modal (card-detail-modal.empty)

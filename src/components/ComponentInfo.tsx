@@ -14,9 +14,14 @@ export default function ComponentInfo() {
   const { closeModal } = useContext(AuthContext);
   const { showToast } = useToast();
 
-  const handleCopyCode = (code: string) => {
-    copyTextToClipboard(code);
-    showToast(`Copiado: ${code}`, 'success');
+  const handleCopyCode = async (code: string) => {
+    // P4: o utilitário devolve o resultado — antes o toast "Copiado"
+    // aparecia mesmo quando a cópia falhava (permissão negada).
+    const copied = await copyTextToClipboard(code);
+    showToast(
+      copied ? `Copiado: ${code}` : `Não foi possível copiar ${code}`,
+      copied ? 'success' : 'error',
+    );
   };
 
   return (
@@ -75,8 +80,8 @@ export default function ComponentInfo() {
                     <button
                       type='button'
                       className={styles.copyButton}
-                      onClick={() => handleCopyCode(e.id)}
-                      aria-label={`Copiar codigo ${e.id}`}
+                      onClick={() => void handleCopyCode(e.id)}
+                      aria-label={`Copiar código ${e.id}`}
                     >
                       {e.id}
                     </button>

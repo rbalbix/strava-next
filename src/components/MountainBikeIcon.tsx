@@ -17,7 +17,7 @@ export default function MountainBikeIcon({
   return (
     <Image
       src='/images/cyclist.png'
-      alt='[icone de um ciclista de mountain bike]'
+      alt='Ícone de um ciclista de mountain bike'
       width={36}
       height={36}
       priority={true}
