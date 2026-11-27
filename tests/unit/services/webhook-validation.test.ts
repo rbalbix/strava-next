@@ -36,6 +36,19 @@ describe('validateWebhookEvent', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts Strava string id fields without rejecting the update', () => {
+    const result = webhookValidation.validateWebhookEvent(
+      makePayload({
+        aspect_type: 'update',
+        object_id_str: '21045467482',
+        owner_id_str: '69666780',
+        updates: { title: 'Updated title', private_note: 'Lub' },
+      }),
+    );
+
+    expect(result.success).toBe(true);
+  });
+
   it('rejects payload older than 1 hour', () => {
     const oldTimestamp = Math.floor(Date.now() / 1000) - 2 * 60 * 60;
     const result = webhookValidation.validateWebhookEvent(

@@ -12,8 +12,10 @@ export const StravaWebhookEventSchema = z
     aspect_type: AspectTypeSchema,
     event_time: z.number().int().positive(),
     object_id: z.number().int().positive(),
+    object_id_str: z.string().optional(),
     object_type: ObjectTypeSchema,
     owner_id: z.number().int().positive(),
+    owner_id_str: z.string().optional(),
     subscription_id: z.number().int().positive(),
     updates: UpdatesSchema,
   })
