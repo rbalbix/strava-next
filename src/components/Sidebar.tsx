@@ -125,7 +125,7 @@ export default function Sidebar({ active, isOpen }: SidebarProps) {
       }
       window.removeEventListener('gearlife:close-sidebar', onGlobalClose);
     };
-  }, [isOpen, getFocusableElements]);
+  }, [isOpen, getFocusableElements, closeSidebar]);
 
   const handleOverlayClick = () => {
     closeSidebar();
