@@ -178,47 +178,52 @@ describe('statistics flow service', () => {
   });
 
   it('reconciles from the last reconciliation time despite fresh activity writes', async () => {
-    process.env.RECONCILIATION_INTERVAL_SECONDS = '60';
-    process.env.RECONCILIATION_LOOKBACK_SECONDS = '1000';
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      process.env.RECONCILIATION_INTERVAL_SECONDS = '60';
+      process.env.RECONCILIATION_LOOKBACK_SECONDS = '1000';
 
-    const now = Math.floor(Date.now() / 1000);
-    const lastUpdated = now;
-    const remoteGetImpl = vi
-      .fn()
-      .mockResolvedValueOnce({
-        data: {
-          lastUpdated,
-          activities: [{ id: 1, sport_type: 'Ride' }],
-        },
-      })
-      .mockResolvedValueOnce({
-        data: {
-          lastUpdated,
-          lastReconciledAt: now - 120,
-          statistics: [{ id: 'bike-1' }],
-        },
+      const now = Math.floor(Date.now() / 1000);
+      const lastUpdated = now;
+      const remoteGetImpl = vi
+        .fn()
+        .mockResolvedValueOnce({
+          data: {
+            lastUpdated,
+            activities: [{ id: 1, sport_type: 'Ride' }],
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            lastUpdated,
+            lastReconciledAt: now - 120,
+            statistics: [{ id: 'bike-1' }],
+          },
+        });
+      const getActivities = vi.fn().mockResolvedValue([]);
+      const saveRemote = vi.fn().mockResolvedValue({ success: true });
+
+      const { updateStatistics, getAthlete } = await loadStatisticsModule({
+        remoteGetImpl,
+        getActivitiesImpl: getActivities,
+        saveRemoteImpl: saveRemote,
+        getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
+        getGearsImpl: vi.fn().mockReturnValue([]),
       });
-    const getActivities = vi.fn().mockResolvedValue([]);
-    const saveRemote = vi.fn().mockResolvedValue({ success: true });
 
-    const { updateStatistics, getAthlete } = await loadStatisticsModule({
-      remoteGetImpl,
-      getActivitiesImpl: getActivities,
-      saveRemoteImpl: saveRemote,
-      getAthleteImpl: vi.fn().mockResolvedValue({ id: 123 }),
-      getGearsImpl: vi.fn().mockReturnValue([]),
-    });
+      await updateStatistics({} as any, 123);
 
-    await updateStatistics({} as any, 123);
-
-    expect(getAthlete).toHaveBeenCalled();
-    expect(getActivities).toHaveBeenCalledWith(
-      expect.anything(),
-      [],
-      null,
-      now - 1000,
-    );
-    expect(JSON.parse(saveRemote.mock.calls[0][1]).lastReconciledAt).toBe(now);
+      expect(getAthlete).toHaveBeenCalled();
+      expect(getActivities).toHaveBeenCalledWith(
+        expect.anything(),
+        [],
+        null,
+        now - 1000,
+      );
+      expect(JSON.parse(saveRemote.mock.calls[0][1]).lastReconciledAt).toBe(now);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('persists a maintenance code returned by a periodic activity reconciliation', async () => {
